@@ -1,0 +1,8 @@
+# Demo Worker: serves the exported stub docs as static assets.
+# Cloudflare Workers Builds: build command runs bin/build-demo, deploy runs wrangler.
+
+name = "vellum"
+compatibility_date = "2026-09-11"
+
+[assets]
+directory = "./demo-dist"

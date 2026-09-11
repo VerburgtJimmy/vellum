@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+root="$(cd "$(dirname "$0")/.." && pwd)"
+cd "$root"
+
+out="${1:-demo-dist}"
+rm -rf "$out"
+mkdir -p "$out"
+
+export VELLUM_PATH="${VELLUM_PATH:-$root/resources/stubs}"
+
+composer install --prefer-dist --no-interaction --no-progress
+vendor/bin/testbench vellum:export --out="$out"
+
+printf '%s\n' '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta http-equiv="refresh" content="0;url=docs/"><link rel="canonical" href="docs/"><title>Vellum</title></head><body><p><a href="docs/">Open docs</a></p></body></html>' > "$out/index.html"
+
+echo "Demo exported to $out"

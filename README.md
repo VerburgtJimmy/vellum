@@ -44,7 +44,7 @@ Dark:
 
 ## Demo
 
-Stub docs on GitHub Pages: [https://verburgtjimmy.github.io/vellum/](https://verburgtjimmy.github.io/vellum/)
+Stub docs deploy via Cloudflare Workers (`wrangler.toml` + `demo-dist`). After the first Git-connected deploy, use the `*.workers.dev` URL from the Cloudflare dashboard.
 
 ## Configuration
 

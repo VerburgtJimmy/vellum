@@ -20,7 +20,7 @@ Initial public release. Pre-1.0: the API may change.
 - `vellum:export` for static HTML output suitable for GitHub Pages or any static host
 - Config surface in `config/vellum.php` (path, routes, versions, theme, search, cache, export)
 - GitHub Actions CI (Pest on Laravel 11/12/13, Pint, PHPStan, frontend build / size gate)
-- Demo site workflow that exports package stubs to GitHub Pages
+- Demo site workflow that exports package stubs for Cloudflare Workers (`bin/build-demo`, `wrangler.toml`)
 
 ### Publishing note
 
