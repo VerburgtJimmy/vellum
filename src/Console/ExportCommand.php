@@ -60,8 +60,8 @@ final class ExportCommand extends Command
 
         foreach ($documents as $document) {
             $html = $this->renderDocument($repository, $document);
-            $html = $this->rewriteHtml($html, $baseUrl, $prefix);
             $path = $this->documentOutputPath($prefixRoot, $document);
+            $html = $this->rewriteHtml($html, $out, $path, $prefix, $baseUrl);
 
             $this->writeFile($path, $html);
             $pages++;
@@ -76,9 +76,9 @@ final class ExportCommand extends Command
                         continue;
                     }
 
-                    $targetHref = $this->joinBase($baseUrl, $repository->hrefFor($document->slug, $latest));
-                    $redirectHtml = $this->redirectHtml($targetHref);
                     $path = $this->unversionedOutputPath($prefixRoot, $document->slug);
+                    $targetHref = $this->hrefBetween($path, $this->documentOutputPath($prefixRoot, $document), $out);
+                    $redirectHtml = $this->redirectHtml($targetHref);
                     $this->writeFile($path, $redirectHtml);
                     $pages++;
                 }
@@ -284,7 +284,7 @@ HTML;
         }
     }
 
-    private function rewriteHtml(string $html, string $baseUrl, string $prefix): string
+    private function rewriteHtml(string $html, string $out, string $htmlPath, string $prefix, string $baseUrl): string
     {
         $appUrl = rtrim((string) config('app.url', ''), '/');
 
@@ -292,27 +292,94 @@ HTML;
             $html = str_replace($appUrl, '', $html);
         }
 
-        $normalizedBase = $this->normalizeBase($baseUrl);
+        $relativeRoot = $this->relativePrefix($htmlPath, $out);
+        $vendorPrefix = $relativeRoot.'vendor/vellum/';
+        $docsPrefix = $relativeRoot.($prefix !== '' ? $prefix.'/' : '');
 
-        if ($normalizedBase === '/') {
-            return $html;
+        $html = preg_replace('#(?<=["\'\(])/vendor/vellum/#', $vendorPrefix, $html) ?? $html;
+
+        if ($prefix !== '') {
+            $html = preg_replace(
+                '#(?<=["\'\(])/'.preg_quote($prefix, '#').'/#',
+                $docsPrefix,
+                $html,
+            ) ?? $html;
+            $html = preg_replace(
+                '#(?<=["\'\(])/'.preg_quote($prefix, '#').'(?=["\'\)\?\#])#',
+                rtrim($docsPrefix, '/'),
+                $html,
+            ) ?? $html;
         }
 
-        $base = rtrim($normalizedBase, '/');
+        // Optional absolute base for hosts that cannot resolve relative URLs.
+        $normalizedBase = $this->normalizeBase($baseUrl);
 
-        $html = preg_replace('#(?<=["\'\(])/vendor/vellum/#', $base.'/vendor/vellum/', $html) ?? $html;
-        $html = preg_replace(
-            '#(?<=["\'\(])/'.preg_quote($prefix, '#').'/#',
-            $base.'/'.$prefix.'/',
-            $html,
-        ) ?? $html;
-        $html = preg_replace(
-            '#(?<=["\'\(])/'.preg_quote($prefix, '#').'(?=["\'\)])#',
-            $base.'/'.$prefix,
-            $html,
-        ) ?? $html;
+        if ($normalizedBase !== '/') {
+            $base = rtrim($normalizedBase, '/');
+            $html = str_replace($vendorPrefix, $base.'/vendor/vellum/', $html);
+
+            if ($prefix !== '') {
+                $html = str_replace($docsPrefix, $base.'/'.$prefix.'/', $html);
+            }
+        }
 
         return $html;
+    }
+
+    /**
+     * Relative path prefix from an exported HTML file up to the export root.
+     */
+    private function relativePrefix(string $htmlPath, string $out): string
+    {
+        $htmlPath = str_replace('\\', '/', $htmlPath);
+        $out = rtrim(str_replace('\\', '/', $out), '/');
+        $relative = trim(substr($htmlPath, strlen($out)), '/');
+        $segments = $relative === '' ? [] : explode('/', $relative);
+        $depth = max(0, count($segments) - 1);
+
+        return $depth === 0 ? './' : str_repeat('../', $depth);
+    }
+
+    /**
+     * Relative href from one exported file to another.
+     */
+    private function hrefBetween(string $fromFile, string $toFile, string $out): string
+    {
+        $fromDir = str_replace('\\', '/', dirname($fromFile));
+        $toFile = str_replace('\\', '/', $toFile);
+        $out = rtrim(str_replace('\\', '/', $out), '/');
+
+        $fromRel = trim(substr($fromDir, strlen($out)), '/');
+        $toRel = trim(substr($toFile, strlen($out)), '/');
+
+        $fromParts = $fromRel === '' ? [] : explode('/', $fromRel);
+        $toParts = $toRel === '' ? [] : explode('/', $toRel);
+
+        if ($toParts !== [] && end($toParts) === 'index.html') {
+            array_pop($toParts);
+        }
+
+        while ($fromParts !== [] && $toParts !== [] && $fromParts[0] === $toParts[0]) {
+            array_shift($fromParts);
+            array_shift($toParts);
+        }
+
+        $up = str_repeat('../', count($fromParts));
+        $down = implode('/', $toParts);
+
+        if ($up === '' && $down === '') {
+            return './';
+        }
+
+        if ($up === '') {
+            return './'.$down.'/';
+        }
+
+        if ($down === '') {
+            return $up;
+        }
+
+        return $up.$down.'/';
     }
 
     private function normalizeBase(string $baseUrl): string
@@ -330,18 +397,6 @@ HTML;
         }
 
         return '/'.trim($baseUrl, '/').'/';
-    }
-
-    private function joinBase(string $baseUrl, string $path): string
-    {
-        $normalizedBase = $this->normalizeBase($baseUrl);
-        $path = '/'.ltrim($path, '/');
-
-        if ($normalizedBase === '/') {
-            return $path;
-        }
-
-        return rtrim($normalizedBase, '/').$path;
     }
 
     private function writeFile(string $path, string $contents): void

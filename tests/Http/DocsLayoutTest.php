@@ -69,7 +69,13 @@ it('binds the search hotkey in the main bundle before any lazy chunk loads', fun
         ->and($js)->toContain('addEventListener')
         ->and($js)->toContain('metaKey')
         ->and($js)->toContain('ctrlKey')
-        ->and($js)->toContain('preventDefault');
+        ->and($js)->toContain('preventDefault')
+        ->and($js)->toContain('"keydown"')
+        ->and($js)->toContain('pointerdown')
+        ->and($js)->toContain('touchstart')
+        ->and($js)->toContain('VellumSearch')
+        ->and($js)->toContain('VellumFocus')
+        ->and($js)->toContain('VellumAnchor');
 });
 
 it('exposes keyboard-complete theme toggle markup', function (): void {

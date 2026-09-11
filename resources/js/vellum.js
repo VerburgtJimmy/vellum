@@ -245,4 +245,21 @@ if (!window.Alpine) {
   Alpine.data('vellumPrefetchHover', prefetchHover)
   window.Alpine = Alpine
   Alpine.start()
+
+  function warmupLazyChunksOnce() {
+    const warmup = () => {
+      window.removeEventListener('pointerdown', warmup, true)
+      window.removeEventListener('keydown', warmup, true)
+      window.removeEventListener('touchstart', warmup, true)
+      window.VellumFocus?.load()?.catch(() => {})
+      window.VellumAnchor?.load()?.catch(() => {})
+      window.VellumSearch?.load()?.catch(() => {})
+    }
+
+    window.addEventListener('pointerdown', warmup, true)
+    window.addEventListener('keydown', warmup, true)
+    window.addEventListener('touchstart', warmup, true)
+  }
+
+  warmupLazyChunksOnce()
 }

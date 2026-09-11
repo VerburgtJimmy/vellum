@@ -105,9 +105,11 @@ it('exports documents assets and search index for a static host', function (): v
 
     expect($html)->not->toBeFalse()
         ->and($html)->toContain('Hello export')
-        ->and($html)->toContain('/vendor/vellum/vellum.css')
+        ->and($html)->toContain('../vendor/vellum/vellum.css')
         ->and($guideHtml)->not->toBeFalse()
-        ->and($guideHtml)->toContain('Guide body');
+        ->and($guideHtml)->toContain('Guide body')
+        ->and($guideHtml)->toContain('../../../vendor/vellum/vellum.css')
+        ->and($guideHtml)->toContain('../../../vendor/vellum/vellum.js');
 
     $this->deleteDirectory($out);
 });
@@ -146,9 +148,10 @@ it('exports versioned pages and unversioned redirects', function (): void {
     expect($versionedHtml)->not->toBeFalse()
         ->and($versionedHtml)->toContain('Auth v2')
         ->and($versionedHtml)->toContain('data-vellum-version-switcher')
+        ->and($versionedHtml)->toContain('../../../../vendor/vellum/vellum.css')
         ->and($redirectHtml)->not->toBeFalse()
         ->and($redirectHtml)->toContain('http-equiv="refresh"')
-        ->and($redirectHtml)->toContain('/docs/v2/guides/auth');
+        ->and($redirectHtml)->toContain('../../v2/guides/auth/');
 
     $this->deleteDirectory($out);
 });
