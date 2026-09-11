@@ -30,16 +30,24 @@ final class TabsRenderer implements NodeRendererInterface
             }
         }
 
+        $persist = $node->getAttribute('persist');
+        $persistKey = is_string($persist) && $persist !== '' ? $persist : null;
+
         if ($tabs === []) {
-            return new HtmlElement('div', [
+            $attrs = [
                 'class' => 'vellum-tabs',
                 'data-vellum-tabs' => '',
-            ], $childRenderer->renderNodes($node->children()));
+            ];
+
+            if ($persistKey !== null) {
+                $attrs['data-persist'] = Xml::escape($persistKey);
+            }
+
+            return new HtmlElement('div', $attrs, $childRenderer->renderNodes($node->children()));
         }
 
-        $persist = $node->getAttribute('persist');
         $defaultId = $tabs[0]->getId();
-        $storageKey = is_string($persist) && $persist !== '' ? 'vellum-tabs-'.$persist : null;
+        $storageKey = $persistKey !== null ? 'vellum-tabs-'.$persistKey : null;
 
         if ($storageKey !== null) {
             $xData = '{ active: (typeof localStorage !== "undefined" && localStorage.getItem("'.$storageKey.'")) || "'.$defaultId.'", set(id) { this.active = id; localStorage.setItem("'.$storageKey.'", id) } }';
@@ -71,11 +79,17 @@ final class TabsRenderer implements NodeRendererInterface
             ], $childRenderer->renderNodes($tab->children()));
         }
 
-        return new HtmlElement('div', [
+        $attrs = [
             'class' => 'vellum-tabs',
             'data-vellum-tabs' => '',
             'x-data' => $xData,
-        ], [
+        ];
+
+        if ($persistKey !== null) {
+            $attrs['data-persist'] = Xml::escape($persistKey);
+        }
+
+        return new HtmlElement('div', $attrs, [
             new HtmlElement('div', [
                 'class' => 'vellum-tabs-list',
                 'role' => 'tablist',

@@ -1,3 +1,4 @@
 <div class="vellum-steps" data-vellum-steps=""><div class="vellum-step" data-vellum-step="1"><div class="vellum-step-indicator" aria-hidden="true">1</div><div class="vellum-step-content"><h2 id="install"><a href="#install" class="vellum-heading-anchor" aria-hidden="true" tabindex="-1" title="Permalink">#</a>Install</h2>
 <p>Run composer require.</p></div></div><div class="vellum-step" data-vellum-step="2"><div class="vellum-step-indicator" aria-hidden="true">2</div><div class="vellum-step-content"><h2 id="configure"><a href="#configure" class="vellum-heading-anchor" aria-hidden="true" tabindex="-1" title="Permalink">#</a>Configure</h2>
-<p>Publish the config.</p></div></div></div>
+<p>Publish the config.</p></div></div><div class="vellum-step" data-vellum-step="3"><div class="vellum-step-indicator" aria-hidden="true">3</div><div class="vellum-step-content"><h2 id="build"><a href="#build" class="vellum-heading-anchor" aria-hidden="true" tabindex="-1" title="Permalink">#</a>Build</h2>
+<p>Compile the docs.</p></div></div></div>

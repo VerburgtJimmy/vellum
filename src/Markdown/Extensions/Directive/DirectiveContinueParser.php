@@ -5,13 +5,14 @@ declare(strict_types=1);
 namespace Vellum\Markdown\Extensions\Directive;
 
 use League\CommonMark\Node\Block\AbstractBlock;
+use League\CommonMark\Node\Node;
 use League\CommonMark\Parser\Block\AbstractBlockContinueParser;
 use League\CommonMark\Parser\Block\BlockContinue;
 use League\CommonMark\Parser\Block\BlockContinueParserInterface;
 use League\CommonMark\Parser\Cursor;
 
 /**
- * Continues a ::: container until a closing ::: fence.
+ * Continues a ::: container until its matching closing ::: fence.
  */
 final class DirectiveContinueParser extends AbstractBlockContinueParser
 {
@@ -47,9 +48,30 @@ final class DirectiveContinueParser extends AbstractBlockContinueParser
         $remainder = trim($cursor->getRemainder());
 
         if ($remainder === ':::') {
+            // CommonMark asks outer containers first. Do not close while a nested
+            // directive is still open between this block and the tip.
+            if ($this->hasOpenNestedDirective($activeBlockParser->getBlock())) {
+                return BlockContinue::at($cursor);
+            }
+
             return BlockContinue::finished();
         }
 
         return BlockContinue::at($cursor);
+    }
+
+    private function hasOpenNestedDirective(AbstractBlock $tip): bool
+    {
+        $node = $tip;
+
+        while ($node instanceof Node && $node !== $this->block) {
+            if ($node instanceof DirectiveBlock) {
+                return true;
+            }
+
+            $node = $node->parent();
+        }
+
+        return false;
     }
 }
