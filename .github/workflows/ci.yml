@@ -12,12 +12,25 @@ concurrency:
 
 jobs:
   php:
-    name: PHP ${{ matrix.php }}
+    name: PHP ${{ matrix.php }} / Laravel ${{ matrix.laravel }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: true
       matrix:
         php: ['8.4']
+        include:
+          - laravel: '11.*'
+            testbench: '^9.0'
+            pest: '^3.8'
+            pest_plugin: '^3.2'
+          - laravel: '12.*'
+            testbench: '^10.0'
+            pest: '^3.8'
+            pest_plugin: '^3.2'
+          - laravel: '13.*'
+            testbench: '^11.0'
+            pest: '^5.0'
+            pest_plugin: '^5.0'
 
     steps:
       - uses: actions/checkout@v4
@@ -30,15 +43,24 @@ jobs:
           tools: composer:v2
 
       - name: Install Composer dependencies
-        run: composer install --prefer-dist --no-interaction --no-progress
+        run: |
+          composer config audit.block-insecure false
+          composer require \
+            "orchestra/testbench:${{ matrix.testbench }}" \
+            "pestphp/pest:${{ matrix.pest }}" \
+            "pestphp/pest-plugin-laravel:${{ matrix.pest_plugin }}" \
+            --dev --no-interaction --no-update
+          composer update --prefer-dist --no-interaction --no-progress --with-all-dependencies
 
       - name: Pest
         run: vendor/bin/pest --colors=always
 
       - name: Pint
+        if: matrix.laravel == '12.*'
         run: vendor/bin/pint --test
 
       - name: PHPStan
+        if: matrix.laravel == '12.*'
         run: vendor/bin/phpstan analyse --memory-limit=512M
 
   assets:
