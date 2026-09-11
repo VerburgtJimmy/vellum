@@ -28,7 +28,7 @@ final class InlineCodeRenderer implements NodeRendererInterface
             throw new InvalidArgumentException('Inline must be instance of '.Code::class);
         }
 
-        $language = $node->data->get('vellum_language');
+        $language = $node->data->get('vellum_language', null);
         $literal = $node->getLiteral();
 
         if (is_string($language) && $language !== '') {

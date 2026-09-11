@@ -58,7 +58,7 @@ final class TabsRenderer implements NodeRendererInterface
         $listItems = [];
         $panels = [];
 
-        foreach ($tabs as $tab) {
+        foreach ($tabs as $index => $tab) {
             $id = $tab->getId();
             $escapedId = Xml::escape($id);
 
@@ -71,12 +71,20 @@ final class TabsRenderer implements NodeRendererInterface
                 'id' => 'vellum-tab-'.$escapedId,
             ], Xml::escape($tab->getLabel()));
 
-            $panels[] = new HtmlElement('div', [
+            $panelAttrs = [
                 'class' => 'vellum-tabs-panel',
                 'role' => 'tabpanel',
                 'x-show' => "active === '{$escapedId}'",
                 'aria-labelledby' => 'vellum-tab-'.$escapedId,
-            ], $childRenderer->renderNodes($tab->children()));
+                'x-cloak' => '',
+            ];
+
+            // Keep the default panel visible before Alpine boots (no localStorage yet).
+            if ($index === 0 && $storageKey === null) {
+                unset($panelAttrs['x-cloak']);
+            }
+
+            $panels[] = new HtmlElement('div', $panelAttrs, $childRenderer->renderNodes($tab->children()));
         }
 
         $attrs = [

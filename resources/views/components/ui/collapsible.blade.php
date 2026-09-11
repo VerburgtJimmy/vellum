@@ -24,7 +24,14 @@
     >
         {{ $trigger ?? '' }}
     </div>
-    <div data-vellum-collapsible-content x-show="open" x-collapse>
+    <div
+        data-vellum-collapsible-content
+        x-show="open"
+        x-collapse
+        @if (! filter_var($open, FILTER_VALIDATE_BOOLEAN))
+            x-cloak
+        @endif
+    >
         {{ $content ?? $slot }}
     </div>
 </div>

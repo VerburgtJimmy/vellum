@@ -113,7 +113,7 @@
                     <p class="text-sm">Dialog body content.</p>
                 </x-slot:content>
                 <x-slot:footer>
-                    <x-vellum::ui.button variant="outline" @@click="hide()">Close</x-vellum::ui.button>
+                    <x-vellum::ui.button variant="outline" x-on:click="close()">Close</x-vellum::ui.button>
                 </x-slot:footer>
             </x-vellum::ui.dialog>
         </section>

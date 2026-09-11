@@ -24,7 +24,7 @@
             {{ $trigger ?? $slot }}
         </button>
     </h3>
-    <div data-vellum-accordion-content x-show="isOpen(@js($value))" x-collapse>
+    <div data-vellum-accordion-content x-show="isOpen(@js($value))" x-collapse x-cloak>
         <div class="pb-4 pt-0 text-sm text-muted-foreground">
             {{ $content ?? '' }}
         </div>

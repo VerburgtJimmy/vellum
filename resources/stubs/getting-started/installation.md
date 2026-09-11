@@ -3,8 +3,6 @@ title: Installation
 description: Install Vellum in a Laravel application.
 ---
 
-# Installation
-
 Require the package with Composer:
 
 ```bash title="terminal" {1} showLineNumbers

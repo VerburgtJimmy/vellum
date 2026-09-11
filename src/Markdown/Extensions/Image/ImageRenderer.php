@@ -43,11 +43,12 @@ final class ImageRenderer implements ConfigurationAwareInterface, NodeRendererIn
         $attrs = $node->data->get('attributes');
         $attrs['loading'] = 'lazy';
 
+        $url = $node->getUrl();
         $forbidUnsafeLinks = ! $this->config->get('allow_unsafe_links');
-        if ($forbidUnsafeLinks && RegexHelper::isLinkPotentiallyUnsafe($node->getUrl())) {
+        if ($forbidUnsafeLinks && RegexHelper::isLinkPotentiallyUnsafe($url)) {
             $attrs['src'] = '';
         } else {
-            $attrs['src'] = $node->getUrl();
+            $attrs['src'] = $this->resolveSrc($url);
         }
 
         $attrs['alt'] = $this->getAltText($node);
@@ -57,7 +58,7 @@ final class ImageRenderer implements ConfigurationAwareInterface, NodeRendererIn
             $attrs['title'] = $title;
         }
 
-        $this->applyLocalDimensions($attrs, $node->getUrl());
+        $this->applyDimensions($attrs, $url);
 
         $img = new HtmlElement('img', $attrs, '', true);
 
@@ -71,11 +72,45 @@ final class ImageRenderer implements ConfigurationAwareInterface, NodeRendererIn
         ]);
     }
 
+    private function resolveSrc(string $url): string
+    {
+        if ($this->contentPath === null || $this->contentPath === '') {
+            return $url;
+        }
+
+        if (preg_match('#^(?:[a-z]+:)?//#i', $url) === 1 || str_starts_with($url, 'data:') || str_starts_with($url, '#')) {
+            return $url;
+        }
+
+        $relative = ltrim(str_replace('\\', '/', $url), '/');
+        $path = rtrim($this->contentPath, '/\\').DIRECTORY_SEPARATOR.str_replace('/', DIRECTORY_SEPARATOR, $relative);
+
+        if (! is_file($path)) {
+            return $url;
+        }
+
+        $prefix = trim((string) config('vellum.route.prefix', 'docs'), '/');
+
+        return '/'.$prefix.'/_vellum/files/'.$relative;
+    }
+
     /**
      * @param  array<string, string|bool>  $attrs
      */
-    private function applyLocalDimensions(array &$attrs, string $url): void
+    private function applyDimensions(array &$attrs, string $url): void
     {
+        if (isset($attrs['width'], $attrs['height'])) {
+            return;
+        }
+
+        if (preg_match('~(?:^|/)(\d{2,5})x(\d{2,5})(?:[./?#]|$)~', $url, $matches) === 1) {
+            $attrs['width'] = $matches[1];
+            $attrs['height'] = $matches[2];
+            $this->applyAspectRatio($attrs);
+
+            return;
+        }
+
         if ($this->contentPath === null || $this->contentPath === '') {
             return;
         }
@@ -94,11 +129,63 @@ final class ImageRenderer implements ConfigurationAwareInterface, NodeRendererIn
         $size = @getimagesize($path);
 
         if ($size === false) {
+            $size = $this->svgSize($path);
+        }
+
+        if ($size === null) {
             return;
         }
 
         $attrs['width'] = (string) $size[0];
         $attrs['height'] = (string) $size[1];
+        $this->applyAspectRatio($attrs);
+    }
+
+    /**
+     * @return array{0: int, 1: int}|null
+     */
+    private function svgSize(string $path): ?array
+    {
+        if (! str_ends_with(strtolower($path), '.svg')) {
+            return null;
+        }
+
+        $contents = @file_get_contents($path);
+
+        if ($contents === false) {
+            return null;
+        }
+
+        if (preg_match('/\bwidth=["\']?(\d+)/i', $contents, $width) !== 1) {
+            return null;
+        }
+
+        if (preg_match('/\bheight=["\']?(\d+)/i', $contents, $height) !== 1) {
+            return null;
+        }
+
+        return [(int) $width[1], (int) $height[1]];
+    }
+
+    /**
+     * @param  array<string, string|bool>  $attrs
+     */
+    private function applyAspectRatio(array &$attrs): void
+    {
+        if (! isset($attrs['width'], $attrs['height'])) {
+            return;
+        }
+
+        $ratio = 'aspect-ratio: '.$attrs['width'].' / '.$attrs['height'];
+        $existing = $attrs['style'] ?? null;
+
+        if (is_string($existing) && $existing !== '') {
+            $attrs['style'] = rtrim($existing, ';').'; '.$ratio;
+
+            return;
+        }
+
+        $attrs['style'] = $ratio;
     }
 
     private function getAltText(Image $node): string

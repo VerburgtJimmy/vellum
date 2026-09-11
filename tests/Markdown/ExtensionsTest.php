@@ -48,6 +48,13 @@ it('highlights inline code with trailing language suffix', function (): void {
         ->and($html)->toMatchSnapshot();
 });
 
+it('renders plain inline code without a language suffix', function (): void {
+    $html = (new MarkdownRenderer)->render('Use `composer require` to install.');
+
+    expect($html)->toContain('<code>composer require</code>')
+        ->and($html)->not->toContain('data-vellum-inline-code');
+});
+
 it('renders callouts with and without custom titles', function (): void {
     $html = (new MarkdownRenderer)->render(<<<'MD'
 :::note
@@ -143,12 +150,23 @@ it('renders local images with dimensions from file', function (): void {
     expect($html)->toContain('loading="lazy"')
         ->and($html)->toContain('width="1"')
         ->and($html)->toContain('height="1"')
+        ->and($html)->toContain('src="/docs/_vellum/files/dot.png"')
         ->and($html)->toContain('<figure')
         ->and($html)->toContain('A tiny pixel')
         ->and($html)->toMatchSnapshot();
 
     unlink($docs.'/dot.png');
     rmdir($docs);
+});
+
+it('parses width and height from remote image urls', function (): void {
+    $html = (new MarkdownRenderer)->render('![Placeholder](https://placehold.co/600x200 "Remote")');
+
+    expect($html)->toContain('loading="lazy"')
+        ->and($html)->toContain('width="600"')
+        ->and($html)->toContain('height="200"')
+        ->and($html)->toContain('aspect-ratio: 600 / 200')
+        ->and($html)->toContain('src="https://placehold.co/600x200"');
 });
 
 it('marks external links with target rel and icon', function (): void {

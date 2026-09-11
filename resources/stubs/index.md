@@ -3,8 +3,6 @@ title: Introduction
 description: Welcome to your Vellum documentation.
 ---
 
-# Introduction
-
 This is your documentation home page. Edit `resources/docs/index.md` to get started.
 
 ## Markdown extensions
@@ -19,7 +17,7 @@ Use callouts for notes, tips, warnings, danger, and info.
 Optional titles go in brackets after the directive name.
 :::
 
-:::tabs persist="pkg-manager"
+:::tabs
 ::tab[npm]
 ```bash title="install.sh"
 npm install jimmyverburgt/vellum
@@ -43,11 +41,11 @@ Run `php artisan vellum:install`.
 ::card[Laravel](https://laravel.com){icon=link}
 :::
 
-![Placeholder](https://placehold.co/600x200 "Remote images stay lazy-loaded")
+![Placeholder](assets/600x200.svg "Local images include width and height")
 
 See the [Laravel docs](https://laravel.com) for framework details.
 
 ## Next steps
 
 - Add pages under `resources/docs/`
-- Run `php artisan vellum:build` in production deploys
+- Run `php artisan vellum:build` in production

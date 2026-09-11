@@ -10,38 +10,32 @@
 
 <div
     data-vellum-tooltip
-    x-data="{
-        open: false,
-        timer: null,
-        show() {
-            clearTimeout(this.timer)
-            this.timer = setTimeout(() => { this.open = true }, {{ (int) $delay }})
-        },
-        hide() {
-            clearTimeout(this.timer)
-            this.open = false
-        },
-    }"
+    x-data="vellumTooltip({{ (int) $delay }})"
+    x-on:pointerenter="ensureAnchor()"
+    x-on:focusin="ensureAnchor()"
     {{ $attributes->except('class')->merge(['class' => $classes]) }}
 >
     <div
         data-vellum-tooltip-trigger
         x-ref="trigger"
-        @@mouseenter="show()"
-        @@mouseleave="hide()"
-        @@focusin="show()"
-        @@focusout="hide()"
+        x-on:mouseenter="show()"
+        x-on:mouseleave="hide()"
+        x-on:focusin="show()"
+        x-on:focusout="hide()"
     >
         {{ $trigger ?? $slot }}
     </div>
-    <div
-        data-vellum-tooltip-content
-        x-show="open"
-        x-cloak
-        x-anchor.offset.6="$refs.trigger"
-        role="tooltip"
-        class="z-50 overflow-hidden rounded-md bg-primary px-3 py-1.5 text-xs text-primary-foreground"
-    >
-        {{ $content ?? '' }}
-    </div>
+
+    {{-- x-if mounts only when open so x-anchor is not evaluated on a display:none node --}}
+    <template x-if="open">
+        <div
+            data-vellum-tooltip-content
+            x-ref="content"
+            x-anchor.offset.6="$refs.trigger"
+            role="tooltip"
+            class="absolute z-50 overflow-hidden rounded-md bg-primary px-3 py-1.5 text-xs text-primary-foreground"
+        >
+            {{ $content ?? '' }}
+        </div>
+    </template>
 </div>
