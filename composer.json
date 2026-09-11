@@ -8,7 +8,7 @@
         "docs",
         "vellum"
     ],
-    "homepage": "https://github.com/jimmyverburgt/vellum",
+    "homepage": "https://github.com/VerburgtJimmy/vellum",
     "license": "MIT",
     "authors": [
         {
@@ -17,6 +17,10 @@
             "role": "Developer"
         }
     ],
+    "support": {
+        "issues": "https://github.com/VerburgtJimmy/vellum/issues",
+        "source": "https://github.com/VerburgtJimmy/vellum"
+    },
     "require": {
         "php": "^8.4",
         "illuminate/console": "^11.0|^12.0",
