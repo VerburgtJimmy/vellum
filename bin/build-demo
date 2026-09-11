@@ -1,8 +1,16 @@
 #!/usr/bin/env bash
+# Regenerate demo-dist locally (or in CI with PHP + Composer).
+# Cloudflare Workers Builds should leave the Build command empty and
+# deploy the committed demo-dist with: npx wrangler deploy
 set -euo pipefail
 
 root="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$root"
+
+if ! command -v composer >/dev/null 2>&1; then
+  echo "composer not found; skip regenerate (using committed demo-dist)." >&2
+  exit 0
+fi
 
 out="${1:-demo-dist}"
 rm -rf "$out"

@@ -44,7 +44,14 @@ Dark:
 
 ## Demo
 
-Stub docs deploy via Cloudflare Workers (`wrangler.toml` + `demo-dist`). After the first Git-connected deploy, use the `*.workers.dev` URL from the Cloudflare dashboard.
+Stub docs deploy via Cloudflare Workers (`wrangler.toml` + committed `demo-dist`).
+
+Cloudflare Git build settings:
+
+- Build command: leave empty
+- Deploy command: `npx wrangler deploy`
+
+Regenerate the static export locally after stub changes: `bash bin/build-demo`
 
 ## Configuration
 
