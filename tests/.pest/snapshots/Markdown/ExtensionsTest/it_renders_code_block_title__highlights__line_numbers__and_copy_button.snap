@@ -1,0 +1,6 @@
+<div class="vellum-code" data-vellum-code=""><div class="vellum-code-header"><span class="vellum-code-title">routes/web.php</span></div><button type="button" class="vellum-code-copy" x-data="{ copied: false }" @click="navigator.clipboard.writeText($el.closest('[data-vellum-code]').querySelector('code').innerText); copied = true; setTimeout(() =&gt; copied = false, 1500)" :aria-label="copied ? 'Copied' : 'Copy code'"><span class="vellum-code-copy-icon" x-show="!copied" aria-hidden="true">Copy</span><span class="vellum-code-check-icon" x-show="copied" x-cloak="" aria-hidden="true">Copied</span></button><pre><code class="language-php"><span class="vellum-code-line"><span class="hl-gutter">1</span>line1</span>
+<span class="vellum-code-line vellum-code-line-highlighted"><span class="hl-gutter">2</span>line2</span>
+<span class="vellum-code-line"><span class="hl-gutter">3</span>line3</span>
+<span class="vellum-code-line vellum-code-line-highlighted"><span class="hl-gutter">4</span>line4</span>
+<span class="vellum-code-line vellum-code-line-highlighted"><span class="hl-gutter">5</span>line5</span>
+<span class="vellum-code-line vellum-code-line-highlighted"><span class="hl-gutter">6</span>line6</span></code></pre></div>
