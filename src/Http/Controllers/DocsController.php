@@ -60,10 +60,31 @@ final class DocsController extends Controller
         $document = $repository->find($documentSlug, $version);
 
         if ($document === null) {
-            abort(404);
+            return $this->notFound($repository, $version);
         }
 
         return $this->render($repository, $document);
+    }
+
+    private function notFound(ContentRepository $repository, ?string $version): Response
+    {
+        $switcher = $repository->versionSwitcherData('', $version);
+
+        $html = $this->view->file(
+            dirname(__DIR__, 3).'/resources/views/pages/404.blade.php',
+            [
+                'name' => config('vellum.name'),
+                'description' => 'Page not found',
+                'navigation' => $repository->navigation($version),
+                'searchHash' => $repository->searchHash($version),
+                'versions' => $switcher['versions'],
+                'currentVersion' => $switcher['currentVersion'],
+                'versionHrefs' => $switcher['versionHrefs'],
+            ],
+        )->render();
+
+        return response($html, 404)
+            ->header('Content-Type', 'text/html; charset=UTF-8');
     }
 
     private function render(ContentRepository $repository, Document $document): Response
@@ -72,6 +93,7 @@ final class DocsController extends Controller
         $adjacent = $repository->adjacent($document->slug, $document->version);
         $breadcrumbs = $repository->breadcrumbs($document);
         $toc = $this->headingExtractor->nest($document->headings);
+        $switcher = $repository->versionSwitcherData($document->slug, $document->version);
 
         $html = $this->view->file(
             dirname(__DIR__, 3).'/resources/views/pages/doc.blade.php',
@@ -85,6 +107,9 @@ final class DocsController extends Controller
                 'breadcrumbs' => $breadcrumbs,
                 'toc' => $toc,
                 'searchHash' => $repository->searchHash($document->version),
+                'versions' => $switcher['versions'],
+                'currentVersion' => $switcher['currentVersion'],
+                'versionHrefs' => $switcher['versionHrefs'],
             ],
         )->render();
 

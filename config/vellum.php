@@ -21,7 +21,7 @@ return [
     | Absolute path to the Markdown documentation root.
     |
     */
-    'path' => resource_path('docs'),
+    'path' => env('VELLUM_PATH', resource_path('docs')),
 
     /*
     |--------------------------------------------------------------------------

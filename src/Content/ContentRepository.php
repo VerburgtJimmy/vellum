@@ -247,6 +247,53 @@ final class ContentRepository
     }
 
     /**
+     * Build a docs URL for a slug (and optional version segment).
+     */
+    public function hrefFor(string $slug, ?string $version = null): string
+    {
+        $parts = array_filter([
+            trim($this->routePrefix, '/'),
+            $this->versionsEnabled ? $version : null,
+            trim($slug, '/'),
+        ], static fn (?string $part): bool => $part !== null && $part !== '');
+
+        return '/'.implode('/', $parts);
+    }
+
+    /**
+     * Version switcher payload for the docs chrome.
+     *
+     * @return array{versions: list<string>, currentVersion: string|null, versionHrefs: array<string, string>}
+     */
+    public function versionSwitcherData(?string $documentSlug, ?string $currentVersion): array
+    {
+        if (! $this->versionsEnabled) {
+            return [
+                'versions' => [],
+                'currentVersion' => null,
+                'versionHrefs' => [],
+            ];
+        }
+
+        $slug = trim((string) $documentSlug, '/');
+        $hrefs = [];
+
+        foreach ($this->versions as $version) {
+            $targetSlug = $this->store->exists($slug, $version) || $this->resolveSourcePath($slug, $version) !== null
+                ? $slug
+                : '';
+
+            $hrefs[$version] = $this->hrefFor($targetSlug, $version);
+        }
+
+        return [
+            'versions' => $this->versions,
+            'currentVersion' => $currentVersion ?? $this->latestVersion,
+            'versionHrefs' => $hrefs,
+        ];
+    }
+
+    /**
      * List every Markdown source under the content root (optionally scoped to a version).
      *
      * @return list<array{path: string, slug: string, version: string|null}>

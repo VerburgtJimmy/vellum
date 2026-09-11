@@ -180,11 +180,13 @@ final class CompiledStore
         if ($hash !== null && $hash !== '') {
             $path = $dir.DIRECTORY_SEPARATOR.'search-index-'.$hash.'.json';
 
-            if (is_file($path)) {
-                $contents = file_get_contents($path);
-
-                return $contents === false ? null : $contents;
+            if (! is_file($path)) {
+                return null;
             }
+
+            $contents = file_get_contents($path);
+
+            return $contents === false ? null : $contents;
         }
 
         $latest = $dir.DIRECTORY_SEPARATOR.'search-index.json';

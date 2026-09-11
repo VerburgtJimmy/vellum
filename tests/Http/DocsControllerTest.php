@@ -33,7 +33,11 @@ MD);
 });
 
 it('returns 404 for missing documents', function (): void {
-    $this->get('/docs/missing-page')->assertNotFound();
+    $this->writeDoc('index.md', "---\ntitle: Home\n---\nHi");
+
+    $this->get('/docs/missing-page')
+        ->assertNotFound()
+        ->assertSee('Page not found', false);
 });
 
 it('redirects unversioned paths to the latest version', function (): void {
@@ -49,6 +53,20 @@ it('redirects unversioned paths to the latest version', function (): void {
     $this->get('/docs/v2/guides/auth')
         ->assertOk()
         ->assertSee('Auth', false);
+});
+
+it('renders the version switcher when versions are enabled', function (): void {
+    config()->set('vellum.versions.enabled', true);
+    config()->set('vellum.versions.latest', 'v2');
+    config()->set('vellum.versions.list', ['v2', 'v1']);
+
+    $this->writeDoc('v2/index.md', "---\ntitle: Home\n---\nV2");
+    $this->writeDoc('v1/index.md', "---\ntitle: Home\n---\nV1");
+
+    $this->get('/docs/v2')
+        ->assertOk()
+        ->assertSee('data-vellum-version-switcher', false)
+        ->assertSee('aria-haspopup="menu"', false);
 });
 
 it('compiles on demand when the cache is cold', function (): void {
