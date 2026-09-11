@@ -4,12 +4,13 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build && node scripts/check-asset-size.mjs",
+    "build": "vite build && vite build --config vite.search.config.js && vite build --config vite.anchor.config.js && vite build --config vite.focus.config.js && node scripts/minify-dist.mjs && node scripts/check-asset-size.mjs",
     "check:size": "node scripts/check-asset-size.mjs"
   },
   "devDependencies": {
     "@alpinejs/anchor": "^3.14.9",
     "@alpinejs/collapse": "^3.14.9",
+    "@alpinejs/focus": "^3.14.9",
     "@tailwindcss/vite": "^4.1.4",
     "alpinejs": "^3.14.9",
     "minisearch": "^7.1.2",

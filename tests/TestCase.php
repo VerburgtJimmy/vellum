@@ -4,11 +4,17 @@ declare(strict_types=1);
 
 namespace Vellum\Tests;
 
+use Illuminate\Foundation\Application;
 use Orchestra\Testbench\TestCase as Orchestra;
 use Vellum\VellumServiceProvider;
 
 abstract class TestCase extends Orchestra
 {
+    /**
+     * When set, overrides Testbench's forced "testing" environment for the next boot.
+     */
+    protected ?string $forceAppEnvironment = null;
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -27,6 +33,20 @@ abstract class TestCase extends Orchestra
         config()->set('vellum.path', $docs);
         config()->set('vellum.cache.path', $cache);
         config()->set('vellum.versions.enabled', false);
+    }
+
+    /**
+     * @param  Application  $app
+     */
+    protected function resolveApplicationCore($app): void
+    {
+        if ($this->forceAppEnvironment !== null) {
+            $app->detectEnvironment(fn (): string => $this->forceAppEnvironment);
+
+            return;
+        }
+
+        parent::resolveApplicationCore($app);
     }
 
     protected function tearDown(): void

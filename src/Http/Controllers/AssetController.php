@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Vellum\Http\Controllers;
 
+use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
 use Vellum\Support\Assets;
@@ -13,17 +14,32 @@ use Vellum\Support\Assets;
  */
 final class AssetController extends Controller
 {
-    public function css(): Response
+    public function css(Request $request): Response
     {
-        return $this->file(Assets::cssPath(), 'text/css; charset=UTF-8');
+        return $this->file($request, Assets::cssPath(), 'text/css; charset=UTF-8');
     }
 
-    public function js(): Response
+    public function js(Request $request): Response
     {
-        return $this->file(Assets::jsPath(), 'text/javascript; charset=UTF-8');
+        return $this->file($request, Assets::jsPath(), 'text/javascript; charset=UTF-8');
     }
 
-    private function file(string $path, string $contentType): Response
+    public function search(Request $request): Response
+    {
+        return $this->file($request, Assets::searchJsPath(), 'text/javascript; charset=UTF-8');
+    }
+
+    public function anchor(Request $request): Response
+    {
+        return $this->file($request, Assets::anchorJsPath(), 'text/javascript; charset=UTF-8');
+    }
+
+    public function focus(Request $request): Response
+    {
+        return $this->file($request, Assets::focusJsPath(), 'text/javascript; charset=UTF-8');
+    }
+
+    private function file(Request $request, string $path, string $contentType): Response
     {
         if (! is_file($path)) {
             abort(404);
@@ -35,9 +51,24 @@ final class AssetController extends Controller
             abort(404);
         }
 
-        return response($contents, 200, [
+        $headers = [
             'Content-Type' => $contentType,
             'Cache-Control' => 'public, max-age=31536000, immutable',
-        ]);
+            'Vary' => 'Accept-Encoding',
+        ];
+
+        $acceptsGzip = str_contains(strtolower($request->header('Accept-Encoding', '')), 'gzip');
+
+        if ($acceptsGzip) {
+            $encoded = gzencode($contents, 9);
+
+            if ($encoded !== false) {
+                $headers['Content-Encoding'] = 'gzip';
+
+                return response($encoded, 200, $headers);
+            }
+        }
+
+        return response($contents, 200, $headers);
     }
 }

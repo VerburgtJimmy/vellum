@@ -21,17 +21,25 @@ function stripCssImports() {
 
 export default defineConfig({
   plugins: [tailwindcss(), stripCssImports()],
+  resolve: {
+    alias: {
+      // Prefer pre-minified ESM entry points so the main gzip budget stays lean.
+      alpinejs: resolve(__dirname, 'node_modules/alpinejs/dist/module.esm.min.js'),
+      '@alpinejs/collapse': resolve(__dirname, 'node_modules/@alpinejs/collapse/dist/module.esm.min.js'),
+    },
+  },
   build: {
     outDir: 'resources/dist',
     emptyOutDir: true,
     minify: 'esbuild',
-    // App-mode build (not lib) so the ES bundle is minified.
+    target: 'es2020',
+    cssMinify: true,
     rollupOptions: {
       input: resolve(__dirname, 'resources/js/vellum.js'),
       output: {
         format: 'es',
         entryFileNames: 'vellum.js',
-        inlineDynamicImports: true,
+        chunkFileNames: 'chunk-[name].js',
         assetFileNames: (assetInfo) => {
           if (assetInfo.name && assetInfo.name.endsWith('.css')) {
             return 'vellum.css'

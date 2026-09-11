@@ -9,36 +9,54 @@ namespace Vellum\Support;
  */
 final class Assets
 {
-    /**
-     * Absolute path to the compiled CSS file.
-     */
     public static function cssPath(): string
     {
         return dirname(__DIR__, 2).'/resources/dist/vellum.css';
     }
 
-    /**
-     * Absolute path to the compiled JS file.
-     */
     public static function jsPath(): string
     {
         return dirname(__DIR__, 2).'/resources/dist/vellum.js';
     }
 
-    /**
-     * Public URL for the compiled CSS, with a short content hash query.
-     */
+    public static function searchJsPath(): string
+    {
+        return dirname(__DIR__, 2).'/resources/dist/vellum-search.js';
+    }
+
+    public static function anchorJsPath(): string
+    {
+        return dirname(__DIR__, 2).'/resources/dist/vellum-anchor.js';
+    }
+
+    public static function focusJsPath(): string
+    {
+        return dirname(__DIR__, 2).'/resources/dist/vellum-focus.js';
+    }
+
     public static function cssUrl(): string
     {
         return route('vellum.assets.css', ['v' => self::hash(self::cssPath())]);
     }
 
-    /**
-     * Public URL for the compiled JS, with a short content hash query.
-     */
     public static function jsUrl(): string
     {
         return route('vellum.assets.js', ['v' => self::hash(self::jsPath())]);
+    }
+
+    public static function searchJsUrl(): string
+    {
+        return route('vellum.assets.search', ['v' => self::hash(self::searchJsPath())]);
+    }
+
+    public static function anchorJsUrl(): string
+    {
+        return route('vellum.assets.anchor', ['v' => self::hash(self::anchorJsPath())]);
+    }
+
+    public static function focusJsUrl(): string
+    {
+        return route('vellum.assets.focus', ['v' => self::hash(self::focusJsPath())]);
     }
 
     private static function hash(string $path): string
