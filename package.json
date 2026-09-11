@@ -1,0 +1,19 @@
+{
+  "name": "jimmyverburgt-vellum",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build && node scripts/check-asset-size.mjs",
+    "check:size": "node scripts/check-asset-size.mjs"
+  },
+  "devDependencies": {
+    "@alpinejs/anchor": "^3.14.9",
+    "@alpinejs/collapse": "^3.14.9",
+    "@tailwindcss/vite": "^4.1.4",
+    "alpinejs": "^3.14.9",
+    "minisearch": "^7.1.2",
+    "tailwindcss": "^4.1.4",
+    "vite": "^6.3.2"
+  }
+}

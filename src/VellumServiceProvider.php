@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Vellum\Console\BuildCommand;
 use Vellum\Console\ClearCommand;
+use Vellum\Http\Controllers\AssetController;
 
 /**
  * Registers Vellum config, views, routes, and Artisan commands.
@@ -34,7 +35,21 @@ final class VellumServiceProvider extends ServiceProvider
             ], 'vellum-config');
         }
 
+        $this->registerAssetRoutes();
         $this->registerRoutes();
+    }
+
+    private function registerAssetRoutes(): void
+    {
+        /** @var list<string> $middleware */
+        $middleware = config('vellum.route.middleware', ['web']);
+
+        Route::middleware($middleware)->group(function (): void {
+            Route::get('/vendor/vellum/vellum.css', [AssetController::class, 'css'])
+                ->name('vellum.assets.css');
+            Route::get('/vendor/vellum/vellum.js', [AssetController::class, 'js'])
+                ->name('vellum.assets.js');
+        });
     }
 
     private function registerRoutes(): void
