@@ -53,6 +53,7 @@
     <style>:root { {{ implode('; ', $rootStyles) }} }</style>
     <link rel="stylesheet" href="{{ Assets::cssUrl() }}">
     <script type="module" src="{{ Assets::jsUrl() }}"></script>
+    @yield('head')
 </head>
 <body class="min-h-screen bg-background text-foreground antialiased">
     <a href="#vellum-content" class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-background focus:px-3 focus:py-2 focus:text-sm focus:shadow">Skip to content</a>

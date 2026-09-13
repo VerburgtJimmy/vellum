@@ -5,8 +5,6 @@ declare(strict_types=1);
 use Vellum\Cache\CompiledStore;
 use Vellum\Content\ContentRepository;
 use Vellum\Content\Document;
-use Vellum\Content\FrontMatterParser;
-use Vellum\Markdown\MarkdownRenderer;
 
 it('discovers nested documents and resolves slugs', function (): void {
     $this->writeDoc('index.md', "# Home\n");
@@ -137,8 +135,6 @@ it('recompiles a document in local when mtime changes', function (): void {
     $repository = new ContentRepository(
         contentPath: $this->docsPath(),
         store: new CompiledStore($this->cachePath()),
-        frontMatterParser: new FrontMatterParser,
-        markdownRenderer: new MarkdownRenderer,
         isLocal: true,
     );
 

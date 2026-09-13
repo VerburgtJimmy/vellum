@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 namespace Vellum\Markdown\Extensions\Tabs;
 
+use Illuminate\Support\HtmlString;
 use League\CommonMark\Extension\CommonMark\Node\Block\FencedCode;
 use League\CommonMark\Node\Node;
 use League\CommonMark\Renderer\ChildNodeRendererInterface;
 use League\CommonMark\Renderer\NodeRendererInterface;
-use League\CommonMark\Util\HtmlElement;
-use League\CommonMark\Util\Xml;
 use Vellum\Markdown\Extensions\Directive\DirectiveBlock;
+use Vellum\Support\MarkdownView;
 
 /**
- * Renders :::tabs as an Alpine-powered tab group with optional localStorage persistence.
+ * Renders :::tabs via the tabs Blade view.
  */
 final class TabsRenderer implements NodeRendererInterface
 {
@@ -35,16 +35,12 @@ final class TabsRenderer implements NodeRendererInterface
         $persistKey = is_string($persist) && $persist !== '' ? $persist : null;
 
         if ($tabs === []) {
-            $attrs = [
-                'class' => 'vellum-tabs',
-                'data-vellum-tabs' => '',
-            ];
-
-            if ($persistKey !== null) {
-                $attrs['data-persist'] = Xml::escape($persistKey);
-            }
-
-            return new HtmlElement('div', $attrs, $childRenderer->renderNodes($node->children()));
+            return MarkdownView::render('tabs', [
+                'persist' => $persistKey,
+                'code' => false,
+                'tabs' => [],
+                'slot' => new HtmlString((string) $childRenderer->renderNodes($node->children())),
+            ]);
         }
 
         $codeTabs = $this->isCodeTabs($tabs);
@@ -61,63 +57,21 @@ final class TabsRenderer implements NodeRendererInterface
             }
         }
 
-        $defaultId = $tabs[0]->getId();
-        $storageKey = $persistKey !== null ? 'vellum-tabs-'.$persistKey : null;
+        $items = [];
 
-        if ($storageKey !== null) {
-            $xData = '{ active: (typeof localStorage !== "undefined" && localStorage.getItem("'.$storageKey.'")) || "'.$defaultId.'", set(id) { this.active = id; localStorage.setItem("'.$storageKey.'", id) } }';
-        } else {
-            $xData = '{ active: "'.$defaultId.'", set(id) { this.active = id } }';
-        }
-
-        $listItems = [];
-        $panels = [];
-
-        foreach ($tabs as $index => $tab) {
-            $id = $tab->getId();
-            $escapedId = Xml::escape($id);
-
-            $listItems[] = new HtmlElement('button', [
-                'type' => 'button',
-                'class' => 'vellum-tabs-trigger',
-                'role' => 'tab',
-                ':aria-selected' => "active === '{$escapedId}'",
-                '@click' => "set('{$escapedId}')",
-                'id' => 'vellum-tab-'.$escapedId,
-            ], Xml::escape($tab->getLabel()));
-
-            $panelAttrs = [
-                'class' => 'vellum-tabs-panel',
-                'role' => 'tabpanel',
-                'x-show' => "active === '{$escapedId}'",
-                'aria-labelledby' => 'vellum-tab-'.$escapedId,
-                'x-cloak' => '',
+        foreach ($tabs as $tab) {
+            $items[] = [
+                'id' => $tab->getId(),
+                'label' => $tab->getLabel(),
+                'html' => (string) $childRenderer->renderNodes($tab->children()),
             ];
-
-            // Keep the default panel visible before Alpine boots (no localStorage yet).
-            if ($index === 0 && $storageKey === null) {
-                unset($panelAttrs['x-cloak']);
-            }
-
-            $panels[] = new HtmlElement('div', $panelAttrs, $childRenderer->renderNodes($tab->children()));
         }
 
-        $attrs = [
-            'class' => $codeTabs ? 'vellum-tabs vellum-tabs-code' : 'vellum-tabs',
-            'data-vellum-tabs' => '',
-            'x-data' => $xData,
-        ];
-
-        if ($persistKey !== null) {
-            $attrs['data-persist'] = Xml::escape($persistKey);
-        }
-
-        return new HtmlElement('div', $attrs, [
-            new HtmlElement('div', [
-                'class' => 'vellum-tabs-list',
-                'role' => 'tablist',
-            ], $listItems),
-            ...$panels,
+        return MarkdownView::render('tabs', [
+            'persist' => $persistKey,
+            'code' => $codeTabs,
+            'tabs' => $items,
+            'slot' => new HtmlString(''),
         ]);
     }
 

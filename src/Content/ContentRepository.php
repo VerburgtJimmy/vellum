@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Vellum\Content;
 
 use Vellum\Cache\CompiledStore;
+use Vellum\Markdown\Islands\MarkdownPipeline;
 use Vellum\Markdown\MarkdownRenderer;
 use Vellum\Support\Slug;
 use Vellum\Support\Str;
@@ -18,7 +19,7 @@ final class ContentRepository
         private readonly string $contentPath,
         private readonly CompiledStore $store,
         private readonly FrontMatterParser $frontMatterParser = new FrontMatterParser,
-        private readonly MarkdownRenderer $markdownRenderer = new MarkdownRenderer,
+        private readonly MarkdownPipeline $pipeline = new MarkdownPipeline,
         private readonly bool $versionsEnabled = false,
         private readonly ?string $latestVersion = null,
         /** @var list<string> */
@@ -38,10 +39,10 @@ final class ContentRepository
         return new self(
             contentPath: (string) config('vellum.path'),
             store: new CompiledStore((string) config('vellum.cache.path')),
-            markdownRenderer: new MarkdownRenderer(
+            pipeline: new MarkdownPipeline(new MarkdownRenderer(
                 contentPath: (string) config('vellum.path'),
                 appUrl: (string) config('app.url', ''),
-            ),
+            )),
             versionsEnabled: (bool) ($versions['enabled'] ?? false),
             latestVersion: $versions['latest'] ?? null,
             versions: $versions['list'] ?? [],
@@ -353,9 +354,10 @@ final class ContentRepository
             : $this->relativePath($this->contentPath, $absolutePath);
 
         $slug ??= $this->slugFromRelativePath($relative, $absolutePath, $matter);
-        $rendered = $this->markdownRenderer->convert($body);
+        $rendered = $this->pipeline->convert($body);
         $html = $rendered['html'];
         $headings = $rendered['headings'];
+        $islands = $rendered['islands'];
         $title = $this->resolveTitle($matter, $body, $relative);
         $mtime = (int) filemtime($absolutePath);
 
@@ -381,6 +383,7 @@ final class ContentRepository
             version: $version,
             full: $full,
             icon: $icon,
+            islands: $islands,
         );
 
         $this->store->put($document);

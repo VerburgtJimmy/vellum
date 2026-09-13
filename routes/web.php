@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Illuminate\Support\Facades\Route;
+use Vellum\Http\Controllers\ChangelogController;
 use Vellum\Http\Controllers\ContentFileController;
 use Vellum\Http\Controllers\DocsController;
 use Vellum\Http\Controllers\RawMarkdownController;
@@ -22,6 +23,9 @@ Route::get('/_vellum/raw/{slug}.md', RawMarkdownController::class)
 if (app()->environment('local')) {
     Route::view('/_vellum/demo', 'vellum::pages.ui-demo')->name('vellum.ui-demo');
 }
+
+Route::get('/changelog.atom', [ChangelogController::class, 'feed'])->name('vellum.changelog.atom');
+Route::get('/changelog', [ChangelogController::class, 'page'])->name('vellum.changelog');
 
 Route::get('/', [DocsController::class, 'index'])->name('vellum.docs.index');
 Route::get('/{slug}', [DocsController::class, 'show'])

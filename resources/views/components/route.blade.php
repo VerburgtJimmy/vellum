@@ -1,0 +1,2 @@
+@props(['key'])
+{{ route($key) }}

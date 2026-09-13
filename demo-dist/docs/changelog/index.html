@@ -1,0 +1,1280 @@
+<!DOCTYPE html>
+<html
+    lang="en"
+    data-vellum-preset="neutral"
+    data-vellum-search="../../vendor/vellum/vellum-search.js?v=90d0eee7"
+    data-vellum-anchor="../../vendor/vellum/vellum-anchor.js?v=a5360955"
+    data-vellum-focus="../../vendor/vellum/vellum-focus.js?v=383bf9a1"
+>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script>
+        (function () {
+            try {
+                var key = 'vellum-theme';
+                var stored = localStorage.getItem(key);
+                var preference = stored || "system";
+                var dark = preference === 'dark' || (
+                    preference === 'system'
+                    && window.matchMedia('(prefers-color-scheme: dark)').matches
+                );
+                document.documentElement.classList.toggle('dark', dark);
+            } catch (e) {}
+            try {
+                if (localStorage.getItem('vellum-sidebar') === 'collapsed') {
+                    document.documentElement.setAttribute('data-vellum-sidebar', 'collapsed');
+                }
+            } catch (e) {}
+        })();
+    </script>
+    <title>Changelog · Vellum</title>
+    <link rel="icon" href="data:,">
+            <meta name="description" content="Release notes">
+            <style>:root { --radius: 0.5rem }</style>
+    <link rel="stylesheet" href="../../vendor/vellum/vellum.css?v=0b581274">
+    <script type="module" src="../../vendor/vellum/vellum.js?v=7136aeda"></script>
+        <link rel="alternate" type="application/atom+xml" title="Changelog" href="../../docs/changelog.atom">
+</head>
+<body class="min-h-screen bg-background text-foreground antialiased">
+    <a href="#vellum-content" class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-background focus:px-3 focus:py-2 focus:text-sm focus:shadow">Skip to content</a>
+        
+    <div data-vellum-docs class="flex min-h-screen flex-col" x-data="vellumChrome">
+            <div
+    data-vellum-search
+    data-vellum-search-hotkey="k"
+    x-data="vellumSearchHotkey('k')"
+    x-on:vellum-search-open.window="openSearch()"
+    x-on:vellum-search-close.window="closeSearch()"
+>
+    <div
+    data-vellum-dialog
+    data-vellum-dialog-variant="search"
+    x-data="vellumDialog(false)"
+    @keydown.escape.window="if (open) close()"
+    class="contents"
+>
+    
+    
+    <template x-teleport="body">
+        <template x-if="open">
+            <div class="fixed inset-0 z-50" role="presentation" data-vellum-dialog-variant="search">
+                <div
+                    data-vellum-dialog-overlay
+                                        class="fixed inset-0 bg-black/50 backdrop-blur-[4px]"
+                                        x-on:click="close()"
+                    aria-hidden="true"
+                ></div>
+                <div
+                    data-vellum-dialog-panel
+                    role="dialog"
+                    aria-modal="true"
+                    x-trap.noscroll="true"
+                    x-on:click.stop
+                    class="fixed left-1/2 top-4 z-50 w-[calc(100%-1rem)] max-w-screen-sm -translate-x-1/2 overflow-hidden rounded-xl border border-border bg-popover text-popover-foreground shadow-2xl shadow-black/50 md:top-[calc(50%-250px)]"
+                                    >
+                    
+                    
+                    <div data-vellum-dialog-content class="">
+                        <div
+                class="flex flex-col"
+                x-data="{
+                    query: '',
+                    groups: [],
+                    flat: [],
+                    active: 0,
+                    status: '',
+                    loading: false,
+                    ready: false,
+                    searchUrl: 'http:\/\/localhost\/docs\/_vellum\/search-0496591142200466ac391418dec4e082.json',
+                    async ensureIndex() {
+                        if (this.ready || this.loading) {
+                            return
+                        }
+                        this.loading = true
+                        this.status = 'Loading search index'
+                        try {
+                            const mod = await window.VellumSearch.load()
+                            await mod.getOrCreateIndex(this.searchUrl)
+                            this.ready = true
+                            this.status = 'Search ready'
+                        } catch (e) {
+                            this.status = 'Search unavailable'
+                        } finally {
+                            this.loading = false
+                        }
+                    },
+                    async runSearch() {
+                        await this.ensureIndex()
+                        const mod = await window.VellumSearch.load()
+                        const { index } = await mod.getOrCreateIndex(this.searchUrl)
+                        const q = this.query.trim()
+                        if (!q) {
+                            this.groups = []
+                            this.flat = []
+                            this.active = 0
+                            this.status = 'Type to search'
+                            return
+                        }
+                        const hits = index.search(q, { boost: { title: 3, headings: 2 }, prefix: true, fuzzy: 0.2 })
+                        this.groups = mod.groupResultsByPage(hits, q)
+                        this.flat = this.groups.map((g) => ({ url: g.url }))
+                        this.active = 0
+                        const count = this.groups.length
+                        this.status = count === 0 ? 'No results' : (count === 1 ? '1 result' : count + ' results')
+                    },
+                    move(delta) {
+                        if (this.flat.length === 0) {
+                            return
+                        }
+                        this.active = (this.active + delta + this.flat.length) % this.flat.length
+                    },
+                    go() {
+                        const item = this.flat[this.active]
+                        if (item?.url) {
+                            window.location.href = item.url
+                        }
+                    },
+                    closeSearch() {
+                        window.dispatchEvent(new CustomEvent('vellum-search-close'))
+                    },
+                }"
+                x-init="ensureIndex(); $nextTick(() => $refs.query?.focus())"
+                x-on:keydown.arrow-down.prevent="move(1)"
+                x-on:keydown.arrow-up.prevent="move(-1)"
+                x-on:keydown.enter.prevent="go()"
+            >
+                <label class="sr-only" for="vellum-search-input">Search</label>
+                <div class="flex flex-row items-center gap-2 p-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="h-5 w-5 shrink-0 text-muted-foreground"><path d="M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z" /></svg>
+                    <input
+                        id="vellum-search-input"
+                        x-ref="query"
+                        type="search"
+                        autocomplete="off"
+                        autocorrect="off"
+                        spellcheck="false"
+                        placeholder="Search"
+                        class="w-0 flex-1 bg-transparent text-lg placeholder:text-muted-foreground focus-visible:outline-none"
+                        x-model="query"
+                        x-on:input.debounce.150ms="runSearch()"
+                    >
+                    <button
+                        type="button"
+                        class="inline-flex items-center rounded-md border border-border px-2 py-1 font-mono text-xs text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                        aria-label="Close search"
+                        x-on:click="closeSearch()"
+                    >ESC</button>
+                </div>
+
+                <div class="sr-only" aria-live="polite" x-text="status"></div>
+
+                <div
+                    class="max-h-[min(60vh,24rem)] overflow-y-auto"
+                    :class="{ 'border-t border-border': query.trim() !== '' }"
+                    role="listbox"
+                    aria-label="Search results"
+                >
+                    <template x-if="loading && ! ready">
+                        <p class="px-3 py-6 text-center text-sm text-muted-foreground">Loading index...</p>
+                    </template>
+                    <template x-if="ready && query.trim() && groups.length === 0">
+                        <p class="px-3 py-6 text-center text-sm text-muted-foreground">No results</p>
+                    </template>
+                    <template x-for="(group, gi) in groups" :key="group.url">
+                        <div class="px-1 py-1">
+                            <a
+                                :href="group.url"
+                                role="option"
+                                class="block rounded-md px-3 py-2 text-sm hover:bg-accent"
+                                :class="flat[active]?.url === group.url && 'bg-accent'"
+                                :aria-selected="(flat[active]?.url === group.url).toString()"
+                                x-on:mouseenter="active = flat.findIndex((f) => f.url === group.url)"
+                            >
+                                <span class="font-medium text-foreground" x-html="group.titleHtml"></span>
+                                <template x-if="group.items[0]">
+                                    <span class="mt-0.5 block line-clamp-2 text-muted-foreground" x-html="group.items[0].html"></span>
+                                </template>
+                            </a>
+                        </div>
+                    </template>
+                </div>
+            </div>
+                    </div>
+
+                                    </div>
+            </div>
+        </template>
+    </template>
+</div>
+</div>
+    
+    <div
+        data-vellum-sidebar-pill
+        class="fixed left-4 z-50 items-center gap-0.5 rounded-xl border border-border bg-muted p-0.5 text-muted-foreground shadow-lg motion-safe:transition-opacity"
+    >
+        <button
+            type="button"
+            data-vellum-sidebar-expand
+            data-vellum-button
+            class="inline-flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            aria-label="Expand sidebar"
+            x-on:click="toggleSidebar()"
+        >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="h-4 w-4"><path d="M216,40H40A16,16,0,0,0,24,56V200a16,16,0,0,0,16,16H216a16,16,0,0,0,16-16V56A16,16,0,0,0,216,40ZM40,56H80V200H40ZM216,200H96V56H216V200Z" /></svg>
+        </button>
+                    <button
+    type="button"
+    data-vellum-search-trigger
+    data-vellum-search-trigger-variant="icon"
+    data-vellum-button
+    class="inline-flex items-center gap-2 rounded-md text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring h-8 w-8 justify-center rounded-lg"
+     aria-label="Open search"     x-on:click="$dispatch('vellum-search-open')"
+>
+    <span class="inline-flex min-w-0 items-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="h-4 w-4 shrink-0"><path d="M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z" /></svg>
+            </span>
+    </button>
+            </div>
+
+    <div
+        data-vellum-sidebar-hotzone
+        class="fixed inset-y-0 left-0 z-[46] hidden w-4 md:block"
+        aria-hidden="true"
+        x-on:mouseenter="showPeek()"
+        x-on:mouseleave="scheduleHidePeek()"
+    ></div>
+
+            <div
+            data-vellum-mobile-bar
+            class="sticky top-0 z-40 flex h-14 shrink-0 items-center justify-between gap-2 border-b border-border bg-background/95 px-4 backdrop-blur md:hidden"
+        >
+            <a href="../../docs" data-vellum-brand class="flex min-w-0 items-center gap-2 font-semibold tracking-tight text-foreground hover:opacity-90">
+        <span class="truncate">Vellum</span>
+</a>
+            <div class="flex items-center gap-0.5">
+                                    <button
+    type="button"
+    data-vellum-search-trigger
+    data-vellum-search-trigger-variant="icon"
+    data-vellum-button
+    class="inline-flex items-center gap-2 rounded-md text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring h-8 w-8 justify-center rounded-lg"
+     aria-label="Open search"     x-on:click="$dispatch('vellum-search-open')"
+>
+    <span class="inline-flex min-w-0 items-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="h-4 w-4 shrink-0"><path d="M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z" /></svg>
+            </span>
+    </button>
+                                <div data-vellum-mobile-sidebar class="contents">
+    <div
+    data-vellum-dialog
+    data-vellum-dialog-variant="sheet"
+    x-data="vellumDialog(false)"
+    @keydown.escape.window="if (open) close()"
+    class="contents"
+>
+            <div data-vellum-dialog-trigger @click="show()">
+            <button
+                    type="button"
+                    data-vellum-button
+                    aria-label="Open navigation"
+                    class="inline-flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="h-5 w-5"><path d="M224,128a8,8,0,0,1-8,8H40a8,8,0,0,1,0-16H216A8,8,0,0,1,224,128ZM40,72H216a8,8,0,0,0,0-16H40a8,8,0,0,0,0,16ZM216,184H40a8,8,0,0,0,0,16H216a8,8,0,0,0,0-16Z" /></svg>
+                </button>
+        </div>
+    
+    
+    <template x-teleport="body">
+        <template x-if="open">
+            <div class="fixed inset-0 z-50" role="presentation" data-vellum-dialog-variant="sheet">
+                <div
+                    data-vellum-dialog-overlay
+                     data-vellum-sheet-overlay                     class="fixed inset-0 bg-black/10 backdrop-blur-2xl"
+                     :class="entered && 'is-entered'"                     x-on:click="close()"
+                    aria-hidden="true"
+                ></div>
+                <div
+                    data-vellum-dialog-panel
+                    role="dialog"
+                    aria-modal="true"
+                    x-trap.noscroll="true"
+                    x-on:click.stop
+                    class="fixed inset-y-0 right-0 z-50 flex h-full w-[85%] max-w-[380px] flex-col border-s border-border bg-background shadow-lg"
+                                            data-vellum-sheet-side="right"
+                        :class="entered && 'is-entered'"
+                                    >
+                    
+                    
+                    <div data-vellum-dialog-content class="flex min-h-0 flex-1 flex-col overflow-hidden">
+                        <div data-vellum-mobile-drawer class="flex h-full min-h-0 flex-col">
+                <div class="flex items-center gap-1.5 px-4 pb-2 pt-4 text-muted-foreground">
+                    <button
+                        type="button"
+                        data-vellum-dialog-close
+                        data-vellum-button
+                        x-on:click="close()"
+                        aria-label="Close"
+                        class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-border text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="h-4 w-4"><path d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z" /></svg>
+                    </button>
+                    <div class="ms-auto flex items-center">
+                        <div
+    data-vellum-theme-toggle
+    class="relative"
+    x-data="{
+        open: false,
+        preference: window.VellumTheme?.getStoredTheme('system') ?? 'system',
+        labels: { light: 'Light', dark: 'Dark', system: 'System' },
+        options: ['light', 'dark', 'system'],
+        active: 0,
+        set(value) {
+            this.preference = value
+            window.VellumTheme?.applyTheme(value)
+            this.closeMenu()
+        },
+        openMenu() {
+            this.active = Math.max(0, this.options.indexOf(this.preference))
+            this.open = true
+            this.$nextTick(() => this.$refs.menu?.querySelectorAll('[role=menuitem]')[this.active]?.focus())
+        },
+        closeMenu() {
+            this.open = false
+            this.$nextTick(() => this.$refs.trigger?.focus())
+        },
+        toggle() {
+            if (this.open) {
+                this.closeMenu()
+            } else {
+                this.openMenu()
+            }
+        },
+        onTriggerKeydown(event) {
+            if (event.key === 'ArrowDown' || event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault()
+                this.openMenu()
+            }
+        },
+        onMenuKeydown(event) {
+            if (event.key === 'Escape') {
+                event.preventDefault()
+                this.closeMenu()
+                return
+            }
+            if (event.key === 'ArrowDown') {
+                event.preventDefault()
+                this.active = (this.active + 1) % this.options.length
+                this.$refs.menu?.querySelectorAll('[role=menuitem]')[this.active]?.focus()
+                return
+            }
+            if (event.key === 'ArrowUp') {
+                event.preventDefault()
+                this.active = (this.active - 1 + this.options.length) % this.options.length
+                this.$refs.menu?.querySelectorAll('[role=menuitem]')[this.active]?.focus()
+                return
+            }
+            if (event.key === 'Home') {
+                event.preventDefault()
+                this.active = 0
+                this.$refs.menu?.querySelectorAll('[role=menuitem]')[0]?.focus()
+                return
+            }
+            if (event.key === 'End') {
+                event.preventDefault()
+                this.active = this.options.length - 1
+                this.$refs.menu?.querySelectorAll('[role=menuitem]')[this.active]?.focus()
+            }
+        },
+    }"
+    x-on:keydown.escape.window="if (open) closeMenu()"
+    x-on:click.outside="if (open) closeMenu()"
+>
+            <div class="flex items-center gap-0.5">
+            <button
+                type="button"
+                data-vellum-button
+                class="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                :class="preference === 'light' && 'bg-accent text-accent-foreground'"
+                aria-label="Light"
+                x-on:click="set('light')"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="h-4 w-4"><path d="M120,40V16a8,8,0,0,1,16,0V40a8,8,0,0,1-16,0Zm72,88a64,64,0,1,1-64-64A64.07,64.07,0,0,1,192,128Zm-16,0a48,48,0,1,0-48,48A48.05,48.05,0,0,0,176,128ZM58.34,69.66A8,8,0,0,0,69.66,58.34l-16-16A8,8,0,0,0,42.34,53.66Zm0,116.68-16,16a8,8,0,0,0,11.32,11.32l16-16a8,8,0,0,0-11.32-11.32ZM192,72a8,8,0,0,0,5.66-2.34l16-16a8,8,0,0,0-11.32-11.32l-16,16A8,8,0,0,0,192,72Zm5.66,114.34a8,8,0,0,0-11.32,11.32l16,16a8,8,0,0,0,11.32-11.32ZM48,128a8,8,0,0,0-8-8H16a8,8,0,0,0,0,16H40A8,8,0,0,0,48,128Zm80,80a8,8,0,0,0-8,8v24a8,8,0,0,0,16,0V216A8,8,0,0,0,128,208Zm112-88H216a8,8,0,0,0,0,16h24a8,8,0,0,0,0-16Z" /></svg>
+            </button>
+            <button
+                type="button"
+                data-vellum-button
+                class="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                :class="preference === 'dark' && 'bg-accent text-accent-foreground'"
+                aria-label="Dark"
+                x-on:click="set('dark')"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="h-4 w-4"><path d="M233.54,142.23a8,8,0,0,0-8-2,88.08,88.08,0,0,1-109.8-109.8,8,8,0,0,0-10-10,104.84,104.84,0,0,0-52.91,37A104,104,0,0,0,136,224a103.09,103.09,0,0,0,62.52-20.88,104.84,104.84,0,0,0,37-52.91A8,8,0,0,0,233.54,142.23ZM188.9,190.34A88,88,0,0,1,65.66,67.11a89,89,0,0,1,31.4-26A106,106,0,0,0,96,56,104.11,104.11,0,0,0,200,160a106,106,0,0,0,14.92-1.06A89,89,0,0,1,188.9,190.34Z" /></svg>
+            </button>
+        </div>
+    </div>
+                    </div>
+                </div>
+
+                <aside
+    data-vellum-sidebar
+    class="flex h-full flex-col border-border min-h-0 w-full flex-1 border-0 bg-transparent"
+        x-init="$nextTick(() => $el.querySelector('[data-vellum-nav-active]')?.scrollIntoView({ block: 'nearest' }))"
+>
+    
+    
+    
+    <div
+    data-vellum-scroll-area
+    class="vellum-scroll-area relative min-h-0 flex-1 px-4 py-1"
+>
+    <nav aria-label="Documentation" class="flex flex-col gap-1 text-sm">
+            <a
+            href="../../docs"
+            data-vellum-nav-link
+                        x-data="vellumPrefetchHover"
+            x-on:pointerenter="onEnter()"
+            class="block rounded-md px-2 -mx-2 py-1.5 transition-colors text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground"
+                    >Vellum</a>
+        
+                    <div
+    data-vellum-collapsible
+    x-data="{ open: true }"
+    class="flex flex-col gap-0.5"
+>
+    <div
+        data-vellum-collapsible-trigger
+        role="button"
+        tabindex="0"
+        :aria-expanded="open.toString()"
+        @click="open = ! open"
+        @keydown.enter.prevent="open = ! open"
+        @keydown.space.prevent="open = ! open"
+    >
+        <div class="block rounded-md px-2 -mx-2 py-1.5 transition-colors flex cursor-pointer items-center gap-1 font-medium text-foreground hover:bg-accent/60">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="h-3.5 w-3.5 shrink-0 text-muted-foreground transition-transform" :class="open &amp;&amp; 'rotate-90'"><path d="M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z" /></svg>
+                    <span class="truncate">Getting started</span>
+                </div>
+    </div>
+    <div
+        data-vellum-collapsible-content
+        x-show="open"
+        x-collapse
+            >
+        <div class="ml-2 flex flex-col gap-0.5 pl-3">
+                    <a
+            href="../../docs/getting-started/installation"
+            data-vellum-nav-link
+                        x-data="vellumPrefetchHover"
+            x-on:pointerenter="onEnter()"
+            class="block rounded-md px-2 -mx-2 py-1.5 transition-colors text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground"
+                    >Installation</a>
+        
+                    <a
+            href="../../docs/getting-started/configuration"
+            data-vellum-nav-link
+                        x-data="vellumPrefetchHover"
+            x-on:pointerenter="onEnter()"
+            class="block rounded-md px-2 -mx-2 py-1.5 transition-colors text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground"
+                    >Configuration</a>
+                    </div>
+    </div>
+</div>
+        
+                    <div
+    data-vellum-collapsible
+    x-data="{ open: true }"
+    class="flex flex-col gap-0.5"
+>
+    <div
+        data-vellum-collapsible-trigger
+        role="button"
+        tabindex="0"
+        :aria-expanded="open.toString()"
+        @click="open = ! open"
+        @keydown.enter.prevent="open = ! open"
+        @keydown.space.prevent="open = ! open"
+    >
+        <div class="block rounded-md px-2 -mx-2 py-1.5 transition-colors flex cursor-pointer items-center gap-1 font-medium text-foreground hover:bg-accent/60">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="h-3.5 w-3.5 shrink-0 text-muted-foreground transition-transform" :class="open &amp;&amp; 'rotate-90'"><path d="M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z" /></svg>
+                    <span class="truncate">Components</span>
+                </div>
+    </div>
+    <div
+        data-vellum-collapsible-content
+        x-show="open"
+        x-collapse
+            >
+        <div class="ml-2 flex flex-col gap-0.5 pl-3">
+                    <a
+            href="../../docs/components"
+            data-vellum-nav-link
+                        x-data="vellumPrefetchHover"
+            x-on:pointerenter="onEnter()"
+            class="block rounded-md px-2 -mx-2 py-1.5 transition-colors text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground"
+                    >Components</a>
+        
+                    <a
+            href="../../docs/components/callouts"
+            data-vellum-nav-link
+                        x-data="vellumPrefetchHover"
+            x-on:pointerenter="onEnter()"
+            class="block rounded-md px-2 -mx-2 py-1.5 transition-colors text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground"
+                    >Callouts</a>
+        
+                    <a
+            href="../../docs/components/tabs"
+            data-vellum-nav-link
+                        x-data="vellumPrefetchHover"
+            x-on:pointerenter="onEnter()"
+            class="block rounded-md px-2 -mx-2 py-1.5 transition-colors text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground"
+                    >Tabs</a>
+        
+                    <a
+            href="../../docs/components/steps"
+            data-vellum-nav-link
+                        x-data="vellumPrefetchHover"
+            x-on:pointerenter="onEnter()"
+            class="block rounded-md px-2 -mx-2 py-1.5 transition-colors text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground"
+                    >Steps</a>
+        
+                    <a
+            href="../../docs/components/cards"
+            data-vellum-nav-link
+                        x-data="vellumPrefetchHover"
+            x-on:pointerenter="onEnter()"
+            class="block rounded-md px-2 -mx-2 py-1.5 transition-colors text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground"
+                    >Cards</a>
+        
+                    <a
+            href="../../docs/components/values"
+            data-vellum-nav-link
+                        x-data="vellumPrefetchHover"
+            x-on:pointerenter="onEnter()"
+            class="block rounded-md px-2 -mx-2 py-1.5 transition-colors text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground"
+                    >Value tags</a>
+                    </div>
+    </div>
+</div>
+        
+                    <a
+            href="../../docs/extending"
+            data-vellum-nav-link
+                        x-data="vellumPrefetchHover"
+            x-on:pointerenter="onEnter()"
+            class="block rounded-md px-2 -mx-2 py-1.5 transition-colors text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground"
+                    >Extending with your own components</a>
+        
+                    <a
+            href="../../docs/changelog"
+            data-vellum-nav-link
+             data-vellum-nav-active             x-data="vellumPrefetchHover"
+            x-on:pointerenter="onEnter()"
+            class="block rounded-md px-2 -mx-2 py-1.5 transition-colors bg-accent font-medium text-accent-foreground"
+             aria-current="page"         >Changelog</a>
+        
+                    <div
+    data-vellum-collapsible
+    x-data="{ open: false }"
+    class="flex flex-col gap-0.5"
+>
+    <div
+        data-vellum-collapsible-trigger
+        role="button"
+        tabindex="0"
+        :aria-expanded="open.toString()"
+        @click="open = ! open"
+        @keydown.enter.prevent="open = ! open"
+        @keydown.space.prevent="open = ! open"
+    >
+        <div class="block rounded-md px-2 -mx-2 py-1.5 transition-colors flex cursor-pointer items-center gap-1 font-medium text-foreground hover:bg-accent/60">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="h-3.5 w-3.5 shrink-0 text-muted-foreground transition-transform" :class="open &amp;&amp; 'rotate-90'"><path d="M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z" /></svg>
+                    <span class="truncate">Screenshots</span>
+                </div>
+    </div>
+    <div
+        data-vellum-collapsible-content
+        x-show="open"
+        x-collapse
+                    x-cloak
+            >
+        <div class="ml-2 flex flex-col gap-0.5 pl-3">
+                                    </div>
+    </div>
+</div>
+            </nav>
+</div>
+
+    </aside>
+            </div>
+                    </div>
+
+                                    </div>
+            </div>
+        </template>
+    </template>
+</div>
+</div>
+            </div>
+        </div>
+    
+    <div class="flex w-full flex-1">
+        <div
+            data-vellum-sidebar-wrap
+            class="hidden shrink-0 md:block sticky top-0 h-screen"
+            x-on:mouseenter="showPeek()"
+            x-on:mouseleave="scheduleHidePeek()"
+        >
+            <aside
+    data-vellum-sidebar
+    class="flex h-full w-[250px] shrink-0 flex-col border-r border-border bg-background"
+            x-on:mouseenter="showPeek()"
+        x-on:mouseleave="scheduleHidePeek()"
+        x-init="$nextTick(() => $el.querySelector('[data-vellum-nav-active]')?.scrollIntoView({ block: 'nearest' }))"
+>
+        <div class="flex items-center gap-2 px-3 py-3">
+                    <div class="min-w-0 flex-1">
+                <a href="../../docs" data-vellum-brand class="flex min-w-0 items-center gap-2 font-semibold tracking-tight text-foreground hover:opacity-90">
+        <span class="truncate">Vellum</span>
+</a>
+            </div>
+                <button
+            type="button"
+            data-vellum-sidebar-collapse
+            data-vellum-button
+            class="hidden h-8 w-8 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:inline-flex"
+            aria-label="Collapse sidebar"
+            x-on:click="toggleSidebar()"
+        >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="h-4 w-4"><path d="M216,40H40A16,16,0,0,0,24,56V200a16,16,0,0,0,16,16H216a16,16,0,0,0,16-16V56A16,16,0,0,0,216,40ZM40,56H80V200H40ZM216,200H96V56H216V200Z" /></svg>
+        </button>
+    </div>
+    
+            <div class="px-3 pb-3">
+            <button
+    type="button"
+    data-vellum-search-trigger
+    data-vellum-search-trigger-variant="sidebar"
+    data-vellum-button
+    class="inline-flex items-center gap-2 rounded-md text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring h-9 w-full border border-input bg-background px-2.5"
+        x-on:click="$dispatch('vellum-search-open')"
+>
+    <span class="inline-flex min-w-0 items-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="h-4 w-4 shrink-0"><path d="M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z" /></svg>
+                    <span class="truncate">Search...</span>
+            </span>
+            <span
+            class="ml-auto hidden items-center gap-0.5 sm:inline-flex shrink-0"
+            aria-hidden="true"
+            x-data="vellumHotkeyChip"
+        >
+            <kbd
+    data-vellum-kbd
+    class="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border border-border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground"
+><span x-text="mod">Ctrl</span></kbd>
+            <kbd
+    data-vellum-kbd
+    class="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border border-border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground"
+>K</kbd>
+        </span>
+    </button>
+        </div>
+    
+    
+    <div
+    data-vellum-scroll-area
+    class="vellum-scroll-area relative min-h-0 flex-1 px-4 py-1"
+>
+    <nav aria-label="Documentation" class="flex flex-col gap-1 text-sm">
+            <a
+            href="../../docs"
+            data-vellum-nav-link
+                        x-data="vellumPrefetchHover"
+            x-on:pointerenter="onEnter()"
+            class="block rounded-md px-2 -mx-2 py-1.5 transition-colors text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground"
+                    >Vellum</a>
+        
+                    <div
+    data-vellum-collapsible
+    x-data="{ open: true }"
+    class="flex flex-col gap-0.5"
+>
+    <div
+        data-vellum-collapsible-trigger
+        role="button"
+        tabindex="0"
+        :aria-expanded="open.toString()"
+        @click="open = ! open"
+        @keydown.enter.prevent="open = ! open"
+        @keydown.space.prevent="open = ! open"
+    >
+        <div class="block rounded-md px-2 -mx-2 py-1.5 transition-colors flex cursor-pointer items-center gap-1 font-medium text-foreground hover:bg-accent/60">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="h-3.5 w-3.5 shrink-0 text-muted-foreground transition-transform" :class="open &amp;&amp; 'rotate-90'"><path d="M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z" /></svg>
+                    <span class="truncate">Getting started</span>
+                </div>
+    </div>
+    <div
+        data-vellum-collapsible-content
+        x-show="open"
+        x-collapse
+            >
+        <div class="ml-2 flex flex-col gap-0.5 pl-3">
+                    <a
+            href="../../docs/getting-started/installation"
+            data-vellum-nav-link
+                        x-data="vellumPrefetchHover"
+            x-on:pointerenter="onEnter()"
+            class="block rounded-md px-2 -mx-2 py-1.5 transition-colors text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground"
+                    >Installation</a>
+        
+                    <a
+            href="../../docs/getting-started/configuration"
+            data-vellum-nav-link
+                        x-data="vellumPrefetchHover"
+            x-on:pointerenter="onEnter()"
+            class="block rounded-md px-2 -mx-2 py-1.5 transition-colors text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground"
+                    >Configuration</a>
+                    </div>
+    </div>
+</div>
+        
+                    <div
+    data-vellum-collapsible
+    x-data="{ open: true }"
+    class="flex flex-col gap-0.5"
+>
+    <div
+        data-vellum-collapsible-trigger
+        role="button"
+        tabindex="0"
+        :aria-expanded="open.toString()"
+        @click="open = ! open"
+        @keydown.enter.prevent="open = ! open"
+        @keydown.space.prevent="open = ! open"
+    >
+        <div class="block rounded-md px-2 -mx-2 py-1.5 transition-colors flex cursor-pointer items-center gap-1 font-medium text-foreground hover:bg-accent/60">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="h-3.5 w-3.5 shrink-0 text-muted-foreground transition-transform" :class="open &amp;&amp; 'rotate-90'"><path d="M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z" /></svg>
+                    <span class="truncate">Components</span>
+                </div>
+    </div>
+    <div
+        data-vellum-collapsible-content
+        x-show="open"
+        x-collapse
+            >
+        <div class="ml-2 flex flex-col gap-0.5 pl-3">
+                    <a
+            href="../../docs/components"
+            data-vellum-nav-link
+                        x-data="vellumPrefetchHover"
+            x-on:pointerenter="onEnter()"
+            class="block rounded-md px-2 -mx-2 py-1.5 transition-colors text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground"
+                    >Components</a>
+        
+                    <a
+            href="../../docs/components/callouts"
+            data-vellum-nav-link
+                        x-data="vellumPrefetchHover"
+            x-on:pointerenter="onEnter()"
+            class="block rounded-md px-2 -mx-2 py-1.5 transition-colors text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground"
+                    >Callouts</a>
+        
+                    <a
+            href="../../docs/components/tabs"
+            data-vellum-nav-link
+                        x-data="vellumPrefetchHover"
+            x-on:pointerenter="onEnter()"
+            class="block rounded-md px-2 -mx-2 py-1.5 transition-colors text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground"
+                    >Tabs</a>
+        
+                    <a
+            href="../../docs/components/steps"
+            data-vellum-nav-link
+                        x-data="vellumPrefetchHover"
+            x-on:pointerenter="onEnter()"
+            class="block rounded-md px-2 -mx-2 py-1.5 transition-colors text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground"
+                    >Steps</a>
+        
+                    <a
+            href="../../docs/components/cards"
+            data-vellum-nav-link
+                        x-data="vellumPrefetchHover"
+            x-on:pointerenter="onEnter()"
+            class="block rounded-md px-2 -mx-2 py-1.5 transition-colors text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground"
+                    >Cards</a>
+        
+                    <a
+            href="../../docs/components/values"
+            data-vellum-nav-link
+                        x-data="vellumPrefetchHover"
+            x-on:pointerenter="onEnter()"
+            class="block rounded-md px-2 -mx-2 py-1.5 transition-colors text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground"
+                    >Value tags</a>
+                    </div>
+    </div>
+</div>
+        
+                    <a
+            href="../../docs/extending"
+            data-vellum-nav-link
+                        x-data="vellumPrefetchHover"
+            x-on:pointerenter="onEnter()"
+            class="block rounded-md px-2 -mx-2 py-1.5 transition-colors text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground"
+                    >Extending with your own components</a>
+        
+                    <a
+            href="../../docs/changelog"
+            data-vellum-nav-link
+             data-vellum-nav-active             x-data="vellumPrefetchHover"
+            x-on:pointerenter="onEnter()"
+            class="block rounded-md px-2 -mx-2 py-1.5 transition-colors bg-accent font-medium text-accent-foreground"
+             aria-current="page"         >Changelog</a>
+        
+                    <div
+    data-vellum-collapsible
+    x-data="{ open: false }"
+    class="flex flex-col gap-0.5"
+>
+    <div
+        data-vellum-collapsible-trigger
+        role="button"
+        tabindex="0"
+        :aria-expanded="open.toString()"
+        @click="open = ! open"
+        @keydown.enter.prevent="open = ! open"
+        @keydown.space.prevent="open = ! open"
+    >
+        <div class="block rounded-md px-2 -mx-2 py-1.5 transition-colors flex cursor-pointer items-center gap-1 font-medium text-foreground hover:bg-accent/60">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="h-3.5 w-3.5 shrink-0 text-muted-foreground transition-transform" :class="open &amp;&amp; 'rotate-90'"><path d="M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z" /></svg>
+                    <span class="truncate">Screenshots</span>
+                </div>
+    </div>
+    <div
+        data-vellum-collapsible-content
+        x-show="open"
+        x-collapse
+                    x-cloak
+            >
+        <div class="ml-2 flex flex-col gap-0.5 pl-3">
+                                    </div>
+    </div>
+</div>
+            </nav>
+</div>
+
+            <div data-vellum-sidebar-footer class="flex items-center gap-1 border-t border-border px-3 py-2">
+            <div
+    data-vellum-theme-toggle
+    class="relative"
+    x-data="{
+        open: false,
+        preference: window.VellumTheme?.getStoredTheme('system') ?? 'system',
+        labels: { light: 'Light', dark: 'Dark', system: 'System' },
+        options: ['light', 'dark', 'system'],
+        active: 0,
+        set(value) {
+            this.preference = value
+            window.VellumTheme?.applyTheme(value)
+            this.closeMenu()
+        },
+        openMenu() {
+            this.active = Math.max(0, this.options.indexOf(this.preference))
+            this.open = true
+            this.$nextTick(() => this.$refs.menu?.querySelectorAll('[role=menuitem]')[this.active]?.focus())
+        },
+        closeMenu() {
+            this.open = false
+            this.$nextTick(() => this.$refs.trigger?.focus())
+        },
+        toggle() {
+            if (this.open) {
+                this.closeMenu()
+            } else {
+                this.openMenu()
+            }
+        },
+        onTriggerKeydown(event) {
+            if (event.key === 'ArrowDown' || event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault()
+                this.openMenu()
+            }
+        },
+        onMenuKeydown(event) {
+            if (event.key === 'Escape') {
+                event.preventDefault()
+                this.closeMenu()
+                return
+            }
+            if (event.key === 'ArrowDown') {
+                event.preventDefault()
+                this.active = (this.active + 1) % this.options.length
+                this.$refs.menu?.querySelectorAll('[role=menuitem]')[this.active]?.focus()
+                return
+            }
+            if (event.key === 'ArrowUp') {
+                event.preventDefault()
+                this.active = (this.active - 1 + this.options.length) % this.options.length
+                this.$refs.menu?.querySelectorAll('[role=menuitem]')[this.active]?.focus()
+                return
+            }
+            if (event.key === 'Home') {
+                event.preventDefault()
+                this.active = 0
+                this.$refs.menu?.querySelectorAll('[role=menuitem]')[0]?.focus()
+                return
+            }
+            if (event.key === 'End') {
+                event.preventDefault()
+                this.active = this.options.length - 1
+                this.$refs.menu?.querySelectorAll('[role=menuitem]')[this.active]?.focus()
+            }
+        },
+    }"
+    x-on:keydown.escape.window="if (open) closeMenu()"
+    x-on:click.outside="if (open) closeMenu()"
+>
+        <button
+        type="button"
+        x-ref="trigger"
+        data-vellum-button
+        class="inline-flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        aria-label="Toggle theme"
+        aria-haspopup="menu"
+        :aria-expanded="open.toString()"
+        x-on:click="toggle()"
+        x-on:keydown="onTriggerKeydown($event)"
+    >
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="h-4 w-4" x-show="preference !== 'dark'"><path d="M120,40V16a8,8,0,0,1,16,0V40a8,8,0,0,1-16,0Zm72,88a64,64,0,1,1-64-64A64.07,64.07,0,0,1,192,128Zm-16,0a48,48,0,1,0-48,48A48.05,48.05,0,0,0,176,128ZM58.34,69.66A8,8,0,0,0,69.66,58.34l-16-16A8,8,0,0,0,42.34,53.66Zm0,116.68-16,16a8,8,0,0,0,11.32,11.32l16-16a8,8,0,0,0-11.32-11.32ZM192,72a8,8,0,0,0,5.66-2.34l16-16a8,8,0,0,0-11.32-11.32l-16,16A8,8,0,0,0,192,72Zm5.66,114.34a8,8,0,0,0-11.32,11.32l16,16a8,8,0,0,0,11.32-11.32ZM48,128a8,8,0,0,0-8-8H16a8,8,0,0,0,0,16H40A8,8,0,0,0,48,128Zm80,80a8,8,0,0,0-8,8v24a8,8,0,0,0,16,0V216A8,8,0,0,0,128,208Zm112-88H216a8,8,0,0,0,0,16h24a8,8,0,0,0,0-16Z" /></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="h-4 w-4" x-cloak="" x-show="preference === 'dark'"><path d="M233.54,142.23a8,8,0,0,0-8-2,88.08,88.08,0,0,1-109.8-109.8,8,8,0,0,0-10-10,104.84,104.84,0,0,0-52.91,37A104,104,0,0,0,136,224a103.09,103.09,0,0,0,62.52-20.88,104.84,104.84,0,0,0,37-52.91A8,8,0,0,0,233.54,142.23ZM188.9,190.34A88,88,0,0,1,65.66,67.11a89,89,0,0,1,31.4-26A106,106,0,0,0,96,56,104.11,104.11,0,0,0,200,160a106,106,0,0,0,14.92-1.06A89,89,0,0,1,188.9,190.34Z" /></svg>
+    </button>
+
+    <div
+        x-ref="menu"
+        x-cloak
+        x-show="open"
+        x-transition.opacity
+        class="absolute z-50 min-w-[8rem] rounded-md border border-border bg-popover p-1 text-popover-foreground shadow-md bottom-full left-0 mb-1"
+        role="menu"
+        aria-label="Color theme"
+        x-on:keydown="onMenuKeydown($event)"
+    >
+        <template x-for="(value, index) in options" :key="value">
+            <button
+                type="button"
+                role="menuitem"
+                class="flex w-full items-center rounded-sm px-2 py-1.5 text-left text-sm hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                :class="preference === value && 'bg-accent'"
+                :tabindex="active === index ? 0 : -1"
+                x-on:click="set(value)"
+                x-on:mouseenter="active = index"
+                x-text="labels[value]"
+            ></button>
+        </template>
+    </div>
+    </div>
+
+                                                </div>
+    </aside>
+        </div>
+
+        <div class="flex min-w-0 min-h-0 flex-1 flex-col">
+            <div
+            data-vellum-toc-mobile
+            class="sticky top-14 md:top-0 relative z-30 lg:hidden"
+            :class="open && 'z-[60]'"
+            x-data="vellumScrollSpy(JSON.parse('[{\u0022id\u0022:\u00220.3.0\u0022,\u0022text\u0022:\u00220.3.0\u0022},{\u0022id\u0022:\u00220.2.0\u0022,\u0022text\u0022:\u00220.2.0\u0022},{\u0022id\u0022:\u00220.1.0\u0022,\u0022text\u0022:\u00220.1.0\u0022}]'), 'On this page')"
+            x-on:keydown.escape.window="if (open) open = false"
+            x-on:click.outside="open = false"
+        >
+            <div
+                class="border-b border-border bg-background/95 backdrop-blur"
+                :class="open && 'shadow-lg'"
+            >
+            <button
+                type="button"
+                data-vellum-toc-popover-trigger
+                class="flex h-10 w-full items-center gap-2.5 px-4 py-2.5 text-start text-sm focus-visible:outline-none md:px-6"
+                :aria-expanded="open.toString()"
+                aria-controls="vellum-toc-popover-panel"
+                x-on:click.stop="toggleOpen()"
+            >
+                <svg
+                    role="progressbar"
+                    viewBox="0 0 18 18"
+                    class="h-[18px] w-[18px] shrink-0 text-muted-foreground"
+                    :aria-valuenow="progress.toFixed(2)"
+                    aria-valuemin="0"
+                    aria-valuemax="1"
+                    aria-label="Reading progress"
+                >
+                    <circle cx="9" cy="9" r="7.5" fill="none" stroke-width="1.5" class="vellum-toc-progress-track"></circle>
+                    <circle
+                        cx="9"
+                        cy="9"
+                        r="7.5"
+                        fill="none"
+                        stroke-width="1.5"
+                        stroke="currentColor"
+                        stroke-linecap="round"
+                        transform="rotate(-90 9 9)"
+                        stroke-dasharray="47.124"
+                        :stroke-dashoffset="(47.124 * (1 - progress)).toFixed(3)"
+                        class="vellum-toc-progress-thumb"
+                    ></circle>
+                </svg>
+                <span
+                    class="min-w-0 flex-1 truncate"
+                    :class="open ? 'font-semibold text-foreground' : 'text-muted-foreground'"
+                    x-text="open ? pageTitle : activeTitle"
+                >On this page</span>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="h-4 w-4 shrink-0 text-muted-foreground transition-transform" :class="open &amp;&amp; 'rotate-180'"><path d="M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80A8,8,0,0,1,53.66,90.34L128,164.69l74.34-74.35a8,8,0,0,1,11.32,11.32Z" /></svg>
+            </button>
+            <div
+                id="vellum-toc-popover-panel"
+                data-vellum-toc-popover-panel
+                x-show="open"
+                x-cloak
+            >
+                <div class="vellum-toc-popover-scroll max-h-[50vh] overflow-y-auto px-4 py-3 md:px-6">
+                    <nav
+    aria-label="Table of contents"
+    class="vellum-toc-nav relative text-sm "
+    data-vellum-toc-nav
+>
+    <svg class="vellum-toc-rail" data-vellum-toc-track aria-hidden="true">
+        <path data-vellum-toc-track-path fill="none" stroke-width="1"></path>
+    </svg>
+    <svg class="vellum-toc-rail vellum-toc-rail-active" data-vellum-toc-thumb aria-hidden="true">
+        <path data-vellum-toc-thumb-path fill="none" stroke-width="1"></path>
+    </svg>
+    <span class="vellum-toc-thumb-dot" data-vellum-toc-dot aria-hidden="true"></span>
+    <a
+        href="#0.3.0"
+        data-vellum-toc-link
+        data-vellum-toc-id="0.3.0"
+        data-vellum-toc-level="0"
+        x-on:click.prevent="scrollTo('0.3.0')"
+        class="vellum-toc-link relative z-10 block py-1 text-[13px] leading-snug text-muted-foreground transition-colors hover:font-semibold hover:text-foreground"
+        :class="activeId === '0.3.0' ? 'is-active font-semibold text-foreground' : 'text-muted-foreground'"
+        style="--vellum-toc-level: 0"
+    >0.3.0</a>
+            <a
+        href="#0.2.0"
+        data-vellum-toc-link
+        data-vellum-toc-id="0.2.0"
+        data-vellum-toc-level="0"
+        x-on:click.prevent="scrollTo('0.2.0')"
+        class="vellum-toc-link relative z-10 block py-1 text-[13px] leading-snug text-muted-foreground transition-colors hover:font-semibold hover:text-foreground"
+        :class="activeId === '0.2.0' ? 'is-active font-semibold text-foreground' : 'text-muted-foreground'"
+        style="--vellum-toc-level: 0"
+    >0.2.0</a>
+            <a
+        href="#0.1.0"
+        data-vellum-toc-link
+        data-vellum-toc-id="0.1.0"
+        data-vellum-toc-level="0"
+        x-on:click.prevent="scrollTo('0.1.0')"
+        class="vellum-toc-link relative z-10 block py-1 text-[13px] leading-snug text-muted-foreground transition-colors hover:font-semibold hover:text-foreground"
+        :class="activeId === '0.1.0' ? 'is-active font-semibold text-foreground' : 'text-muted-foreground'"
+        style="--vellum-toc-level: 0"
+    >0.1.0</a>
+    </nav>
+                </div>
+            </div>
+            </div>
+        </div>
+    
+            <div data-vellum-page-row class="flex min-w-0 flex-1 gap-8 px-4 py-8 md:px-6 xl:px-8">
+            <main id="vellum-content" class="flex min-h-0 w-full min-w-0 max-w-[860px] flex-1 flex-col">
+                <div data-vellum-page-heading class="mb-4 flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
+                    <nav data-vellum-breadcrumb aria-label="Breadcrumb" class="min-w-0">
+                <ol class="flex flex-wrap items-center gap-1.5 text-sm text-muted-foreground">
+                                            <li class="inline-flex items-center gap-1.5">
+                                                                                        <span  class="text-foreground" aria-current="page" >Changelog</span>
+                                                    </li>
+                                    </ol>
+            </nav>
+        
+                    <time data-vellum-updated datetime="" class="text-xs text-muted-foreground">Sep 13, 2026</time>
+            </div>
+
+                <article data-vellum-article data-vellum-changelog>
+                    <div class="mb-2 flex flex-wrap items-end justify-between gap-3">
+                        <h1 class="text-3xl font-semibold tracking-tight text-foreground md:text-4xl">
+                            Changelog
+                        </h1>
+                        <a
+                            href="../../docs/changelog.atom"
+                            class="text-sm text-muted-foreground hover:text-foreground"
+                        >Atom feed</a>
+                    </div>
+                    <div class="vellum-prose">
+                        <p>All notable changes to this project are documented in this file.</p>
+<p>The format is based on <a href="https://keepachangelog.com/en/1.1.0/" target="_blank" rel="noopener" class="vellum-external-link">Keep a Changelog<span class="vellum-external-icon" aria-hidden="true"></span></a>,
+and this project adheres to <a href="https://semver.org/spec/v2.0.0.html" target="_blank" rel="noopener" class="vellum-external-link">Semantic Versioning<span class="vellum-external-icon" aria-hidden="true"></span></a>.</p>
+                                                    <section class="vellum-changelog-release">
+                                <h2 id="0.3.0" class="vellum-heading">
+                                                                            <a href="https://github.com/VerburgtJimmy/vellum/releases/tag/v0.3.0" target="_blank" rel="noopener">0.3.0</a>
+                                                                                                                <time datetime="2026-09-13" class="ml-2 text-base font-normal text-muted-foreground">2026-09-13</time>
+                                                                    </h2>
+                                <p>Markdown plus components. Pre-1.0: the API may change.</p>
+<h3 id="added" class="vellum-heading">Added<button type="button" class="vellum-heading-anchor" data-vellum-heading-copy="" aria-label="Copy link to heading" x-data="vellumHeadingCopy" @click="copy()"><span class="vellum-heading-anchor-icon" x-show="!copied" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="h-3.5 w-3.5"><path d="M165.66,90.34a8,8,0,0,1,0,11.32l-64,64a8,8,0,0,1-11.32-11.32l64-64A8,8,0,0,1,165.66,90.34ZM215.6,40.4a56,56,0,0,0-79.2,0L106.34,70.45a8,8,0,0,0,11.32,11.32l30.06-30a40,40,0,0,1,56.57,56.56l-30.07,30.06a8,8,0,0,0,11.31,11.32L215.6,119.6a56,56,0,0,0,0-79.2ZM138.34,174.22l-30.06,30.06a40,40,0,1,1-56.56-56.57l30.05-30.05a8,8,0,0,0-11.32-11.32L40.4,136.4a56,56,0,0,0,79.2,79.2l30.06-30.07a8,8,0,0,0-11.32-11.31Z" /></svg></span><span class="vellum-heading-anchor-copied" x-show="copied" x-cloak="">Copied</span></button></h3>
+<ul>
+<li><code data-vellum-inline-code="">&lt;x-…&gt;</code> component islands in Markdown. Slots are Markdown and may nest. Attributes are quoted strings only: no <code data-vellum-inline-code="">{{ }}</code>, Blade directives, or <code data-vellum-inline-code="">@php</code> in docs. Tags inside fenced or inline code stay as text</li>
+<li>Host Blade components via <code data-vellum-inline-code="">vellum.components.namespaces</code> (default <code data-vellum-inline-code="">['vellum']</code> allows <code data-vellum-inline-code="">&lt;x-vellum::…&gt;</code> only; add <code data-vellum-inline-code="">''</code> or <code data-vellum-inline-code="">'app'</code> for <code data-vellum-inline-code="">&lt;x-alert&gt;</code>). Unknown or disallowed tags fail locally and at build</li>
+<li>Built-in <code data-vellum-inline-code="">:::callout</code>, <code data-vellum-inline-code="">:::tabs</code>, <code data-vellum-inline-code="">:::steps</code>, and <code data-vellum-inline-code="">:::cards</code> render the same views as <code data-vellum-inline-code="">&lt;x-vellum::callout&gt;</code>, tabs, steps, and cards. Prefer <code data-vellum-inline-code="">:::</code> for those</li>
+<li><code data-vellum-inline-code="">&lt;x-vellum::env /&gt;</code>, <code data-vellum-inline-code="">config</code>, and <code data-vellum-inline-code="">route</code> value tags, gated by <code data-vellum-inline-code="">vellum.components.allowlist</code> (empty lists refuse every key). They resolve when the page is rendered, including inside <code data-vellum-inline-code="">:::tabs</code>, not when Markdown is compiled</li>
+<li>Request-time fragment cache for those islands, cleared by <code data-vellum-inline-code="">vellum:clear</code> and <code data-vellum-inline-code="">optimize:clear</code></li>
+<li>Changelog page at <code data-vellum-inline-code="">/docs/changelog</code> and Atom feed at <code data-vellum-inline-code="">/docs/changelog.atom</code> (<code data-vellum-inline-code="">vellum.changelog.path</code>, default <code data-vellum-inline-code="">CHANGELOG.md</code>). Set <code data-vellum-inline-code="">path</code> to <code data-vellum-inline-code="">null</code> to disable. <code data-vellum-inline-code="">[Unreleased]</code> stays in the source file; the page hides it unless <code data-vellum-inline-code="">vellum.changelog.unreleased</code> is true; the feed never includes it</li>
+<li>Package docs in <code data-vellum-inline-code="">docs/</code> (the Cloudflare demo exports that tree). <code data-vellum-inline-code="">vellum:install</code> stubs stay a short getting-started plus one page per built-in</li>
+</ul>
+                            </section>
+                                                    <section class="vellum-changelog-release mt-10">
+                                <h2 id="0.2.0" class="vellum-heading">
+                                                                            <a href="https://github.com/VerburgtJimmy/vellum/releases/tag/v0.2.0" target="_blank" rel="noopener">0.2.0</a>
+                                                                                                                <time datetime="2026-09-13" class="ml-2 text-base font-normal text-muted-foreground">2026-09-13</time>
+                                                                    </h2>
+                                <p>Docs chrome and Markdown polish. Pre-1.0: the API may change.</p>
+<h3 id="added" class="vellum-heading">Added<button type="button" class="vellum-heading-anchor" data-vellum-heading-copy="" aria-label="Copy link to heading" x-data="vellumHeadingCopy" @click="copy()"><span class="vellum-heading-anchor-icon" x-show="!copied" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="h-3.5 w-3.5"><path d="M165.66,90.34a8,8,0,0,1,0,11.32l-64,64a8,8,0,0,1-11.32-11.32l64-64A8,8,0,0,1,165.66,90.34ZM215.6,40.4a56,56,0,0,0-79.2,0L106.34,70.45a8,8,0,0,0,11.32,11.32l30.06-30a40,40,0,0,1,56.57,56.56l-30.07,30.06a8,8,0,0,0,11.31,11.32L215.6,119.6a56,56,0,0,0,0-79.2ZM138.34,174.22l-30.06,30.06a40,40,0,1,1-56.56-56.57l30.05-30.05a8,8,0,0,0-11.32-11.32L40.4,136.4a56,56,0,0,0,79.2,79.2l30.06-30.07a8,8,0,0,0-11.32-11.31Z" /></svg></span><span class="vellum-heading-anchor-copied" x-show="copied" x-cloak="">Copied</span></button></h3>
+<ul>
+<li>Footnotes via CommonMark, with styled list and backlinks</li>
+<li><code data-vellum-inline-code="">vellum.layout.search</code>: <code data-vellum-inline-code="">sidebar</code> (default) or <code data-vellum-inline-code="">header</code></li>
+<li>Collapsible desktop sidebar, persisted in <code data-vellum-inline-code="">localStorage</code>, with a floating expand/search pill, width animation, and a rounded left-edge hover peek</li>
+<li>Mobile &quot;On this page&quot; popover: sticky bar, reading-progress circle, overlay rail dropdown (<code data-vellum-inline-code="">max-h-[50vh]</code>)</li>
+<li>Page actions: copy Markdown, Open menu (ChatGPT, Claude, raw Markdown, Edit on GitHub)</li>
+<li>Raw Markdown route <code data-vellum-inline-code="">/docs/_vellum/raw/{slug}.md</code>, included in <code data-vellum-inline-code="">vellum:export</code></li>
+<li><code data-vellum-inline-code="">success</code> and <code data-vellum-inline-code="">idea</code> callout aliases (map to tip and note)</li>
+<li><code data-vellum-inline-code="">vellum.theme.preset</code>: Fumadocs palettes (<code data-vellum-inline-code="">neutral</code>, <code data-vellum-inline-code="">black</code>, <code data-vellum-inline-code="">vitepress</code>, <code data-vellum-inline-code="">dusk</code>, <code data-vellum-inline-code="">catppuccin</code>, <code data-vellum-inline-code="">ocean</code>, <code data-vellum-inline-code="">purple</code>, <code data-vellum-inline-code="">solar</code>, <code data-vellum-inline-code="">emerald</code>, <code data-vellum-inline-code="">ruby</code>, <code data-vellum-inline-code="">aspen</code>)</li>
+</ul>
+<h3 id="fixed" class="vellum-heading">Fixed<button type="button" class="vellum-heading-anchor" data-vellum-heading-copy="" aria-label="Copy link to heading" x-data="vellumHeadingCopy" @click="copy()"><span class="vellum-heading-anchor-icon" x-show="!copied" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="h-3.5 w-3.5"><path d="M165.66,90.34a8,8,0,0,1,0,11.32l-64,64a8,8,0,0,1-11.32-11.32l64-64A8,8,0,0,1,165.66,90.34ZM215.6,40.4a56,56,0,0,0-79.2,0L106.34,70.45a8,8,0,0,0,11.32,11.32l30.06-30a40,40,0,0,1,56.57,56.56l-30.07,30.06a8,8,0,0,0,11.31,11.32L215.6,119.6a56,56,0,0,0,0-79.2ZM138.34,174.22l-30.06,30.06a40,40,0,1,1-56.56-56.57l30.05-30.05a8,8,0,0,0-11.32-11.32L40.4,136.4a56,56,0,0,0,79.2,79.2l30.06-30.07a8,8,0,0,0-11.32-11.31Z" /></svg></span><span class="vellum-heading-anchor-copied" x-show="copied" x-cloak="">Copied</span></button></h3>
+<ul>
+<li>Collapsed sidebar peek only opens from the left-edge hotzone after a short cooldown, and hides when the pointer leaves</li>
+<li>Theme menu in the sidebar footer opens upward so it stays on screen</li>
+<li><code data-vellum-inline-code="">bin/build-demo</code> registers the package through <code data-vellum-inline-code="">testbench.yaml</code> so <code data-vellum-inline-code="">vellum:export</code> is available</li>
+</ul>
+<h3 id="changed" class="vellum-heading">Changed<button type="button" class="vellum-heading-anchor" data-vellum-heading-copy="" aria-label="Copy link to heading" x-data="vellumHeadingCopy" @click="copy()"><span class="vellum-heading-anchor-icon" x-show="!copied" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="h-3.5 w-3.5"><path d="M165.66,90.34a8,8,0,0,1,0,11.32l-64,64a8,8,0,0,1-11.32-11.32l64-64A8,8,0,0,1,165.66,90.34ZM215.6,40.4a56,56,0,0,0-79.2,0L106.34,70.45a8,8,0,0,0,11.32,11.32l30.06-30a40,40,0,0,1,56.57,56.56l-30.07,30.06a8,8,0,0,0,11.31,11.32L215.6,119.6a56,56,0,0,0,0-79.2ZM138.34,174.22l-30.06,30.06a40,40,0,1,1-56.56-56.57l30.05-30.05a8,8,0,0,0-11.32-11.32L40.4,136.4a56,56,0,0,0,79.2,79.2l30.06-30.07a8,8,0,0,0-11.32-11.31Z" /></svg></span><span class="vellum-heading-anchor-copied" x-show="copied" x-cloak="">Copied</span></button></h3>
+<ul>
+<li>Plain inline code uses the same chip as tagged inline code</li>
+<li>Line numbers are CSS counters (<code data-vellum-inline-code="">user-select: none</code>) and are omitted from copied text</li>
+<li>Sidebar item text aligns with the brand; nested items indent from that edge</li>
+<li>Default chrome has no top header; search and theme live in the sidebar</li>
+<li>Copyright footer removed; footer is an empty optional slot</li>
+<li>Previous/next cards use arrows, a bold title, and the page description; they sit after footnotes, half width when both exist, full width for a single direction, stacked on small screens</li>
+<li>Content stays left when there is no table of contents; the TOC column is still reserved</li>
+<li>Last-updated date sits above the H1 next to breadcrumbs</li>
+<li>Tighter content-column padding</li>
+<li>Hotkey chip defaults to <code data-vellum-inline-code="">Ctrl</code> and switches to <code data-vellum-inline-code="">⌘</code> on Apple platforms after hydration</li>
+<li>TOC uses a continuous SVG rail with heading-level jogs, a 420ms active clip, and a path-following thumb</li>
+<li>Heading permalinks are a hover/focus copy-link control (no visible <code data-vellum-inline-code="">#</code>)</li>
+<li>Code copy control is icon-only; title bar uses Phosphor language file marks</li>
+<li>Chrome icons use Phosphor (search, theme, sidebar, carets, GitHub, heading permalinks)</li>
+<li>TOC active and hovered section titles are semibold</li>
+<li>Fenced code uses GitHub Light/Dark token colours on a Fumadocs-like card surface</li>
+<li>Code tabs sit in a lighter grey chrome; the inner fence uses the same surface as standalone code blocks</li>
+<li>Author <code data-vellum-inline-code="">---</code> rules are lighter; theme no longer inserts rules between headings</li>
+<li><code data-vellum-inline-code="">:::cards</code> render two per row (one on mobile)</li>
+<li>Tempest token classes are styled in the built CSS</li>
+<li>Callouts: rounded card, inset rounded-pill accent rail, Phosphor fill icons aligned to the title/first line, bold title, muted body</li>
+<li>Mobile navigation is a Fumadocs-style right sheet: 85% width, sun/moon header, a heavily blurred page overlay, and the same 280ms sidebar slide</li>
+<li>Mobile &quot;On this page&quot; popover shares one frosted surface with the title bar so the blur matches</li>
+<li>Neutral palette matches Fumadocs (soft gray light, charcoal dark instead of OLED black)</li>
+<li>Copy on embedded/tab code sits on the first line</li>
+<li>Docs images align to the content edge</li>
+<li>Task-list checkboxes use muted-foreground grey so the check stays visible</li>
+</ul>
+<h3 id="removed" class="vellum-heading">Removed<button type="button" class="vellum-heading-anchor" data-vellum-heading-copy="" aria-label="Copy link to heading" x-data="vellumHeadingCopy" @click="copy()"><span class="vellum-heading-anchor-icon" x-show="!copied" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="h-3.5 w-3.5"><path d="M165.66,90.34a8,8,0,0,1,0,11.32l-64,64a8,8,0,0,1-11.32-11.32l64-64A8,8,0,0,1,165.66,90.34ZM215.6,40.4a56,56,0,0,0-79.2,0L106.34,70.45a8,8,0,0,0,11.32,11.32l30.06-30a40,40,0,0,1,56.57,56.56l-30.07,30.06a8,8,0,0,0,11.31,11.32L215.6,119.6a56,56,0,0,0,0-79.2ZM138.34,174.22l-30.06,30.06a40,40,0,1,1-56.56-56.57l30.05-30.05a8,8,0,0,0-11.32-11.32L40.4,136.4a56,56,0,0,0,79.2,79.2l30.06-30.07a8,8,0,0,0-11.32-11.31Z" /></svg></span><span class="vellum-heading-anchor-copied" x-show="copied" x-cloak="">Copied</span></button></h3>
+<ul>
+<li>Default copyright / &quot;Built with Vellum&quot; footer content</li>
+</ul>
+                            </section>
+                                                    <section class="vellum-changelog-release mt-10">
+                                <h2 id="0.1.0" class="vellum-heading">
+                                                                            <a href="https://github.com/VerburgtJimmy/vellum/releases/tag/v0.1.0" target="_blank" rel="noopener">0.1.0</a>
+                                                                                                                <time datetime="2026-09-11" class="ml-2 text-base font-normal text-muted-foreground">2026-09-11</time>
+                                                                    </h2>
+                                <p>Initial public release. Pre-1.0: the API may change.</p>
+<h3 id="added" class="vellum-heading">Added<button type="button" class="vellum-heading-anchor" data-vellum-heading-copy="" aria-label="Copy link to heading" x-data="vellumHeadingCopy" @click="copy()"><span class="vellum-heading-anchor-icon" x-show="!copied" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="h-3.5 w-3.5"><path d="M165.66,90.34a8,8,0,0,1,0,11.32l-64,64a8,8,0,0,1-11.32-11.32l64-64A8,8,0,0,1,165.66,90.34ZM215.6,40.4a56,56,0,0,0-79.2,0L106.34,70.45a8,8,0,0,0,11.32,11.32l30.06-30a40,40,0,0,1,56.57,56.56l-30.07,30.06a8,8,0,0,0,11.31,11.32L215.6,119.6a56,56,0,0,0,0-79.2ZM138.34,174.22l-30.06,30.06a40,40,0,1,1-56.56-56.57l30.05-30.05a8,8,0,0,0-11.32-11.32L40.4,136.4a56,56,0,0,0,79.2,79.2l30.06-30.07a8,8,0,0,0-11.32-11.31Z" /></svg></span><span class="vellum-heading-anchor-copied" x-show="copied" x-cloak="">Copied</span></button></h3>
+<ul>
+<li>Laravel package that serves documentation from Markdown (<code data-vellum-inline-code="">resources/docs</code> by default); supports Laravel 11, 12, and 13</li>
+<li><code data-vellum-inline-code="">vellum:install</code> to publish config, starter stubs, and public dist assets</li>
+<li><code data-vellum-inline-code="">vellum:build</code> / <code data-vellum-inline-code="">vellum:clear</code> for an OPcache-friendly compile cache</li>
+<li>Markdown extensions: callouts, tabs, steps, cards, fenced code blocks, inline code highlighting, images, external links, heading anchors</li>
+<li>Docs UI: sidebar navigation, table of contents, breadcrumbs, search (MiniSearch), light/dark/system theme</li>
+<li>Optional version folders with latest redirect and version switcher</li>
+<li><code data-vellum-inline-code="">vellum:export</code> for static HTML output suitable for GitHub Pages or any static host</li>
+<li>Config surface in <code data-vellum-inline-code="">config/vellum.php</code> (path, routes, versions, theme, search, cache, export)</li>
+<li>GitHub Actions CI (Pest on Laravel 11/12/13, Pint, PHPStan, frontend build / size gate)</li>
+<li>Demo site workflow that exports package stubs for Cloudflare Workers (<code data-vellum-inline-code="">bin/build-demo</code>, <code data-vellum-inline-code="">wrangler.toml</code>)</li>
+</ul>
+<h3 id="publishing-note" class="vellum-heading">Publishing note<button type="button" class="vellum-heading-anchor" data-vellum-heading-copy="" aria-label="Copy link to heading" x-data="vellumHeadingCopy" @click="copy()"><span class="vellum-heading-anchor-icon" x-show="!copied" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="h-3.5 w-3.5"><path d="M165.66,90.34a8,8,0,0,1,0,11.32l-64,64a8,8,0,0,1-11.32-11.32l64-64A8,8,0,0,1,165.66,90.34ZM215.6,40.4a56,56,0,0,0-79.2,0L106.34,70.45a8,8,0,0,0,11.32,11.32l30.06-30a40,40,0,0,1,56.57,56.56l-30.07,30.06a8,8,0,0,0,11.31,11.32L215.6,119.6a56,56,0,0,0,0-79.2ZM138.34,174.22l-30.06,30.06a40,40,0,1,1-56.56-56.57l30.05-30.05a8,8,0,0,0-11.32-11.32L40.4,136.4a56,56,0,0,0,79.2,79.2l30.06-30.07a8,8,0,0,0-11.32-11.31Z" /></svg></span><span class="vellum-heading-anchor-copied" x-show="copied" x-cloak="">Copied</span></button></h3>
+<p>Tag <code data-vellum-inline-code="">v0.1.0</code> and push the tag, then submit <code data-vellum-inline-code="">https://github.com/VerburgtJimmy/vellum</code> on Packagist if the package is not listed yet. Do not hardcode <code data-vellum-inline-code="">&quot;version&quot;</code> in <code data-vellum-inline-code="">composer.json</code>.</p>
+                            </section>
+                                            </div>
+                </article>
+
+                <div class="mt-auto">
+                                    </div>
+            </main>
+
+            <aside
+            data-vellum-toc
+            class="hidden w-[220px] shrink-0 lg:block"
+            x-data="vellumScrollSpy(JSON.parse('[{\u0022id\u0022:\u00220.3.0\u0022,\u0022text\u0022:\u00220.3.0\u0022},{\u0022id\u0022:\u00220.2.0\u0022,\u0022text\u0022:\u00220.2.0\u0022},{\u0022id\u0022:\u00220.1.0\u0022,\u0022text\u0022:\u00220.1.0\u0022}]'))"
+        >
+            <div class="sticky top-0 max-h-screen overflow-y-auto py-6 pl-2">
+                <p class="mb-3 flex items-center gap-2 text-[13px] font-medium text-muted-foreground">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="h-3.5 w-3.5"><path d="M80,64a8,8,0,0,1,8-8H216a8,8,0,0,1,0,16H88A8,8,0,0,1,80,64Zm136,56H88a8,8,0,0,0,0,16H216a8,8,0,0,0,0-16Zm0,64H88a8,8,0,0,0,0,16H216a8,8,0,0,0,0-16ZM44,52A12,12,0,1,0,56,64,12,12,0,0,0,44,52Zm0,64a12,12,0,1,0,12,12A12,12,0,0,0,44,116Zm0,64a12,12,0,1,0,12,12A12,12,0,0,0,44,180Z" /></svg>
+                    <span>On this page</span>
+                </p>
+                <nav
+    aria-label="Table of contents"
+    class="vellum-toc-nav relative text-sm "
+    data-vellum-toc-nav
+>
+    <svg class="vellum-toc-rail" data-vellum-toc-track aria-hidden="true">
+        <path data-vellum-toc-track-path fill="none" stroke-width="1"></path>
+    </svg>
+    <svg class="vellum-toc-rail vellum-toc-rail-active" data-vellum-toc-thumb aria-hidden="true">
+        <path data-vellum-toc-thumb-path fill="none" stroke-width="1"></path>
+    </svg>
+    <span class="vellum-toc-thumb-dot" data-vellum-toc-dot aria-hidden="true"></span>
+    <a
+        href="#0.3.0"
+        data-vellum-toc-link
+        data-vellum-toc-id="0.3.0"
+        data-vellum-toc-level="0"
+        x-on:click.prevent="scrollTo('0.3.0')"
+        class="vellum-toc-link relative z-10 block py-1 text-[13px] leading-snug text-muted-foreground transition-colors hover:font-semibold hover:text-foreground"
+        :class="activeId === '0.3.0' ? 'is-active font-semibold text-foreground' : 'text-muted-foreground'"
+        style="--vellum-toc-level: 0"
+    >0.3.0</a>
+            <a
+        href="#0.2.0"
+        data-vellum-toc-link
+        data-vellum-toc-id="0.2.0"
+        data-vellum-toc-level="0"
+        x-on:click.prevent="scrollTo('0.2.0')"
+        class="vellum-toc-link relative z-10 block py-1 text-[13px] leading-snug text-muted-foreground transition-colors hover:font-semibold hover:text-foreground"
+        :class="activeId === '0.2.0' ? 'is-active font-semibold text-foreground' : 'text-muted-foreground'"
+        style="--vellum-toc-level: 0"
+    >0.2.0</a>
+            <a
+        href="#0.1.0"
+        data-vellum-toc-link
+        data-vellum-toc-id="0.1.0"
+        data-vellum-toc-level="0"
+        x-on:click.prevent="scrollTo('0.1.0')"
+        class="vellum-toc-link relative z-10 block py-1 text-[13px] leading-snug text-muted-foreground transition-colors hover:font-semibold hover:text-foreground"
+        :class="activeId === '0.1.0' ? 'is-active font-semibold text-foreground' : 'text-muted-foreground'"
+        style="--vellum-toc-level: 0"
+    >0.1.0</a>
+    </nav>
+            </div>
+        </aside>
+    
+                </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

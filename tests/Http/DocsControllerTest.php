@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use Illuminate\Support\Facades\Blade;
+
 it('serves the index document at /docs', function (): void {
     $this->writeDoc('index.md', <<<'MD'
 ---
@@ -100,4 +102,57 @@ it('serves raw markdown for the index page', function (): void {
     $this->get('/docs/_vellum/raw/index.md')
         ->assertOk()
         ->assertSee('Index body', false);
+});
+
+it('renders nested markdown components on a document page', function (): void {
+    Blade::anonymousComponentPath(__DIR__.'/../fixtures/components');
+    config()->set('vellum.components.namespaces', ['vellum', '']);
+
+    $this->writeDoc('index.md', <<<'MD'
+---
+title: Home
+---
+<x-card>
+<x-alert type="ok">Hello **docs**</x-alert>
+</x-card>
+MD);
+
+    $this->get('/docs')
+        ->assertOk()
+        ->assertSee('data-test-card', false)
+        ->assertSee('data-test-alert', false)
+        ->assertSee('<strong>docs</strong>', false);
+});
+
+it('resolves nested value tags from the compiled island tree after config changes', function (): void {
+    config()->set('vellum.components.allowlist.config', ['vellum.name']);
+    config()->set('vellum.name', 'Alpha');
+
+    $this->writeDoc('index.md', <<<'MD'
+---
+title: Home
+---
+Top <x-vellum::config key="vellum.name" />
+
+:::tabs
+::tab[Live]
+Nested <x-vellum::config key="vellum.name" />
+:::
+MD);
+
+    $this->get('/docs')
+        ->assertOk()
+        ->assertSee('Alpha', false);
+
+    $compiled = file_get_contents($this->cachePath().'/index.php');
+    expect($compiled)->toContain('VELLUMISLAND')
+        ->and($compiled)->toContain('vellum::config')
+        ->and($compiled)->not->toContain('Alpha');
+
+    config()->set('vellum.name', 'Beta');
+
+    $this->get('/docs')
+        ->assertOk()
+        ->assertSee('Beta', false)
+        ->assertDontSee('Alpha', false);
 });

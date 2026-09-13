@@ -16,7 +16,9 @@ out="${1:-demo-dist}"
 rm -rf "$out"
 mkdir -p "$out"
 
-export VELLUM_PATH="${VELLUM_PATH:-$root/resources/stubs}"
+export VELLUM_PATH="${VELLUM_PATH:-$root/docs}"
+export VELLUM_CHANGELOG="${VELLUM_CHANGELOG:-$root/CHANGELOG.md}"
+export APP_NAME="${APP_NAME:-Vellum}"
 
 composer install --prefer-dist --no-interaction --no-progress
 vendor/bin/testbench vellum:export --out="$out"

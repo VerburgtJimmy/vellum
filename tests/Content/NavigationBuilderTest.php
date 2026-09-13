@@ -126,3 +126,27 @@ it('resolves previous and next pages and breadcrumbs', function (): void {
     expect($crumbs[0]['title'])->toBe('Docs')
         ->and($crumbs[array_key_last($crumbs)]['title'])->toBe('One');
 });
+
+it('inserts custom href entries from meta.json', function (): void {
+    $this->writeDoc('meta.json', json_encode([
+        'pages' => [
+            'index',
+            ['title' => 'Changelog', 'slug' => 'changelog'],
+        ],
+    ], JSON_THROW_ON_ERROR));
+    $this->writeDoc('index.md', "---\ntitle: Home\n---\nH");
+
+    $repository = new ContentRepository(
+        contentPath: $this->docsPath(),
+        store: new CompiledStore($this->cachePath()),
+    );
+    $tree = (new NavigationBuilder($this->docsPath()))->build($repository->buildAll());
+
+    expect($tree[0]['slug'])->toBe('')
+        ->and($tree[1])->toMatchArray([
+            'type' => 'page',
+            'slug' => 'changelog',
+            'title' => 'Changelog',
+            'href' => '/docs/changelog',
+        ]);
+});

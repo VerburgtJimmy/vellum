@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Vellum\Content;
 
+use Vellum\Markdown\Islands\IslandRenderer;
+
 /**
  * Builds the client-side MiniSearch document list from compiled pages.
  *
@@ -35,7 +37,7 @@ final class SearchIndexBuilder
                 'id' => $document->slug === '' ? 'index' : $document->slug,
                 'title' => $document->title,
                 'description' => $document->description ?? '',
-                'content' => $this->plainText($document->html),
+                'content' => $this->plainText((new IslandRenderer)->inlineSlots($document->html, $document->islands)),
                 'url' => $this->urlFor($document->slug, $version ?? $document->version),
                 'headings' => array_map(
                     static fn (array $heading): string => $heading['text'],

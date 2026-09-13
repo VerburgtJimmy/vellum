@@ -7,6 +7,8 @@ namespace Vellum\Console;
 use Illuminate\Console\Command;
 use Illuminate\Contracts\View\Factory as ViewFactory;
 use Illuminate\Support\Facades\File;
+use Vellum\Changelog\Changelog;
+use Vellum\Changelog\ChangelogFeed;
 use Vellum\Content\ContentRepository;
 use Vellum\Content\Document;
 use Vellum\Content\HeadingExtractor;
@@ -87,6 +89,8 @@ final class ExportCommand extends Command
             }
         }
 
+        $pages += $this->exportChangelog($repository, $prefixRoot, $out, $prefix, $baseUrl);
+
         $this->copyDist($packageRoot, $out);
         $this->copyContentFiles((string) config('vellum.path'), $prefixRoot);
         $this->writeSearchIndexes($repository, $prefixRoot);
@@ -110,8 +114,36 @@ final class ExportCommand extends Command
     {
         return $this->view->file(
             dirname(__DIR__, 2).'/resources/views/pages/doc.blade.php',
-            DocsView::document($repository, $document, $this->headingExtractor),
+            DocsView::document($repository, $document, $this->headingExtractor, cacheFragment: false),
         )->render();
+    }
+
+    private function exportChangelog(
+        ContentRepository $repository,
+        string $prefixRoot,
+        string $out,
+        string $prefix,
+        string $baseUrl,
+    ): int {
+        $changelog = Changelog::load();
+
+        if ($changelog === null) {
+            return 0;
+        }
+
+        $path = $prefixRoot.DIRECTORY_SEPARATOR.'changelog'.DIRECTORY_SEPARATOR.'index.html';
+        $html = $this->view->file(
+            dirname(__DIR__, 2).'/resources/views/pages/changelog.blade.php',
+            DocsView::changelog($repository, $changelog),
+        )->render();
+        $html = $this->rewriteHtml($html, $out, $path, $prefix, $baseUrl);
+        $this->writeFile($path, $html);
+        $this->writeFile(
+            $prefixRoot.DIRECTORY_SEPARATOR.'changelog.atom',
+            (new ChangelogFeed)->render($changelog),
+        );
+
+        return 1;
     }
 
     private function writeRawMarkdown(string $prefixRoot, Document $document): void

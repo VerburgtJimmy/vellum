@@ -33,6 +33,8 @@ abstract class TestCase extends Orchestra
         config()->set('vellum.path', $docs);
         config()->set('vellum.cache.path', $cache);
         config()->set('vellum.versions.enabled', false);
+        config()->set('cache.default', 'array');
+        config()->set('vellum.changelog', null);
     }
 
     /**

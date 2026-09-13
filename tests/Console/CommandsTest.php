@@ -2,6 +2,9 @@
 
 declare(strict_types=1);
 
+use Vellum\Cache\FragmentCache;
+use Vellum\Content\Document;
+
 it('builds all documents via artisan', function (): void {
     $this->writeDoc('index.md', "---\ntitle: Home\n---\nHi");
     $this->writeDoc('guides/one.md', "---\ntitle: One\n---\nOne");
@@ -23,6 +26,43 @@ it('clears the cache via artisan', function (): void {
     $this->artisan('vellum:clear')
         ->expectsOutputToContain('Vellum cache cleared')
         ->assertSuccessful();
+
+    expect(is_file($this->cachePath().'/index.php'))->toBeFalse();
+});
+
+it('clears the island fragment cache via artisan', function (): void {
+    $document = new Document(
+        slug: 'index',
+        title: 'Home',
+        html: '<p>Hi</p>',
+        headings: [],
+        frontmatter: [],
+        path: '/tmp/index.md',
+        mtime: 1,
+    );
+
+    $cache = new FragmentCache;
+    $hits = 0;
+    $resolve = function () use (&$hits): string {
+        $hits++;
+
+        return 'frag-'.$hits;
+    };
+
+    $cache->remember($document, $resolve);
+
+    $this->artisan('vellum:clear')->assertSuccessful();
+
+    expect($cache->remember($document, $resolve))->toBe('frag-2')
+        ->and($hits)->toBe(2);
+});
+
+it('clears vellum caches from optimize:clear', function (): void {
+    $this->writeDoc('index.md', "---\ntitle: Home\n---\nHi");
+    $this->artisan('vellum:build')->assertSuccessful();
+    expect(is_file($this->cachePath().'/index.php'))->toBeTrue();
+
+    $this->artisan('optimize:clear')->assertSuccessful();
 
     expect(is_file($this->cachePath().'/index.php'))->toBeFalse();
 });

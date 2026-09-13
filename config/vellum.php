@@ -133,6 +133,41 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Components
+    |--------------------------------------------------------------------------
+    |
+    | namespaces: Blade prefixes allowed in Markdown as <x-...>. Default is
+    | vellum. Add '' or 'app' to allow unprefixed host components (<x-alert>).
+    | allowlist: keys permitted on <x-vellum::env />, config, and route.
+    | Empty lists refuse those value tags.
+    |
+    */
+    'components' => [
+        'namespaces' => ['vellum'],
+        'allowlist' => [
+            'env' => [],
+            'config' => [],
+            'route' => [],
+        ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Changelog
+    |--------------------------------------------------------------------------
+    |
+    | path: Keep a Changelog file. Rendered at /docs/changelog with an Atom
+    | feed at /docs/changelog.atom. Set path to null to disable both.
+    | unreleased: show [Unreleased] on the HTML page. The feed never includes it.
+    |
+    */
+    'changelog' => [
+        'path' => env('VELLUM_CHANGELOG', base_path('CHANGELOG.md')),
+        'unreleased' => false,
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Compile cache
     |--------------------------------------------------------------------------
     */

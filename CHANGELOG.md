@@ -5,6 +5,22 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+## [0.3.0] - 2026-09-13
+
+Markdown plus components. Pre-1.0: the API may change.
+
+### Added
+
+- `<x-…>` component islands in Markdown. Slots are Markdown and may nest. Attributes are quoted strings only: no `{{ }}`, Blade directives, or `@php` in docs. Tags inside fenced or inline code stay as text
+- Host Blade components via `vellum.components.namespaces` (default `['vellum']` allows `<x-vellum::…>` only; add `''` or `'app'` for `<x-alert>`). Unknown or disallowed tags fail locally and at build
+- Built-in `:::callout`, `:::tabs`, `:::steps`, and `:::cards` render the same views as `<x-vellum::callout>`, tabs, steps, and cards. Prefer `:::` for those
+- `<x-vellum::env />`, `config`, and `route` value tags, gated by `vellum.components.allowlist` (empty lists refuse every key). They resolve when the page is rendered, including inside `:::tabs`, not when Markdown is compiled
+- Request-time fragment cache for those islands, cleared by `vellum:clear` and `optimize:clear`
+- Changelog page at `/docs/changelog` and Atom feed at `/docs/changelog.atom` (`vellum.changelog.path`, default `CHANGELOG.md`). Set `path` to `null` to disable. `[Unreleased]` stays in the source file; the page hides it unless `vellum.changelog.unreleased` is true; the feed never includes it
+- Package docs in `docs/` (the Cloudflare demo exports that tree). `vellum:install` stubs stay a short getting-started plus one page per built-in
+
 ## [0.2.0] - 2026-09-13
 
 Docs chrome and Markdown polish. Pre-1.0: the API may change.
@@ -81,5 +97,7 @@ Initial public release. Pre-1.0: the API may change.
 
 Tag `v0.1.0` and push the tag, then submit `https://github.com/VerburgtJimmy/vellum` on Packagist if the package is not listed yet. Do not hardcode `"version"` in `composer.json`.
 
+[Unreleased]: https://github.com/VerburgtJimmy/vellum/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/VerburgtJimmy/vellum/releases/tag/v0.3.0
 [0.2.0]: https://github.com/VerburgtJimmy/vellum/releases/tag/v0.2.0
 [0.1.0]: https://github.com/VerburgtJimmy/vellum/releases/tag/v0.1.0

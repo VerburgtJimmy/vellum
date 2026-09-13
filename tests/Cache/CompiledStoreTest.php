@@ -27,7 +27,8 @@ it('writes and reads compiled php documents', function (): void {
 
     expect($loaded)->not->toBeNull()
         ->and($loaded->title)->toBe('Auth')
-        ->and($loaded->mtime)->toBe(123);
+        ->and($loaded->mtime)->toBe(123)
+        ->and($loaded->islands)->toBe([]);
 });
 
 it('clears the compiled directory', function (): void {

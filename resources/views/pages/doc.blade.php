@@ -39,7 +39,7 @@
                         :edit-url="$editUrl ?? null"
                     />
                     <div class="vellum-prose">
-                        {!! $document->html !!}
+                        {!! $html ?? $document->html !!}
                     </div>
                 </article>
 

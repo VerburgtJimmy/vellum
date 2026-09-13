@@ -1,0 +1,10 @@
+{
+    "title": "Vellum",
+    "pages": [
+        "index",
+        "getting-started",
+        "components",
+        "extending",
+        { "title": "Changelog", "slug": "changelog" }
+    ]
+}

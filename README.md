@@ -27,6 +27,8 @@ php artisan vellum:build
 ## What it includes
 
 - Markdown extensions: callouts, tabs, steps, cards, code blocks, heading anchors
+- Markdown plus components (`<x-...>` islands, allowlisted env/config/route tags)
+- Changelog page and Atom feed
 - Client-side search
 - Optional versioned docs
 - Static HTML export (`vellum:export`)
@@ -44,14 +46,14 @@ Dark:
 
 ## Demo
 
-Stub docs deploy via Cloudflare Workers (`wrangler.toml` + committed `demo-dist`).
+The site in `docs/` deploys via Cloudflare Workers (`wrangler.toml` + committed `demo-dist`).
 
 Cloudflare Git build settings:
 
 - Build command: leave empty
 - Deploy command: `npx wrangler deploy`
 
-Regenerate the static export locally after stub changes: `bash bin/build-demo`
+Regenerate the static export locally after docs changes: `bash bin/build-demo`
 
 ## Configuration
 
@@ -82,8 +84,8 @@ Optional `'fonts'` injects HTML into the layout head (for example a `<link>` tag
 ## Publishing
 
 ```bash
-git tag v0.2.0
-git push origin v0.2.0
+git tag v0.3.0
+git push origin v0.3.0
 ```
 
 Submit the repo once at [https://packagist.org/packages/submit](https://packagist.org/packages/submit). Packagist reads the Git tag; do not add a `version` field to `composer.json`.

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Vellum\Cache;
 
 use Vellum\Content\Document;
+use Vellum\Markdown\Islands\Island;
 
 /**
  * Reads and writes compiled documents as OPcache-friendly PHP return files.
@@ -108,6 +109,7 @@ final class CompiledStore
             version: isset($data['version']) && is_string($data['version']) ? $data['version'] : null,
             full: isset($data['full']) && is_bool($data['full']) ? $data['full'] : false,
             icon: isset($data['icon']) && is_string($data['icon']) ? $data['icon'] : null,
+            islands: Island::listFromArray($data['islands'] ?? []),
         );
     }
 

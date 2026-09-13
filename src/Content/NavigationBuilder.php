@@ -221,6 +221,16 @@ final class NavigationBuilder
         }
 
         foreach ($pages as $entry) {
+            if (is_array($entry)) {
+                $link = $this->materializeLink($entry);
+
+                if ($link !== null) {
+                    $ordered[] = $link;
+                }
+
+                continue;
+            }
+
             if (! is_string($entry)) {
                 continue;
             }
@@ -477,6 +487,42 @@ final class NavigationBuilder
             'description' => $document->description,
             'icon' => $document->icon,
             'href' => $this->hrefForSlug($document->slug, $version ?? $document->version),
+        ];
+    }
+
+    /**
+     * @param  array<string, mixed>  $entry
+     * @return NavPage|null
+     */
+    private function materializeLink(array $entry): ?array
+    {
+        $title = isset($entry['title']) && is_string($entry['title']) ? $entry['title'] : null;
+
+        if ($title === null || $title === '') {
+            return null;
+        }
+
+        $slug = isset($entry['slug']) && is_string($entry['slug']) ? $entry['slug'] : '';
+        $href = isset($entry['href']) && is_string($entry['href']) && $entry['href'] !== ''
+            ? $entry['href']
+            : ($slug !== '' ? $this->hrefForSlug($slug, null) : null);
+
+        if ($href === null) {
+            return null;
+        }
+
+        $description = isset($entry['description']) && is_string($entry['description'])
+            ? $entry['description']
+            : null;
+        $icon = isset($entry['icon']) && is_string($entry['icon']) ? $entry['icon'] : null;
+
+        return [
+            'type' => 'page',
+            'slug' => $slug,
+            'title' => $title,
+            'description' => $description,
+            'icon' => $icon,
+            'href' => $href,
         ];
     }
 

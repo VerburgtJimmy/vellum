@@ -38,6 +38,8 @@ final class VellumServiceProvider extends ServiceProvider
             $this->publishes([
                 __DIR__.'/../config/vellum.php' => config_path('vellum.php'),
             ], 'vellum-config');
+
+            $this->optimizes(clear: 'vellum:clear');
         }
 
         $this->registerAssetRoutes();
