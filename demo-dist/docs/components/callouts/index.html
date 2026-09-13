@@ -2,7 +2,7 @@
 <html
     lang="en"
     data-vellum-preset="neutral"
-    data-vellum-search="../../../vendor/vellum/vellum-search.js?v=90d0eee7"
+    data-vellum-search="../../../vendor/vellum/vellum-search.js?v=5f3acc61"
     data-vellum-anchor="../../../vendor/vellum/vellum-anchor.js?v=a5360955"
     data-vellum-focus="../../../vendor/vellum/vellum-focus.js?v=383bf9a1"
 >
@@ -32,7 +32,7 @@
     <link rel="icon" href="data:,">
             <meta name="description" content="Notes, tips, warnings, and related asides.">
             <style>:root { --radius: 0.5rem }</style>
-    <link rel="stylesheet" href="../../../vendor/vellum/vellum.css?v=0b581274">
+    <link rel="stylesheet" href="../../../vendor/vellum/vellum.css?v=d4e9018b">
     <script type="module" src="../../../vendor/vellum/vellum.js?v=7136aeda"></script>
     </head>
 <body class="min-h-screen bg-background text-foreground antialiased">
@@ -42,6 +42,8 @@
             <div
     data-vellum-search
     data-vellum-search-hotkey="k"
+    data-vellum-search-driver="minisearch"
+    data-vellum-search-url="../../../docs/_vellum/search-5efbadb7469ba4a25f1911f2828012de.json"
     x-data="vellumSearchHotkey('k')"
     x-on:vellum-search-open.window="openSearch()"
     x-on:vellum-search-close.window="closeSearch()"
@@ -85,9 +87,15 @@
                     status: '',
                     loading: false,
                     ready: false,
-                    searchUrl: 'http:\/\/localhost\/docs\/_vellum\/search-0496591142200466ac391418dec4e082.json',
+                    searchUrl: '\/docs\/_vellum\/search-5efbadb7469ba4a25f1911f2828012de.json',
+                    driver: 'minisearch',
                     async ensureIndex() {
                         if (this.ready || this.loading) {
+                            return
+                        }
+                        if (this.driver === 'scout') {
+                            this.ready = true
+                            this.status = 'Search ready'
                             return
                         }
                         this.loading = true
@@ -106,7 +114,6 @@
                     async runSearch() {
                         await this.ensureIndex()
                         const mod = await window.VellumSearch.load()
-                        const { index } = await mod.getOrCreateIndex(this.searchUrl)
                         const q = this.query.trim()
                         if (!q) {
                             this.groups = []
@@ -115,8 +122,14 @@
                             this.status = 'Type to search'
                             return
                         }
-                        const hits = index.search(q, { boost: { title: 3, headings: 2 }, prefix: true, fuzzy: 0.2 })
-                        this.groups = mod.groupResultsByPage(hits, q)
+                        if (this.driver === 'scout') {
+                            const documents = await mod.fetchSearchDocuments(this.searchUrl + (this.searchUrl.includes('?') ? '&' : '?') + 'q=' + encodeURIComponent(q))
+                            this.groups = mod.groupResultsByPage(documents, q)
+                        } else {
+                            const { index } = await mod.getOrCreateIndex(this.searchUrl)
+                            const hits = index.search(q, { boost: { title: 3, headings: 2 }, prefix: true, fuzzy: 0.2 })
+                            this.groups = mod.groupResultsByPage(hits, q)
+                        }
                         this.flat = this.groups.map((g) => ({ url: g.url }))
                         this.active = 0
                         const count = this.groups.length
@@ -318,8 +331,8 @@
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="h-4 w-4"><path d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z" /></svg>
                     </button>
-                    <div class="ms-auto flex items-center">
-                        <div
+                    <div class="ms-auto flex items-center gap-1.5">
+                                                <div
     data-vellum-theme-toggle
     class="relative"
     x-data="{
@@ -422,7 +435,6 @@
 >
     
     
-    
     <div
     data-vellum-scroll-area
     class="vellum-scroll-area relative min-h-0 flex-1 px-4 py-1"
@@ -571,36 +583,6 @@
             x-on:pointerenter="onEnter()"
             class="block rounded-md px-2 -mx-2 py-1.5 transition-colors text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground"
                     >Changelog</a>
-        
-                    <div
-    data-vellum-collapsible
-    x-data="{ open: false }"
-    class="flex flex-col gap-0.5"
->
-    <div
-        data-vellum-collapsible-trigger
-        role="button"
-        tabindex="0"
-        :aria-expanded="open.toString()"
-        @click="open = ! open"
-        @keydown.enter.prevent="open = ! open"
-        @keydown.space.prevent="open = ! open"
-    >
-        <div class="block rounded-md px-2 -mx-2 py-1.5 transition-colors flex cursor-pointer items-center gap-1 font-medium text-foreground hover:bg-accent/60">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="h-3.5 w-3.5 shrink-0 text-muted-foreground transition-transform" :class="open &amp;&amp; 'rotate-90'"><path d="M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z" /></svg>
-                    <span class="truncate">Screenshots</span>
-                </div>
-    </div>
-    <div
-        data-vellum-collapsible-content
-        x-show="open"
-        x-collapse
-                    x-cloak
-            >
-        <div class="ml-2 flex flex-col gap-0.5 pl-3">
-                                    </div>
-    </div>
-</div>
             </nav>
 </div>
 
@@ -637,7 +619,7 @@
         <span class="truncate">Vellum</span>
 </a>
             </div>
-                <button
+                        <button
             type="button"
             data-vellum-sidebar-collapse
             data-vellum-button
@@ -679,7 +661,6 @@
     </button>
         </div>
     
-    
     <div
     data-vellum-scroll-area
     class="vellum-scroll-area relative min-h-0 flex-1 px-4 py-1"
@@ -828,36 +809,6 @@
             x-on:pointerenter="onEnter()"
             class="block rounded-md px-2 -mx-2 py-1.5 transition-colors text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground"
                     >Changelog</a>
-        
-                    <div
-    data-vellum-collapsible
-    x-data="{ open: false }"
-    class="flex flex-col gap-0.5"
->
-    <div
-        data-vellum-collapsible-trigger
-        role="button"
-        tabindex="0"
-        :aria-expanded="open.toString()"
-        @click="open = ! open"
-        @keydown.enter.prevent="open = ! open"
-        @keydown.space.prevent="open = ! open"
-    >
-        <div class="block rounded-md px-2 -mx-2 py-1.5 transition-colors flex cursor-pointer items-center gap-1 font-medium text-foreground hover:bg-accent/60">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="h-3.5 w-3.5 shrink-0 text-muted-foreground transition-transform" :class="open &amp;&amp; 'rotate-90'"><path d="M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z" /></svg>
-                    <span class="truncate">Screenshots</span>
-                </div>
-    </div>
-    <div
-        data-vellum-collapsible-content
-        x-show="open"
-        x-collapse
-                    x-cloak
-            >
-        <div class="ml-2 flex flex-col gap-0.5 pl-3">
-                                    </div>
-    </div>
-</div>
             </nav>
 </div>
 

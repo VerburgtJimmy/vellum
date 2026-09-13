@@ -29,6 +29,8 @@ php artisan vellum:build
 
 `vellum:clear` drops that cache. It also runs from `optimize:clear`.
 
+`vellum:index` rebuilds the MiniSearch compile cache. When `vellum.search.driver` is `scout`, it also syncs Laravel Scout.
+
 ## Static export
 
 ```bash

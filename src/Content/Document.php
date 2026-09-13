@@ -101,4 +101,9 @@ final readonly class Document
             islands: Island::listFromArray($data['islands'] ?? []),
         );
     }
+
+    public function access(): string
+    {
+        return Access::normalize($this->frontmatter['access'] ?? 'guest');
+    }
 }
