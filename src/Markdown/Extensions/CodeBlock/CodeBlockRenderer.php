@@ -12,9 +12,10 @@ use League\CommonMark\Renderer\NodeRendererInterface;
 use League\CommonMark\Util\HtmlElement;
 use League\CommonMark\Util\Xml;
 use Tempest\Highlight\Highlighter;
+use Vellum\Support\Icons;
 
 /**
- * Renders fenced code with Tempest highlighting, titles, gutters, and a copy control.
+ * Renders fenced code with Tempest highlighting, a language header, and a copy control.
  */
 final class CodeBlockRenderer implements NodeRendererInterface
 {
@@ -29,34 +30,44 @@ final class CodeBlockRenderer implements NodeRendererInterface
         }
 
         $info = CodeBlockInfo::parse($node->getInfo());
-        $highlighter = $this->highlighter;
-
-        if ($info->showLineNumbers) {
-            $highlighter = $highlighter->withGutter(1);
-        }
-
-        $highlighted = $highlighter->parse($node->getLiteral(), $info->language);
+        $highlighted = $this->highlighter->parse($node->getLiteral(), $info->language);
         $highlighted = $this->wrapHighlightedLines($highlighted, $info->highlightLines);
+        $embedded = $node->data->get('vellum_embedded', false) === true;
 
-        $codeAttrs = [
-            'class' => 'language-'.$info->language,
+        $attrs = [
+            'class' => $embedded ? 'vellum-code vellum-code-embedded' : 'vellum-code',
+            'data-vellum-code' => '',
         ];
 
-        $inner = [];
+        if ($info->showLineNumbers) {
+            $attrs['data-vellum-line-numbers'] = '';
+        }
 
-        if ($info->title !== null && $info->title !== '') {
-            $inner[] = new HtmlElement('div', ['class' => 'vellum-code-header'], [
-                new HtmlElement('span', ['class' => 'vellum-code-title'], Xml::escape($info->title)),
+        $pre = new HtmlElement('pre', [], new HtmlElement('code', [
+            'class' => 'language-'.$info->language,
+        ], $highlighted));
+
+        if ($embedded) {
+            return new HtmlElement('div', $attrs, [
+                $this->copyButton(),
+                $pre,
             ]);
         }
 
-        $inner[] = $this->copyButton();
-        $inner[] = new HtmlElement('pre', [], new HtmlElement('code', $codeAttrs, $highlighted));
+        $label = ($info->title !== null && $info->title !== '')
+            ? $info->title
+            : LanguageIcon::normalize($info->language);
 
-        return new HtmlElement('div', [
-            'class' => 'vellum-code',
-            'data-vellum-code' => '',
-        ], $inner);
+        return new HtmlElement('div', $attrs, [
+            new HtmlElement('div', ['class' => 'vellum-code-header'], [
+                new HtmlElement('span', ['class' => 'vellum-code-header-meta'], [
+                    LanguageIcon::svg($info->language),
+                    new HtmlElement('span', ['class' => 'vellum-code-title'], Xml::escape($label)),
+                ]),
+                $this->copyButton(),
+            ]),
+            $pre,
+        ]);
     }
 
     /**
@@ -70,6 +81,10 @@ final class CodeBlockRenderer implements NodeRendererInterface
             $lines = [$highlighted];
         }
 
+        if ($lines !== [] && $lines[array_key_last($lines)] === '') {
+            array_pop($lines);
+        }
+
         $highlightLookup = array_fill_keys($highlightLines, true);
         $wrapped = [];
 
@@ -81,10 +96,10 @@ final class CodeBlockRenderer implements NodeRendererInterface
                 $classes[] = 'vellum-code-line-highlighted';
             }
 
-            $wrapped[] = '<span class="'.implode(' ', $classes).'">'.$line.'</span>';
+            $wrapped[] = '<span class="'.implode(' ', $classes).'">'.$line."\n".'</span>';
         }
 
-        return implode("\n", $wrapped);
+        return implode('', $wrapped);
     }
 
     private function copyButton(): HtmlElement
@@ -93,20 +108,20 @@ final class CodeBlockRenderer implements NodeRendererInterface
             'type' => 'button',
             'class' => 'vellum-code-copy',
             'x-data' => '{ copied: false }',
-            '@click' => "navigator.clipboard.writeText(\$el.closest('[data-vellum-code]').querySelector('code').innerText); copied = true; setTimeout(() => copied = false, 1500)",
+            '@click' => "navigator.clipboard.writeText(\$el.closest('[data-vellum-code]').querySelector('code').textContent); copied = true; setTimeout(() => copied = false, 1500)",
             ':aria-label' => "copied ? 'Copied' : 'Copy code'",
         ], [
             new HtmlElement('span', [
                 'class' => 'vellum-code-copy-icon',
                 'x-show' => '!copied',
                 'aria-hidden' => 'true',
-            ], 'Copy'),
+            ], Icons::copy()),
             new HtmlElement('span', [
                 'class' => 'vellum-code-check-icon',
                 'x-show' => 'copied',
                 'x-cloak' => '',
                 'aria-hidden' => 'true',
-            ], 'Copied'),
+            ], Icons::check()),
         ]);
     }
 }

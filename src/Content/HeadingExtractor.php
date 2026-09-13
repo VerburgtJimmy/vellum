@@ -19,10 +19,10 @@ final class HeadingExtractor
 {
     public const MIN_LEVEL = 2;
 
-    public const MAX_LEVEL = 4;
+    public const MAX_LEVEL = 6;
 
     /**
-     * Collect h2-h4 headings that already have an id from HeadingAnchorExtension.
+     * Collect h2-h6 headings that already have an id from HeadingAnchorExtension.
      *
      * @return list<HeadingData>
      */

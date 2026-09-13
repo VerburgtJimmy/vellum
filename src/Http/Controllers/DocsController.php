@@ -11,6 +11,7 @@ use Illuminate\Routing\Controller;
 use Vellum\Content\ContentRepository;
 use Vellum\Content\Document;
 use Vellum\Content\HeadingExtractor;
+use Vellum\Http\DocsView;
 
 /**
  * Serves compiled documentation pages.
@@ -80,6 +81,7 @@ final class DocsController extends Controller
                 'versions' => $switcher['versions'],
                 'currentVersion' => $switcher['currentVersion'],
                 'versionHrefs' => $switcher['versionHrefs'],
+                'searchPlacement' => config('vellum.layout.search', 'sidebar') === 'header' ? 'header' : 'sidebar',
             ],
         )->render();
 
@@ -89,28 +91,9 @@ final class DocsController extends Controller
 
     private function render(ContentRepository $repository, Document $document): Response
     {
-        $navigation = $repository->navigation($document->version);
-        $adjacent = $repository->adjacent($document->slug, $document->version);
-        $breadcrumbs = $repository->breadcrumbs($document);
-        $toc = $this->headingExtractor->nest($document->headings);
-        $switcher = $repository->versionSwitcherData($document->slug, $document->version);
-
         $html = $this->view->file(
             dirname(__DIR__, 3).'/resources/views/pages/doc.blade.php',
-            [
-                'document' => $document,
-                'name' => config('vellum.name'),
-                'description' => $document->description,
-                'navigation' => $navigation,
-                'previous' => $adjacent['previous'],
-                'next' => $adjacent['next'],
-                'breadcrumbs' => $breadcrumbs,
-                'toc' => $toc,
-                'searchHash' => $repository->searchHash($document->version),
-                'versions' => $switcher['versions'],
-                'currentVersion' => $switcher['currentVersion'],
-                'versionHrefs' => $switcher['versionHrefs'],
-            ],
+            DocsView::document($repository, $document, $this->headingExtractor),
         )->render();
 
         return response($html, 200)

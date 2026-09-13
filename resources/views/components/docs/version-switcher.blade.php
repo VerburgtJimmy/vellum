@@ -78,9 +78,7 @@
         x-on:keydown="onTriggerKeydown($event)"
     >
         <span x-text="current">{{ $currentVersion }}</span>
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-3.5 w-3.5 opacity-70" aria-hidden="true">
-            <path d="m6 9 6 6 6-6"/>
-        </svg>
+        {!! \Vellum\Support\Icons::caretDown(['class' => 'h-3.5 w-3.5 opacity-70']) !!}
     </button>
 
     <div

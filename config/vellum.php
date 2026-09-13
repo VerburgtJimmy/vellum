@@ -83,6 +83,20 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Layout
+    |--------------------------------------------------------------------------
+    |
+    | search: header keeps the current top bar with the search field;
+    | sidebar places search at the top of the sidebar (Fumadocs style)
+    | and removes the top header.
+    |
+    */
+    'layout' => [
+        'search' => env('VELLUM_LAYOUT_SEARCH', 'sidebar'),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Theme
     |--------------------------------------------------------------------------
     */

@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\File;
 use Vellum\Content\ContentRepository;
 use Vellum\Content\Document;
 use Vellum\Content\HeadingExtractor;
+use Vellum\Http\DocsView;
 
 /**
  * Renders the docs site to a static HTML folder for any static host.
@@ -64,6 +65,7 @@ final class ExportCommand extends Command
             $html = $this->rewriteHtml($html, $out, $path, $prefix, $baseUrl);
 
             $this->writeFile($path, $html);
+            $this->writeRawMarkdown($prefixRoot, $document);
             $pages++;
         }
 
@@ -106,29 +108,19 @@ final class ExportCommand extends Command
 
     private function renderDocument(ContentRepository $repository, Document $document): string
     {
-        $navigation = $repository->navigation($document->version);
-        $adjacent = $repository->adjacent($document->slug, $document->version);
-        $breadcrumbs = $repository->breadcrumbs($document);
-        $toc = $this->headingExtractor->nest($document->headings);
-        $switcher = $repository->versionSwitcherData($document->slug, $document->version);
-
         return $this->view->file(
             dirname(__DIR__, 2).'/resources/views/pages/doc.blade.php',
-            [
-                'document' => $document,
-                'name' => config('vellum.name'),
-                'description' => $document->description,
-                'navigation' => $navigation,
-                'previous' => $adjacent['previous'],
-                'next' => $adjacent['next'],
-                'breadcrumbs' => $breadcrumbs,
-                'toc' => $toc,
-                'searchHash' => $repository->searchHash($document->version),
-                'versions' => $switcher['versions'],
-                'currentVersion' => $switcher['currentVersion'],
-                'versionHrefs' => $switcher['versionHrefs'],
-            ],
+            DocsView::document($repository, $document, $this->headingExtractor),
         )->render();
+    }
+
+    private function writeRawMarkdown(string $prefixRoot, Document $document): void
+    {
+        $slug = DocsView::rawSlug($document);
+        $target = $prefixRoot.DIRECTORY_SEPARATOR.'_vellum'.DIRECTORY_SEPARATOR.'raw'
+            .DIRECTORY_SEPARATOR.str_replace('/', DIRECTORY_SEPARATOR, $slug).'.md';
+
+        $this->writeFile($target, DocsView::source($document));
     }
 
     private function documentOutputPath(string $prefixRoot, Document $document): string

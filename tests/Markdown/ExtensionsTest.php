@@ -21,7 +21,9 @@ MD);
         ->and($html)->toContain('routes/web.php')
         ->and($html)->toContain('vellum-code-copy')
         ->and($html)->toContain('vellum-code-line-highlighted')
-        ->and($html)->toContain('hl-gutter')
+        ->and($html)->toContain('data-vellum-line-numbers')
+        ->and($html)->not->toContain('hl-gutter')
+        ->and($html)->toContain('vellum-code-lang-icon')
         ->and($html)->toContain('x-data')
         ->and($html)->toMatchSnapshot();
 });
@@ -51,8 +53,8 @@ it('highlights inline code with trailing language suffix', function (): void {
 it('renders plain inline code without a language suffix', function (): void {
     $html = (new MarkdownRenderer)->render('Use `composer require` to install.');
 
-    expect($html)->toContain('<code>composer require</code>')
-        ->and($html)->not->toContain('data-vellum-inline-code');
+    expect($html)->toContain('data-vellum-inline-code')
+        ->and($html)->toContain('composer require');
 });
 
 it('renders callouts with and without custom titles', function (): void {
@@ -69,6 +71,7 @@ MD);
     expect($html)->toContain('data-vellum-callout="note"')
         ->and($html)->toContain('data-vellum-callout="warning"')
         ->and($html)->toContain('vellum-callout-icon')
+        ->and($html)->toContain('vellum-callout-rail')
         ->and($html)->toContain('Careful')
         ->and($html)->toContain('A note body.')
         ->and($html)->toMatchSnapshot();
@@ -91,6 +94,8 @@ MD);
     expect($html)->toContain('data-vellum-tabs')
         ->and($html)->toContain('data-persist="pkg-manager"')
         ->and($html)->toContain('vellum-tabs-pkg-manager')
+        ->and($html)->toContain('vellum-tabs-code')
+        ->and($html)->toContain('vellum-code-embedded')
         ->and($html)->toContain('role="tablist"')
         ->and($html)->toContain('npm')
         ->and($html)->toContain('pnpm')
@@ -244,4 +249,78 @@ MD);
         ->and($html)->toContain('vellum-tab-b')
         ->and($html)->not->toContain('::tab[A]')
         ->and($html)->toMatchSnapshot();
+});
+
+it('renders footnotes with a list and backlinks', function (): void {
+    $html = (new MarkdownRenderer)->render(<<<'MD'
+A claim with a footnote.[^note]
+
+[^note]: The supporting detail.
+MD);
+
+    expect($html)->toContain('footnote-ref')
+        ->and($html)->toContain('footnotes')
+        ->and($html)->toContain('footnote-backref')
+        ->and($html)->toContain('The supporting detail.')
+        ->and($html)->toMatchSnapshot();
+});
+
+it('maps success and idea callout aliases onto tip and note styles', function (): void {
+    $html = (new MarkdownRenderer)->render(<<<'MD'
+:::success[Done]
+Shipped.
+:::
+
+:::idea
+Spark.
+:::
+MD);
+
+    expect($html)->toContain('data-vellum-callout="success"')
+        ->and($html)->toContain('vellum-callout-tip')
+        ->and($html)->toContain('data-vellum-callout="idea"')
+        ->and($html)->toContain('vellum-callout-note')
+        ->and($html)->toContain('Done')
+        ->and($html)->toContain('Spark.');
+});
+
+it('emits highlighted token spans for a php fence', function (): void {
+    $html = (new MarkdownRenderer)->render(<<<'MD'
+```php
+echo "hi";
+```
+MD);
+
+    expect($html)->toContain('hl-keyword')
+        ->and($html)->toContain('language-php')
+        ->and($html)->toContain('vellum-code-lang-icon');
+});
+
+it('uses phosphor language marks for php, js, json, and yaml', function (): void {
+    $php = (new MarkdownRenderer)->render("```php\necho 1;\n```");
+    $js = (new MarkdownRenderer)->render("```js\n1\n```");
+    $json = (new MarkdownRenderer)->render("```json\n{}\n```");
+    $yaml = (new MarkdownRenderer)->render("```yaml\na: 1\n```");
+
+    foreach ([$php, $js, $json, $yaml] as $html) {
+        expect($html)->toMatch('/<svg[^>]*class="vellum-code-lang-icon"[^>]*viewBox="0 0 256 256"|<svg[^>]*viewBox="0 0 256 256"[^>]*class="vellum-code-lang-icon"/');
+    }
+
+    expect($php)->toMatch('/class="vellum-code-lang-icon"[^>]*data-language="php"|data-language="php"[^>]*class="vellum-code-lang-icon"/');
+});
+
+it('highlights shell commands inside code tabs', function (): void {
+    $html = (new MarkdownRenderer)->render(<<<'MD'
+:::tabs
+::tab[composer]
+```bash
+composer require jimmyverburgt/vellum
+```
+:::
+MD);
+
+    expect($html)->toContain('vellum-tabs-code')
+        ->and($html)->toContain('hl-property')
+        ->and($html)->toContain('hl-number')
+        ->and($html)->not->toMatch('/<span class="vellum-code-line">\s*<\/span>\s*<\/code>/');
 });

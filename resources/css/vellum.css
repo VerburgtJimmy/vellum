@@ -7,47 +7,47 @@
 :root {
   --vellum-primary-hue: 0;
   --radius: 0.5rem;
-  --background: oklch(1 0 0);
+  --background: oklch(0.96 0 0);
   --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
+  --card: oklch(0.955 0 0);
   --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
+  --popover: oklch(0.98 0 0);
+  --popover-foreground: oklch(0.28 0 0);
   --primary: oklch(0.205 0.02 var(--vellum-primary-hue));
   --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
+  --secondary: oklch(0.94 0 0);
   --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
+  --muted: oklch(0.961 0 0);
   --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
+  --accent: oklch(0.93 0 0);
   --accent-foreground: oklch(0.205 0 0);
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.985 0 0);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
+  --border: oklch(0.84 0 0 / 50%);
+  --input: oklch(0.84 0 0 / 50%);
   --ring: oklch(0.708 0 0);
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0.02 var(--vellum-primary-hue));
+  --background: oklch(0.177 0 0);
+  --foreground: oklch(0.93 0 0);
+  --card: oklch(0.21 0 0);
+  --card-foreground: oklch(0.98 0 0);
+  --popover: oklch(0.23 0 0);
+  --popover-foreground: oklch(0.9 0 0);
+  --primary: oklch(0.98 0.02 var(--vellum-primary-hue));
   --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.26 0 0);
+  --secondary-foreground: oklch(0.93 0 0);
+  --muted: oklch(0.26 0 0);
+  --muted-foreground: oklch(0.72 0 0);
+  --accent: oklch(0.28 0 0);
+  --accent-foreground: oklch(0.92 0 0);
   --destructive: oklch(0.704 0.191 22.216);
   --destructive-foreground: oklch(0.985 0 0);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
+  --border: oklch(0.5 0 0 / 20%);
+  --input: oklch(0.5 0 0 / 25%);
+  --ring: oklch(0.62 0 0);
 }
 
 @theme inline {
@@ -170,7 +170,7 @@
   margin-bottom: 0;
 }
 
-.vellum-prose :where(h1, h2, h3, h4) {
+.vellum-prose :where(h1, h2, h3, h4, h5, h6) {
   font-weight: 600;
   letter-spacing: -0.02em;
   color: var(--foreground);
@@ -185,13 +185,6 @@
 .vellum-prose :where(h2) {
   font-size: 1.5rem;
   margin: 2.25rem 0 0.75rem;
-  padding-top: 0.5rem;
-  border-top: 1px solid var(--border);
-}
-
-.vellum-prose :where(h2):first-child {
-  border-top: 0;
-  padding-top: 0;
 }
 
 .vellum-prose :where(h3) {
@@ -202,6 +195,17 @@
 .vellum-prose :where(h4) {
   font-size: 1.05rem;
   margin: 1.5rem 0 0.5rem;
+}
+
+.vellum-prose :where(h5) {
+  font-size: 0.95rem;
+  margin: 1.25rem 0 0.4rem;
+}
+
+.vellum-prose :where(h6) {
+  font-size: 0.9rem;
+  margin: 1.1rem 0 0.4rem;
+  color: var(--muted-foreground);
 }
 
 .vellum-prose :where(p) {
@@ -229,15 +233,51 @@
   margin: 0.25rem 0;
 }
 
-.vellum-prose :where(a):not([data-vellum-button]) {
+.vellum-prose :where(li:has(> input[type='checkbox'])) {
+  list-style: none;
+}
+
+.vellum-prose :where(input[type='checkbox']) {
+  appearance: none;
+  -webkit-appearance: none;
+  display: inline-block;
+  width: 0.95rem;
+  height: 0.95rem;
+  margin: 0 0.5rem 0 0;
+  vertical-align: -0.14em;
+  flex-shrink: 0;
+  border: 1.5px solid var(--muted-foreground);
+  border-radius: 0.25rem;
+  background-color: var(--muted);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 0.7rem 0.7rem;
+  color: var(--muted-foreground);
+  opacity: 1;
+}
+
+.vellum-prose :where(input[type='checkbox']:disabled) {
+  opacity: 1;
+  cursor: default;
+}
+
+.vellum-prose :where(input[type='checkbox']:checked) {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256'%3E%3Cpath fill='oklch(0.556 0 0)' d='M229.66,77.66l-128,128a8,8,0,0,1-11.32,0l-56-56a8,8,0,0,1,11.32-11.32L96,188.69,218.34,66.34a8,8,0,0,1,11.32,11.32Z'/%3E%3C/svg%3E");
+}
+
+.dark .vellum-prose :where(input[type='checkbox']:checked) {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256'%3E%3Cpath fill='oklch(0.72 0 0)' d='M229.66,77.66l-128,128a8,8,0,0,1-11.32,0l-56-56a8,8,0,0,1,11.32-11.32L96,188.69,218.34,66.34a8,8,0,0,1,11.32,11.32Z'/%3E%3C/svg%3E");
+}
+
+.vellum-prose :where(a):not([data-vellum-button]):not(.vellum-card) {
   color: var(--foreground);
-  font-weight: 500;
+  font-weight: 600;
   text-decoration: underline;
   text-underline-offset: 3px;
   text-decoration-color: color-mix(in oklch, var(--foreground) 35%, transparent);
 }
 
-.vellum-prose :where(a):not([data-vellum-button]):hover {
+.vellum-prose :where(a):not([data-vellum-button]):not(.vellum-card):hover {
   text-decoration-color: var(--foreground);
 }
 
@@ -249,22 +289,43 @@
 }
 
 .vellum-prose :where(hr) {
-  margin: 2rem 0;
+  margin: 1.25rem 0;
   border: 0;
-  border-top: 1px solid var(--border);
+  border-top: 1px solid color-mix(in oklch, var(--border) 70%, transparent);
+}
+
+.vellum-page-rule {
+  margin: 0 0 1.5rem;
+}
+
+.vellum-table {
+  margin: 1.25rem 0;
+  overflow: auto;
+  border: 1px solid color-mix(in oklch, var(--foreground) 14%, transparent);
+  border-radius: var(--radius);
 }
 
 .vellum-prose :where(table) {
   width: 100%;
-  margin: 1.25rem 0;
+  margin: 0;
   border-collapse: collapse;
   font-size: 0.9rem;
 }
 
 .vellum-prose :where(th, td) {
-  border: 1px solid var(--border);
+  border: 0;
+  border-right: 1px solid color-mix(in oklch, var(--foreground) 14%, transparent);
+  border-bottom: 1px solid color-mix(in oklch, var(--foreground) 14%, transparent);
   padding: 0.55rem 0.75rem;
   text-align: left;
+}
+
+.vellum-prose :where(th:last-child, td:last-child) {
+  border-right: 0;
+}
+
+.vellum-prose :where(tr:last-child td) {
+  border-bottom: 0;
 }
 
 .vellum-prose :where(th) {
@@ -273,43 +334,60 @@
 }
 
 .vellum-prose :where(img) {
-  max-width: 100%;
-  height: auto;
-  border-radius: var(--radius);
-  margin: 1.25rem 0;
-}
-
-.vellum-figure :where(img) {
   display: block;
-  width: 100%;
-  margin: 0;
+  max-width: 100%;
+  width: auto;
+  height: auto;
+  margin: 1.25rem 0;
+  border-radius: var(--radius);
 }
 
-.vellum-prose :where(code):not(pre code):not(.vellum-code code) {
+.vellum-prose :where(code):not(pre code):not(.vellum-code code),
+.vellum-prose [data-vellum-inline-code] {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 0.875em;
-  padding: 0.15em 0.35em;
-  border-radius: 0.3rem;
-  background: var(--muted);
-  border: 1px solid var(--border);
+  font-size: 0.8125em;
+  padding: 0.15em 0.4em;
+  border-radius: 0.35rem;
+  background: color-mix(in oklch, var(--muted) 88%, var(--foreground) 4%);
+  border: 1px solid color-mix(in oklch, var(--border) 80%, transparent);
+  color: var(--foreground);
+}
+
+.dark .vellum-prose :where(code):not(pre code):not(.vellum-code code),
+.dark .vellum-prose [data-vellum-inline-code] {
+  background: color-mix(in oklch, var(--muted) 80%, var(--background));
 }
 
 .vellum-prose :where(pre) {
   margin: 0;
   overflow-x: auto;
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 0.85rem;
-  line-height: 1.65;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.vellum-heading {
+  position: relative;
 }
 
 .vellum-heading-anchor {
-  margin-left: 0.35rem;
+  display: inline-flex;
+  align-items: center;
+  margin-left: 0.4rem;
+  vertical-align: middle;
   color: var(--muted-foreground);
-  text-decoration: none;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
   opacity: 0;
+  font-size: 0.75rem;
+  font-weight: 500;
 }
 
-.vellum-prose :where(h1, h2, h3, h4):hover .vellum-heading-anchor {
+.vellum-prose :where(h2, h3, h4, h5, h6):hover .vellum-heading-anchor,
+.vellum-prose :where(h2, h3, h4, h5, h6):focus-within .vellum-heading-anchor,
+.vellum-heading-anchor:focus-visible {
   opacity: 1;
 }
 
@@ -317,65 +395,258 @@
   position: relative;
   margin: 1.25rem 0;
   border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: var(--muted);
+  border-radius: 0.75rem;
+  background: #ffffff;
+  color: #24292e;
   overflow: hidden;
+}
+
+.dark .vellum-code {
+  background: #191919;
+  color: #e1e4e8;
 }
 
 .vellum-code-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.5rem 0.75rem;
+  gap: 0.75rem;
+  height: 2.375rem;
+  padding: 0 0.5rem 0 1rem;
   border-bottom: 1px solid var(--border);
   font-size: 0.75rem;
   color: var(--muted-foreground);
 }
 
+.vellum-code-header-meta {
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.vellum-code-lang-icon {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+  color: inherit;
+}
+
+.vellum-code-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .vellum-code pre {
-  padding: 0.9rem 1rem;
+  padding: 0.75rem 0;
 }
 
 .vellum-code-copy {
-  position: absolute;
-  top: 0.5rem;
-  right: 0.5rem;
-  z-index: 1;
   display: inline-flex;
-  height: 1.75rem;
-  width: 1.75rem;
+  height: 2rem;
+  width: 2rem;
+  flex-shrink: 0;
   align-items: center;
   justify-content: center;
-  border-radius: 0.375rem;
-  border: 1px solid var(--border);
-  background: var(--background);
+  border: 0;
+  background: transparent;
   color: var(--muted-foreground);
   cursor: pointer;
+  opacity: 0.9;
 }
 
-.vellum-code-copy:hover {
+.vellum-code-copy svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.vellum-code-copy:hover,
+.vellum-code-copy:focus-visible {
   color: var(--foreground);
+  opacity: 1;
+}
+
+.vellum-code-line {
+  display: block;
+  padding-inline: 1rem;
+  line-height: inherit;
+  box-decoration-break: clone;
 }
 
 .vellum-code-line-highlighted {
+  position: relative;
+  background: color-mix(in oklch, var(--primary) 10%, transparent);
+}
+
+.vellum-code-line-highlighted::after {
+  content: '';
+  position: absolute;
+  inset-block: 0;
+  left: 0;
+  border-left: 2px solid color-mix(in oklch, var(--primary) 50%, transparent);
+}
+
+.vellum-code[data-vellum-line-numbers] {
+  counter-reset: vellum-line;
+}
+
+.vellum-code[data-vellum-line-numbers] pre {
+  padding-left: 0;
+}
+
+.vellum-code[data-vellum-line-numbers] .vellum-code-line {
+  padding-left: 3.25rem;
+}
+
+.vellum-code[data-vellum-line-numbers] .vellum-code-line::before {
+  content: counter(vellum-line);
+  counter-increment: vellum-line;
   display: inline-block;
-  width: 100%;
-  background: color-mix(in oklch, var(--primary) 12%, transparent);
+  width: 2.25rem;
+  margin-left: -3.25rem;
+  margin-right: 1rem;
+  text-align: right;
+  color: color-mix(in oklch, var(--muted-foreground) 42%, transparent);
+  user-select: none;
+  pointer-events: none;
+  font-variant-numeric: tabular-nums;
+}
+
+.vellum-code-embedded {
+  position: relative;
+}
+
+.vellum-code-embedded .vellum-code-copy {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.5rem;
+  z-index: 2;
+  height: calc(13px * 1.45);
+  width: calc(13px * 1.45);
+}
+
+.vellum-code-embedded .vellum-code-copy svg {
+  width: 0.875rem;
+  height: 0.875rem;
+}
+
+/* GitHub Light / GitHub Dark — the Fumadocs Shiki default. */
+.hl-keyword,
+.hl-operator { color: #d73a49; }
+.hl-property,
+.hl-generic,
+.hl-attribute { color: #6f42c1; }
+.hl-type { color: #005cc5; }
+.hl-variable { color: #e36209; }
+.hl-value,
+.hl-literal { color: #032f62; }
+.hl-number { color: #005cc5; }
+.hl-comment,
+.hl-comment span,
+.hl-injection { color: #6a737d; }
+.hl-addition { color: #22863a; }
+.hl-deletion { color: #b31d28; }
+.hl-strong { font-weight: 700; }
+.hl-em { font-style: italic; }
+
+.dark .hl-keyword,
+.dark .hl-operator { color: #f97583; }
+.dark .hl-property,
+.dark .hl-generic,
+.dark .hl-attribute { color: #b392f0; }
+.dark .hl-type { color: #79b8ff; }
+.dark .hl-variable { color: #ffab70; }
+.dark .hl-value,
+.dark .hl-literal { color: #9ecbff; }
+.dark .hl-number { color: #79b8ff; }
+.dark .hl-comment,
+.dark .hl-comment span,
+.dark .hl-injection { color: #959da5; }
+.dark .hl-addition { color: #85e89d; }
+.dark .hl-deletion { color: #fdaeb7; }
+
+.vellum-prose .footnote-ref {
+  font-size: 0.75em;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.vellum-prose .footnotes {
+  margin-top: 3rem;
+  padding-top: 0.25rem;
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+}
+
+.vellum-prose .footnotes ol {
+  padding-left: 1.25rem;
+}
+
+.vellum-prose .footnote-backref {
+  margin-left: 0.35rem;
+  text-decoration: none;
+  color: var(--muted-foreground);
+}
+
+.vellum-prose .footnote-backref:hover {
+  color: var(--foreground);
 }
 
 .vellum-callout {
+  --vellum-callout-accent: var(--muted-foreground);
+  position: relative;
   display: flex;
+  align-items: flex-start;
   gap: 0.75rem;
   margin: 1.25rem 0;
-  padding: 0.9rem 1rem;
+  padding: 0.9rem 1rem 0.9rem 1.2rem;
   border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: var(--muted);
+  border-radius: calc(var(--radius) + 0.15rem);
+  background: var(--card);
+}
+
+.vellum-callout-rail {
+  position: absolute;
+  top: 0.75rem;
+  bottom: 0.75rem;
+  left: 0.4rem;
+  width: 2px;
+  border-radius: 2px;
+  background: var(--vellum-callout-accent);
+  opacity: 0.45;
+}
+
+.vellum-callout-icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-self: start;
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-top: calc((1.75em - 1.25rem) / 2);
+  color: var(--vellum-callout-accent);
+}
+
+.vellum-callout-glyph {
+  width: 1.25rem;
+  height: 1.25rem;
+  fill: var(--vellum-callout-accent);
+  stroke: none;
 }
 
 .vellum-callout-title {
-  margin: 0 0 0.25rem;
-  font-weight: 600;
+  margin: 0;
+  font-weight: 650;
+  color: var(--foreground);
+}
+
+.vellum-callout-body {
+  min-width: 0;
+  flex: 1;
+}
+
+.vellum-callout-title + .vellum-callout-content {
+  margin-top: 0.2rem;
 }
 
 .vellum-callout-content > :first-child {
@@ -386,21 +657,24 @@
   margin-bottom: 0;
 }
 
-.vellum-callout-note,
 .vellum-callout-info {
-  border-color: color-mix(in oklch, oklch(0.6 0.12 240) 40%, var(--border));
+  --vellum-callout-accent: oklch(0.62 0.16 250);
 }
 
 .vellum-callout-tip {
-  border-color: color-mix(in oklch, oklch(0.65 0.15 150) 40%, var(--border));
+  --vellum-callout-accent: oklch(0.7 0.18 150);
 }
 
 .vellum-callout-warning {
-  border-color: color-mix(in oklch, oklch(0.75 0.15 85) 45%, var(--border));
+  --vellum-callout-accent: oklch(0.78 0.16 80);
 }
 
 .vellum-callout-danger {
-  border-color: color-mix(in oklch, oklch(0.6 0.2 25) 40%, var(--border));
+  --vellum-callout-accent: oklch(0.64 0.2 25);
+}
+
+.vellum-callout-note {
+  --vellum-callout-accent: oklch(0.72 0.18 55);
 }
 
 .vellum-tabs {
@@ -439,37 +713,218 @@
   padding: 1rem;
 }
 
+.vellum-tabs-code {
+  background: oklch(0.94 0 0);
+  border-radius: 0.75rem;
+  overflow: hidden;
+}
+
+.dark .vellum-tabs-code {
+  background: oklch(0.28 0 0);
+}
+
+.vellum-tabs-code .vellum-tabs-list {
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 0.875rem;
+  padding: 0 0.75rem;
+  background: transparent;
+  border-bottom: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+}
+
+.vellum-tabs-code .vellum-tabs-list::-webkit-scrollbar {
+  display: none;
+}
+
+.vellum-tabs-code .vellum-tabs-trigger {
+  border-radius: 0;
+  padding: 0.7rem 0;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border-bottom: 2px solid transparent;
+}
+
+.vellum-tabs-code .vellum-tabs-trigger[aria-selected='true'] {
+  background: transparent;
+  color: var(--primary);
+  border-bottom-color: var(--primary);
+}
+
+.vellum-tabs-code .vellum-tabs-panel {
+  padding: 0 0.5rem 0.5rem;
+  background: transparent;
+}
+
+.vellum-tabs-code .vellum-code {
+  margin: 0;
+  border: 0;
+  border-radius: 0.5rem;
+  background: #ffffff;
+  color: #24292e;
+  overflow: hidden;
+}
+
+.dark .vellum-tabs-code .vellum-code {
+  background: #191919;
+  color: #e1e4e8;
+}
+
+.vellum-tabs-code .vellum-code pre {
+  padding: 0.75rem 0;
+}
+
 .vellum-steps {
+  position: relative;
   margin: 1.25rem 0;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.25rem;
 }
 
 .vellum-step {
   display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 0.75rem;
+  grid-template-columns: 1.75rem 1fr;
+  column-gap: 0.75rem;
+  align-items: start;
+  position: relative;
+}
+
+.vellum-step:not(:last-child)::before {
+  content: '';
+  position: absolute;
+  left: 0.8125rem;
+  top: 1.75rem;
+  bottom: -1.25rem;
+  width: 1px;
+  background: var(--border);
 }
 
 .vellum-step-indicator {
+  position: relative;
+  z-index: 1;
   display: inline-flex;
   height: 1.75rem;
   width: 1.75rem;
   align-items: center;
   justify-content: center;
   border-radius: 9999px;
-  background: var(--primary);
-  color: var(--primary-foreground);
+  background: var(--muted);
+  color: var(--foreground);
   font-size: 0.75rem;
   font-weight: 600;
+}
+
+.vellum-step-content > :first-child {
+  margin-top: 0;
+}
+
+.vellum-step-content > .vellum-heading:first-child {
+  margin-top: 0;
+  margin-bottom: 0.35rem;
+  font-size: 1.05rem;
+  line-height: 1.75rem;
+}
+
+@property --track-top {
+  syntax: '<length>';
+  inherits: true;
+  initial-value: 0px;
+}
+
+@property --track-bottom {
+  syntax: '<length>';
+  inherits: true;
+  initial-value: 0px;
+}
+
+@property --offset-distance {
+  syntax: '<length>';
+  inherits: true;
+  initial-value: 0px;
+}
+
+.vellum-toc-nav {
+  --track-top: 0px;
+  --track-bottom: 0px;
+  --offset-distance: 0px;
+  --toc-dot-opacity: 0;
+}
+
+.vellum-toc-link {
+  padding-top: 0.375rem;
+  padding-bottom: 0.375rem;
+  padding-left: calc(1.25rem + var(--vellum-toc-level, 0) * 0.75rem);
+}
+
+.vellum-toc-link:hover,
+.vellum-toc-link.is-active {
+  font-weight: 600;
+}
+
+.vellum-toc-link:first-of-type {
+  padding-top: 0;
+}
+
+.vellum-toc-rail {
+  pointer-events: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  overflow: visible;
+}
+
+.vellum-toc-rail [data-vellum-toc-track-path] {
+  stroke: color-mix(in oklch, var(--foreground) 12%, transparent);
+}
+
+.vellum-toc-rail-active {
+  z-index: 1;
+  clip-path: polygon(0 var(--track-top), 100% var(--track-top), 100% var(--track-bottom), 0 var(--track-bottom));
+  transition: clip-path 420ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.vellum-toc-rail-active [data-vellum-toc-thumb-path] {
+  stroke: var(--foreground);
+}
+
+.vellum-toc-thumb-dot {
+  pointer-events: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 2;
+  width: 4px;
+  height: 4px;
+  border-radius: 9999px;
+  background: var(--foreground);
+  offset-distance: var(--offset-distance);
+  offset-anchor: center;
+  opacity: var(--toc-dot-opacity, 0);
+  transition: offset-distance 420ms cubic-bezier(0.16, 1, 0.3, 1), opacity 200ms ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vellum-toc-rail-active,
+  .vellum-toc-thumb-dot {
+    transition: none;
+  }
 }
 
 .vellum-cards {
   display: grid;
   gap: 0.75rem;
   margin: 1.25rem 0;
-  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 640px) {
+  .vellum-cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 .vellum-card {
@@ -496,11 +951,17 @@
   margin: 1.25rem 0;
 }
 
+.vellum-figure :where(img) {
+  display: block;
+  width: auto;
+  max-width: 100%;
+  margin: 0;
+}
+
 .vellum-figure-caption {
   margin-top: 0.5rem;
   font-size: 0.875rem;
   color: var(--muted-foreground);
-  text-align: center;
 }
 
 .vellum-search-mark {
@@ -512,5 +973,155 @@
 
 .dark .vellum-search-mark {
   background: color-mix(in oklch, oklch(0.55 0.14 95) 55%, transparent);
+}
+
+[data-vellum-sidebar-pill] {
+  display: none;
+  top: 0.75rem;
+}
+
+[data-vellum-sidebar-hotzone] {
+  pointer-events: none;
+}
+
+html {
+  --vellum-mobile-chrome: 0px;
+  --vellum-toc-popover-height: 0px;
+  --vellum-sidebar-duration: 280ms;
+  --vellum-sidebar-ease: cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+@media (max-width: 767px) {
+  html:has([data-vellum-mobile-bar]),
+  html:has([data-vellum-header]) {
+    --vellum-mobile-chrome: 3.5rem;
+  }
+}
+
+@media (min-width: 768px) {
+  html:has([data-vellum-header]) {
+    --vellum-mobile-chrome: 3.5rem;
+  }
+
+  [data-vellum-sidebar-wrap] {
+    position: sticky;
+    width: 250px;
+    overflow: visible;
+    transition: width var(--vellum-sidebar-duration) var(--vellum-sidebar-ease);
+  }
+
+  [data-vellum-sidebar-wrap] [data-vellum-sidebar] {
+    position: absolute;
+    inset: 0 auto 0 0;
+    height: auto;
+    transition: transform var(--vellum-sidebar-duration) var(--vellum-sidebar-ease), box-shadow var(--vellum-sidebar-duration) var(--vellum-sidebar-ease), border-radius var(--vellum-sidebar-duration) var(--vellum-sidebar-ease), top var(--vellum-sidebar-duration) var(--vellum-sidebar-ease), bottom var(--vellum-sidebar-duration) var(--vellum-sidebar-ease);
+  }
+}
+
+@media (max-width: 1023px) {
+  html:has([data-vellum-toc-mobile]) {
+    --vellum-toc-popover-height: 2.5rem;
+  }
+}
+
+@media (min-width: 768px) {
+  html[data-vellum-sidebar="collapsed"] [data-vellum-sidebar-hotzone] {
+    pointer-events: auto;
+  }
+
+  html[data-vellum-sidebar="collapsed"] [data-vellum-sidebar-wrap] {
+    z-index: 45;
+    width: 0;
+    min-width: 0;
+  }
+
+  html[data-vellum-sidebar="collapsed"] [data-vellum-sidebar] {
+    top: 0.5rem;
+    bottom: 0.5rem;
+    z-index: 45;
+    overflow: hidden;
+    border-radius: 0.75rem;
+    border: 1px solid var(--border);
+    background-color: var(--background);
+    transform: translate3d(-100%, 0, 0);
+    pointer-events: none;
+    box-shadow: none;
+  }
+
+  html[data-vellum-sidebar="collapsed"][data-vellum-sidebar-peek] [data-vellum-sidebar-wrap] {
+    z-index: 50;
+  }
+
+  html[data-vellum-sidebar="collapsed"][data-vellum-sidebar-peek] [data-vellum-sidebar] {
+    transform: translate3d(0.5rem, 0, 0);
+    pointer-events: auto;
+    box-shadow: 0 10px 15px -3px oklch(0 0 0 / 0.18), 0 4px 6px -4px oklch(0 0 0 / 0.12);
+  }
+
+  html[data-vellum-sidebar="collapsed"] [data-vellum-sidebar-pill] {
+    display: flex;
+    top: calc(1rem + var(--vellum-mobile-chrome, 0px) + var(--vellum-toc-popover-height, 0px));
+  }
+
+  html[data-vellum-sidebar="collapsed"][data-vellum-sidebar-peek] [data-vellum-sidebar-pill] {
+    opacity: 0;
+    pointer-events: none;
+  }
+}
+
+.vellum-toc-progress-track {
+  stroke: color-mix(in oklch, var(--foreground) 25%, transparent);
+}
+
+.vellum-toc-progress-thumb {
+  transition: stroke-dashoffset 200ms linear;
+}
+
+.vellum-toc-popover-scroll {
+  scrollbar-width: none;
+  mask-image: linear-gradient(to bottom, transparent, #000 12px, #000 calc(100% - 12px), transparent);
+}
+
+.vellum-toc-popover-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+[data-vellum-sheet-overlay] {
+  opacity: 0;
+  transition: opacity var(--vellum-sidebar-duration) var(--vellum-sidebar-ease);
+}
+
+[data-vellum-sheet-overlay].is-entered {
+  opacity: 1;
+}
+
+[data-vellum-dialog-panel][data-vellum-sheet-side] {
+  transition: transform var(--vellum-sidebar-duration) var(--vellum-sidebar-ease);
+}
+
+[data-vellum-dialog-panel][data-vellum-sheet-side="right"] {
+  transform: translate3d(100%, 0, 0);
+}
+
+[data-vellum-dialog-panel][data-vellum-sheet-side="left"] {
+  transform: translate3d(-100%, 0, 0);
+}
+
+[data-vellum-dialog-panel][data-vellum-sheet-side].is-entered {
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-vellum-sidebar-wrap],
+  [data-vellum-sidebar-wrap] [data-vellum-sidebar],
+  html[data-vellum-sidebar="collapsed"] [data-vellum-sidebar],
+  [data-vellum-sheet-overlay],
+  [data-vellum-dialog-panel][data-vellum-sheet-side] {
+    transition: none;
+  }
+
+  .vellum-toc-progress-thumb {
+    transition: none;
+  }
 }
 

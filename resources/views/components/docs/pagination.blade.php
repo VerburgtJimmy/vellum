@@ -3,33 +3,47 @@
     'next' => null,
 ])
 
+@php
+    $both = $previous && $next;
+@endphp
+
 @if ($previous || $next)
-    <nav data-vellum-pagination aria-label="Page" class="mt-12 grid gap-3 border-t border-border pt-8 sm:grid-cols-2">
+    <nav data-vellum-pagination aria-label="Page" class="mt-16 grid grid-cols-1 gap-3 {{ $both ? 'sm:grid-cols-2' : '' }}">
         @if ($previous)
             <a
                 href="{{ $previous['href'] }}"
                 data-vellum-pagination-prev
+                aria-label="Previous: {{ $previous['title'] }}"
                 x-data="vellumPrefetchHover"
                 x-on:pointerenter="onEnter()"
-                class="group flex flex-col gap-1 rounded-lg border border-border p-4 transition-colors hover:bg-accent/50"
+                class="group flex flex-col gap-2 rounded-lg border border-border p-4 text-sm transition-colors hover:bg-accent/50"
             >
-                <span class="text-xs text-muted-foreground">Previous</span>
-                <span class="font-medium text-foreground group-hover:underline">{{ $previous['title'] }}</span>
+                <span class="inline-flex items-center gap-1.5 font-semibold text-foreground">
+                    {!! \Vellum\Support\Icons::caretLeft() !!}
+                    {{ $previous['title'] }}
+                </span>
+                @if (! empty($previous['description']))
+                    <span class="truncate text-muted-foreground">{{ $previous['description'] }}</span>
+                @endif
             </a>
-        @else
-            <div class="hidden sm:block"></div>
         @endif
 
         @if ($next)
             <a
                 href="{{ $next['href'] }}"
                 data-vellum-pagination-next
+                aria-label="Next: {{ $next['title'] }}"
                 x-data="vellumPrefetchHover"
                 x-on:pointerenter="onEnter()"
-                class="group flex flex-col gap-1 rounded-lg border border-border p-4 text-right transition-colors hover:bg-accent/50 sm:items-end"
+                class="group flex flex-col gap-2 rounded-lg border border-border p-4 text-end text-sm transition-colors hover:bg-accent/50"
             >
-                <span class="text-xs text-muted-foreground">Next</span>
-                <span class="font-medium text-foreground group-hover:underline">{{ $next['title'] }}</span>
+                <span class="inline-flex flex-row-reverse items-center gap-1.5 font-semibold text-foreground">
+                    {!! \Vellum\Support\Icons::caretRight() !!}
+                    {{ $next['title'] }}
+                </span>
+                @if (! empty($next['description']))
+                    <span class="truncate text-muted-foreground">{{ $next['description'] }}</span>
+                @endif
             </a>
         @endif
     </nav>

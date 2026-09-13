@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Vellum\Markdown\Extensions\Tabs;
 
+use League\CommonMark\Extension\CommonMark\Node\Block\FencedCode;
 use League\CommonMark\Node\Node;
 use League\CommonMark\Renderer\ChildNodeRendererInterface;
 use League\CommonMark\Renderer\NodeRendererInterface;
@@ -44,6 +45,20 @@ final class TabsRenderer implements NodeRendererInterface
             }
 
             return new HtmlElement('div', $attrs, $childRenderer->renderNodes($node->children()));
+        }
+
+        $codeTabs = $this->isCodeTabs($tabs);
+
+        foreach ($tabs as $tab) {
+            if (! $codeTabs) {
+                break;
+            }
+
+            foreach ($tab->children() as $child) {
+                if ($child instanceof FencedCode) {
+                    $child->data->set('vellum_embedded', true);
+                }
+            }
         }
 
         $defaultId = $tabs[0]->getId();
@@ -88,7 +103,7 @@ final class TabsRenderer implements NodeRendererInterface
         }
 
         $attrs = [
-            'class' => 'vellum-tabs',
+            'class' => $codeTabs ? 'vellum-tabs vellum-tabs-code' : 'vellum-tabs',
             'data-vellum-tabs' => '',
             'x-data' => $xData,
         ];
@@ -104,5 +119,35 @@ final class TabsRenderer implements NodeRendererInterface
             ], $listItems),
             ...$panels,
         ]);
+    }
+
+    /**
+     * @param  list<TabBlock>  $tabs
+     */
+    private function isCodeTabs(array $tabs): bool
+    {
+        if ($tabs === []) {
+            return false;
+        }
+
+        foreach ($tabs as $tab) {
+            $fences = 0;
+
+            foreach ($tab->children() as $child) {
+                if ($child instanceof FencedCode) {
+                    $fences++;
+
+                    continue;
+                }
+
+                return false;
+            }
+
+            if ($fences !== 1) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

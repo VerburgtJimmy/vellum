@@ -10,7 +10,7 @@ use Vellum\Support\Str;
 /**
  * Builds the sidebar navigation tree from folders, meta.json, and documents.
  *
- * @phpstan-type NavPage array{type: 'page', slug: string, title: string, icon: string|null, href: string}
+ * @phpstan-type NavPage array{type: 'page', slug: string, title: string, description: string|null, icon: string|null, href: string}
  * @phpstan-type NavSeparator array{type: 'separator', title: string}
  * @phpstan-type NavNode array<string, mixed>
  * @phpstan-type NavTree list<array<string, mixed>>
@@ -474,6 +474,7 @@ final class NavigationBuilder
             'type' => 'page',
             'slug' => $document->slug,
             'title' => $document->title,
+            'description' => $document->description,
             'icon' => $document->icon,
             'href' => $this->hrefForSlug($document->slug, $version ?? $document->version),
         ];

@@ -78,3 +78,26 @@ it('compiles on demand when the cache is cold', function (): void {
 
     expect(is_file($this->cachePath().'/cold.php'))->toBeTrue();
 });
+
+it('serves raw markdown for the current page', function (): void {
+    $this->writeDoc('guides/one.md', <<<'MD'
+---
+title: One
+---
+Body of one
+MD);
+
+    $this->get('/docs/_vellum/raw/guides/one.md')
+        ->assertOk()
+        ->assertHeader('Content-Type', 'text/markdown; charset=UTF-8')
+        ->assertSee('title: One', false)
+        ->assertSee('Body of one', false);
+});
+
+it('serves raw markdown for the index page', function (): void {
+    $this->writeDoc('index.md', "---\ntitle: Home\n---\nIndex body");
+
+    $this->get('/docs/_vellum/raw/index.md')
+        ->assertOk()
+        ->assertSee('Index body', false);
+});

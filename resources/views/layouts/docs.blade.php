@@ -32,6 +32,11 @@
                 );
                 document.documentElement.classList.toggle('dark', dark);
             } catch (e) {}
+            try {
+                if (localStorage.getItem('vellum-sidebar') === 'collapsed') {
+                    document.documentElement.setAttribute('data-vellum-sidebar', 'collapsed');
+                }
+            } catch (e) {}
         })();
     </script>
     <title>@yield('title', config('vellum.name'))</title>

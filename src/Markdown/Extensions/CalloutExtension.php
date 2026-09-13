@@ -10,7 +10,7 @@ use Vellum\Markdown\Extensions\Callout\CalloutRenderer;
 use Vellum\Markdown\Extensions\Directive\DirectiveBlock;
 
 /**
- * Registers :::note|tip|warning|danger|info callout containers.
+ * Registers :::note|tip|warning|danger|info|success|idea callout containers.
  */
 final class CalloutExtension implements ExtensionInterface
 {

@@ -14,7 +14,7 @@ use League\CommonMark\Util\Xml;
 use Tempest\Highlight\Highlighter;
 
 /**
- * Renders inline code, applying Tempest highlighting when a {:lang} suffix was merged.
+ * Renders inline code with the same chip as tagged snippets, highlighting when a {:lang} suffix was merged.
  */
 final class InlineCodeRenderer implements NodeRendererInterface
 {
@@ -30,14 +30,16 @@ final class InlineCodeRenderer implements NodeRendererInterface
 
         $language = $node->data->get('vellum_language', null);
         $literal = $node->getLiteral();
+        $attrs = [
+            'data-vellum-inline-code' => '',
+        ];
 
         if (is_string($language) && $language !== '') {
-            return new HtmlElement('code', [
-                'class' => 'language-'.$language,
-                'data-vellum-inline-code' => '',
-            ], $this->highlighter->parse($literal, $language));
+            $attrs['class'] = 'language-'.$language;
+
+            return new HtmlElement('code', $attrs, $this->highlighter->parse($literal, $language));
         }
 
-        return new HtmlElement('code', [], Xml::escape($literal));
+        return new HtmlElement('code', $attrs, Xml::escape($literal));
     }
 }

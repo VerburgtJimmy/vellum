@@ -103,9 +103,9 @@ it('resolves previous and next pages and breadcrumbs', function (): void {
     $this->writeDoc('meta.json', json_encode([
         'pages' => ['index', 'one', 'two'],
     ], JSON_THROW_ON_ERROR));
-    $this->writeDoc('index.md', "---\ntitle: Home\n---\nH");
+    $this->writeDoc('index.md', "---\ntitle: Home\ndescription: Start here.\n---\nH");
     $this->writeDoc('one.md', "---\ntitle: One\n---\n1");
-    $this->writeDoc('two.md', "---\ntitle: Two\n---\n2");
+    $this->writeDoc('two.md', "---\ntitle: Two\ndescription: After one.\n---\n2");
 
     $repository = new ContentRepository(
         contentPath: $this->docsPath(),
@@ -116,7 +116,9 @@ it('resolves previous and next pages and breadcrumbs', function (): void {
     $adjacent = $repository->adjacent('one');
 
     expect($adjacent['previous']['slug'])->toBe('')
-        ->and($adjacent['next']['slug'])->toBe('two');
+        ->and($adjacent['previous']['description'])->toBe('Start here.')
+        ->and($adjacent['next']['slug'])->toBe('two')
+        ->and($adjacent['next']['description'])->toBe('After one.');
 
     $document = $repository->find('one');
     $crumbs = $repository->breadcrumbs($document);

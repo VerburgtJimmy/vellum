@@ -13,6 +13,7 @@ use Tempest\Highlight\Highlighter;
 use Vellum\Markdown\Extensions\CodeBlock\CodeBlockRenderer;
 use Vellum\Markdown\Extensions\CodeBlock\InlineCodeHighlightListener;
 use Vellum\Markdown\Extensions\CodeBlock\InlineCodeRenderer;
+use Vellum\Markdown\Extensions\CodeBlock\VellumBashLanguage;
 
 /**
  * Fenced and inline code highlighting with title, line marks, numbers, and copy control.
@@ -21,7 +22,9 @@ final class CodeBlockExtension implements ExtensionInterface
 {
     public function __construct(
         private readonly Highlighter $highlighter = new Highlighter,
-    ) {}
+    ) {
+        $this->highlighter->addLanguage(new VellumBashLanguage);
+    }
 
     public function register(EnvironmentBuilderInterface $environment): void
     {

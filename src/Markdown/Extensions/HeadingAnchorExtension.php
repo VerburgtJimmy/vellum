@@ -6,7 +6,9 @@ namespace Vellum\Markdown\Extensions;
 
 use League\CommonMark\Environment\EnvironmentBuilderInterface;
 use League\CommonMark\Extension\ExtensionInterface;
+use League\CommonMark\Extension\HeadingPermalink\HeadingPermalink;
 use League\CommonMark\Extension\HeadingPermalink\HeadingPermalinkExtension;
+use Vellum\Markdown\Extensions\HeadingPermalink\HeadingPermalinkRenderer;
 
 /**
  * Registers heading IDs and permalink anchors via CommonMark's HeadingPermalinkExtension.
@@ -16,5 +18,6 @@ final class HeadingAnchorExtension implements ExtensionInterface
     public function register(EnvironmentBuilderInterface $environment): void
     {
         $environment->addExtension(new HeadingPermalinkExtension);
+        $environment->addRenderer(HeadingPermalink::class, new HeadingPermalinkRenderer, 100);
     }
 }

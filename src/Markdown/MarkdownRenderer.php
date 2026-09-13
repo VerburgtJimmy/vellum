@@ -6,6 +6,7 @@ namespace Vellum\Markdown;
 
 use League\CommonMark\Environment\Environment;
 use League\CommonMark\Extension\CommonMark\CommonMarkCoreExtension;
+use League\CommonMark\Extension\Footnote\FootnoteExtension;
 use League\CommonMark\Extension\GithubFlavoredMarkdownExtension;
 use League\CommonMark\Node\Block\Document;
 use League\CommonMark\Parser\MarkdownParser;
@@ -19,6 +20,7 @@ use Vellum\Markdown\Extensions\ExternalLinkExtension;
 use Vellum\Markdown\Extensions\HeadingAnchorExtension;
 use Vellum\Markdown\Extensions\ImageExtension;
 use Vellum\Markdown\Extensions\StepsExtension;
+use Vellum\Markdown\Extensions\TableExtension;
 use Vellum\Markdown\Extensions\TabsExtension;
 
 /**
@@ -49,19 +51,28 @@ final class MarkdownRenderer
                 'html_class' => 'vellum-heading-anchor',
                 'id_prefix' => '',
                 'fragment_prefix' => '',
-                'insert' => 'before',
-                'title' => 'Permalink',
-                'symbol' => '#',
-                'aria_hidden' => true,
+                'insert' => 'after',
+                'title' => 'Copy link',
+                'symbol' => '',
+                'aria_hidden' => false,
                 'apply_id_to_heading' => true,
-                'heading_class' => '',
+                'heading_class' => 'vellum-heading',
                 'min_heading_level' => 2,
-                'max_heading_level' => 4,
+                'max_heading_level' => 6,
+            ],
+            'footnote' => [
+                'backref_class' => 'footnote-backref',
+                'container_add_hr' => false,
+                'container_class' => 'footnotes',
+                'ref_class' => 'footnote-ref',
+                'footnote_class' => 'footnote',
             ],
         ]);
 
         $this->environment->addExtension(new CommonMarkCoreExtension);
         $this->environment->addExtension(new GithubFlavoredMarkdownExtension);
+        $this->environment->addExtension(new TableExtension);
+        $this->environment->addExtension(new FootnoteExtension);
         $this->environment->addExtension(new HeadingAnchorExtension);
         $this->environment->addExtension(new DirectiveExtension);
         $this->environment->addExtension(new CodeBlockExtension);

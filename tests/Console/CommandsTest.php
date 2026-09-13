@@ -111,6 +111,15 @@ it('exports documents assets and search index for a static host', function (): v
         ->and($guideHtml)->toContain('../../../vendor/vellum/vellum.css')
         ->and($guideHtml)->toContain('../../../vendor/vellum/vellum.js');
 
+    $rawIndex = $out.'/docs/_vellum/raw/index.md';
+    $rawGuide = $out.'/docs/_vellum/raw/guides/one.md';
+
+    expect(is_file($rawIndex))->toBeTrue()
+        ->and(is_file($rawGuide))->toBeTrue()
+        ->and(file_get_contents($rawIndex))->toContain('Hello export')
+        ->and(file_get_contents($rawGuide))->toContain('Guide body')
+        ->and($html)->toContain('_vellum/raw/index.md');
+
     $this->deleteDirectory($out);
 });
 

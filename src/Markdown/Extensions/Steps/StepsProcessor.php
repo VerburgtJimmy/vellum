@@ -45,6 +45,7 @@ final class StepsProcessor
         foreach ($children as $child) {
             if ($child instanceof Heading && $child->getLevel() === 2) {
                 $index++;
+                $child->setLevel(3);
                 $current = new StepBlock($index);
                 $steps->appendChild($current);
                 $current->appendChild($child);

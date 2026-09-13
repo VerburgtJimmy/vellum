@@ -12,6 +12,7 @@ it('renders gfm tables', function (): void {
 MD);
 
     expect($html)->toContain('<table>')
+        ->and($html)->toContain('vellum-table')
         ->and($html)->toContain('<td>1</td>');
 });
 
@@ -31,7 +32,7 @@ it('adds heading anchors with ids and permalinks', function (): void {
     $html = (new MarkdownRenderer)->render("## Hello World\n");
 
     expect($html)->toContain('id="hello-world"')
-        ->and($html)->toContain('href="#hello-world"')
+        ->toContain('data-vellum-heading-copy')
         ->and($html)->toContain('vellum-heading-anchor')
         ->and($html)->toMatch('/<h2[^>]*id="hello-world"/');
 });

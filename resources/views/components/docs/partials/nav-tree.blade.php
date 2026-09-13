@@ -4,6 +4,7 @@
     $containsActive = $containsActive ?? static fn (array $node): bool => false;
     $activeSlug = $activeSlug ?? null;
     $depth = $depth ?? 0;
+    $itemClass = 'block rounded-md px-2 -mx-2 py-1.5 transition-colors';
 @endphp
 
 @foreach ($nodes as $node)
@@ -12,7 +13,7 @@
     @endphp
 
     @if ($type === 'separator')
-        <div class="mt-4 mb-1 px-2 text-xs font-medium uppercase tracking-wide text-muted-foreground" role="presentation">
+        <div class="mt-4 mb-1 text-xs font-medium uppercase tracking-wide text-muted-foreground" role="presentation">
             {{ $node['title'] ?? '' }}
         </div>
     @elseif ($type === 'page')
@@ -26,7 +27,7 @@
             @if ($isActive) data-vellum-nav-active @endif
             x-data="vellumPrefetchHover"
             x-on:pointerenter="onEnter()"
-            class="block rounded-md px-2 py-1.5 transition-colors {{ $isActive ? 'bg-accent font-medium text-accent-foreground' : 'text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground' }}"
+            class="{{ $itemClass }} {{ $isActive ? 'bg-accent font-medium text-accent-foreground' : 'text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground' }}"
             @if ($isActive) aria-current="page" @endif
         >{{ $node['title'] ?? 'Untitled' }}</a>
     @elseif ($type === 'folder')
@@ -36,15 +37,13 @@
         @endphp
         <x-vellum::ui.collapsible :open="$open" class="flex flex-col gap-0.5">
             <x-slot:trigger>
-                <div class="flex cursor-pointer items-center gap-1 rounded-md px-2 py-1.5 font-medium text-foreground hover:bg-accent/60">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-3.5 w-3.5 shrink-0 text-muted-foreground transition-transform" :class="open && 'rotate-90'" aria-hidden="true">
-                        <path d="m9 18 6-6-6-6"/>
-                    </svg>
+                <div class="{{ $itemClass }} flex cursor-pointer items-center gap-1 font-medium text-foreground hover:bg-accent/60">
+                    {!! \Vellum\Support\Icons::caretRight(['class' => 'h-3.5 w-3.5 shrink-0 text-muted-foreground transition-transform', ':class' => "open && 'rotate-90'"]) !!}
                     <span class="truncate">{{ $node['title'] ?? 'Folder' }}</span>
                 </div>
             </x-slot:trigger>
             <x-slot:content>
-                <div class="ml-2 flex flex-col gap-0.5 border-l border-border pl-2">
+                <div class="ml-2 flex flex-col gap-0.5 pl-3">
                     @include('vellum::components.docs.partials.nav-tree', [
                         'nodes' => $children,
                         'activeSlug' => $activeSlug,

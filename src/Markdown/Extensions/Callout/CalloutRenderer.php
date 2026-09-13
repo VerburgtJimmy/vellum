@@ -10,21 +10,32 @@ use League\CommonMark\Renderer\NodeRendererInterface;
 use League\CommonMark\Util\HtmlElement;
 use League\CommonMark\Util\Xml;
 use Vellum\Markdown\Extensions\Directive\DirectiveBlock;
+use Vellum\Support\Icons;
 
 /**
- * Renders :::note|tip|warning|danger|info containers as callouts.
+ * Renders :::note|tip|warning|danger|info|success|idea containers as callouts.
  */
 final class CalloutRenderer implements NodeRendererInterface
 {
     private const TYPES = ['note', 'tip', 'warning', 'danger', 'info'];
 
+    private const ALIASES = [
+        'success' => 'tip',
+        'idea' => 'note',
+    ];
+
     public function render(Node $node, ChildNodeRendererInterface $childRenderer): ?\Stringable
     {
-        if (! $node instanceof DirectiveBlock || ! in_array($node->getName(), self::TYPES, true)) {
+        if (! $node instanceof DirectiveBlock) {
             return null;
         }
 
-        $type = $node->getName();
+        $name = $node->getName();
+        $type = self::ALIASES[$name] ?? $name;
+
+        if (! in_array($type, self::TYPES, true)) {
+            return null;
+        }
         $body = [];
 
         if ($node->getTitle() !== null && $node->getTitle() !== '') {
@@ -35,12 +46,16 @@ final class CalloutRenderer implements NodeRendererInterface
 
         return new HtmlElement('div', [
             'class' => 'vellum-callout vellum-callout-'.$type,
-            'data-vellum-callout' => $type,
+            'data-vellum-callout' => $name,
         ], [
+            new HtmlElement('span', [
+                'class' => 'vellum-callout-rail',
+                'aria-hidden' => 'true',
+            ]),
             new HtmlElement('span', [
                 'class' => 'vellum-callout-icon vellum-callout-icon-'.$type,
                 'aria-hidden' => 'true',
-            ]),
+            ], Icons::callout($type)),
             new HtmlElement('div', ['class' => 'vellum-callout-body'], $body),
         ]);
     }

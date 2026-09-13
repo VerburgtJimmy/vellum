@@ -127,15 +127,66 @@ function vellumTooltip(delay = 300) {
 function vellumDialog(initialOpen = false) {
   return {
     open: initialOpen,
+    entered: false,
+    closeTimer: null,
+    motionToken: 0,
     async ensureFocus() {
       await window.VellumFocus.load()
     },
+    isSheet() {
+      return this.$el?.getAttribute('data-vellum-dialog-variant') === 'sheet'
+    },
+    motionMs() {
+      if (!this.isSheet()) {
+        return 0
+      }
+
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        return 0
+      }
+
+      return 280
+    },
     async show() {
       await this.ensureFocus()
+      clearTimeout(this.closeTimer)
+      this.closeTimer = null
       this.open = true
+      const wait = this.motionMs()
+      this.entered = wait === 0
+      if (this.entered) {
+        return
+      }
+
+      const token = ++this.motionToken
+      this.$nextTick(() => {
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            if (this.motionToken !== token || !this.open) {
+              return
+            }
+            this.entered = true
+          })
+        })
+      })
     },
     close() {
-      this.open = false
+      this.motionToken += 1
+      this.entered = false
+      const wait = this.motionMs()
+      if (wait === 0) {
+        this.open = false
+        return
+      }
+
+      clearTimeout(this.closeTimer)
+      this.closeTimer = setTimeout(() => {
+        this.open = false
+        this.closeTimer = null
+      }, wait)
+    },
+    destroy() {
+      clearTimeout(this.closeTimer)
     },
   }
 }
@@ -155,6 +206,30 @@ function vellumSearchHotkey(hotkey = 'k') {
       if (this._onKey) {
         window.removeEventListener('keydown', this._onKey, true)
       }
+    },
+    openSearch() {
+      const dialog = this.$el.querySelector('[data-vellum-dialog]')
+      if (!dialog || !window.Alpine) {
+        return
+      }
+
+      const data = window.Alpine.$data(dialog)
+      if (!data) {
+        return
+      }
+
+      if (typeof data.show === 'function') {
+        data.show()
+      }
+    },
+    closeSearch() {
+      const dialog = this.$el.querySelector('[data-vellum-dialog]')
+      if (!dialog || !window.Alpine) {
+        return
+      }
+
+      const data = window.Alpine.$data(dialog)
+      data?.close?.()
     },
     onHotkey(event) {
       if (!(event.metaKey || event.ctrlKey)) {
@@ -182,6 +257,181 @@ function vellumSearchHotkey(hotkey = 'k') {
         data.close()
       } else {
         data.show()
+      }
+    },
+  }
+}
+
+function isApplePlatform() {
+  const uaData = navigator.userAgentData
+  if (uaData && typeof uaData.platform === 'string' && uaData.platform !== '') {
+    return /mac|iphone|ipad|ipod/i.test(uaData.platform)
+  }
+
+  return /mac|iphone|ipad|ipod/i.test(navigator.platform || navigator.userAgent || '')
+}
+
+function vellumHotkeyChip() {
+  return {
+    mod: 'Ctrl',
+    init() {
+      this.mod = isApplePlatform() ? '⌘' : 'Ctrl'
+    },
+  }
+}
+
+function vellumChrome() {
+  return {
+    collapsed: false,
+    peek: false,
+    peekTimer: null,
+    peekLockedUntil: 0,
+    init() {
+      this.collapsed = document.documentElement.getAttribute('data-vellum-sidebar') === 'collapsed'
+    },
+    destroy() {
+      clearTimeout(this.peekTimer)
+    },
+    setCollapsed(value) {
+      this.collapsed = value
+      this.peek = false
+      this.peekLockedUntil = value ? Date.now() + 400 : 0
+      clearTimeout(this.peekTimer)
+      this.peekTimer = null
+      document.documentElement.removeAttribute('data-vellum-sidebar-peek')
+      try {
+        if (value) {
+          document.documentElement.setAttribute('data-vellum-sidebar', 'collapsed')
+          localStorage.setItem('vellum-sidebar', 'collapsed')
+        } else {
+          document.documentElement.removeAttribute('data-vellum-sidebar')
+          localStorage.setItem('vellum-sidebar', 'open')
+        }
+      } catch (e) {
+        // ignore storage failures
+      }
+    },
+    toggleSidebar() {
+      this.setCollapsed(!this.collapsed)
+    },
+    showPeek() {
+      if (!this.collapsed || Date.now() < this.peekLockedUntil) {
+        return
+      }
+      clearTimeout(this.peekTimer)
+      this.peekTimer = null
+      this.peek = true
+      document.documentElement.setAttribute('data-vellum-sidebar-peek', '')
+    },
+    scheduleHidePeek() {
+      if (!this.collapsed || !this.peek || this.peekTimer) {
+        return
+      }
+      this.peekTimer = setTimeout(() => {
+        this.peek = false
+        this.peekTimer = null
+        document.documentElement.removeAttribute('data-vellum-sidebar-peek')
+      }, 280)
+    },
+  }
+}
+
+function vellumHeadingCopy() {
+  return {
+    copied: false,
+    copy() {
+      const heading = this.$el.closest('h1, h2, h3, h4, h5, h6')
+      const id = heading?.id
+      if (!id) {
+        return
+      }
+
+      const url = new URL(`#${id}`, window.location.href)
+      navigator.clipboard.writeText(url.href)
+      this.copied = true
+      setTimeout(() => {
+        this.copied = false
+      }, 1500)
+    },
+  }
+}
+
+function vellumCopyMarkdown(source = '') {
+  return {
+    source,
+    copiedMarkdown: false,
+    copyMarkdown() {
+      navigator.clipboard.writeText(this.source)
+      this.copiedMarkdown = true
+      setTimeout(() => {
+        this.copiedMarkdown = false
+      }, 1500)
+    },
+  }
+}
+
+function vellumPageActions(source = '') {
+  return vellumCopyMarkdown(source)
+}
+
+function vellumOpenMenu() {
+  return {
+    open: false,
+    active: 0,
+    items() {
+      return [...(this.$refs.menu?.querySelectorAll('[role=menuitem]') ?? [])]
+    },
+    openMenu() {
+      this.open = true
+      this.active = 0
+      this.$nextTick(() => this.items()[0]?.focus())
+    },
+    closeMenu() {
+      this.open = false
+      this.$nextTick(() => this.$refs.trigger?.focus())
+    },
+    toggle() {
+      if (this.open) {
+        this.closeMenu()
+      } else {
+        this.openMenu()
+      }
+    },
+    onTriggerKeydown(event) {
+      if (event.key === 'ArrowDown' || event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault()
+        this.openMenu()
+      }
+    },
+    onMenuKeydown(event) {
+      const items = this.items()
+      if (event.key === 'Escape') {
+        event.preventDefault()
+        this.closeMenu()
+        return
+      }
+      if (event.key === 'ArrowDown') {
+        event.preventDefault()
+        this.active = (this.active + 1) % items.length
+        items[this.active]?.focus()
+        return
+      }
+      if (event.key === 'ArrowUp') {
+        event.preventDefault()
+        this.active = (this.active - 1 + items.length) % items.length
+        items[this.active]?.focus()
+        return
+      }
+      if (event.key === 'Home') {
+        event.preventDefault()
+        this.active = 0
+        items[0]?.focus()
+        return
+      }
+      if (event.key === 'End') {
+        event.preventDefault()
+        this.active = items.length - 1
+        items[this.active]?.focus()
       }
     },
   }
@@ -241,6 +491,11 @@ if (!window.Alpine) {
   Alpine.data('vellumTooltip', vellumTooltip)
   Alpine.data('vellumDialog', vellumDialog)
   Alpine.data('vellumSearchHotkey', vellumSearchHotkey)
+  Alpine.data('vellumHotkeyChip', vellumHotkeyChip)
+  Alpine.data('vellumChrome', vellumChrome)
+  Alpine.data('vellumHeadingCopy', vellumHeadingCopy)
+  Alpine.data('vellumPageActions', vellumPageActions)
+  Alpine.data('vellumOpenMenu', vellumOpenMenu)
   Alpine.data('vellumScrollSpy', vellumScrollSpy)
   Alpine.data('vellumPrefetchHover', prefetchHover)
   window.Alpine = Alpine

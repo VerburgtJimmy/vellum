@@ -1,6 +1,7 @@
 @props([
     'open' => false,
     'variant' => 'modal',
+    'side' => 'left',
     'showClose' => null,
     'showFooter' => true,
 ])
@@ -9,19 +10,33 @@
     use Vellum\Support\Cn;
 
     $isSheet = $variant === 'sheet';
-    $showCloseButton = $showClose === null ? true : filter_var($showClose, FILTER_VALIDATE_BOOLEAN);
+    $isSearch = $variant === 'search';
+    $showCloseButton = $showClose === null ? ! $isSearch : filter_var($showClose, FILTER_VALIDATE_BOOLEAN);
     $showFooterBar = isset($footer) || filter_var($showFooter, FILTER_VALIDATE_BOOLEAN);
 
+    $sheetFromRight = $isSheet && $side === 'right';
     $panelClasses = $isSheet
-        ? 'fixed inset-y-0 left-0 z-50 flex h-full w-[min(100vw,20rem)] flex-col gap-4 border-r border-border bg-background p-4 shadow-lg motion-safe:transition-transform'
-        : 'fixed left-1/2 top-1/2 z-50 grid w-full max-w-lg -translate-x-1/2 -translate-y-1/2 gap-4 border border-border bg-background p-6 shadow-lg rounded-lg';
+        ? ($sheetFromRight
+            ? 'fixed inset-y-0 right-0 z-50 flex h-full w-[85%] max-w-[380px] flex-col border-s border-border bg-background shadow-lg'
+            : 'fixed inset-y-0 left-0 z-50 flex h-full w-[85%] max-w-[380px] flex-col border-e border-border bg-background shadow-lg')
+        : ($isSearch
+            ? 'fixed left-1/2 top-4 z-50 w-[calc(100%-1rem)] max-w-screen-sm -translate-x-1/2 overflow-hidden rounded-xl border border-border bg-popover text-popover-foreground shadow-2xl shadow-black/50 md:top-[calc(50%-250px)]'
+            : 'fixed left-1/2 top-1/2 z-50 grid w-full max-w-lg -translate-x-1/2 -translate-y-1/2 gap-4 border border-border bg-background p-6 shadow-lg rounded-lg');
+
+    $overlayClasses = $isSearch
+        ? 'fixed inset-0 bg-black/50 backdrop-blur-[4px]'
+        : ($isSheet
+            ? 'fixed inset-0 bg-black/10 backdrop-blur-2xl'
+            : 'fixed inset-0 bg-black/50');
+
+    $dialogVariant = $isSheet ? 'sheet' : ($isSearch ? 'search' : 'modal');
 
     $classes = Cn::merge($attributes->get('class'));
 @endphp
 
 <div
     data-vellum-dialog
-    data-vellum-dialog-variant="{{ $isSheet ? 'sheet' : 'modal' }}"
+    data-vellum-dialog-variant="{{ $dialogVariant }}"
     x-data="vellumDialog(@js((bool) $open))"
     @@keydown.escape.window="if (open) close()"
     {{ $attributes->except('class')->merge(['class' => $classes]) }}
@@ -35,10 +50,12 @@
     {{-- Mount only when open so x-trap is bound after the focus chunk registers --}}
     <template x-teleport="body">
         <template x-if="open">
-            <div class="fixed inset-0 z-50" role="presentation">
+            <div class="fixed inset-0 z-50" role="presentation" data-vellum-dialog-variant="{{ $dialogVariant }}">
                 <div
                     data-vellum-dialog-overlay
-                    class="fixed inset-0 bg-black/50"
+                    @if ($isSheet) data-vellum-sheet-overlay @endif
+                    class="{{ $overlayClasses }}"
+                    @if ($isSheet) :class="entered && 'is-entered'" @endif
                     x-on:click="close()"
                     aria-hidden="true"
                 ></div>
@@ -49,6 +66,10 @@
                     x-trap.noscroll="true"
                     x-on:click.stop
                     class="{{ $panelClasses }}"
+                    @if ($isSheet)
+                        data-vellum-sheet-side="{{ $sheetFromRight ? 'right' : 'left' }}"
+                        :class="entered && 'is-entered'"
+                    @endif
                 >
                     @if ($showCloseButton)
                         <button
@@ -59,9 +80,7 @@
                             aria-label="Close"
                             class="absolute right-3 top-3 inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                         >
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4" aria-hidden="true">
-                                <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
-                            </svg>
+                            {!! \Vellum\Support\Icons::x(['class' => 'h-4 w-4']) !!}
                         </button>
                     @endif
 
@@ -80,7 +99,7 @@
                         </div>
                     @endif
 
-                    <div data-vellum-dialog-content class="{{ $isSheet ? 'min-h-0 flex-1 overflow-y-auto' : '' }}">
+                    <div data-vellum-dialog-content class="{{ $isSheet ? 'flex min-h-0 flex-1 flex-col overflow-hidden' : '' }}">
                         {{ $content ?? $slot }}
                     </div>
 
