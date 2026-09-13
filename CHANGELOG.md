@@ -5,7 +5,7 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.2.0] - 2026-09-12
+## [0.2.0] - 2026-09-13
 
 Docs chrome and Markdown polish. Pre-1.0: the API may change.
 
@@ -18,11 +18,13 @@ Docs chrome and Markdown polish. Pre-1.0: the API may change.
 - Page actions: copy Markdown, Open menu (ChatGPT, Claude, raw Markdown, Edit on GitHub)
 - Raw Markdown route `/docs/_vellum/raw/{slug}.md`, included in `vellum:export`
 - `success` and `idea` callout aliases (map to tip and note)
+- `vellum.theme.preset`: Fumadocs palettes (`neutral`, `black`, `vitepress`, `dusk`, `catppuccin`, `ocean`, `purple`, `solar`, `emerald`, `ruby`, `aspen`)
 
 ### Fixed
 
 - Collapsed sidebar peek only opens from the left-edge hotzone after a short cooldown, and hides when the pointer leaves
 - Theme menu in the sidebar footer opens upward so it stays on screen
+- `bin/build-demo` registers the package through `testbench.yaml` so `vellum:export` is available
 
 ### Changed
 

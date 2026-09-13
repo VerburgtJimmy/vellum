@@ -101,7 +101,10 @@ return [
     |--------------------------------------------------------------------------
     */
     'theme' => [
-        // oklch hue override for --primary (null keeps the default)
+        // Fumadocs palettes: neutral (default), black, vitepress, dusk,
+        // catppuccin, ocean, purple, solar, emerald, ruby, aspen
+        'preset' => 'neutral',
+        // oklch hue override for --primary on Neutral (null keeps the default)
         'primary' => null,
         'radius' => '0.5rem',
         // light | dark | system

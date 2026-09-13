@@ -1,9 +1,11 @@
 @php
     use Vellum\Support\Assets;
+    use Vellum\Support\Theme;
 
     $themeDefault = config('vellum.theme.default', 'system');
     $themeRadius = config('vellum.theme.radius', '0.5rem');
     $themePrimary = config('vellum.theme.primary');
+    $themePreset = Theme::preset();
     $rootStyles = ['--radius: '.$themeRadius];
 
     if ($themePrimary !== null && $themePrimary !== '') {
@@ -13,6 +15,7 @@
 <!DOCTYPE html>
 <html
     lang="{{ str_replace('_', '-', app()->getLocale()) }}"
+    data-vellum-preset="{{ $themePreset }}"
     data-vellum-search="{{ Assets::searchJsUrl() }}"
     data-vellum-anchor="{{ Assets::anchorJsUrl() }}"
     data-vellum-focus="{{ Assets::focusJsUrl() }}"

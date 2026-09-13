@@ -57,6 +57,19 @@ Regenerate the static export locally after stub changes: `bash bin/build-demo`
 
 `config/vellum.php` (published by `vellum:install`).
 
+Theme:
+
+```php
+'theme' => [
+    'preset' => 'neutral', // black, vitepress, dusk, catppuccin, ocean, purple, solar, emerald, ruby, aspen
+    'primary' => null,     // oklch hue, used by Neutral
+    'radius' => '0.5rem',
+    'default' => 'system', // light | dark | system
+],
+```
+
+Optional `'fonts'` injects HTML into the layout head (for example a `<link>` tag).
+
 ## Commands
 
 | Command | Description |
@@ -69,8 +82,8 @@ Regenerate the static export locally after stub changes: `bash bin/build-demo`
 ## Publishing
 
 ```bash
-git tag v0.1.0
-git push origin v0.1.0
+git tag v0.2.0
+git push origin v0.2.0
 ```
 
 Submit the repo once at [https://packagist.org/packages/submit](https://packagist.org/packages/submit). Packagist reads the Git tag; do not add a `version` field to `composer.json`.

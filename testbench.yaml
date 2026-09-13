@@ -1,0 +1,2 @@
+providers:
+  - Vellum\VellumServiceProvider

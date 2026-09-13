@@ -53,7 +53,8 @@ MD);
         ->toContain('hover:font-semibold')
         ->toContain('is-active font-semibold text-foreground')
         ->toContain('data-vellum-toc-nav')
-        ->toContain('viewBox="0 0 256 256"');
+        ->toContain('viewBox="0 0 256 256"')
+        ->toContain('data-vellum-preset="neutral"');
 });
 
 it('renders the branded 404 page for missing documents', function (): void {
@@ -320,5 +321,26 @@ it('keeps line-number gutters unselectable in css', function (): void {
         ->and($css)->toContain('data-vellum-sidebar-peek')
         ->and($css)->not->toMatch('/\[data-vellum-page-row\]\{[^}]*justify-content:\s*center/')
         ->and($css)->toContain('data-vellum-sidebar-hotzone')
+        ->and($css)->toMatch('/data-vellum-preset[=]["\']?ocean/')
         ->and($css)->not->toContain('margin-inline: -1rem');
+});
+
+it('applies a fumadocs colour preset from config', function (): void {
+    config()->set('vellum.theme.preset', 'ocean');
+
+    $this->writeDoc('index.md', "---\ntitle: Home\n---\nHi");
+
+    $html = $this->get('/docs')->assertOk()->getContent();
+
+    expect($html)->toContain('data-vellum-preset="ocean"');
+});
+
+it('falls back to neutral for an unknown colour preset', function (): void {
+    config()->set('vellum.theme.preset', 'not-a-palette');
+
+    $this->writeDoc('index.md', "---\ntitle: Home\n---\nHi");
+
+    $html = $this->get('/docs')->assertOk()->getContent();
+
+    expect($html)->toContain('data-vellum-preset="neutral"');
 });
