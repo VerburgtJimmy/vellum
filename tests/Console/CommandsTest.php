@@ -163,7 +163,7 @@ it('exports documents assets and search index for a static host', function (): v
     $this->deleteDirectory($out);
 });
 
-it('exports versioned pages and unversioned redirects', function (): void {
+it('exports the latest version unprefixed and older versions under /docs/{version}', function (): void {
     $out = sys_get_temp_dir().'/vellum-tests/export-versions-'.$this->fixtureId();
 
     if (is_dir($out)) {
@@ -181,26 +181,87 @@ it('exports versioned pages and unversioned redirects', function (): void {
 
     $this->artisan('vellum:export')->assertSuccessful();
 
-    $versioned = $out.'/docs/v2/guides/auth/index.html';
-    $redirect = $out.'/docs/guides/auth/index.html';
-    $versionedIndex = $out.'/docs/v2/index.html';
-    $redirectIndex = $out.'/docs/index.html';
+    $latest = $out.'/docs/guides/auth/index.html';
+    $redirect = $out.'/docs/v2/guides/auth/index.html';
+    $latestIndex = $out.'/docs/index.html';
+    $redirectIndex = $out.'/docs/v2/index.html';
+    $older = $out.'/docs/v1/index.html';
 
-    expect(is_file($versioned))->toBeTrue()
+    expect(is_file($latest))->toBeTrue()
         ->and(is_file($redirect))->toBeTrue()
-        ->and(is_file($versionedIndex))->toBeTrue()
-        ->and(is_file($redirectIndex))->toBeTrue();
+        ->and(is_file($latestIndex))->toBeTrue()
+        ->and(is_file($redirectIndex))->toBeTrue()
+        ->and(is_file($older))->toBeTrue();
 
-    $versionedHtml = file_get_contents($versioned);
+    $latestHtml = file_get_contents($latest);
     $redirectHtml = file_get_contents($redirect);
+    $olderHtml = file_get_contents($older);
 
-    expect($versionedHtml)->not->toBeFalse()
-        ->and($versionedHtml)->toContain('Auth v2')
-        ->and($versionedHtml)->toContain('data-vellum-version-switcher')
-        ->and($versionedHtml)->toContain('../../../../vendor/vellum/vellum.css')
+    expect($latestHtml)->not->toBeFalse()
+        ->and($latestHtml)->toContain('Auth v2')
+        ->and($latestHtml)->toContain('data-vellum-version-switcher')
+        ->and($latestHtml)->toContain('Latest')
+        ->and($latestHtml)->toContain('../../../vendor/vellum/vellum.css')
         ->and($redirectHtml)->not->toBeFalse()
         ->and($redirectHtml)->toContain('http-equiv="refresh"')
-        ->and($redirectHtml)->toContain('../../v2/guides/auth/');
+        ->and($redirectHtml)->toContain('../../../guides/auth/')
+        ->and($olderHtml)->not->toBeFalse()
+        ->and($olderHtml)->toContain('Version one');
 
     $this->deleteDirectory($out);
+});
+
+it('drops auth-only pages from the exported MiniSearch index', function (): void {
+    $out = sys_get_temp_dir().'/vellum-tests/export-search-'.$this->fixtureId();
+
+    if (is_dir($out)) {
+        $this->deleteDirectory($out);
+    }
+
+    config()->set('vellum.export.out', $out);
+    config()->set('vellum.search.driver', 'scout');
+
+    $this->writeDoc('index.md', "---\ntitle: Home\n---\nHello export");
+    $this->writeDoc('secret.md', "---\ntitle: Secret\naccess: auth\n---\nNope");
+
+    $this->artisan('vellum:export')
+        ->expectsOutputToContain('Dropped gated page: secret (access: auth)')
+        ->assertSuccessful();
+
+    $search = $out.'/docs/_vellum/search.json';
+    $html = file_get_contents($out.'/docs/index.html');
+
+    expect(is_file($search))->toBeTrue()
+        ->and($html)->not->toBeFalse()
+        ->and(is_file($out.'/docs/secret/index.html'))->toBeFalse()
+        ->and(is_file($out.'/docs/_vellum/raw/secret.md'))->toBeFalse();
+
+    /** @var array{driver: string, documents: list<array{title: string}>} $payload */
+    $payload = json_decode((string) file_get_contents($search), true, 512, JSON_THROW_ON_ERROR);
+
+    expect($payload['driver'])->toBe('minisearch')
+        ->and(collect($payload['documents'])->pluck('title')->all())->toContain('Home')
+        ->and(collect($payload['documents'])->pluck('title')->all())->not->toContain('Secret')
+        ->and($html)->toContain('data-vellum-search-driver="minisearch"')
+        ->and($html)->toContain('_vellum/search-');
+
+    $this->deleteDirectory($out);
+});
+
+it('rebuilds the MiniSearch index via vellum:index', function (): void {
+    $this->writeDoc('index.md', "---\ntitle: Home\n---\nHi");
+
+    $this->artisan('vellum:index')
+        ->expectsOutputToContain('MiniSearch index rebuilt')
+        ->assertSuccessful();
+
+    expect(is_file($this->cachePath().'/search-index.json'))->toBeTrue();
+});
+
+it('fails vellum:index when scout is configured without laravel/scout', function (): void {
+    $this->writeDoc('index.md', "---\ntitle: Home\n---\nHi");
+    config()->set('vellum.search.driver', 'scout');
+
+    expect(fn () => $this->artisan('vellum:index'))
+        ->toThrow(RuntimeException::class, 'laravel/scout is not installed');
 });

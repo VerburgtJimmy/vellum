@@ -28,7 +28,8 @@ it('builds a minisearch document list with stable hash', function (): void {
         ->and($home['description'])->toBe('Welcome')
         ->and($home['content'])->toContain('Hello world')
         ->and($home['url'])->toBe('/docs')
-        ->and($home['headings'])->toContain('Section');
+        ->and($home['headings'])->toContain('Section')
+        ->and($home['access'])->toBe('guest');
 
     $manifest = $repository->store()->getManifest();
 
@@ -36,4 +37,20 @@ it('builds a minisearch document list with stable hash', function (): void {
         ->and($manifest['search_hash'])->toBe($built['hash'])
         ->and(is_file($this->cachePath().'/search-index.json'))->toBeTrue()
         ->and(is_file($this->cachePath().'/search-index-'.$built['hash'].'.json'))->toBeTrue();
+});
+
+it('records frontmatter access on search documents', function (): void {
+    $this->writeDoc('index.md', "---\ntitle: Home\n---\nHi");
+    $this->writeDoc('secret.md', "---\ntitle: Secret\naccess: auth\n---\nNope");
+
+    $repository = new ContentRepository(
+        contentPath: $this->docsPath(),
+        store: new CompiledStore($this->cachePath()),
+    );
+    $built = (new SearchIndexBuilder)->build($repository->buildAll());
+
+    $secret = collect($built['documents'])->firstWhere('id', 'secret');
+
+    expect($secret)->not->toBeNull()
+        ->and($secret['access'])->toBe('auth');
 });

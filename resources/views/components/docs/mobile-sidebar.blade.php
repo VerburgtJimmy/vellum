@@ -37,7 +37,14 @@
                     >
                         {!! \Vellum\Support\Icons::x(['class' => 'h-4 w-4']) !!}
                     </button>
-                    <div class="ms-auto flex items-center">
+                    <div class="ms-auto flex items-center gap-1.5">
+                        @if (config('vellum.versions.enabled'))
+                            <x-vellum::docs.version-switcher
+                                :versions="$versions"
+                                :current-version="$currentVersion"
+                                :version-hrefs="$versionHrefs"
+                            />
+                        @endif
                         <x-vellum::docs.theme-toggle variant="pair" />
                     </div>
                 </div>

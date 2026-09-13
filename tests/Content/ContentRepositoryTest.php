@@ -146,7 +146,7 @@ it('recompiles a document in local when mtime changes', function (): void {
     expect($repository->find('local')?->title)->toBe('Updated');
 });
 
-it('resolves versioned documents and redirects unversioned slugs', function (): void {
+it('resolves versioned documents and omits the latest version from URLs', function (): void {
     $this->writeDoc('v2/guides/auth.md', "---\ntitle: V2 Auth\n---\nV2");
     $this->writeDoc('v1/guides/auth.md', "---\ntitle: V1 Auth\n---\nV1");
 
@@ -162,8 +162,13 @@ it('resolves versioned documents and redirects unversioned slugs', function (): 
         versions: ['v2', 'v1'],
     );
 
-    expect($repository->shouldRedirectToLatest('guides/auth'))->toBeTrue()
-        ->and($repository->shouldRedirectToLatest('v2/guides/auth'))->toBeFalse();
+    expect($repository->shouldRedirectToUnprefixed('guides/auth'))->toBeFalse()
+        ->and($repository->shouldRedirectToUnprefixed('v2/guides/auth'))->toBeTrue()
+        ->and($repository->unprefixedPath('v2/guides/auth'))->toBe('guides/auth')
+        ->and($repository->hrefFor('guides/auth', 'v2'))->toBe('/docs/guides/auth')
+        ->and($repository->hrefFor('guides/auth', 'v1'))->toBe('/docs/v1/guides/auth')
+        ->and($repository->parseRequestSlug('guides/auth'))->toBe(['version' => 'v2', 'slug' => 'guides/auth'])
+        ->and($repository->parseRequestSlug('v1/guides/auth'))->toBe(['version' => 'v1', 'slug' => 'guides/auth']);
 
     $document = $repository->find('guides/auth', 'v2');
 

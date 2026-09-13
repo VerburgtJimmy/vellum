@@ -29,7 +29,7 @@ php artisan vellum:build
 - Markdown extensions: callouts, tabs, steps, cards, code blocks, heading anchors
 - Markdown plus components (`<x-...>` islands, allowlisted env/config/route tags)
 - Changelog page and Atom feed
-- Client-side search
+- Client-side search (MiniSearch by default; Laravel Scout optional)
 - Optional versioned docs
 - Static HTML export (`vellum:export`)
 - Light / dark / system theme
@@ -78,6 +78,7 @@ Optional `'fonts'` injects HTML into the layout head (for example a `<link>` tag
 | --- | --- |
 | `php artisan vellum:install` | Publish config, starter Markdown stubs, and public assets |
 | `php artisan vellum:build` | Compile Markdown into the Vellum cache |
+| `php artisan vellum:index` | Rebuild the search index (MiniSearch, and Scout when that driver is on) |
 | `php artisan vellum:clear` | Clear the compiled cache |
 | `php artisan vellum:export` | Export a static HTML site (`--out=` optional) |
 

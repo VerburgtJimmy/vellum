@@ -11,6 +11,7 @@ use Vellum\Content\ContentRepository;
 use Vellum\Content\Document;
 use Vellum\Content\HeadingExtractor;
 use Vellum\Markdown\Islands\IslandRenderer;
+use Vellum\Search\SearchDriver;
 
 /**
  * Shared view data for live docs pages and static export.
@@ -27,6 +28,7 @@ final class DocsView
         Document $document,
         HeadingExtractor $headingExtractor,
         bool $cacheFragment = true,
+        bool $staticExport = false,
     ): array {
         $adjacent = $repository->adjacent($document->slug, $document->version);
         $switcher = $repository->versionSwitcherData($document->slug, $document->version);
@@ -47,6 +49,8 @@ final class DocsView
             'breadcrumbs' => $repository->breadcrumbs($document),
             'toc' => $headingExtractor->nest($document->headings),
             'searchHash' => $repository->searchHash($document->version),
+            'searchDriver' => SearchDriver::name(),
+            'staticExport' => $staticExport,
             'versions' => $switcher['versions'],
             'currentVersion' => $switcher['currentVersion'],
             'versionHrefs' => $switcher['versionHrefs'],
@@ -61,7 +65,7 @@ final class DocsView
     /**
      * @return DocsPageData
      */
-    public static function changelog(ContentRepository $repository, Changelog $changelog): array
+    public static function changelog(ContentRepository $repository, Changelog $changelog, bool $staticExport = false): array
     {
         $version = $repository->latestVersion();
         $switcher = $repository->versionSwitcherData('', $version);
@@ -93,6 +97,8 @@ final class DocsView
             ],
             'toc' => (new HeadingExtractor)->nest($headings),
             'searchHash' => $repository->searchHash($version),
+            'searchDriver' => SearchDriver::name(),
+            'staticExport' => $staticExport,
             'versions' => $switcher['versions'],
             'currentVersion' => $switcher['currentVersion'],
             'versionHrefs' => $switcher['versionHrefs'],
@@ -107,9 +113,15 @@ final class DocsView
     public static function rawSlug(Document $document): string
     {
         $slug = $document->slug === '' ? 'index' : $document->slug;
+        $version = $document->version;
 
-        if (is_string($document->version) && $document->version !== '') {
-            return $document->version.'/'.$slug;
+        if (
+            (bool) config('vellum.versions.enabled')
+            && is_string($version)
+            && $version !== ''
+            && $version !== config('vellum.versions.latest')
+        ) {
+            return $version.'/'.$slug;
         }
 
         return $slug;

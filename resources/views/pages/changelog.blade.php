@@ -22,6 +22,7 @@
         :current-version="$currentVersion ?? null"
         :version-hrefs="$versionHrefs ?? []"
         :search-placement="$searchPlacement"
+        :static-export="$staticExport ?? false"
     >
         <div class="flex min-w-0 min-h-0 flex-1 flex-col">
             <x-vellum::docs.toc :toc="$toc" :document="null" placement="mobile" :sticky-class="$tocSticky" :mobile-sticky-class="$tocMobileSticky" />

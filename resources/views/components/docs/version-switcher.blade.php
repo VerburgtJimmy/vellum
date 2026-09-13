@@ -11,6 +11,12 @@
     $currentVersion = is_string($currentVersion) && $currentVersion !== ''
         ? $currentVersion
         : ($versions[0] ?? null);
+    $latest = config('vellum.versions.latest');
+    $labels = [];
+
+    foreach ($versions as $version) {
+        $labels[$version] = $version === $latest ? 'Latest' : $version;
+    }
 @endphp
 
 @if ($enabled && $versions !== [] && $currentVersion !== null)
@@ -20,6 +26,7 @@
     x-data="{
         open: false,
         versions: @js($versions),
+        labels: @js($labels),
         current: @js($currentVersion),
         active: 0,
         openMenu() {
@@ -77,7 +84,7 @@
         x-on:click="toggle()"
         x-on:keydown="onTriggerKeydown($event)"
     >
-        <span x-text="current">{{ $currentVersion }}</span>
+        <span x-text="labels[current] ?? current">{{ $labels[$currentVersion] ?? $currentVersion }}</span>
         {!! \Vellum\Support\Icons::caretDown(['class' => 'h-3.5 w-3.5 opacity-70']) !!}
     </button>
 
@@ -102,7 +109,7 @@
                 :tabindex="active === {{ $index }} ? 0 : -1"
                 x-on:mouseenter="active = {{ $index }}"
                 @if ($version === $currentVersion) aria-current="true" @endif
-            >{{ $version }}</a>
+            >{{ $labels[$version] ?? $version }}</a>
         @endforeach
     </div>
 </div>

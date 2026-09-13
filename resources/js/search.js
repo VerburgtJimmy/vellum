@@ -40,6 +40,7 @@ export function createSearchIndex(documents, options = {}) {
  */
 export async function fetchSearchDocuments(url) {
   const response = await fetch(url, {
+    credentials: 'same-origin',
     headers: { Accept: 'application/json' },
   })
 

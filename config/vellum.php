@@ -39,8 +39,10 @@ return [
     | Versions
     |--------------------------------------------------------------------------
     |
-    | When enabled, docs live under version folders (e.g. v2/, v1/). Requests
-    | without a version segment redirect to the latest version.
+    | When enabled, docs live under version folders (e.g. v2/, v1/). The
+    | latest version is served at /docs/... with no version segment. Other
+    | versions are at /docs/v1/.... /docs/{latest}/... redirects to the
+    | unprefixed URL. The switcher labels the latest folder "Latest".
     |
     */
     'versions' => [
@@ -125,10 +127,23 @@ return [
     |--------------------------------------------------------------------------
     | Search
     |--------------------------------------------------------------------------
+    |
+    | driver: minisearch (default) or scout. MiniSearch is zero-setup and
+    | works on every host, including static export. Scout is opt-in for
+    | Meilisearch or Typesense (composer require laravel/scout). Export
+    | always writes MiniSearch JSON, regardless of this setting.
+    |
+    | The live MiniSearch index is a package route, filtered for the current
+    | user and cached per visibility set. It is not a public static asset.
+    |
     */
     'search' => [
         'enabled' => true,
         'hotkey' => 'k',
+        'driver' => env('VELLUM_SEARCH_DRIVER', 'minisearch'),
+        'scout' => [
+            'index' => 'vellum',
+        ],
     ],
 
     /*

@@ -33,34 +33,23 @@ final class DocsController extends Controller
         $repository = ContentRepository::fromConfig();
         $slug = trim($slug, '/');
 
-        if ($repository->versionsEnabled() && $repository->shouldRedirectToLatest($slug)) {
-            $latest = $repository->latestVersion();
+        if ($repository->versionsEnabled() && $repository->shouldRedirectToUnprefixed($slug)) {
+            $target = $repository->unprefixedPath($slug);
 
-            if ($latest !== null) {
-                $target = trim($latest.'/'.$slug, '/');
-
-                return redirect()->route('vellum.docs.show', ['slug' => $target], 302);
+            if ($target === '') {
+                return redirect()->route('vellum.docs.index', status: 301);
             }
+
+            return redirect()->route('vellum.docs.show', ['slug' => $target], 301);
         }
 
-        $version = null;
-        $documentSlug = $slug;
-
-        if ($repository->versionsEnabled()) {
-            $parts = $slug === '' ? [] : explode('/', $slug, 2);
-            $first = $parts[0] ?? '';
-
-            if (in_array($first, $repository->versions(), true)) {
-                $version = $first;
-                $documentSlug = $parts[1] ?? '';
-            } else {
-                $version = $repository->latestVersion();
-            }
-        }
+        $parsed = $repository->parseRequestSlug($slug);
+        $version = $parsed['version'];
+        $documentSlug = $parsed['slug'];
 
         $document = $repository->find($documentSlug, $version);
 
-        if ($document === null) {
+        if ($document === null || ! $repository->allows($document)) {
             return $this->notFound($repository, $version);
         }
 

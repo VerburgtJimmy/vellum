@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Vellum\Content;
 
 use Vellum\Markdown\Islands\IslandRenderer;
+use Vellum\Support\VersionUrl;
 
 /**
  * Builds the client-side MiniSearch document list from compiled pages.
@@ -15,13 +16,15 @@ use Vellum\Markdown\Islands\IslandRenderer;
  *     description: string,
  *     content: string,
  *     url: string,
- *     headings: list<string>
+ *     headings: list<string>,
+ *     access: string
  * }
  */
 final class SearchIndexBuilder
 {
     public function __construct(
         private readonly string $routePrefix = 'docs',
+        private readonly ?string $defaultVersion = null,
     ) {}
 
     /**
@@ -33,6 +36,8 @@ final class SearchIndexBuilder
         $entries = [];
 
         foreach ($documents as $document) {
+            $access = $document->access();
+
             $entries[] = [
                 'id' => $document->slug === '' ? 'index' : $document->slug,
                 'title' => $document->title,
@@ -43,6 +48,7 @@ final class SearchIndexBuilder
                     static fn (array $heading): string => $heading['text'],
                     $document->headings,
                 ),
+                'access' => $access,
             ];
         }
 
@@ -66,12 +72,6 @@ final class SearchIndexBuilder
 
     private function urlFor(string $slug, ?string $version): string
     {
-        $parts = array_filter([
-            trim($this->routePrefix, '/'),
-            $version,
-            trim($slug, '/'),
-        ], static fn (?string $part): bool => $part !== null && $part !== '');
-
-        return '/'.implode('/', $parts);
+        return VersionUrl::href($this->routePrefix, $slug, $version, $this->defaultVersion);
     }
 }

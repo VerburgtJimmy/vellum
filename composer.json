@@ -51,6 +51,9 @@
             "Vellum\\Tests\\": "tests/"
         }
     },
+    "suggest": {
+        "laravel/scout": "Required when vellum.search.driver is scout (Meilisearch or Typesense)."
+    },
     "extra": {
         "laravel": {
             "providers": [

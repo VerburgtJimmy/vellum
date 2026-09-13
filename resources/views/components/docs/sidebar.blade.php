@@ -58,6 +58,13 @@
         @else
             <div class="min-w-0 flex-1"></div>
         @endif
+        @if ($searchInSidebar && config('vellum.versions.enabled'))
+            <x-vellum::docs.version-switcher
+                :versions="$versions"
+                :current-version="$currentVersion"
+                :version-hrefs="$versionHrefs"
+            />
+        @endif
         <button
             type="button"
             data-vellum-sidebar-collapse
@@ -74,16 +81,6 @@
     @if ($chrome && $searchInSidebar && config('vellum.search.enabled'))
         <div class="px-3 pb-3">
             <x-vellum::docs.search-trigger variant="sidebar" />
-        </div>
-    @endif
-
-    @if ($chrome && $searchInSidebar && config('vellum.versions.enabled'))
-        <div class="px-3 pb-3">
-            <x-vellum::docs.version-switcher
-                :versions="$versions"
-                :current-version="$currentVersion"
-                :version-hrefs="$versionHrefs"
-            />
         </div>
     @endif
 

@@ -6,6 +6,8 @@ namespace Vellum\Console;
 
 use Illuminate\Console\Command;
 use Vellum\Content\ContentRepository;
+use Vellum\Search\ScoutIndexer;
+use Vellum\Search\SearchDriver;
 
 /**
  * Compiles every Markdown document into the OPcache-friendly cache.
@@ -24,6 +26,12 @@ final class BuildCommand extends Command
         $version = is_string($version) && $version !== '' ? $version : null;
 
         $documents = $repository->buildAll($version);
+
+        if (SearchDriver::isScout()) {
+            SearchDriver::assertScoutInstalled();
+            (new ScoutIndexer)->sync($repository, $documents);
+        }
+
         $elapsed = round((microtime(true) - $started) * 1000);
 
         $this->info(sprintf(

@@ -6,3 +6,6 @@ parameters:
     paths:
         - src
     tmpDir: .phpstan.cache
+    excludePaths:
+        - src/Search/SearchableDocument.php
+        - src/Search/ScoutIndexer.php

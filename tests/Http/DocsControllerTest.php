@@ -42,19 +42,25 @@ it('returns 404 for missing documents', function (): void {
         ->assertSee('Page not found', false);
 });
 
-it('redirects unversioned paths to the latest version', function (): void {
+it('serves the latest version at unprefixed URLs and older versions under /docs/{version}', function (): void {
     config()->set('vellum.versions.enabled', true);
     config()->set('vellum.versions.latest', 'v2');
     config()->set('vellum.versions.list', ['v2', 'v1']);
 
     $this->writeDoc('v2/guides/auth.md', "---\ntitle: Auth\n---\nV2");
+    $this->writeDoc('v1/guides/auth.md', "---\ntitle: Auth\n---\nV1");
 
     $this->get('/docs/guides/auth')
-        ->assertRedirect('/docs/v2/guides/auth');
+        ->assertOk()
+        ->assertSee('V2', false);
 
     $this->get('/docs/v2/guides/auth')
+        ->assertRedirect('/docs/guides/auth')
+        ->assertStatus(301);
+
+    $this->get('/docs/v1/guides/auth')
         ->assertOk()
-        ->assertSee('Auth', false);
+        ->assertSee('V1', false);
 });
 
 it('renders the version switcher when versions are enabled', function (): void {
@@ -65,9 +71,10 @@ it('renders the version switcher when versions are enabled', function (): void {
     $this->writeDoc('v2/index.md', "---\ntitle: Home\n---\nV2");
     $this->writeDoc('v1/index.md', "---\ntitle: Home\n---\nV1");
 
-    $this->get('/docs/v2')
+    $this->get('/docs')
         ->assertOk()
         ->assertSee('data-vellum-version-switcher', false)
+        ->assertSee('Latest', false)
         ->assertSee('aria-haspopup="menu"', false);
 });
 

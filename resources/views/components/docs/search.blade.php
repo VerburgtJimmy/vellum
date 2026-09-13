@@ -1,17 +1,30 @@
 @props([
     'searchHash' => null,
+    'currentVersion' => null,
+    'staticExport' => false,
 ])
 
 @php
     $hotkey = (string) config('vellum.search.hotkey', 'k');
-    $searchUrl = is_string($searchHash) && $searchHash !== ''
-        ? route('vellum.search.hashed', ['hash' => $searchHash])
-        : route('vellum.search');
+    $driver = $staticExport ? 'minisearch' : \Vellum\Search\SearchDriver::name();
+    $prefix = trim((string) config('vellum.route.prefix', 'docs'), '/');
+
+    if ($staticExport && is_string($searchHash) && $searchHash !== '') {
+        $searchUrl = '/'.$prefix.'/_vellum/search-'.$searchHash.'.json';
+    } else {
+        $params = [];
+        if (is_string($currentVersion) && $currentVersion !== '' && (bool) config('vellum.versions.enabled')) {
+            $params['version'] = $currentVersion;
+        }
+        $searchUrl = route('vellum.search', $params);
+    }
 @endphp
 
 <div
     data-vellum-search
     data-vellum-search-hotkey="{{ $hotkey }}"
+    data-vellum-search-driver="{{ $driver }}"
+    data-vellum-search-url="{{ $searchUrl }}"
     x-data="vellumSearchHotkey(@js($hotkey))"
     x-on:vellum-search-open.window="openSearch()"
     x-on:vellum-search-close.window="closeSearch()"
@@ -34,8 +47,14 @@
                     loading: false,
                     ready: false,
                     searchUrl: @js($searchUrl),
+                    driver: @js($driver),
                     async ensureIndex() {
                         if (this.ready || this.loading) {
+                            return
+                        }
+                        if (this.driver === 'scout') {
+                            this.ready = true
+                            this.status = 'Search ready'
                             return
                         }
                         this.loading = true
@@ -54,7 +73,6 @@
                     async runSearch() {
                         await this.ensureIndex()
                         const mod = await window.VellumSearch.load()
-                        const { index } = await mod.getOrCreateIndex(this.searchUrl)
                         const q = this.query.trim()
                         if (!q) {
                             this.groups = []
@@ -63,8 +81,14 @@
                             this.status = 'Type to search'
                             return
                         }
-                        const hits = index.search(q, { boost: { title: 3, headings: 2 }, prefix: true, fuzzy: 0.2 })
-                        this.groups = mod.groupResultsByPage(hits, q)
+                        if (this.driver === 'scout') {
+                            const documents = await mod.fetchSearchDocuments(this.searchUrl + (this.searchUrl.includes('?') ? '&' : '?') + 'q=' + encodeURIComponent(q))
+                            this.groups = mod.groupResultsByPage(documents, q)
+                        } else {
+                            const { index } = await mod.getOrCreateIndex(this.searchUrl)
+                            const hits = index.search(q, { boost: { title: 3, headings: 2 }, prefix: true, fuzzy: 0.2 })
+                            this.groups = mod.groupResultsByPage(hits, q)
+                        }
                         this.flat = this.groups.map((g) => ({ url: g.url }))
                         this.active = 0
                         const count = this.groups.length

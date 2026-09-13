@@ -13,6 +13,7 @@ use Vellum\Content\ContentRepository;
 use Vellum\Content\Document;
 use Vellum\Content\HeadingExtractor;
 use Vellum\Http\DocsView;
+use Vellum\Search\SearchIndexQuery;
 
 /**
  * Renders the docs site to a static HTML folder for any static host.
@@ -62,8 +63,19 @@ final class ExportCommand extends Command
         $pages = 0;
 
         foreach ($documents as $document) {
+            $access = $document->access();
+
+            if (! $repository->allows($document)) {
+                $label = $document->version !== null && $document->version !== ''
+                    ? $document->version.'/'.($document->slug === '' ? 'index' : $document->slug)
+                    : ($document->slug === '' ? 'index' : $document->slug);
+                $this->warn("Dropped gated page: {$label} (access: {$access})");
+
+                continue;
+            }
+
             $html = $this->renderDocument($repository, $document);
-            $path = $this->documentOutputPath($prefixRoot, $document);
+            $path = $this->documentOutputPath($prefixRoot, $document, $repository);
             $html = $this->rewriteHtml($html, $out, $path, $prefix, $baseUrl);
 
             $this->writeFile($path, $html);
@@ -76,14 +88,13 @@ final class ExportCommand extends Command
 
             if ($latest !== null) {
                 foreach ($documents as $document) {
-                    if ($document->version !== $latest) {
+                    if ($document->version !== $latest || ! $repository->allows($document)) {
                         continue;
                     }
 
-                    $path = $this->unversionedOutputPath($prefixRoot, $document->slug);
-                    $targetHref = $this->hrefBetween($path, $this->documentOutputPath($prefixRoot, $document), $out);
-                    $redirectHtml = $this->redirectHtml($targetHref);
-                    $this->writeFile($path, $redirectHtml);
+                    $path = $this->prefixedOutputPath($prefixRoot, $document);
+                    $targetHref = $this->hrefBetween($path, $this->documentOutputPath($prefixRoot, $document, $repository), $out);
+                    $this->writeFile($path, $this->redirectHtml($targetHref));
                     $pages++;
                 }
             }
@@ -114,7 +125,7 @@ final class ExportCommand extends Command
     {
         return $this->view->file(
             dirname(__DIR__, 2).'/resources/views/pages/doc.blade.php',
-            DocsView::document($repository, $document, $this->headingExtractor, cacheFragment: false),
+            DocsView::document($repository, $document, $this->headingExtractor, cacheFragment: false, staticExport: true),
         )->render();
     }
 
@@ -134,7 +145,7 @@ final class ExportCommand extends Command
         $path = $prefixRoot.DIRECTORY_SEPARATOR.'changelog'.DIRECTORY_SEPARATOR.'index.html';
         $html = $this->view->file(
             dirname(__DIR__, 2).'/resources/views/pages/changelog.blade.php',
-            DocsView::changelog($repository, $changelog),
+            DocsView::changelog($repository, $changelog, staticExport: true),
         )->render();
         $html = $this->rewriteHtml($html, $out, $path, $prefix, $baseUrl);
         $this->writeFile($path, $html);
@@ -155,11 +166,11 @@ final class ExportCommand extends Command
         $this->writeFile($target, DocsView::source($document));
     }
 
-    private function documentOutputPath(string $prefixRoot, Document $document): string
+    private function documentOutputPath(string $prefixRoot, Document $document, ContentRepository $repository): string
     {
         $segments = [];
 
-        if ($document->version !== null && $document->version !== '') {
+        if (is_string($document->version) && $document->version !== '' && ! $repository->isDefaultVersion($document->version)) {
             $segments[] = $document->version;
         }
 
@@ -176,15 +187,25 @@ final class ExportCommand extends Command
         return $directory.DIRECTORY_SEPARATOR.'index.html';
     }
 
-    private function unversionedOutputPath(string $prefixRoot, string $slug): string
+    private function prefixedOutputPath(string $prefixRoot, Document $document): string
     {
-        $slug = trim($slug, '/');
+        $segments = [];
 
-        if ($slug === '') {
-            return $prefixRoot.DIRECTORY_SEPARATOR.'index.html';
+        if (is_string($document->version) && $document->version !== '') {
+            $segments[] = $document->version;
         }
 
-        return $prefixRoot.DIRECTORY_SEPARATOR.str_replace('/', DIRECTORY_SEPARATOR, $slug).DIRECTORY_SEPARATOR.'index.html';
+        $slug = trim($document->slug, '/');
+
+        if ($slug !== '') {
+            $segments[] = str_replace('/', DIRECTORY_SEPARATOR, $slug);
+        }
+
+        $directory = $segments === []
+            ? $prefixRoot
+            : $prefixRoot.DIRECTORY_SEPARATOR.implode(DIRECTORY_SEPARATOR, $segments);
+
+        return $directory.DIRECTORY_SEPARATOR.'index.html';
     }
 
     private function redirectHtml(string $targetHref): string
@@ -293,6 +314,8 @@ HTML;
             if ($json === null) {
                 continue;
             }
+
+            $json = (new SearchIndexQuery)->filterJson($json);
 
             if ($hash !== null && $hash !== '') {
                 $this->writeFile($searchDir.DIRECTORY_SEPARATOR.'search-'.$hash.'.json', $json);

@@ -17,18 +17,9 @@ final class RawMarkdownController extends Controller
     {
         $repository = ContentRepository::fromConfig();
         $slug = trim($slug, '/');
-        $version = null;
-        $documentSlug = $slug;
-
-        if ($repository->versionsEnabled()) {
-            $parts = $slug === '' ? [] : explode('/', $slug, 2);
-            $first = $parts[0] ?? '';
-
-            if (in_array($first, $repository->versions(), true)) {
-                $version = $first;
-                $documentSlug = $parts[1] ?? '';
-            }
-        }
+        $parsed = $repository->parseRequestSlug($slug);
+        $version = $parsed['version'];
+        $documentSlug = $parsed['slug'];
 
         if ($documentSlug === 'index') {
             $documentSlug = '';
@@ -36,7 +27,7 @@ final class RawMarkdownController extends Controller
 
         $document = $repository->find($documentSlug, $version);
 
-        if ($document === null || ! is_file($document->path)) {
+        if ($document === null || ! is_file($document->path) || ! $repository->allows($document)) {
             abort(404);
         }
 

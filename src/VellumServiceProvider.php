@@ -9,6 +9,7 @@ use Illuminate\Support\ServiceProvider;
 use Vellum\Console\BuildCommand;
 use Vellum\Console\ClearCommand;
 use Vellum\Console\ExportCommand;
+use Vellum\Console\IndexCommand;
 use Vellum\Console\InstallCommand;
 use Vellum\Http\Controllers\AssetController;
 use Vellum\Http\Middleware\CompressHtmlResponse;
@@ -32,6 +33,7 @@ final class VellumServiceProvider extends ServiceProvider
                 BuildCommand::class,
                 ClearCommand::class,
                 InstallCommand::class,
+                IndexCommand::class,
                 ExportCommand::class,
             ]);
 

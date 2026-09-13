@@ -6,11 +6,12 @@ namespace Vellum\Content;
 
 use Vellum\Support\Slug;
 use Vellum\Support\Str;
+use Vellum\Support\VersionUrl;
 
 /**
  * Builds the sidebar navigation tree from folders, meta.json, and documents.
  *
- * @phpstan-type NavPage array{type: 'page', slug: string, title: string, description: string|null, icon: string|null, href: string}
+ * @phpstan-type NavPage array{type: 'page', slug: string, title: string, description: string|null, icon: string|null, href: string, access: string}
  * @phpstan-type NavSeparator array{type: 'separator', title: string}
  * @phpstan-type NavNode array<string, mixed>
  * @phpstan-type NavTree list<array<string, mixed>>
@@ -22,6 +23,7 @@ final class NavigationBuilder
     public function __construct(
         private readonly string $contentPath,
         private readonly string $routePrefix = 'docs',
+        private readonly ?string $defaultVersion = null,
     ) {}
 
     /**
@@ -375,7 +377,7 @@ final class NavigationBuilder
         }
 
         foreach (scandir($absoluteFolder) ?: [] as $entry) {
-            if ($entry === '.' || $entry === '..' || $entry === 'meta.json') {
+            if ($entry === '.' || $entry === '..' || $entry === 'meta.json' || $entry === '_meta.md') {
                 continue;
             }
 
@@ -487,6 +489,7 @@ final class NavigationBuilder
             'description' => $document->description,
             'icon' => $document->icon,
             'href' => $this->hrefForSlug($document->slug, $version ?? $document->version),
+            'access' => $document->access(),
         ];
     }
 
@@ -523,18 +526,13 @@ final class NavigationBuilder
             'description' => $description,
             'icon' => $icon,
             'href' => $href,
+            'access' => Access::normalize($entry['access'] ?? 'guest'),
         ];
     }
 
     private function hrefForSlug(string $slug, ?string $version): string
     {
-        $parts = array_filter([
-            trim($this->routePrefix, '/'),
-            $version,
-            trim($slug, '/'),
-        ], static fn (?string $part): bool => $part !== null && $part !== '');
-
-        return '/'.implode('/', $parts);
+        return VersionUrl::href($this->routePrefix, $slug, $version, $this->defaultVersion);
     }
 
     /**

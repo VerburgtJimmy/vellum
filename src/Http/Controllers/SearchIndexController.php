@@ -4,72 +4,73 @@ declare(strict_types=1);
 
 namespace Vellum\Http\Controllers;
 
+use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
 use Vellum\Content\ContentRepository;
+use Vellum\Search\ScoutIndexer;
+use Vellum\Search\SearchDriver;
+use Vellum\Search\SearchIndexQuery;
 
 /**
- * Serves the compiled MiniSearch document index.
+ * Live search: MiniSearch index or Scout hits, always filtered for the current user.
  */
 final class SearchIndexController extends Controller
 {
-    public function __invoke(?string $hash = null): Response
+    public function __construct(
+        private readonly SearchIndexQuery $query = new SearchIndexQuery,
+    ) {}
+
+    public function __invoke(Request $request, ?string $hash = null): Response
     {
         $repository = ContentRepository::fromConfig();
-        $store = $repository->store();
+        $version = $request->query('version');
+        $version = is_string($version) && $version !== '' ? $version : null;
 
-        if ($hash !== null && $hash !== '') {
-            $json = $this->findHashedIndex($repository, $hash);
+        if (SearchDriver::isScout() && ($hash === null || $hash === '')) {
+            SearchDriver::assertScoutInstalled();
 
-            if ($json === null) {
-                abort(404);
-            }
+            $q = $request->query('q');
+            $q = is_string($q) ? trim($q) : '';
+            $resolved = $this->resolveVersion($repository, $version);
+            $documents = $q === '' ? [] : (new ScoutIndexer)->search($q, $resolved);
 
-            return $this->jsonResponse($json);
+            return $this->jsonResponse($request, json_encode(
+                ['driver' => 'scout', 'documents' => $documents],
+                JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE,
+            ));
         }
 
-        $version = $repository->versionsEnabled() ? $repository->latestVersion() : null;
+        $payload = $this->query->json($repository, $version, $hash);
 
-        // Ensure nav/search exist in local when the directory changed.
-        $repository->navigation($version);
-
-        $resolvedHash = $repository->searchHash($version);
-        $json = $store->getSearchIndex($version, $resolvedHash);
-
-        if ($json === null) {
-            abort(404);
-        }
-
-        return $this->jsonResponse($json);
+        return $this->jsonResponse($request, $payload['json'], $payload['etag']);
     }
 
-    private function findHashedIndex(ContentRepository $repository, string $hash): ?string
+    private function resolveVersion(ContentRepository $repository, ?string $version): ?string
     {
-        $store = $repository->store();
-        $candidates = $repository->versionsEnabled()
-            ? $repository->versions()
-            : [null];
-
-        if ($repository->versionsEnabled()) {
-            $candidates[] = null;
+        if (! $repository->versionsEnabled()) {
+            return null;
         }
 
-        foreach ($candidates as $version) {
-            $json = $store->getSearchIndex($version, $hash);
-
-            if ($json !== null) {
-                return $json;
-            }
+        if (is_string($version) && in_array($version, $repository->versions(), true)) {
+            return $version;
         }
 
-        return null;
+        return $repository->latestVersion();
     }
 
-    private function jsonResponse(string $json): Response
+    private function jsonResponse(Request $request, string $json, ?string $etag = null): Response
     {
-        return response($json, 200, [
+        $response = response($json, 200, [
             'Content-Type' => 'application/json; charset=UTF-8',
-            'Cache-Control' => 'public, max-age=31536000, immutable',
+            'Cache-Control' => 'private, max-age=0, must-revalidate',
         ]);
+
+        if ($etag !== null && $etag !== '') {
+            $response->setEtag($etag);
+            $response->isNotModified($request);
+        }
+
+        return $response;
     }
 }

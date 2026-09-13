@@ -1,0 +1,48 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Vellum\Console;
+
+use Illuminate\Console\Command;
+use Vellum\Content\ContentRepository;
+use Vellum\Content\Document;
+use Vellum\Search\ScoutIndexer;
+use Vellum\Search\SearchDriver;
+
+/**
+ * Rebuild search indexes (MiniSearch compile cache, and Scout when that driver is on).
+ */
+final class IndexCommand extends Command
+{
+    protected $signature = 'vellum:index {--docs-version= : Index a single version folder}';
+
+    protected $description = 'Rebuild the Vellum search index';
+
+    public function handle(): int
+    {
+        $repository = ContentRepository::fromConfig();
+        $version = $this->option('docs-version');
+        $version = is_string($version) && $version !== '' ? $version : null;
+
+        $documents = $repository->buildAll($version);
+
+        if (SearchDriver::isScout()) {
+            SearchDriver::assertScoutInstalled();
+            (new ScoutIndexer)->sync($repository, $documents);
+            $this->info('Scout index updated ('.$this->count($documents).' documents).');
+        }
+
+        $this->info('MiniSearch index rebuilt for '.$this->count($documents).' document(s).');
+
+        return self::SUCCESS;
+    }
+
+    /**
+     * @param  list<Document>  $documents
+     */
+    private function count(array $documents): int
+    {
+        return count($documents);
+    }
+}

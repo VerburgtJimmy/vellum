@@ -7,8 +7,10 @@ namespace Vellum\Content;
 use Vellum\Cache\CompiledStore;
 use Vellum\Markdown\Islands\MarkdownPipeline;
 use Vellum\Markdown\MarkdownRenderer;
+use Vellum\Search\SearchVisibility;
 use Vellum\Support\Slug;
 use Vellum\Support\Str;
+use Vellum\Support\VersionUrl;
 
 /**
  * Discovers Markdown documents on disk and resolves them to compiled Documents.
@@ -26,6 +28,8 @@ final class ContentRepository
         private readonly array $versions = [],
         private readonly bool $isLocal = false,
         private readonly string $routePrefix = 'docs',
+        private readonly Access $access = new Access,
+        private readonly SearchVisibility $visibility = new SearchVisibility,
     ) {}
 
     /**
@@ -58,12 +62,16 @@ final class ContentRepository
 
     public function navigationBuilder(): NavigationBuilder
     {
-        return new NavigationBuilder($this->contentPath, $this->routePrefix);
+        return new NavigationBuilder(
+            $this->contentPath,
+            $this->routePrefix,
+            $this->urlDefaultVersion(),
+        );
     }
 
     public function searchIndexBuilder(): SearchIndexBuilder
     {
-        return new SearchIndexBuilder($this->routePrefix);
+        return new SearchIndexBuilder($this->routePrefix, $this->urlDefaultVersion());
     }
 
     /**
@@ -113,17 +121,17 @@ final class ContentRepository
             && $manifest['directory_hash'] === $currentHash
             && ($nav = $this->store->getNav($version)) !== null
         ) {
-            return $nav;
+            return $this->visibleNavigation($nav);
         }
 
         if (! $this->isLocal && ($nav = $this->store->getNav($version)) !== null) {
-            return $nav;
+            return $this->visibleNavigation($nav);
         }
 
         $documents = $this->documentsForVersion($version);
         $this->rebuildNavAndSearch($documents, $version);
 
-        return $this->store->getNav($version) ?? [];
+        return $this->visibleNavigation($this->store->getNav($version) ?? []);
     }
 
     /**
@@ -132,6 +140,11 @@ final class ContentRepository
     public function adjacent(string $slug, ?string $version = null): array
     {
         return $this->navigationBuilder()->adjacent($this->navigation($version), $slug);
+    }
+
+    public function allows(Document $document): bool
+    {
+        return $this->visibility->allowsAccess($document->access());
     }
 
     /**
@@ -144,6 +157,15 @@ final class ContentRepository
             $document->slug,
             $document->title,
         );
+    }
+
+    /**
+     * @param  list<array<string, mixed>>  $tree
+     * @return list<array<string, mixed>>
+     */
+    private function visibleNavigation(array $tree): array
+    {
+        return $this->visibility->filterNavigation($tree);
     }
 
     public function searchHash(?string $version = null): ?string
@@ -216,9 +238,39 @@ final class ContentRepository
     }
 
     /**
-     * Whether an unversioned slug should redirect to the latest version.
+     * Split a request slug into version folder and document slug.
+     * The latest version has no URL prefix; other versions keep /{version}/...
+     *
+     * @return array{version: string|null, slug: string}
      */
-    public function shouldRedirectToLatest(string $slug): bool
+    public function parseRequestSlug(string $slug): array
+    {
+        $slug = trim($slug, '/');
+
+        if (! $this->versionsEnabled) {
+            return ['version' => null, 'slug' => $slug];
+        }
+
+        $parts = $slug === '' ? [] : explode('/', $slug, 2);
+        $first = $parts[0] ?? '';
+
+        if ($first !== '' && in_array($first, $this->versions, true) && ! $this->isDefaultVersion($first)) {
+            return [
+                'version' => $first,
+                'slug' => $parts[1] ?? '',
+            ];
+        }
+
+        return [
+            'version' => $this->latestVersion,
+            'slug' => $slug,
+        ];
+    }
+
+    /**
+     * Whether /docs/{latest}/... should 301 to the unprefixed default URL.
+     */
+    public function shouldRedirectToUnprefixed(string $slug): bool
     {
         if (! $this->versionsEnabled || $this->latestVersion === null) {
             return false;
@@ -226,7 +278,38 @@ final class ContentRepository
 
         $first = explode('/', trim($slug, '/'), 2)[0];
 
-        return $first !== '' && ! in_array($first, $this->versions, true);
+        return $first === $this->latestVersion;
+    }
+
+    /**
+     * Strip a leading latest-version segment from a request slug.
+     */
+    public function unprefixedPath(string $slug): string
+    {
+        $slug = trim($slug, '/');
+
+        if ($this->latestVersion === null) {
+            return $slug;
+        }
+
+        if ($slug === $this->latestVersion) {
+            return '';
+        }
+
+        $prefix = $this->latestVersion.'/';
+
+        if (str_starts_with($slug, $prefix)) {
+            return substr($slug, strlen($prefix));
+        }
+
+        return $slug;
+    }
+
+    public function isDefaultVersion(?string $version): bool
+    {
+        return $this->versionsEnabled
+            && $this->latestVersion !== null
+            && $version === $this->latestVersion;
     }
 
     public function latestVersion(): ?string
@@ -249,16 +332,11 @@ final class ContentRepository
 
     /**
      * Build a docs URL for a slug (and optional version segment).
+     * The latest version omits the version segment.
      */
     public function hrefFor(string $slug, ?string $version = null): string
     {
-        $parts = array_filter([
-            trim($this->routePrefix, '/'),
-            $this->versionsEnabled ? $version : null,
-            trim($slug, '/'),
-        ], static fn (?string $part): bool => $part !== null && $part !== '');
-
-        return '/'.implode('/', $parts);
+        return VersionUrl::href($this->routePrefix, $slug, $version, $this->urlDefaultVersion());
     }
 
     /**
@@ -370,6 +448,7 @@ final class ContentRepository
             : null;
 
         $full = isset($matter['full']) && filter_var($matter['full'], FILTER_VALIDATE_BOOLEAN);
+        $matter['access'] = $this->access->forPage($matter, $absolutePath, $this->contentPath);
 
         $document = new Document(
             slug: $slug,
@@ -401,7 +480,11 @@ final class ContentRepository
             return true;
         }
 
-        return (int) filemtime($document->path) > $document->mtime;
+        if ((int) filemtime($document->path) > $document->mtime) {
+            return true;
+        }
+
+        return $this->access->folderMtime($document->path, $this->contentPath) > $document->mtime;
     }
 
     private function resolveVersion(?string $version): ?string
@@ -411,6 +494,11 @@ final class ContentRepository
         }
 
         return $version ?? $this->latestVersion;
+    }
+
+    private function urlDefaultVersion(): ?string
+    {
+        return $this->versionsEnabled ? $this->latestVersion : null;
     }
 
     private function resolveSourcePath(string $slug, ?string $version): ?string
@@ -529,6 +617,10 @@ final class ContentRepository
             }
 
             if (strtolower($file->getExtension()) !== 'md') {
+                continue;
+            }
+
+            if (strtolower($file->getFilename()) === '_meta.md') {
                 continue;
             }
 

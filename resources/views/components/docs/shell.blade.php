@@ -6,6 +6,7 @@
     'currentVersion' => null,
     'versionHrefs' => [],
     'searchPlacement' => 'sidebar',
+    'staticExport' => false,
 ])
 
 @php
@@ -16,7 +17,11 @@
 
 <div data-vellum-docs class="flex min-h-screen flex-col" x-data="vellumChrome">
     @if ($searchEnabled)
-        <x-vellum::docs.search :search-hash="$searchHash" />
+        <x-vellum::docs.search
+            :search-hash="$searchHash"
+            :current-version="$currentVersion ?? null"
+            :static-export="$staticExport ?? false"
+        />
     @endif
 
     <div
