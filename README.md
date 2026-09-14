@@ -47,16 +47,9 @@ Dark:
 
 ![Vellum docs dark theme](docs/screenshots/docs-dark.png)
 
-## Demo
+## Site
 
-The site in `docs/` deploys via Cloudflare Workers (`wrangler.toml` + committed `demo-dist`).
-
-Cloudflare Git build settings:
-
-- Build command: leave empty
-- Deploy command: `npx wrangler deploy`
-
-Regenerate the static export locally after docs changes: `bash bin/build-demo`
+The public site (marketing page at `/`, these docs at `/docs`) is a small Laravel app in the `vellum-site` repo that requires this package and points `vellum.path` at `vendor/jimmyverburgt/vellum/docs`. Docs changes ship by releasing the package and updating that app. Nothing is exported or committed here.
 
 ## Configuration
 

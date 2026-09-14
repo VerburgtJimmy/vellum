@@ -20,4 +20,4 @@ The export always uses MiniSearch, even when `search.driver` is `scout`. Gated p
 
 Value tags are baked in at export time, so the snapshot matches the app config you exported with.
 
-This package's public demo is that command pointed at `docs/` (`bash bin/build-demo`).
+This package's own docs are not exported: the public site is a Laravel app that serves `docs/` live, which is the point.

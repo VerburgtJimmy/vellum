@@ -22,13 +22,7 @@ git diff --exit-code -- resources/dist
 npm run check:size
 ```
 
-After docs or Blade chrome changes, regenerate the demo export:
-
-```bash
-bash bin/build-demo
-```
-
-`demo-dist` is committed. Cloudflare Workers deploys that folder.
+The public site is a separate Laravel app (`vellum-site`) that installs this package and serves `docs/` live. There is no static export to regenerate in this repo.
 
 ## Style
 

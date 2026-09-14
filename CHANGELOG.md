@@ -20,6 +20,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Markdown tabs and UI tabs share `vellumTabs()` for arrow keys, Home/End, and `aria-controls`
 - Search dialog labelled for assistive tech (`combobox` + `listbox`); version switcher menu has Home/End and `aria-controls`
 
+### Removed
+
+- Cloudflare Workers demo (`bin/build-demo`, `wrangler.toml`, committed `demo-dist`). The public site is now a Laravel app that serves `docs/` through the package
+
 ## [0.4.0] - 2026-09-13
 
 Versioned docs URLs and search drivers.
