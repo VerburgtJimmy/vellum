@@ -856,6 +856,7 @@
 }
 
 .vellum-toc-link {
+  min-height: 24px;
   padding-top: 0.375rem;
   padding-bottom: 0.375rem;
   padding-left: calc(1.25rem + var(--vellum-toc-level, 0) * 0.75rem);
@@ -864,10 +865,6 @@
 .vellum-toc-link:hover,
 .vellum-toc-link.is-active {
   font-weight: 600;
-}
-
-.vellum-toc-link:first-of-type {
-  padding-top: 0;
 }
 
 .vellum-toc-rail {

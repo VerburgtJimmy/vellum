@@ -32,8 +32,8 @@
     <link rel="icon" href="data:,">
             <meta name="description" content="Register Blade components for use in Markdown.">
             <style>:root { --radius: 0.5rem }</style>
-    <link rel="stylesheet" href="../../vendor/vellum/vellum.css?v=d4e9018b">
-    <script type="module" src="../../vendor/vellum/vellum.js?v=7136aeda"></script>
+    <link rel="stylesheet" href="../../vendor/vellum/vellum.css?v=7921ad64">
+    <script type="module" src="../../vendor/vellum/vellum.js?v=13280d52"></script>
     </head>
 <body class="min-h-screen bg-background text-foreground antialiased">
     <a href="#vellum-content" class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-background focus:px-3 focus:py-2 focus:text-sm focus:shadow">Skip to content</a>
@@ -43,7 +43,7 @@
     data-vellum-search
     data-vellum-search-hotkey="k"
     data-vellum-search-driver="minisearch"
-    data-vellum-search-url="../../docs/_vellum/search-5efbadb7469ba4a25f1911f2828012de.json"
+    data-vellum-search-url="../../docs/_vellum/search-8ba9a30c31949a8bbfda446e20dcbf69.json"
     x-data="vellumSearchHotkey('k')"
     x-on:vellum-search-open.window="openSearch()"
     x-on:vellum-search-close.window="closeSearch()"
@@ -70,7 +70,8 @@
                     data-vellum-dialog-panel
                     role="dialog"
                     aria-modal="true"
-                    x-trap.noscroll="true"
+                                            aria-label="Search documentation"
+                                        x-trap.noscroll="true"
                     x-on:click.stop
                     class="fixed left-1/2 top-4 z-50 w-[calc(100%-1rem)] max-w-screen-sm -translate-x-1/2 overflow-hidden rounded-xl border border-border bg-popover text-popover-foreground shadow-2xl shadow-black/50 md:top-[calc(50%-250px)]"
                                     >
@@ -87,7 +88,7 @@
                     status: '',
                     loading: false,
                     ready: false,
-                    searchUrl: '\/docs\/_vellum\/search-5efbadb7469ba4a25f1911f2828012de.json',
+                    searchUrl: '\/docs\/_vellum\/search-8ba9a30c31949a8bbfda446e20dcbf69.json',
                     driver: 'minisearch',
                     async ensureIndex() {
                         if (this.ready || this.loading) {
@@ -156,13 +157,18 @@
                 x-on:keydown.arrow-up.prevent="move(-1)"
                 x-on:keydown.enter.prevent="go()"
             >
-                <label class="sr-only" for="vellum-search-input">Search</label>
+                <label class="sr-only" for="vellum-search-query">Search</label>
                 <div class="flex flex-row items-center gap-2 p-3">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="h-5 w-5 shrink-0 text-muted-foreground"><path d="M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z" /></svg>
                     <input
-                        id="vellum-search-input"
+                        id="vellum-search-query"
                         x-ref="query"
                         type="search"
+                        role="combobox"
+                        aria-autocomplete="list"
+                        aria-expanded="true"
+                        aria-controls="vellum-search-results"
+                        :aria-activedescendant="flat[active] ? 'vellum-search-option-' + active : ''"
                         autocomplete="off"
                         autocorrect="off"
                         spellcheck="false"
@@ -182,6 +188,7 @@
                 <div class="sr-only" aria-live="polite" x-text="status"></div>
 
                 <div
+                    id="vellum-search-results"
                     class="max-h-[min(60vh,24rem)] overflow-y-auto"
                     :class="{ 'border-t border-border': query.trim() !== '' }"
                     role="listbox"
@@ -196,6 +203,7 @@
                     <template x-for="(group, gi) in groups" :key="group.url">
                         <div class="px-1 py-1">
                             <a
+                                :id="'vellum-search-option-' + gi"
                                 :href="group.url"
                                 role="option"
                                 class="block rounded-md px-3 py-2 text-sm hover:bg-accent"
@@ -241,7 +249,8 @@
     data-vellum-search-trigger-variant="icon"
     data-vellum-button
     class="inline-flex items-center gap-2 rounded-md text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring h-8 w-8 justify-center rounded-lg"
-     aria-label="Open search"     x-on:click="$dispatch('vellum-search-open')"
+     aria-label="Search"     aria-haspopup="dialog"
+    x-on:click="$dispatch('vellum-search-open')"
 >
     <span class="inline-flex min-w-0 items-center gap-2">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="h-4 w-4 shrink-0"><path d="M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z" /></svg>
@@ -271,7 +280,8 @@
     data-vellum-search-trigger-variant="icon"
     data-vellum-button
     class="inline-flex items-center gap-2 rounded-md text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring h-8 w-8 justify-center rounded-lg"
-     aria-label="Open search"     x-on:click="$dispatch('vellum-search-open')"
+     aria-label="Search"     aria-haspopup="dialog"
+    x-on:click="$dispatch('vellum-search-open')"
 >
     <span class="inline-flex min-w-0 items-center gap-2">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="h-4 w-4 shrink-0"><path d="M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z" /></svg>
@@ -310,7 +320,8 @@
                     data-vellum-dialog-panel
                     role="dialog"
                     aria-modal="true"
-                    x-trap.noscroll="true"
+                                            aria-label="Documentation navigation"
+                                        x-trap.noscroll="true"
                     x-on:click.stop
                     class="fixed inset-y-0 right-0 z-50 flex h-full w-[85%] max-w-[380px] flex-col border-s border-border bg-background shadow-lg"
                                             data-vellum-sheet-side="right"
@@ -448,6 +459,14 @@
             class="block rounded-md px-2 -mx-2 py-1.5 transition-colors text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground"
                     >Vellum</a>
         
+                    <a
+            href="../../docs/why"
+            data-vellum-nav-link
+                        x-data="vellumPrefetchHover"
+            x-on:pointerenter="onEnter()"
+            class="block rounded-md px-2 -mx-2 py-1.5 transition-colors text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground"
+                    >Why Vellum</a>
+        
                     <div
     data-vellum-collapsible
     x-data="{ open: true }"
@@ -488,6 +507,14 @@
             x-on:pointerenter="onEnter()"
             class="block rounded-md px-2 -mx-2 py-1.5 transition-colors text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground"
                     >Configuration</a>
+        
+                    <a
+            href="../../docs/getting-started/upgrade"
+            data-vellum-nav-link
+                        x-data="vellumPrefetchHover"
+            x-on:pointerenter="onEnter()"
+            class="block rounded-md px-2 -mx-2 py-1.5 transition-colors text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground"
+                    >Upgrade from 0.2 to 0.5</a>
                     </div>
     </div>
 </div>
@@ -556,17 +583,65 @@
             x-on:pointerenter="onEnter()"
             class="block rounded-md px-2 -mx-2 py-1.5 transition-colors text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground"
                     >Cards</a>
+                    </div>
+    </div>
+</div>
         
                     <a
-            href="../../docs/components/values"
+            href="../../docs/value-tags"
             data-vellum-nav-link
                         x-data="vellumPrefetchHover"
             x-on:pointerenter="onEnter()"
             class="block rounded-md px-2 -mx-2 py-1.5 transition-colors text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground"
                     >Value tags</a>
-                    </div>
-    </div>
-</div>
+        
+                    <a
+            href="../../docs/versions"
+            data-vellum-nav-link
+                        x-data="vellumPrefetchHover"
+            x-on:pointerenter="onEnter()"
+            class="block rounded-md px-2 -mx-2 py-1.5 transition-colors text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground"
+                    >Versions</a>
+        
+                    <a
+            href="../../docs/gating"
+            data-vellum-nav-link
+                        x-data="vellumPrefetchHover"
+            x-on:pointerenter="onEnter()"
+            class="block rounded-md px-2 -mx-2 py-1.5 transition-colors text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground"
+                    >Gating</a>
+        
+                    <a
+            href="../../docs/search"
+            data-vellum-nav-link
+                        x-data="vellumPrefetchHover"
+            x-on:pointerenter="onEnter()"
+            class="block rounded-md px-2 -mx-2 py-1.5 transition-colors text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground"
+                    >Search</a>
+        
+                    <a
+            href="../../docs/releases"
+            data-vellum-nav-link
+                        x-data="vellumPrefetchHover"
+            x-on:pointerenter="onEnter()"
+            class="block rounded-md px-2 -mx-2 py-1.5 transition-colors text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground"
+                    >Release notes</a>
+        
+                    <a
+            href="../../docs/export"
+            data-vellum-nav-link
+                        x-data="vellumPrefetchHover"
+            x-on:pointerenter="onEnter()"
+            class="block rounded-md px-2 -mx-2 py-1.5 transition-colors text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground"
+                    >Export</a>
+        
+                    <a
+            href="../../docs/theming"
+            data-vellum-nav-link
+                        x-data="vellumPrefetchHover"
+            x-on:pointerenter="onEnter()"
+            class="block rounded-md px-2 -mx-2 py-1.5 transition-colors text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground"
+                    >Theming</a>
         
                     <a
             href="../../docs/extending"
@@ -638,7 +713,8 @@
     data-vellum-search-trigger-variant="sidebar"
     data-vellum-button
     class="inline-flex items-center gap-2 rounded-md text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring h-9 w-full border border-input bg-background px-2.5"
-        x-on:click="$dispatch('vellum-search-open')"
+        aria-haspopup="dialog"
+    x-on:click="$dispatch('vellum-search-open')"
 >
     <span class="inline-flex min-w-0 items-center gap-2">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="h-4 w-4 shrink-0"><path d="M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z" /></svg>
@@ -673,6 +749,14 @@
             x-on:pointerenter="onEnter()"
             class="block rounded-md px-2 -mx-2 py-1.5 transition-colors text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground"
                     >Vellum</a>
+        
+                    <a
+            href="../../docs/why"
+            data-vellum-nav-link
+                        x-data="vellumPrefetchHover"
+            x-on:pointerenter="onEnter()"
+            class="block rounded-md px-2 -mx-2 py-1.5 transition-colors text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground"
+                    >Why Vellum</a>
         
                     <div
     data-vellum-collapsible
@@ -714,6 +798,14 @@
             x-on:pointerenter="onEnter()"
             class="block rounded-md px-2 -mx-2 py-1.5 transition-colors text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground"
                     >Configuration</a>
+        
+                    <a
+            href="../../docs/getting-started/upgrade"
+            data-vellum-nav-link
+                        x-data="vellumPrefetchHover"
+            x-on:pointerenter="onEnter()"
+            class="block rounded-md px-2 -mx-2 py-1.5 transition-colors text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground"
+                    >Upgrade from 0.2 to 0.5</a>
                     </div>
     </div>
 </div>
@@ -782,17 +874,65 @@
             x-on:pointerenter="onEnter()"
             class="block rounded-md px-2 -mx-2 py-1.5 transition-colors text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground"
                     >Cards</a>
+                    </div>
+    </div>
+</div>
         
                     <a
-            href="../../docs/components/values"
+            href="../../docs/value-tags"
             data-vellum-nav-link
                         x-data="vellumPrefetchHover"
             x-on:pointerenter="onEnter()"
             class="block rounded-md px-2 -mx-2 py-1.5 transition-colors text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground"
                     >Value tags</a>
-                    </div>
-    </div>
-</div>
+        
+                    <a
+            href="../../docs/versions"
+            data-vellum-nav-link
+                        x-data="vellumPrefetchHover"
+            x-on:pointerenter="onEnter()"
+            class="block rounded-md px-2 -mx-2 py-1.5 transition-colors text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground"
+                    >Versions</a>
+        
+                    <a
+            href="../../docs/gating"
+            data-vellum-nav-link
+                        x-data="vellumPrefetchHover"
+            x-on:pointerenter="onEnter()"
+            class="block rounded-md px-2 -mx-2 py-1.5 transition-colors text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground"
+                    >Gating</a>
+        
+                    <a
+            href="../../docs/search"
+            data-vellum-nav-link
+                        x-data="vellumPrefetchHover"
+            x-on:pointerenter="onEnter()"
+            class="block rounded-md px-2 -mx-2 py-1.5 transition-colors text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground"
+                    >Search</a>
+        
+                    <a
+            href="../../docs/releases"
+            data-vellum-nav-link
+                        x-data="vellumPrefetchHover"
+            x-on:pointerenter="onEnter()"
+            class="block rounded-md px-2 -mx-2 py-1.5 transition-colors text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground"
+                    >Release notes</a>
+        
+                    <a
+            href="../../docs/export"
+            data-vellum-nav-link
+                        x-data="vellumPrefetchHover"
+            x-on:pointerenter="onEnter()"
+            class="block rounded-md px-2 -mx-2 py-1.5 transition-colors text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground"
+                    >Export</a>
+        
+                    <a
+            href="../../docs/theming"
+            data-vellum-nav-link
+                        x-data="vellumPrefetchHover"
+            x-on:pointerenter="onEnter()"
+            class="block rounded-md px-2 -mx-2 py-1.5 transition-colors text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground"
+                    >Theming</a>
         
                     <a
             href="../../docs/extending"
@@ -1004,7 +1144,7 @@
         data-vellum-toc-id="namespaces"
         data-vellum-toc-level="0"
         x-on:click.prevent="scrollTo('namespaces')"
-        class="vellum-toc-link relative z-10 block py-1 text-[13px] leading-snug text-muted-foreground transition-colors hover:font-semibold hover:text-foreground"
+        class="vellum-toc-link relative z-10 block min-h-6 py-1.5 text-[13px] leading-snug text-muted-foreground transition-colors hover:font-semibold hover:text-foreground"
         :class="activeId === 'namespaces' ? 'is-active font-semibold text-foreground' : 'text-muted-foreground'"
         style="--vellum-toc-level: 0"
     >Namespaces</a>
@@ -1014,7 +1154,7 @@
         data-vellum-toc-id="slots"
         data-vellum-toc-level="0"
         x-on:click.prevent="scrollTo('slots')"
-        class="vellum-toc-link relative z-10 block py-1 text-[13px] leading-snug text-muted-foreground transition-colors hover:font-semibold hover:text-foreground"
+        class="vellum-toc-link relative z-10 block min-h-6 py-1.5 text-[13px] leading-snug text-muted-foreground transition-colors hover:font-semibold hover:text-foreground"
         :class="activeId === 'slots' ? 'is-active font-semibold text-foreground' : 'text-muted-foreground'"
         style="--vellum-toc-level: 0"
     >Slots</a>
@@ -1024,7 +1164,7 @@
         data-vellum-toc-id="built-ins-share-blade-views"
         data-vellum-toc-level="0"
         x-on:click.prevent="scrollTo('built-ins-share-blade-views')"
-        class="vellum-toc-link relative z-10 block py-1 text-[13px] leading-snug text-muted-foreground transition-colors hover:font-semibold hover:text-foreground"
+        class="vellum-toc-link relative z-10 block min-h-6 py-1.5 text-[13px] leading-snug text-muted-foreground transition-colors hover:font-semibold hover:text-foreground"
         :class="activeId === 'built-ins-share-blade-views' ? 'is-active font-semibold text-foreground' : 'text-muted-foreground'"
         style="--vellum-toc-level: 0"
     >Built-ins share Blade views</a>
@@ -1034,7 +1174,7 @@
         data-vellum-toc-id="missing-components"
         data-vellum-toc-level="0"
         x-on:click.prevent="scrollTo('missing-components')"
-        class="vellum-toc-link relative z-10 block py-1 text-[13px] leading-snug text-muted-foreground transition-colors hover:font-semibold hover:text-foreground"
+        class="vellum-toc-link relative z-10 block min-h-6 py-1.5 text-[13px] leading-snug text-muted-foreground transition-colors hover:font-semibold hover:text-foreground"
         :class="activeId === 'missing-components' ? 'is-active font-semibold text-foreground' : 'text-muted-foreground'"
         style="--vellum-toc-level: 0"
     >Missing components</a>
@@ -1173,29 +1313,29 @@
                 <div class="mt-auto">
                     <nav data-vellum-pagination aria-label="Page" class="mt-16 grid grid-cols-1 gap-3 sm:grid-cols-2">
                     <a
-                href="../../docs/components/values"
+                href="../../docs/theming"
                 data-vellum-pagination-prev
-                aria-label="Previous: Value tags"
                 x-data="vellumPrefetchHover"
                 x-on:pointerenter="onEnter()"
                 class="group flex flex-col gap-2 rounded-lg border border-border p-4 text-sm transition-colors hover:bg-accent/50"
             >
                 <span class="inline-flex items-center gap-1.5 font-semibold text-foreground">
+                    <span class="sr-only">Previous:</span>
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="h-4 w-4 shrink-0 -mx-1"><path d="M165.66,202.34a8,8,0,0,1-11.32,11.32l-80-80a8,8,0,0,1,0-11.32l80-80a8,8,0,0,1,11.32,11.32L91.31,128Z" /></svg>
-                    Value tags
+                    Theming
                 </span>
-                                    <span class="truncate text-muted-foreground">Allowlisted env, config, and route lookups.</span>
+                                    <span class="truncate text-muted-foreground">Eleven colour presets, radius, and light / dark / system.</span>
                             </a>
         
                     <a
                 href="../../docs/changelog"
                 data-vellum-pagination-next
-                aria-label="Next: Changelog"
                 x-data="vellumPrefetchHover"
                 x-on:pointerenter="onEnter()"
                 class="group flex flex-col gap-2 rounded-lg border border-border p-4 text-end text-sm transition-colors hover:bg-accent/50"
             >
                 <span class="inline-flex flex-row-reverse items-center gap-1.5 font-semibold text-foreground">
+                    <span class="sr-only">Next:</span>
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="h-4 w-4 shrink-0 -mx-1"><path d="M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z" /></svg>
                     Changelog
                 </span>
@@ -1232,7 +1372,7 @@
         data-vellum-toc-id="namespaces"
         data-vellum-toc-level="0"
         x-on:click.prevent="scrollTo('namespaces')"
-        class="vellum-toc-link relative z-10 block py-1 text-[13px] leading-snug text-muted-foreground transition-colors hover:font-semibold hover:text-foreground"
+        class="vellum-toc-link relative z-10 block min-h-6 py-1.5 text-[13px] leading-snug text-muted-foreground transition-colors hover:font-semibold hover:text-foreground"
         :class="activeId === 'namespaces' ? 'is-active font-semibold text-foreground' : 'text-muted-foreground'"
         style="--vellum-toc-level: 0"
     >Namespaces</a>
@@ -1242,7 +1382,7 @@
         data-vellum-toc-id="slots"
         data-vellum-toc-level="0"
         x-on:click.prevent="scrollTo('slots')"
-        class="vellum-toc-link relative z-10 block py-1 text-[13px] leading-snug text-muted-foreground transition-colors hover:font-semibold hover:text-foreground"
+        class="vellum-toc-link relative z-10 block min-h-6 py-1.5 text-[13px] leading-snug text-muted-foreground transition-colors hover:font-semibold hover:text-foreground"
         :class="activeId === 'slots' ? 'is-active font-semibold text-foreground' : 'text-muted-foreground'"
         style="--vellum-toc-level: 0"
     >Slots</a>
@@ -1252,7 +1392,7 @@
         data-vellum-toc-id="built-ins-share-blade-views"
         data-vellum-toc-level="0"
         x-on:click.prevent="scrollTo('built-ins-share-blade-views')"
-        class="vellum-toc-link relative z-10 block py-1 text-[13px] leading-snug text-muted-foreground transition-colors hover:font-semibold hover:text-foreground"
+        class="vellum-toc-link relative z-10 block min-h-6 py-1.5 text-[13px] leading-snug text-muted-foreground transition-colors hover:font-semibold hover:text-foreground"
         :class="activeId === 'built-ins-share-blade-views' ? 'is-active font-semibold text-foreground' : 'text-muted-foreground'"
         style="--vellum-toc-level: 0"
     >Built-ins share Blade views</a>
@@ -1262,7 +1402,7 @@
         data-vellum-toc-id="missing-components"
         data-vellum-toc-level="0"
         x-on:click.prevent="scrollTo('missing-components')"
-        class="vellum-toc-link relative z-10 block py-1 text-[13px] leading-snug text-muted-foreground transition-colors hover:font-semibold hover:text-foreground"
+        class="vellum-toc-link relative z-10 block min-h-6 py-1.5 text-[13px] leading-snug text-muted-foreground transition-colors hover:font-semibold hover:text-foreground"
         :class="activeId === 'missing-components' ? 'is-active font-semibold text-foreground' : 'text-muted-foreground'"
         style="--vellum-toc-level: 0"
     >Missing components</a>

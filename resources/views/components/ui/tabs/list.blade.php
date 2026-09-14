@@ -10,6 +10,7 @@
 <div
     data-vellum-tabs-list
     role="tablist"
+    aria-orientation="horizontal"
     @@keydown="onListKeydown($event)"
     {{ $attributes->except('class')->merge(['class' => $classes]) }}
 >

@@ -2,8 +2,16 @@
     "title": "Vellum",
     "pages": [
         "index",
+        "why",
         "getting-started",
         "components",
+        "value-tags",
+        "versions",
+        "gating",
+        "search",
+        "releases",
+        "export",
+        "theming",
         "extending",
         { "title": "Changelog", "slug": "changelog" }
     ]

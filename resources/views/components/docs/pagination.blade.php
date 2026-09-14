@@ -13,12 +13,12 @@
             <a
                 href="{{ $previous['href'] }}"
                 data-vellum-pagination-prev
-                aria-label="Previous: {{ $previous['title'] }}"
                 x-data="vellumPrefetchHover"
                 x-on:pointerenter="onEnter()"
                 class="group flex flex-col gap-2 rounded-lg border border-border p-4 text-sm transition-colors hover:bg-accent/50"
             >
                 <span class="inline-flex items-center gap-1.5 font-semibold text-foreground">
+                    <span class="sr-only">Previous:</span>
                     {!! \Vellum\Support\Icons::caretLeft() !!}
                     {{ $previous['title'] }}
                 </span>
@@ -32,12 +32,12 @@
             <a
                 href="{{ $next['href'] }}"
                 data-vellum-pagination-next
-                aria-label="Next: {{ $next['title'] }}"
                 x-data="vellumPrefetchHover"
                 x-on:pointerenter="onEnter()"
                 class="group flex flex-col gap-2 rounded-lg border border-border p-4 text-end text-sm transition-colors hover:bg-accent/50"
             >
                 <span class="inline-flex flex-row-reverse items-center gap-1.5 font-semibold text-foreground">
+                    <span class="sr-only">Next:</span>
                     {!! \Vellum\Support\Icons::caretRight() !!}
                     {{ $next['title'] }}
                 </span>

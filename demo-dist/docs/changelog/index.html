@@ -32,8 +32,8 @@
     <link rel="icon" href="data:,">
             <meta name="description" content="Release notes">
             <style>:root { --radius: 0.5rem }</style>
-    <link rel="stylesheet" href="../../vendor/vellum/vellum.css?v=d4e9018b">
-    <script type="module" src="../../vendor/vellum/vellum.js?v=7136aeda"></script>
+    <link rel="stylesheet" href="../../vendor/vellum/vellum.css?v=7921ad64">
+    <script type="module" src="../../vendor/vellum/vellum.js?v=13280d52"></script>
         <link rel="alternate" type="application/atom+xml" title="Changelog" href="../../docs/changelog.atom">
 </head>
 <body class="min-h-screen bg-background text-foreground antialiased">
@@ -44,7 +44,7 @@
     data-vellum-search
     data-vellum-search-hotkey="k"
     data-vellum-search-driver="minisearch"
-    data-vellum-search-url="../../docs/_vellum/search-5efbadb7469ba4a25f1911f2828012de.json"
+    data-vellum-search-url="../../docs/_vellum/search-8ba9a30c31949a8bbfda446e20dcbf69.json"
     x-data="vellumSearchHotkey('k')"
     x-on:vellum-search-open.window="openSearch()"
     x-on:vellum-search-close.window="closeSearch()"
@@ -71,7 +71,8 @@
                     data-vellum-dialog-panel
                     role="dialog"
                     aria-modal="true"
-                    x-trap.noscroll="true"
+                                            aria-label="Search documentation"
+                                        x-trap.noscroll="true"
                     x-on:click.stop
                     class="fixed left-1/2 top-4 z-50 w-[calc(100%-1rem)] max-w-screen-sm -translate-x-1/2 overflow-hidden rounded-xl border border-border bg-popover text-popover-foreground shadow-2xl shadow-black/50 md:top-[calc(50%-250px)]"
                                     >
@@ -88,7 +89,7 @@
                     status: '',
                     loading: false,
                     ready: false,
-                    searchUrl: '\/docs\/_vellum\/search-5efbadb7469ba4a25f1911f2828012de.json',
+                    searchUrl: '\/docs\/_vellum\/search-8ba9a30c31949a8bbfda446e20dcbf69.json',
                     driver: 'minisearch',
                     async ensureIndex() {
                         if (this.ready || this.loading) {
@@ -157,13 +158,18 @@
                 x-on:keydown.arrow-up.prevent="move(-1)"
                 x-on:keydown.enter.prevent="go()"
             >
-                <label class="sr-only" for="vellum-search-input">Search</label>
+                <label class="sr-only" for="vellum-search-query">Search</label>
                 <div class="flex flex-row items-center gap-2 p-3">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="h-5 w-5 shrink-0 text-muted-foreground"><path d="M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z" /></svg>
                     <input
-                        id="vellum-search-input"
+                        id="vellum-search-query"
                         x-ref="query"
                         type="search"
+                        role="combobox"
+                        aria-autocomplete="list"
+                        aria-expanded="true"
+                        aria-controls="vellum-search-results"
+                        :aria-activedescendant="flat[active] ? 'vellum-search-option-' + active : ''"
                         autocomplete="off"
                         autocorrect="off"
                         spellcheck="false"
@@ -183,6 +189,7 @@
                 <div class="sr-only" aria-live="polite" x-text="status"></div>
 
                 <div
+                    id="vellum-search-results"
                     class="max-h-[min(60vh,24rem)] overflow-y-auto"
                     :class="{ 'border-t border-border': query.trim() !== '' }"
                     role="listbox"
@@ -197,6 +204,7 @@
                     <template x-for="(group, gi) in groups" :key="group.url">
                         <div class="px-1 py-1">
                             <a
+                                :id="'vellum-search-option-' + gi"
                                 :href="group.url"
                                 role="option"
                                 class="block rounded-md px-3 py-2 text-sm hover:bg-accent"
@@ -242,7 +250,8 @@
     data-vellum-search-trigger-variant="icon"
     data-vellum-button
     class="inline-flex items-center gap-2 rounded-md text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring h-8 w-8 justify-center rounded-lg"
-     aria-label="Open search"     x-on:click="$dispatch('vellum-search-open')"
+     aria-label="Search"     aria-haspopup="dialog"
+    x-on:click="$dispatch('vellum-search-open')"
 >
     <span class="inline-flex min-w-0 items-center gap-2">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="h-4 w-4 shrink-0"><path d="M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z" /></svg>
@@ -272,7 +281,8 @@
     data-vellum-search-trigger-variant="icon"
     data-vellum-button
     class="inline-flex items-center gap-2 rounded-md text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring h-8 w-8 justify-center rounded-lg"
-     aria-label="Open search"     x-on:click="$dispatch('vellum-search-open')"
+     aria-label="Search"     aria-haspopup="dialog"
+    x-on:click="$dispatch('vellum-search-open')"
 >
     <span class="inline-flex min-w-0 items-center gap-2">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="h-4 w-4 shrink-0"><path d="M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z" /></svg>
@@ -311,7 +321,8 @@
                     data-vellum-dialog-panel
                     role="dialog"
                     aria-modal="true"
-                    x-trap.noscroll="true"
+                                            aria-label="Documentation navigation"
+                                        x-trap.noscroll="true"
                     x-on:click.stop
                     class="fixed inset-y-0 right-0 z-50 flex h-full w-[85%] max-w-[380px] flex-col border-s border-border bg-background shadow-lg"
                                             data-vellum-sheet-side="right"
@@ -449,6 +460,14 @@
             class="block rounded-md px-2 -mx-2 py-1.5 transition-colors text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground"
                     >Vellum</a>
         
+                    <a
+            href="../../docs/why"
+            data-vellum-nav-link
+                        x-data="vellumPrefetchHover"
+            x-on:pointerenter="onEnter()"
+            class="block rounded-md px-2 -mx-2 py-1.5 transition-colors text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground"
+                    >Why Vellum</a>
+        
                     <div
     data-vellum-collapsible
     x-data="{ open: true }"
@@ -489,6 +508,14 @@
             x-on:pointerenter="onEnter()"
             class="block rounded-md px-2 -mx-2 py-1.5 transition-colors text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground"
                     >Configuration</a>
+        
+                    <a
+            href="../../docs/getting-started/upgrade"
+            data-vellum-nav-link
+                        x-data="vellumPrefetchHover"
+            x-on:pointerenter="onEnter()"
+            class="block rounded-md px-2 -mx-2 py-1.5 transition-colors text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground"
+                    >Upgrade from 0.2 to 0.5</a>
                     </div>
     </div>
 </div>
@@ -557,17 +584,65 @@
             x-on:pointerenter="onEnter()"
             class="block rounded-md px-2 -mx-2 py-1.5 transition-colors text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground"
                     >Cards</a>
+                    </div>
+    </div>
+</div>
         
                     <a
-            href="../../docs/components/values"
+            href="../../docs/value-tags"
             data-vellum-nav-link
                         x-data="vellumPrefetchHover"
             x-on:pointerenter="onEnter()"
             class="block rounded-md px-2 -mx-2 py-1.5 transition-colors text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground"
                     >Value tags</a>
-                    </div>
-    </div>
-</div>
+        
+                    <a
+            href="../../docs/versions"
+            data-vellum-nav-link
+                        x-data="vellumPrefetchHover"
+            x-on:pointerenter="onEnter()"
+            class="block rounded-md px-2 -mx-2 py-1.5 transition-colors text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground"
+                    >Versions</a>
+        
+                    <a
+            href="../../docs/gating"
+            data-vellum-nav-link
+                        x-data="vellumPrefetchHover"
+            x-on:pointerenter="onEnter()"
+            class="block rounded-md px-2 -mx-2 py-1.5 transition-colors text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground"
+                    >Gating</a>
+        
+                    <a
+            href="../../docs/search"
+            data-vellum-nav-link
+                        x-data="vellumPrefetchHover"
+            x-on:pointerenter="onEnter()"
+            class="block rounded-md px-2 -mx-2 py-1.5 transition-colors text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground"
+                    >Search</a>
+        
+                    <a
+            href="../../docs/releases"
+            data-vellum-nav-link
+                        x-data="vellumPrefetchHover"
+            x-on:pointerenter="onEnter()"
+            class="block rounded-md px-2 -mx-2 py-1.5 transition-colors text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground"
+                    >Release notes</a>
+        
+                    <a
+            href="../../docs/export"
+            data-vellum-nav-link
+                        x-data="vellumPrefetchHover"
+            x-on:pointerenter="onEnter()"
+            class="block rounded-md px-2 -mx-2 py-1.5 transition-colors text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground"
+                    >Export</a>
+        
+                    <a
+            href="../../docs/theming"
+            data-vellum-nav-link
+                        x-data="vellumPrefetchHover"
+            x-on:pointerenter="onEnter()"
+            class="block rounded-md px-2 -mx-2 py-1.5 transition-colors text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground"
+                    >Theming</a>
         
                     <a
             href="../../docs/extending"
@@ -639,7 +714,8 @@
     data-vellum-search-trigger-variant="sidebar"
     data-vellum-button
     class="inline-flex items-center gap-2 rounded-md text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring h-9 w-full border border-input bg-background px-2.5"
-        x-on:click="$dispatch('vellum-search-open')"
+        aria-haspopup="dialog"
+    x-on:click="$dispatch('vellum-search-open')"
 >
     <span class="inline-flex min-w-0 items-center gap-2">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="h-4 w-4 shrink-0"><path d="M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z" /></svg>
@@ -674,6 +750,14 @@
             x-on:pointerenter="onEnter()"
             class="block rounded-md px-2 -mx-2 py-1.5 transition-colors text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground"
                     >Vellum</a>
+        
+                    <a
+            href="../../docs/why"
+            data-vellum-nav-link
+                        x-data="vellumPrefetchHover"
+            x-on:pointerenter="onEnter()"
+            class="block rounded-md px-2 -mx-2 py-1.5 transition-colors text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground"
+                    >Why Vellum</a>
         
                     <div
     data-vellum-collapsible
@@ -715,6 +799,14 @@
             x-on:pointerenter="onEnter()"
             class="block rounded-md px-2 -mx-2 py-1.5 transition-colors text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground"
                     >Configuration</a>
+        
+                    <a
+            href="../../docs/getting-started/upgrade"
+            data-vellum-nav-link
+                        x-data="vellumPrefetchHover"
+            x-on:pointerenter="onEnter()"
+            class="block rounded-md px-2 -mx-2 py-1.5 transition-colors text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground"
+                    >Upgrade from 0.2 to 0.5</a>
                     </div>
     </div>
 </div>
@@ -783,17 +875,65 @@
             x-on:pointerenter="onEnter()"
             class="block rounded-md px-2 -mx-2 py-1.5 transition-colors text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground"
                     >Cards</a>
+                    </div>
+    </div>
+</div>
         
                     <a
-            href="../../docs/components/values"
+            href="../../docs/value-tags"
             data-vellum-nav-link
                         x-data="vellumPrefetchHover"
             x-on:pointerenter="onEnter()"
             class="block rounded-md px-2 -mx-2 py-1.5 transition-colors text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground"
                     >Value tags</a>
-                    </div>
-    </div>
-</div>
+        
+                    <a
+            href="../../docs/versions"
+            data-vellum-nav-link
+                        x-data="vellumPrefetchHover"
+            x-on:pointerenter="onEnter()"
+            class="block rounded-md px-2 -mx-2 py-1.5 transition-colors text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground"
+                    >Versions</a>
+        
+                    <a
+            href="../../docs/gating"
+            data-vellum-nav-link
+                        x-data="vellumPrefetchHover"
+            x-on:pointerenter="onEnter()"
+            class="block rounded-md px-2 -mx-2 py-1.5 transition-colors text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground"
+                    >Gating</a>
+        
+                    <a
+            href="../../docs/search"
+            data-vellum-nav-link
+                        x-data="vellumPrefetchHover"
+            x-on:pointerenter="onEnter()"
+            class="block rounded-md px-2 -mx-2 py-1.5 transition-colors text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground"
+                    >Search</a>
+        
+                    <a
+            href="../../docs/releases"
+            data-vellum-nav-link
+                        x-data="vellumPrefetchHover"
+            x-on:pointerenter="onEnter()"
+            class="block rounded-md px-2 -mx-2 py-1.5 transition-colors text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground"
+                    >Release notes</a>
+        
+                    <a
+            href="../../docs/export"
+            data-vellum-nav-link
+                        x-data="vellumPrefetchHover"
+            x-on:pointerenter="onEnter()"
+            class="block rounded-md px-2 -mx-2 py-1.5 transition-colors text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground"
+                    >Export</a>
+        
+                    <a
+            href="../../docs/theming"
+            data-vellum-nav-link
+                        x-data="vellumPrefetchHover"
+            x-on:pointerenter="onEnter()"
+            class="block rounded-md px-2 -mx-2 py-1.5 transition-colors text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground"
+                    >Theming</a>
         
                     <a
             href="../../docs/extending"
@@ -933,7 +1073,7 @@
             data-vellum-toc-mobile
             class="sticky top-14 md:top-0 relative z-30 lg:hidden"
             :class="open && 'z-[60]'"
-            x-data="vellumScrollSpy(JSON.parse('[{\u0022id\u0022:\u00220.3.0\u0022,\u0022text\u0022:\u00220.3.0\u0022},{\u0022id\u0022:\u00220.2.0\u0022,\u0022text\u0022:\u00220.2.0\u0022},{\u0022id\u0022:\u00220.1.0\u0022,\u0022text\u0022:\u00220.1.0\u0022}]'), 'On this page')"
+            x-data="vellumScrollSpy(JSON.parse('[{\u0022id\u0022:\u00220.4.0\u0022,\u0022text\u0022:\u00220.4.0\u0022},{\u0022id\u0022:\u00220.3.0\u0022,\u0022text\u0022:\u00220.3.0\u0022},{\u0022id\u0022:\u00220.2.0\u0022,\u0022text\u0022:\u00220.2.0\u0022},{\u0022id\u0022:\u00220.1.0\u0022,\u0022text\u0022:\u00220.1.0\u0022}]'), 'On this page')"
             x-on:keydown.escape.window="if (open) open = false"
             x-on:click.outside="open = false"
         >
@@ -1000,12 +1140,22 @@
     </svg>
     <span class="vellum-toc-thumb-dot" data-vellum-toc-dot aria-hidden="true"></span>
     <a
+        href="#0.4.0"
+        data-vellum-toc-link
+        data-vellum-toc-id="0.4.0"
+        data-vellum-toc-level="0"
+        x-on:click.prevent="scrollTo('0.4.0')"
+        class="vellum-toc-link relative z-10 block min-h-6 py-1.5 text-[13px] leading-snug text-muted-foreground transition-colors hover:font-semibold hover:text-foreground"
+        :class="activeId === '0.4.0' ? 'is-active font-semibold text-foreground' : 'text-muted-foreground'"
+        style="--vellum-toc-level: 0"
+    >0.4.0</a>
+            <a
         href="#0.3.0"
         data-vellum-toc-link
         data-vellum-toc-id="0.3.0"
         data-vellum-toc-level="0"
         x-on:click.prevent="scrollTo('0.3.0')"
-        class="vellum-toc-link relative z-10 block py-1 text-[13px] leading-snug text-muted-foreground transition-colors hover:font-semibold hover:text-foreground"
+        class="vellum-toc-link relative z-10 block min-h-6 py-1.5 text-[13px] leading-snug text-muted-foreground transition-colors hover:font-semibold hover:text-foreground"
         :class="activeId === '0.3.0' ? 'is-active font-semibold text-foreground' : 'text-muted-foreground'"
         style="--vellum-toc-level: 0"
     >0.3.0</a>
@@ -1015,7 +1165,7 @@
         data-vellum-toc-id="0.2.0"
         data-vellum-toc-level="0"
         x-on:click.prevent="scrollTo('0.2.0')"
-        class="vellum-toc-link relative z-10 block py-1 text-[13px] leading-snug text-muted-foreground transition-colors hover:font-semibold hover:text-foreground"
+        class="vellum-toc-link relative z-10 block min-h-6 py-1.5 text-[13px] leading-snug text-muted-foreground transition-colors hover:font-semibold hover:text-foreground"
         :class="activeId === '0.2.0' ? 'is-active font-semibold text-foreground' : 'text-muted-foreground'"
         style="--vellum-toc-level: 0"
     >0.2.0</a>
@@ -1025,7 +1175,7 @@
         data-vellum-toc-id="0.1.0"
         data-vellum-toc-level="0"
         x-on:click.prevent="scrollTo('0.1.0')"
-        class="vellum-toc-link relative z-10 block py-1 text-[13px] leading-snug text-muted-foreground transition-colors hover:font-semibold hover:text-foreground"
+        class="vellum-toc-link relative z-10 block min-h-6 py-1.5 text-[13px] leading-snug text-muted-foreground transition-colors hover:font-semibold hover:text-foreground"
         :class="activeId === '0.1.0' ? 'is-active font-semibold text-foreground' : 'text-muted-foreground'"
         style="--vellum-toc-level: 0"
     >0.1.0</a>
@@ -1064,6 +1214,23 @@
 <p>The format is based on <a href="https://keepachangelog.com/en/1.1.0/" target="_blank" rel="noopener" class="vellum-external-link">Keep a Changelog<span class="vellum-external-icon" aria-hidden="true"></span></a>,
 and this project adheres to <a href="https://semver.org/spec/v2.0.0.html" target="_blank" rel="noopener" class="vellum-external-link">Semantic Versioning<span class="vellum-external-icon" aria-hidden="true"></span></a>.</p>
                                                     <section class="vellum-changelog-release">
+                                <h2 id="0.4.0" class="vellum-heading">
+                                                                            <a href="https://github.com/VerburgtJimmy/vellum/releases/tag/v0.4.0" target="_blank" rel="noopener">0.4.0</a>
+                                                                                                                <time datetime="2026-09-13" class="ml-2 text-base font-normal text-muted-foreground">2026-09-13</time>
+                                                                    </h2>
+                                <p>Versioned docs URLs and search drivers.</p>
+<h3 id="added" class="vellum-heading">Added<button type="button" class="vellum-heading-anchor" data-vellum-heading-copy="" aria-label="Copy link to heading" x-data="vellumHeadingCopy" @click="copy()"><span class="vellum-heading-anchor-icon" x-show="!copied" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="h-3.5 w-3.5"><path d="M165.66,90.34a8,8,0,0,1,0,11.32l-64,64a8,8,0,0,1-11.32-11.32l64-64A8,8,0,0,1,165.66,90.34ZM215.6,40.4a56,56,0,0,0-79.2,0L106.34,70.45a8,8,0,0,0,11.32,11.32l30.06-30a40,40,0,0,1,56.57,56.56l-30.07,30.06a8,8,0,0,0,11.31,11.32L215.6,119.6a56,56,0,0,0,0-79.2ZM138.34,174.22l-30.06,30.06a40,40,0,1,1-56.56-56.57l30.05-30.05a8,8,0,0,0-11.32-11.32L40.4,136.4a56,56,0,0,0,79.2,79.2l30.06-30.07a8,8,0,0,0-11.32-11.31Z" /></svg></span><span class="vellum-heading-anchor-copied" x-show="copied" x-cloak="">Copied</span></button></h3>
+<ul>
+<li><code data-vellum-inline-code="">php artisan vellum:index</code> rebuilds the MiniSearch compile cache and, when <code data-vellum-inline-code="">search.driver</code> is <code data-vellum-inline-code="">scout</code>, syncs Laravel Scout</li>
+<li>Page <code data-vellum-inline-code="">access</code> frontmatter (<code data-vellum-inline-code="">guest</code>, <code data-vellum-inline-code="">auth</code>, or a gate name). Folder <code data-vellum-inline-code="">meta.json</code> or <code data-vellum-inline-code="">_meta.md</code> inherits downward; a page overrides. Export logs each dropped gated page</li>
+</ul>
+<h3 id="changed" class="vellum-heading">Changed<button type="button" class="vellum-heading-anchor" data-vellum-heading-copy="" aria-label="Copy link to heading" x-data="vellumHeadingCopy" @click="copy()"><span class="vellum-heading-anchor-icon" x-show="!copied" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="h-3.5 w-3.5"><path d="M165.66,90.34a8,8,0,0,1,0,11.32l-64,64a8,8,0,0,1-11.32-11.32l64-64A8,8,0,0,1,165.66,90.34ZM215.6,40.4a56,56,0,0,0-79.2,0L106.34,70.45a8,8,0,0,0,11.32,11.32l30.06-30a40,40,0,0,1,56.57,56.56l-30.07,30.06a8,8,0,0,0,11.31,11.32L215.6,119.6a56,56,0,0,0,0-79.2ZM138.34,174.22l-30.06,30.06a40,40,0,1,1-56.56-56.57l30.05-30.05a8,8,0,0,0-11.32-11.32L40.4,136.4a56,56,0,0,0,79.2,79.2l30.06-30.07a8,8,0,0,0-11.32-11.31Z" /></svg></span><span class="vellum-heading-anchor-copied" x-show="copied" x-cloak="">Copied</span></button></h3>
+<ul>
+<li>When <code data-vellum-inline-code="">vellum.versions.enabled</code> is true, the latest version is served at <code data-vellum-inline-code="">/docs/...</code>. Older versions stay at <code data-vellum-inline-code="">/docs/{version}/...</code>. <code data-vellum-inline-code="">/docs/{latest}/...</code> redirects to the unprefixed URL with HTTP 301. The version switcher labels the latest folder &quot;Latest&quot;.</li>
+<li>Search is a driver (<code data-vellum-inline-code="">vellum.search.driver</code>): MiniSearch by default, Laravel Scout optional. The live MiniSearch index is a package route that filters pages the current user cannot access, cached per visibility set, with an ETag so <code data-vellum-inline-code="">must-revalidate</code> can 304. Static export always writes MiniSearch JSON and drops gated pages.</li>
+</ul>
+                            </section>
+                                                    <section class="vellum-changelog-release mt-10">
                                 <h2 id="0.3.0" class="vellum-heading">
                                                                             <a href="https://github.com/VerburgtJimmy/vellum/releases/tag/v0.3.0" target="_blank" rel="noopener">0.3.0</a>
                                                                                                                 <time datetime="2026-09-13" class="ml-2 text-base font-normal text-muted-foreground">2026-09-13</time>
@@ -1170,7 +1337,7 @@ and this project adheres to <a href="https://semver.org/spec/v2.0.0.html" target
             <aside
             data-vellum-toc
             class="hidden w-[220px] shrink-0 lg:block"
-            x-data="vellumScrollSpy(JSON.parse('[{\u0022id\u0022:\u00220.3.0\u0022,\u0022text\u0022:\u00220.3.0\u0022},{\u0022id\u0022:\u00220.2.0\u0022,\u0022text\u0022:\u00220.2.0\u0022},{\u0022id\u0022:\u00220.1.0\u0022,\u0022text\u0022:\u00220.1.0\u0022}]'))"
+            x-data="vellumScrollSpy(JSON.parse('[{\u0022id\u0022:\u00220.4.0\u0022,\u0022text\u0022:\u00220.4.0\u0022},{\u0022id\u0022:\u00220.3.0\u0022,\u0022text\u0022:\u00220.3.0\u0022},{\u0022id\u0022:\u00220.2.0\u0022,\u0022text\u0022:\u00220.2.0\u0022},{\u0022id\u0022:\u00220.1.0\u0022,\u0022text\u0022:\u00220.1.0\u0022}]'))"
         >
             <div class="sticky top-0 max-h-screen overflow-y-auto py-6 pl-2">
                 <p class="mb-3 flex items-center gap-2 text-[13px] font-medium text-muted-foreground">
@@ -1190,12 +1357,22 @@ and this project adheres to <a href="https://semver.org/spec/v2.0.0.html" target
     </svg>
     <span class="vellum-toc-thumb-dot" data-vellum-toc-dot aria-hidden="true"></span>
     <a
+        href="#0.4.0"
+        data-vellum-toc-link
+        data-vellum-toc-id="0.4.0"
+        data-vellum-toc-level="0"
+        x-on:click.prevent="scrollTo('0.4.0')"
+        class="vellum-toc-link relative z-10 block min-h-6 py-1.5 text-[13px] leading-snug text-muted-foreground transition-colors hover:font-semibold hover:text-foreground"
+        :class="activeId === '0.4.0' ? 'is-active font-semibold text-foreground' : 'text-muted-foreground'"
+        style="--vellum-toc-level: 0"
+    >0.4.0</a>
+            <a
         href="#0.3.0"
         data-vellum-toc-link
         data-vellum-toc-id="0.3.0"
         data-vellum-toc-level="0"
         x-on:click.prevent="scrollTo('0.3.0')"
-        class="vellum-toc-link relative z-10 block py-1 text-[13px] leading-snug text-muted-foreground transition-colors hover:font-semibold hover:text-foreground"
+        class="vellum-toc-link relative z-10 block min-h-6 py-1.5 text-[13px] leading-snug text-muted-foreground transition-colors hover:font-semibold hover:text-foreground"
         :class="activeId === '0.3.0' ? 'is-active font-semibold text-foreground' : 'text-muted-foreground'"
         style="--vellum-toc-level: 0"
     >0.3.0</a>
@@ -1205,7 +1382,7 @@ and this project adheres to <a href="https://semver.org/spec/v2.0.0.html" target
         data-vellum-toc-id="0.2.0"
         data-vellum-toc-level="0"
         x-on:click.prevent="scrollTo('0.2.0')"
-        class="vellum-toc-link relative z-10 block py-1 text-[13px] leading-snug text-muted-foreground transition-colors hover:font-semibold hover:text-foreground"
+        class="vellum-toc-link relative z-10 block min-h-6 py-1.5 text-[13px] leading-snug text-muted-foreground transition-colors hover:font-semibold hover:text-foreground"
         :class="activeId === '0.2.0' ? 'is-active font-semibold text-foreground' : 'text-muted-foreground'"
         style="--vellum-toc-level: 0"
     >0.2.0</a>
@@ -1215,7 +1392,7 @@ and this project adheres to <a href="https://semver.org/spec/v2.0.0.html" target
         data-vellum-toc-id="0.1.0"
         data-vellum-toc-level="0"
         x-on:click.prevent="scrollTo('0.1.0')"
-        class="vellum-toc-link relative z-10 block py-1 text-[13px] leading-snug text-muted-foreground transition-colors hover:font-semibold hover:text-foreground"
+        class="vellum-toc-link relative z-10 block min-h-6 py-1.5 text-[13px] leading-snug text-muted-foreground transition-colors hover:font-semibold hover:text-foreground"
         :class="activeId === '0.1.0' ? 'is-active font-semibold text-foreground' : 'text-muted-foreground'"
         style="--vellum-toc-level: 0"
     >0.1.0</a>

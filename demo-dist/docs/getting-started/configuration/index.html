@@ -30,10 +30,10 @@
     </script>
     <title>Configuration · Vellum</title>
     <link rel="icon" href="data:,">
-            <meta name="description" content="Config keys that shape a Vellum site.">
+            <meta name="description" content="Frozen config keys and frontmatter for Vellum 0.5.">
             <style>:root { --radius: 0.5rem }</style>
-    <link rel="stylesheet" href="../../../vendor/vellum/vellum.css?v=d4e9018b">
-    <script type="module" src="../../../vendor/vellum/vellum.js?v=7136aeda"></script>
+    <link rel="stylesheet" href="../../../vendor/vellum/vellum.css?v=7921ad64">
+    <script type="module" src="../../../vendor/vellum/vellum.js?v=13280d52"></script>
     </head>
 <body class="min-h-screen bg-background text-foreground antialiased">
     <a href="#vellum-content" class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-background focus:px-3 focus:py-2 focus:text-sm focus:shadow">Skip to content</a>
@@ -43,7 +43,7 @@
     data-vellum-search
     data-vellum-search-hotkey="k"
     data-vellum-search-driver="minisearch"
-    data-vellum-search-url="../../../docs/_vellum/search-5efbadb7469ba4a25f1911f2828012de.json"
+    data-vellum-search-url="../../../docs/_vellum/search-8ba9a30c31949a8bbfda446e20dcbf69.json"
     x-data="vellumSearchHotkey('k')"
     x-on:vellum-search-open.window="openSearch()"
     x-on:vellum-search-close.window="closeSearch()"
@@ -70,7 +70,8 @@
                     data-vellum-dialog-panel
                     role="dialog"
                     aria-modal="true"
-                    x-trap.noscroll="true"
+                                            aria-label="Search documentation"
+                                        x-trap.noscroll="true"
                     x-on:click.stop
                     class="fixed left-1/2 top-4 z-50 w-[calc(100%-1rem)] max-w-screen-sm -translate-x-1/2 overflow-hidden rounded-xl border border-border bg-popover text-popover-foreground shadow-2xl shadow-black/50 md:top-[calc(50%-250px)]"
                                     >
@@ -87,7 +88,7 @@
                     status: '',
                     loading: false,
                     ready: false,
-                    searchUrl: '\/docs\/_vellum\/search-5efbadb7469ba4a25f1911f2828012de.json',
+                    searchUrl: '\/docs\/_vellum\/search-8ba9a30c31949a8bbfda446e20dcbf69.json',
                     driver: 'minisearch',
                     async ensureIndex() {
                         if (this.ready || this.loading) {
@@ -156,13 +157,18 @@
                 x-on:keydown.arrow-up.prevent="move(-1)"
                 x-on:keydown.enter.prevent="go()"
             >
-                <label class="sr-only" for="vellum-search-input">Search</label>
+                <label class="sr-only" for="vellum-search-query">Search</label>
                 <div class="flex flex-row items-center gap-2 p-3">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="h-5 w-5 shrink-0 text-muted-foreground"><path d="M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z" /></svg>
                     <input
-                        id="vellum-search-input"
+                        id="vellum-search-query"
                         x-ref="query"
                         type="search"
+                        role="combobox"
+                        aria-autocomplete="list"
+                        aria-expanded="true"
+                        aria-controls="vellum-search-results"
+                        :aria-activedescendant="flat[active] ? 'vellum-search-option-' + active : ''"
                         autocomplete="off"
                         autocorrect="off"
                         spellcheck="false"
@@ -182,6 +188,7 @@
                 <div class="sr-only" aria-live="polite" x-text="status"></div>
 
                 <div
+                    id="vellum-search-results"
                     class="max-h-[min(60vh,24rem)] overflow-y-auto"
                     :class="{ 'border-t border-border': query.trim() !== '' }"
                     role="listbox"
@@ -196,6 +203,7 @@
                     <template x-for="(group, gi) in groups" :key="group.url">
                         <div class="px-1 py-1">
                             <a
+                                :id="'vellum-search-option-' + gi"
                                 :href="group.url"
                                 role="option"
                                 class="block rounded-md px-3 py-2 text-sm hover:bg-accent"
@@ -241,7 +249,8 @@
     data-vellum-search-trigger-variant="icon"
     data-vellum-button
     class="inline-flex items-center gap-2 rounded-md text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring h-8 w-8 justify-center rounded-lg"
-     aria-label="Open search"     x-on:click="$dispatch('vellum-search-open')"
+     aria-label="Search"     aria-haspopup="dialog"
+    x-on:click="$dispatch('vellum-search-open')"
 >
     <span class="inline-flex min-w-0 items-center gap-2">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="h-4 w-4 shrink-0"><path d="M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z" /></svg>
@@ -271,7 +280,8 @@
     data-vellum-search-trigger-variant="icon"
     data-vellum-button
     class="inline-flex items-center gap-2 rounded-md text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring h-8 w-8 justify-center rounded-lg"
-     aria-label="Open search"     x-on:click="$dispatch('vellum-search-open')"
+     aria-label="Search"     aria-haspopup="dialog"
+    x-on:click="$dispatch('vellum-search-open')"
 >
     <span class="inline-flex min-w-0 items-center gap-2">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="h-4 w-4 shrink-0"><path d="M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z" /></svg>
@@ -310,7 +320,8 @@
                     data-vellum-dialog-panel
                     role="dialog"
                     aria-modal="true"
-                    x-trap.noscroll="true"
+                                            aria-label="Documentation navigation"
+                                        x-trap.noscroll="true"
                     x-on:click.stop
                     class="fixed inset-y-0 right-0 z-50 flex h-full w-[85%] max-w-[380px] flex-col border-s border-border bg-background shadow-lg"
                                             data-vellum-sheet-side="right"
@@ -448,6 +459,14 @@
             class="block rounded-md px-2 -mx-2 py-1.5 transition-colors text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground"
                     >Vellum</a>
         
+                    <a
+            href="../../../docs/why"
+            data-vellum-nav-link
+                        x-data="vellumPrefetchHover"
+            x-on:pointerenter="onEnter()"
+            class="block rounded-md px-2 -mx-2 py-1.5 transition-colors text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground"
+                    >Why Vellum</a>
+        
                     <div
     data-vellum-collapsible
     x-data="{ open: true }"
@@ -488,6 +507,14 @@
             x-on:pointerenter="onEnter()"
             class="block rounded-md px-2 -mx-2 py-1.5 transition-colors bg-accent font-medium text-accent-foreground"
              aria-current="page"         >Configuration</a>
+        
+                    <a
+            href="../../../docs/getting-started/upgrade"
+            data-vellum-nav-link
+                        x-data="vellumPrefetchHover"
+            x-on:pointerenter="onEnter()"
+            class="block rounded-md px-2 -mx-2 py-1.5 transition-colors text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground"
+                    >Upgrade from 0.2 to 0.5</a>
                     </div>
     </div>
 </div>
@@ -556,17 +583,65 @@
             x-on:pointerenter="onEnter()"
             class="block rounded-md px-2 -mx-2 py-1.5 transition-colors text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground"
                     >Cards</a>
+                    </div>
+    </div>
+</div>
         
                     <a
-            href="../../../docs/components/values"
+            href="../../../docs/value-tags"
             data-vellum-nav-link
                         x-data="vellumPrefetchHover"
             x-on:pointerenter="onEnter()"
             class="block rounded-md px-2 -mx-2 py-1.5 transition-colors text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground"
                     >Value tags</a>
-                    </div>
-    </div>
-</div>
+        
+                    <a
+            href="../../../docs/versions"
+            data-vellum-nav-link
+                        x-data="vellumPrefetchHover"
+            x-on:pointerenter="onEnter()"
+            class="block rounded-md px-2 -mx-2 py-1.5 transition-colors text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground"
+                    >Versions</a>
+        
+                    <a
+            href="../../../docs/gating"
+            data-vellum-nav-link
+                        x-data="vellumPrefetchHover"
+            x-on:pointerenter="onEnter()"
+            class="block rounded-md px-2 -mx-2 py-1.5 transition-colors text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground"
+                    >Gating</a>
+        
+                    <a
+            href="../../../docs/search"
+            data-vellum-nav-link
+                        x-data="vellumPrefetchHover"
+            x-on:pointerenter="onEnter()"
+            class="block rounded-md px-2 -mx-2 py-1.5 transition-colors text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground"
+                    >Search</a>
+        
+                    <a
+            href="../../../docs/releases"
+            data-vellum-nav-link
+                        x-data="vellumPrefetchHover"
+            x-on:pointerenter="onEnter()"
+            class="block rounded-md px-2 -mx-2 py-1.5 transition-colors text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground"
+                    >Release notes</a>
+        
+                    <a
+            href="../../../docs/export"
+            data-vellum-nav-link
+                        x-data="vellumPrefetchHover"
+            x-on:pointerenter="onEnter()"
+            class="block rounded-md px-2 -mx-2 py-1.5 transition-colors text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground"
+                    >Export</a>
+        
+                    <a
+            href="../../../docs/theming"
+            data-vellum-nav-link
+                        x-data="vellumPrefetchHover"
+            x-on:pointerenter="onEnter()"
+            class="block rounded-md px-2 -mx-2 py-1.5 transition-colors text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground"
+                    >Theming</a>
         
                     <a
             href="../../../docs/extending"
@@ -638,7 +713,8 @@
     data-vellum-search-trigger-variant="sidebar"
     data-vellum-button
     class="inline-flex items-center gap-2 rounded-md text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring h-9 w-full border border-input bg-background px-2.5"
-        x-on:click="$dispatch('vellum-search-open')"
+        aria-haspopup="dialog"
+    x-on:click="$dispatch('vellum-search-open')"
 >
     <span class="inline-flex min-w-0 items-center gap-2">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="h-4 w-4 shrink-0"><path d="M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z" /></svg>
@@ -673,6 +749,14 @@
             x-on:pointerenter="onEnter()"
             class="block rounded-md px-2 -mx-2 py-1.5 transition-colors text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground"
                     >Vellum</a>
+        
+                    <a
+            href="../../../docs/why"
+            data-vellum-nav-link
+                        x-data="vellumPrefetchHover"
+            x-on:pointerenter="onEnter()"
+            class="block rounded-md px-2 -mx-2 py-1.5 transition-colors text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground"
+                    >Why Vellum</a>
         
                     <div
     data-vellum-collapsible
@@ -714,6 +798,14 @@
             x-on:pointerenter="onEnter()"
             class="block rounded-md px-2 -mx-2 py-1.5 transition-colors bg-accent font-medium text-accent-foreground"
              aria-current="page"         >Configuration</a>
+        
+                    <a
+            href="../../../docs/getting-started/upgrade"
+            data-vellum-nav-link
+                        x-data="vellumPrefetchHover"
+            x-on:pointerenter="onEnter()"
+            class="block rounded-md px-2 -mx-2 py-1.5 transition-colors text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground"
+                    >Upgrade from 0.2 to 0.5</a>
                     </div>
     </div>
 </div>
@@ -782,17 +874,65 @@
             x-on:pointerenter="onEnter()"
             class="block rounded-md px-2 -mx-2 py-1.5 transition-colors text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground"
                     >Cards</a>
+                    </div>
+    </div>
+</div>
         
                     <a
-            href="../../../docs/components/values"
+            href="../../../docs/value-tags"
             data-vellum-nav-link
                         x-data="vellumPrefetchHover"
             x-on:pointerenter="onEnter()"
             class="block rounded-md px-2 -mx-2 py-1.5 transition-colors text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground"
                     >Value tags</a>
-                    </div>
-    </div>
-</div>
+        
+                    <a
+            href="../../../docs/versions"
+            data-vellum-nav-link
+                        x-data="vellumPrefetchHover"
+            x-on:pointerenter="onEnter()"
+            class="block rounded-md px-2 -mx-2 py-1.5 transition-colors text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground"
+                    >Versions</a>
+        
+                    <a
+            href="../../../docs/gating"
+            data-vellum-nav-link
+                        x-data="vellumPrefetchHover"
+            x-on:pointerenter="onEnter()"
+            class="block rounded-md px-2 -mx-2 py-1.5 transition-colors text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground"
+                    >Gating</a>
+        
+                    <a
+            href="../../../docs/search"
+            data-vellum-nav-link
+                        x-data="vellumPrefetchHover"
+            x-on:pointerenter="onEnter()"
+            class="block rounded-md px-2 -mx-2 py-1.5 transition-colors text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground"
+                    >Search</a>
+        
+                    <a
+            href="../../../docs/releases"
+            data-vellum-nav-link
+                        x-data="vellumPrefetchHover"
+            x-on:pointerenter="onEnter()"
+            class="block rounded-md px-2 -mx-2 py-1.5 transition-colors text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground"
+                    >Release notes</a>
+        
+                    <a
+            href="../../../docs/export"
+            data-vellum-nav-link
+                        x-data="vellumPrefetchHover"
+            x-on:pointerenter="onEnter()"
+            class="block rounded-md px-2 -mx-2 py-1.5 transition-colors text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground"
+                    >Export</a>
+        
+                    <a
+            href="../../../docs/theming"
+            data-vellum-nav-link
+                        x-data="vellumPrefetchHover"
+            x-on:pointerenter="onEnter()"
+            class="block rounded-md px-2 -mx-2 py-1.5 transition-colors text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground"
+                    >Theming</a>
         
                     <a
             href="../../../docs/extending"
@@ -932,7 +1072,7 @@
             data-vellum-toc-mobile
             class="sticky top-14 md:top-0 relative z-30 lg:hidden"
             :class="open && 'z-[60]'"
-            x-data="vellumScrollSpy(JSON.parse('[{\u0022id\u0022:\u0022content-and-routing\u0022,\u0022text\u0022:\u0022Content and routing\u0022},{\u0022id\u0022:\u0022changelog\u0022,\u0022text\u0022:\u0022Changelog\u0022},{\u0022id\u0022:\u0022components\u0022,\u0022text\u0022:\u0022Components\u0022},{\u0022id\u0022:\u0022versions\u0022,\u0022text\u0022:\u0022Versions\u0022},{\u0022id\u0022:\u0022search\u0022,\u0022text\u0022:\u0022Search\u0022},{\u0022id\u0022:\u0022access\u0022,\u0022text\u0022:\u0022Access\u0022},{\u0022id\u0022:\u0022theme\u0022,\u0022text\u0022:\u0022Theme\u0022}]'), 'Configuration')"
+            x-data="vellumScrollSpy(JSON.parse('[{\u0022id\u0022:\u0022site-and-routing\u0022,\u0022text\u0022:\u0022Site and routing\u0022},{\u0022id\u0022:\u0022theme\u0022,\u0022text\u0022:\u0022Theme\u0022},{\u0022id\u0022:\u0022versions\u0022,\u0022text\u0022:\u0022Versions\u0022},{\u0022id\u0022:\u0022search\u0022,\u0022text\u0022:\u0022Search\u0022},{\u0022id\u0022:\u0022components\u0022,\u0022text\u0022:\u0022Components\u0022},{\u0022id\u0022:\u0022changelog\u0022,\u0022text\u0022:\u0022Changelog\u0022},{\u0022id\u0022:\u0022frontmatter\u0022,\u0022text\u0022:\u0022Frontmatter\u0022}]'), 'Configuration')"
             x-on:keydown.escape.window="if (open) open = false"
             x-on:click.outside="open = false"
         >
@@ -999,42 +1139,32 @@
     </svg>
     <span class="vellum-toc-thumb-dot" data-vellum-toc-dot aria-hidden="true"></span>
     <a
-        href="#content-and-routing"
+        href="#site-and-routing"
         data-vellum-toc-link
-        data-vellum-toc-id="content-and-routing"
+        data-vellum-toc-id="site-and-routing"
         data-vellum-toc-level="0"
-        x-on:click.prevent="scrollTo('content-and-routing')"
-        class="vellum-toc-link relative z-10 block py-1 text-[13px] leading-snug text-muted-foreground transition-colors hover:font-semibold hover:text-foreground"
-        :class="activeId === 'content-and-routing' ? 'is-active font-semibold text-foreground' : 'text-muted-foreground'"
+        x-on:click.prevent="scrollTo('site-and-routing')"
+        class="vellum-toc-link relative z-10 block min-h-6 py-1.5 text-[13px] leading-snug text-muted-foreground transition-colors hover:font-semibold hover:text-foreground"
+        :class="activeId === 'site-and-routing' ? 'is-active font-semibold text-foreground' : 'text-muted-foreground'"
         style="--vellum-toc-level: 0"
-    >Content and routing</a>
+    >Site and routing</a>
             <a
-        href="#changelog"
+        href="#theme"
         data-vellum-toc-link
-        data-vellum-toc-id="changelog"
+        data-vellum-toc-id="theme"
         data-vellum-toc-level="0"
-        x-on:click.prevent="scrollTo('changelog')"
-        class="vellum-toc-link relative z-10 block py-1 text-[13px] leading-snug text-muted-foreground transition-colors hover:font-semibold hover:text-foreground"
-        :class="activeId === 'changelog' ? 'is-active font-semibold text-foreground' : 'text-muted-foreground'"
+        x-on:click.prevent="scrollTo('theme')"
+        class="vellum-toc-link relative z-10 block min-h-6 py-1.5 text-[13px] leading-snug text-muted-foreground transition-colors hover:font-semibold hover:text-foreground"
+        :class="activeId === 'theme' ? 'is-active font-semibold text-foreground' : 'text-muted-foreground'"
         style="--vellum-toc-level: 0"
-    >Changelog</a>
-            <a
-        href="#components"
-        data-vellum-toc-link
-        data-vellum-toc-id="components"
-        data-vellum-toc-level="0"
-        x-on:click.prevent="scrollTo('components')"
-        class="vellum-toc-link relative z-10 block py-1 text-[13px] leading-snug text-muted-foreground transition-colors hover:font-semibold hover:text-foreground"
-        :class="activeId === 'components' ? 'is-active font-semibold text-foreground' : 'text-muted-foreground'"
-        style="--vellum-toc-level: 0"
-    >Components</a>
+    >Theme</a>
             <a
         href="#versions"
         data-vellum-toc-link
         data-vellum-toc-id="versions"
         data-vellum-toc-level="0"
         x-on:click.prevent="scrollTo('versions')"
-        class="vellum-toc-link relative z-10 block py-1 text-[13px] leading-snug text-muted-foreground transition-colors hover:font-semibold hover:text-foreground"
+        class="vellum-toc-link relative z-10 block min-h-6 py-1.5 text-[13px] leading-snug text-muted-foreground transition-colors hover:font-semibold hover:text-foreground"
         :class="activeId === 'versions' ? 'is-active font-semibold text-foreground' : 'text-muted-foreground'"
         style="--vellum-toc-level: 0"
     >Versions</a>
@@ -1044,30 +1174,40 @@
         data-vellum-toc-id="search"
         data-vellum-toc-level="0"
         x-on:click.prevent="scrollTo('search')"
-        class="vellum-toc-link relative z-10 block py-1 text-[13px] leading-snug text-muted-foreground transition-colors hover:font-semibold hover:text-foreground"
+        class="vellum-toc-link relative z-10 block min-h-6 py-1.5 text-[13px] leading-snug text-muted-foreground transition-colors hover:font-semibold hover:text-foreground"
         :class="activeId === 'search' ? 'is-active font-semibold text-foreground' : 'text-muted-foreground'"
         style="--vellum-toc-level: 0"
     >Search</a>
             <a
-        href="#access"
+        href="#components"
         data-vellum-toc-link
-        data-vellum-toc-id="access"
+        data-vellum-toc-id="components"
         data-vellum-toc-level="0"
-        x-on:click.prevent="scrollTo('access')"
-        class="vellum-toc-link relative z-10 block py-1 text-[13px] leading-snug text-muted-foreground transition-colors hover:font-semibold hover:text-foreground"
-        :class="activeId === 'access' ? 'is-active font-semibold text-foreground' : 'text-muted-foreground'"
+        x-on:click.prevent="scrollTo('components')"
+        class="vellum-toc-link relative z-10 block min-h-6 py-1.5 text-[13px] leading-snug text-muted-foreground transition-colors hover:font-semibold hover:text-foreground"
+        :class="activeId === 'components' ? 'is-active font-semibold text-foreground' : 'text-muted-foreground'"
         style="--vellum-toc-level: 0"
-    >Access</a>
+    >Components</a>
             <a
-        href="#theme"
+        href="#changelog"
         data-vellum-toc-link
-        data-vellum-toc-id="theme"
+        data-vellum-toc-id="changelog"
         data-vellum-toc-level="0"
-        x-on:click.prevent="scrollTo('theme')"
-        class="vellum-toc-link relative z-10 block py-1 text-[13px] leading-snug text-muted-foreground transition-colors hover:font-semibold hover:text-foreground"
-        :class="activeId === 'theme' ? 'is-active font-semibold text-foreground' : 'text-muted-foreground'"
+        x-on:click.prevent="scrollTo('changelog')"
+        class="vellum-toc-link relative z-10 block min-h-6 py-1.5 text-[13px] leading-snug text-muted-foreground transition-colors hover:font-semibold hover:text-foreground"
+        :class="activeId === 'changelog' ? 'is-active font-semibold text-foreground' : 'text-muted-foreground'"
         style="--vellum-toc-level: 0"
-    >Theme</a>
+    >Changelog</a>
+            <a
+        href="#frontmatter"
+        data-vellum-toc-link
+        data-vellum-toc-id="frontmatter"
+        data-vellum-toc-level="0"
+        x-on:click.prevent="scrollTo('frontmatter')"
+        class="vellum-toc-link relative z-10 block min-h-6 py-1.5 text-[13px] leading-snug text-muted-foreground transition-colors hover:font-semibold hover:text-foreground"
+        :class="activeId === 'frontmatter' ? 'is-active font-semibold text-foreground' : 'text-muted-foreground'"
+        style="--vellum-toc-level: 0"
+    >Frontmatter</a>
     </nav>
                 </div>
             </div>
@@ -1100,11 +1240,11 @@
                     <h1 class="mb-2 text-3xl font-semibold tracking-tight text-foreground md:text-4xl">
                         Configuration
                     </h1>
-                                            <p class="mb-2 text-lg text-muted-foreground">Config keys that shape a Vellum site.</p>
+                                            <p class="mb-2 text-lg text-muted-foreground">Frozen config keys and frontmatter for Vellum 0.5.</p>
                                         <div
     data-vellum-page-actions
     class="mt-4 mb-6 flex flex-wrap items-center gap-1"
-    x-data="vellumPageActions('---\ntitle: Configuration\ndescription: Config keys that shape a Vellum site.\n---\n\nPublished as `config\/vellum.php`.\n\n## Content and routing\n\n| Key | Default | Purpose |\n| --- | --- | --- |\n| `name` | `env(\u0027APP_NAME\u0027)` | Site name in the header and titles |\n| `path` | `resource_path(\u0027docs\u0027)` | Markdown root |\n| `route.prefix` | `docs` | URL prefix |\n| `repo` | `null` | Base URL for \u0022Edit on GitHub\u0022 |\n\n## Changelog\n\n```php\n\u0027changelog\u0027 =\u003E [\n    \u0027path\u0027 =\u003E env(\u0027VELLUM_CHANGELOG\u0027, base_path(\u0027CHANGELOG.md\u0027)),\n    \u0027unreleased\u0027 =\u003E false,\n],\n```\n\n`path` is a Keep a Changelog file. Set it to `null` to disable the page and feed.\n\nThe page is `\/docs\/changelog`. The Atom feed is `\/docs\/changelog.atom`. `[Unreleased]` stays in the source file for authors. The feed never includes it. The HTML page shows it only when `unreleased` is `true`.\n\nHeadings may be `## [1.2.0] - 2026-09-13` or `## 1.2.0`.\n\n## Components\n\n```php\n\u0027components\u0027 =\u003E [\n    \u0027namespaces\u0027 =\u003E [\u0027vellum\u0027],\n    \u0027allowlist\u0027 =\u003E [\n        \u0027env\u0027 =\u003E [],\n        \u0027config\u0027 =\u003E [],\n        \u0027route\u0027 =\u003E [],\n    ],\n],\n```\n\n`namespaces` is the list of Blade prefixes allowed as `\u003Cx-\u2026\u003E` in Markdown. Add `\u0027\u0027` or `\u0027app\u0027` to allow unprefixed host components such as `\u003Cx-alert\u003E`.\n\n`allowlist` is the only way `\u003Cx-vellum::env \/\u003E`, `config`, and `route` resolve. Empty lists refuse every key.\n\nSee [Extending](\/docs\/extending) for registering your own components.\n\n## Versions\n\n```php\n\u0027versions\u0027 =\u003E [\n    \u0027enabled\u0027 =\u003E false,\n    \u0027latest\u0027 =\u003E \u0027v2\u0027,\n    \u0027list\u0027 =\u003E [\u0027v2\u0027, \u0027v1\u0027],\n],\n```\n\nWhen enabled, Markdown lives in version folders (`docs\/v2\/`, `docs\/v1\/`). The `latest` folder is served at `\/docs\/...` with no version in the URL. Other folders are at `\/docs\/v1\/...`. Visiting `\/docs\/v2\/...` redirects to the unprefixed URL with HTTP 301. The switcher labels `latest` as **Latest**. Changelog stays at `\/docs\/changelog` for every version. Do not detect versions from git tags.\n\n## Search\n\n```php\n\u0027search\u0027 =\u003E [\n    \u0027enabled\u0027 =\u003E true,\n    \u0027hotkey\u0027 =\u003E \u0027k\u0027,\n    \u0027driver\u0027 =\u003E env(\u0027VELLUM_SEARCH_DRIVER\u0027, \u0027minisearch\u0027),\n    \u0027scout\u0027 =\u003E [\n        \u0027index\u0027 =\u003E \u0027vellum\u0027,\n    ],\n],\n```\n\n`minisearch` is the default. It needs no extra services and works on every host. The live index is `\/docs\/_vellum\/search.json`, filtered for the current user and cached per visibility set (guest, auth, and per-gate combinations). Responses send an ETag (index hash plus visibility) so `must-revalidate` can 304. It is not a public immutable file.\n\n`scout` is opt-in for people who already run Meilisearch or Typesense and want heading-level relevance at scale. Install Laravel Scout (`composer require laravel\/scout`) and set `VELLUM_SEARCH_DRIVER=scout`. The same visibility filter runs at query time. `vellum:build` and `vellum:index` sync Scout when that driver is on.\n\n`vellum:export` always writes MiniSearch JSON, regardless of `driver`. Gated pages are dropped from the exported index.\n\n## Access\n\n```yaml\n---\ntitle: Billing\naccess: auth\n---\n```\n\n`access` is `guest` (default), `auth`, or a Laravel gate name. It is resolved once per page into the same visibility set search uses, then applied to the sidebar, the page route, raw Markdown, and search.\n\nFolder access inherits downward. Set it on `meta.json` or `_meta.md`. A page\u0027s own `access` wins.\n\n```json\n{\n  \u0022title\u0022: \u0022Billing\u0022,\n  \u0022access\u0022: \u0022auth\u0022\n}\n```\n\n```yaml\n---\naccess: auth\n---\n```\n\nGuests and users who fail the gate get a 404. `vellum:export` runs as a guest: gated pages are omitted, and each one is logged.\n\n## Theme\n\n```php\n\u0027theme\u0027 =\u003E [\n    \u0027preset\u0027 =\u003E \u0027neutral\u0027,\n    \u0027primary\u0027 =\u003E null,\n    \u0027radius\u0027 =\u003E \u00270.5rem\u0027,\n    \u0027default\u0027 =\u003E \u0027system\u0027,\n],\n```\n\nPresets: `neutral`, `black`, `vitepress`, `dusk`, `catppuccin`, `ocean`, `purple`, `solar`, `emerald`, `ruby`, `aspen`.\n')"
+    x-data="vellumPageActions('---\ntitle: Configuration\ndescription: Frozen config keys and frontmatter for Vellum 0.5.\n---\n\nPublished as `config\/vellum.php`. **0.5 freezes these names.** Add values, do not rename keys.\n\n## Site and routing\n\n| Key | Default | Purpose |\n| --- | --- | --- |\n| `name` | `env(\u0027APP_NAME\u0027)` | Site name in the header and titles |\n| `path` | `resource_path(\u0027docs\u0027)` | Markdown root |\n| `route.prefix` | `docs` | URL prefix |\n| `route.middleware` | `[\u0027web\u0027]` | Route middleware |\n| `route.domain` | `null` | Optional domain |\n| `repo` | `null` | Base URL for \u0022Edit on GitHub\u0022 |\n| `logo` | `null` | SVG path or Blade view in the header |\n| `links` | `[]` | Extra header links (`label`, `href`, optional `icon`) |\n| `layout.search` | `sidebar` | `sidebar` or `header` |\n| `fonts` | `null` | HTML injected into the layout head |\n| `cache.path` | `storage_path(\u0027framework\/vellum\u0027)` | Compile cache |\n| `export.out` | `public_path(\u0027docs-static\u0027)` | Static export directory |\n| `export.base_url` | `\/` | Prefix inside the export |\n\n## Theme\n\nSee [Theming](\/docs\/theming) for all eleven presets.\n\n```php\n\u0027theme\u0027 =\u003E [\n    \u0027preset\u0027 =\u003E \u0027neutral\u0027,\n    \u0027primary\u0027 =\u003E null,\n    \u0027radius\u0027 =\u003E \u00270.5rem\u0027,\n    \u0027default\u0027 =\u003E \u0027system\u0027,\n],\n```\n\n## Versions\n\nSee [Versions](\/docs\/versions).\n\n```php\n\u0027versions\u0027 =\u003E [\n    \u0027enabled\u0027 =\u003E false,\n    \u0027latest\u0027 =\u003E \u0027v2\u0027,\n    \u0027list\u0027 =\u003E [\u0027v2\u0027, \u0027v1\u0027],\n],\n```\n\n## Search\n\nSee [Search](\/docs\/search).\n\n```php\n\u0027search\u0027 =\u003E [\n    \u0027enabled\u0027 =\u003E true,\n    \u0027hotkey\u0027 =\u003E \u0027k\u0027,\n    \u0027driver\u0027 =\u003E env(\u0027VELLUM_SEARCH_DRIVER\u0027, \u0027minisearch\u0027),\n    \u0027scout\u0027 =\u003E [\n        \u0027index\u0027 =\u003E \u0027vellum\u0027,\n    ],\n],\n```\n\n## Components\n\nSee [Value tags](\/docs\/value-tags) and [Extending](\/docs\/extending).\n\n```php\n\u0027components\u0027 =\u003E [\n    \u0027namespaces\u0027 =\u003E [\u0027vellum\u0027],\n    \u0027allowlist\u0027 =\u003E [\n        \u0027env\u0027 =\u003E [],\n        \u0027config\u0027 =\u003E [],\n        \u0027route\u0027 =\u003E [],\n    ],\n],\n```\n\n## Changelog\n\nSee [Release notes](\/docs\/releases).\n\n```php\n\u0027changelog\u0027 =\u003E [\n    \u0027path\u0027 =\u003E env(\u0027VELLUM_CHANGELOG\u0027, base_path(\u0027CHANGELOG.md\u0027)),\n    \u0027unreleased\u0027 =\u003E false,\n],\n```\n\n## Frontmatter\n\nFrozen page keys:\n\n| Key | Purpose |\n| --- | --- |\n| `title` | Page title (falls back to the first heading or the file name) |\n| `description` | Meta description and prev\/next cards |\n| `slug` | Override the URL slug |\n| `icon` | Sidebar icon name |\n| `order` | Sort among siblings when `meta.json` does not list pages |\n| `full` | Hide the table of contents column |\n| `access` | `guest`, `auth`, or a gate name. See [Gating](\/docs\/gating). |\n\nFolder `meta.json`: `title`, `icon`, `defaultOpen`, `pages`, `access`. `_meta.md` can set `access` (and the usual matter) for the folder.\n\nUnknown keys are stored and ignored. Do not rely on that as an API.\n')"
 >
     <button
         type="button"
@@ -1177,8 +1317,8 @@
 </div>
 <hr data-vellum-page-rule class="vellum-page-rule border-0 border-t border-border">
                     <div class="vellum-prose">
-                        <p>Published as <code data-vellum-inline-code="">config/vellum.php</code>.</p>
-<h2 id="content-and-routing" class="vellum-heading">Content and routing<button type="button" class="vellum-heading-anchor" data-vellum-heading-copy="" aria-label="Copy link to heading" x-data="vellumHeadingCopy" @click="copy()"><span class="vellum-heading-anchor-icon" x-show="!copied" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="h-3.5 w-3.5"><path d="M165.66,90.34a8,8,0,0,1,0,11.32l-64,64a8,8,0,0,1-11.32-11.32l64-64A8,8,0,0,1,165.66,90.34ZM215.6,40.4a56,56,0,0,0-79.2,0L106.34,70.45a8,8,0,0,0,11.32,11.32l30.06-30a40,40,0,0,1,56.57,56.56l-30.07,30.06a8,8,0,0,0,11.31,11.32L215.6,119.6a56,56,0,0,0,0-79.2ZM138.34,174.22l-30.06,30.06a40,40,0,1,1-56.56-56.57l30.05-30.05a8,8,0,0,0-11.32-11.32L40.4,136.4a56,56,0,0,0,79.2,79.2l30.06-30.07a8,8,0,0,0-11.32-11.31Z" /></svg></span><span class="vellum-heading-anchor-copied" x-show="copied" x-cloak="">Copied</span></button></h2>
+                        <p>Published as <code data-vellum-inline-code="">config/vellum.php</code>. <strong>0.5 freezes these names.</strong> Add values, do not rename keys.</p>
+<h2 id="site-and-routing" class="vellum-heading">Site and routing<button type="button" class="vellum-heading-anchor" data-vellum-heading-copy="" aria-label="Copy link to heading" x-data="vellumHeadingCopy" @click="copy()"><span class="vellum-heading-anchor-icon" x-show="!copied" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="h-3.5 w-3.5"><path d="M165.66,90.34a8,8,0,0,1,0,11.32l-64,64a8,8,0,0,1-11.32-11.32l64-64A8,8,0,0,1,165.66,90.34ZM215.6,40.4a56,56,0,0,0-79.2,0L106.34,70.45a8,8,0,0,0,11.32,11.32l30.06-30a40,40,0,0,1,56.57,56.56l-30.07,30.06a8,8,0,0,0,11.31,11.32L215.6,119.6a56,56,0,0,0,0-79.2ZM138.34,174.22l-30.06,30.06a40,40,0,1,1-56.56-56.57l30.05-30.05a8,8,0,0,0-11.32-11.32L40.4,136.4a56,56,0,0,0,79.2,79.2l30.06-30.07a8,8,0,0,0-11.32-11.31Z" /></svg></span><span class="vellum-heading-anchor-copied" x-show="copied" x-cloak="">Copied</span></button></h2>
 <div class="vellum-table"><table>
 <thead>
 <tr>
@@ -1204,43 +1344,76 @@
 <td>URL prefix</td>
 </tr>
 <tr>
+<td><code data-vellum-inline-code="">route.middleware</code></td>
+<td><code data-vellum-inline-code="">['web']</code></td>
+<td>Route middleware</td>
+</tr>
+<tr>
+<td><code data-vellum-inline-code="">route.domain</code></td>
+<td><code data-vellum-inline-code="">null</code></td>
+<td>Optional domain</td>
+</tr>
+<tr>
 <td><code data-vellum-inline-code="">repo</code></td>
 <td><code data-vellum-inline-code="">null</code></td>
 <td>Base URL for &quot;Edit on GitHub&quot;</td>
 </tr>
+<tr>
+<td><code data-vellum-inline-code="">logo</code></td>
+<td><code data-vellum-inline-code="">null</code></td>
+<td>SVG path or Blade view in the header</td>
+</tr>
+<tr>
+<td><code data-vellum-inline-code="">links</code></td>
+<td><code data-vellum-inline-code="">[]</code></td>
+<td>Extra header links (<code data-vellum-inline-code="">label</code>, <code data-vellum-inline-code="">href</code>, optional <code data-vellum-inline-code="">icon</code>)</td>
+</tr>
+<tr>
+<td><code data-vellum-inline-code="">layout.search</code></td>
+<td><code data-vellum-inline-code="">sidebar</code></td>
+<td><code data-vellum-inline-code="">sidebar</code> or <code data-vellum-inline-code="">header</code></td>
+</tr>
+<tr>
+<td><code data-vellum-inline-code="">fonts</code></td>
+<td><code data-vellum-inline-code="">null</code></td>
+<td>HTML injected into the layout head</td>
+</tr>
+<tr>
+<td><code data-vellum-inline-code="">cache.path</code></td>
+<td><code data-vellum-inline-code="">storage_path('framework/vellum')</code></td>
+<td>Compile cache</td>
+</tr>
+<tr>
+<td><code data-vellum-inline-code="">export.out</code></td>
+<td><code data-vellum-inline-code="">public_path('docs-static')</code></td>
+<td>Static export directory</td>
+</tr>
+<tr>
+<td><code data-vellum-inline-code="">export.base_url</code></td>
+<td><code data-vellum-inline-code="">/</code></td>
+<td>Prefix inside the export</td>
+</tr>
 </tbody>
 </table></div>
-<h2 id="changelog" class="vellum-heading">Changelog<button type="button" class="vellum-heading-anchor" data-vellum-heading-copy="" aria-label="Copy link to heading" x-data="vellumHeadingCopy" @click="copy()"><span class="vellum-heading-anchor-icon" x-show="!copied" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="h-3.5 w-3.5"><path d="M165.66,90.34a8,8,0,0,1,0,11.32l-64,64a8,8,0,0,1-11.32-11.32l64-64A8,8,0,0,1,165.66,90.34ZM215.6,40.4a56,56,0,0,0-79.2,0L106.34,70.45a8,8,0,0,0,11.32,11.32l30.06-30a40,40,0,0,1,56.57,56.56l-30.07,30.06a8,8,0,0,0,11.31,11.32L215.6,119.6a56,56,0,0,0,0-79.2ZM138.34,174.22l-30.06,30.06a40,40,0,1,1-56.56-56.57l30.05-30.05a8,8,0,0,0-11.32-11.32L40.4,136.4a56,56,0,0,0,79.2,79.2l30.06-30.07a8,8,0,0,0-11.32-11.31Z" /></svg></span><span class="vellum-heading-anchor-copied" x-show="copied" x-cloak="">Copied</span></button></h2>
-<div class="vellum-code" data-vellum-code=""><div class="vellum-code-header"><span class="vellum-code-header-meta"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="vellum-code-lang-icon" data-language="php"><path d="M213.66,82.34l-56-56A8,8,0,0,0,152,24H56A16,16,0,0,0,40,40V216a16,16,0,0,0,16,16H200a16,16,0,0,0,16-16V88A8,8,0,0,0,213.66,82.34Zm-104,88a8,8,0,0,1-11.32,11.32l-24-24a8,8,0,0,1,0-11.32l24-24a8,8,0,0,1,11.32,11.32L91.31,152Zm72-12.68-24,24a8,8,0,0,1-11.32-11.32L164.69,152l-18.35-18.34a8,8,0,0,1,11.32-11.32l24,24A8,8,0,0,1,181.66,157.66ZM152,88V44l44,44Z" /></svg><span class="vellum-code-title">php</span></span><button type="button" class="vellum-code-copy" x-data="{ copied: false }" @click="navigator.clipboard.writeText($el.closest('[data-vellum-code]').querySelector('code').textContent); copied = true; setTimeout(() =&gt; copied = false, 1500)" :aria-label="copied ? 'Copied' : 'Copy code'"><span class="vellum-code-copy-icon" x-show="!copied" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M184,64H40a8,8,0,0,0-8,8V216a8,8,0,0,0,8,8H184a8,8,0,0,0,8-8V72A8,8,0,0,0,184,64Zm-8,144H48V80H176ZM224,40V184a8,8,0,0,1-16,0V48H72a8,8,0,0,1,0-16H216A8,8,0,0,1,224,40Z" /></svg></span><span class="vellum-code-check-icon" x-show="copied" x-cloak="" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M229.66,77.66l-128,128a8,8,0,0,1-11.32,0l-56-56a8,8,0,0,1,11.32-11.32L96,188.69,218.34,66.34a8,8,0,0,1,11.32,11.32Z" /></svg></span></button></div><pre><code class="language-php"><span class="vellum-code-line"><span class="hl-value">'changelog'</span> =&gt; [
-</span><span class="vellum-code-line">    <span class="hl-value">'path'</span> =&gt; <span class="hl-property">env</span>(<span class="hl-value">'VELLUM_CHANGELOG'</span>, <span class="hl-property">base_path</span>(<span class="hl-value">'CHANGELOG.md'</span>)),
-</span><span class="vellum-code-line">    <span class="hl-value">'unreleased'</span> =&gt; <span class="hl-keyword">false</span>,
+<h2 id="theme" class="vellum-heading">Theme<button type="button" class="vellum-heading-anchor" data-vellum-heading-copy="" aria-label="Copy link to heading" x-data="vellumHeadingCopy" @click="copy()"><span class="vellum-heading-anchor-icon" x-show="!copied" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="h-3.5 w-3.5"><path d="M165.66,90.34a8,8,0,0,1,0,11.32l-64,64a8,8,0,0,1-11.32-11.32l64-64A8,8,0,0,1,165.66,90.34ZM215.6,40.4a56,56,0,0,0-79.2,0L106.34,70.45a8,8,0,0,0,11.32,11.32l30.06-30a40,40,0,0,1,56.57,56.56l-30.07,30.06a8,8,0,0,0,11.31,11.32L215.6,119.6a56,56,0,0,0,0-79.2ZM138.34,174.22l-30.06,30.06a40,40,0,1,1-56.56-56.57l30.05-30.05a8,8,0,0,0-11.32-11.32L40.4,136.4a56,56,0,0,0,79.2,79.2l30.06-30.07a8,8,0,0,0-11.32-11.31Z" /></svg></span><span class="vellum-heading-anchor-copied" x-show="copied" x-cloak="">Copied</span></button></h2>
+<p>See <a href="../../../docs/theming">Theming</a> for all eleven presets.</p>
+<div class="vellum-code" data-vellum-code=""><div class="vellum-code-header"><span class="vellum-code-header-meta"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="vellum-code-lang-icon" data-language="php"><path d="M213.66,82.34l-56-56A8,8,0,0,0,152,24H56A16,16,0,0,0,40,40V216a16,16,0,0,0,16,16H200a16,16,0,0,0,16-16V88A8,8,0,0,0,213.66,82.34Zm-104,88a8,8,0,0,1-11.32,11.32l-24-24a8,8,0,0,1,0-11.32l24-24a8,8,0,0,1,11.32,11.32L91.31,152Zm72-12.68-24,24a8,8,0,0,1-11.32-11.32L164.69,152l-18.35-18.34a8,8,0,0,1,11.32-11.32l24,24A8,8,0,0,1,181.66,157.66ZM152,88V44l44,44Z" /></svg><span class="vellum-code-title">php</span></span><button type="button" class="vellum-code-copy" x-data="{ copied: false }" @click="navigator.clipboard.writeText($el.closest('[data-vellum-code]').querySelector('code').textContent); copied = true; setTimeout(() =&gt; copied = false, 1500)" :aria-label="copied ? 'Copied' : 'Copy code'"><span class="vellum-code-copy-icon" x-show="!copied" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M184,64H40a8,8,0,0,0-8,8V216a8,8,0,0,0,8,8H184a8,8,0,0,0,8-8V72A8,8,0,0,0,184,64Zm-8,144H48V80H176ZM224,40V184a8,8,0,0,1-16,0V48H72a8,8,0,0,1,0-16H216A8,8,0,0,1,224,40Z" /></svg></span><span class="vellum-code-check-icon" x-show="copied" x-cloak="" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M229.66,77.66l-128,128a8,8,0,0,1-11.32,0l-56-56a8,8,0,0,1,11.32-11.32L96,188.69,218.34,66.34a8,8,0,0,1,11.32,11.32Z" /></svg></span></button></div><pre><code class="language-php"><span class="vellum-code-line"><span class="hl-value">'theme'</span> =&gt; [
+</span><span class="vellum-code-line">    <span class="hl-value">'preset'</span> =&gt; <span class="hl-value">'neutral'</span>,
+</span><span class="vellum-code-line">    <span class="hl-value">'primary'</span> =&gt; <span class="hl-keyword">null</span>,
+</span><span class="vellum-code-line">    <span class="hl-value">'radius'</span> =&gt; <span class="hl-value">'0.5rem'</span>,
+</span><span class="vellum-code-line">    <span class="hl-value">'default'</span> =&gt; <span class="hl-value">'system'</span>,
 </span><span class="vellum-code-line">],
 </span></code></pre></div>
-<p><code data-vellum-inline-code="">path</code> is a Keep a Changelog file. Set it to <code data-vellum-inline-code="">null</code> to disable the page and feed.</p>
-<p>The page is <code data-vellum-inline-code="">/docs/changelog</code>. The Atom feed is <code data-vellum-inline-code="">/docs/changelog.atom</code>. <code data-vellum-inline-code="">[Unreleased]</code> stays in the source file for authors. The feed never includes it. The HTML page shows it only when <code data-vellum-inline-code="">unreleased</code> is <code data-vellum-inline-code="">true</code>.</p>
-<p>Headings may be <code data-vellum-inline-code="">## [1.2.0] - 2026-09-13</code> or <code data-vellum-inline-code="">## 1.2.0</code>.</p>
-<h2 id="components" class="vellum-heading">Components<button type="button" class="vellum-heading-anchor" data-vellum-heading-copy="" aria-label="Copy link to heading" x-data="vellumHeadingCopy" @click="copy()"><span class="vellum-heading-anchor-icon" x-show="!copied" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="h-3.5 w-3.5"><path d="M165.66,90.34a8,8,0,0,1,0,11.32l-64,64a8,8,0,0,1-11.32-11.32l64-64A8,8,0,0,1,165.66,90.34ZM215.6,40.4a56,56,0,0,0-79.2,0L106.34,70.45a8,8,0,0,0,11.32,11.32l30.06-30a40,40,0,0,1,56.57,56.56l-30.07,30.06a8,8,0,0,0,11.31,11.32L215.6,119.6a56,56,0,0,0,0-79.2ZM138.34,174.22l-30.06,30.06a40,40,0,1,1-56.56-56.57l30.05-30.05a8,8,0,0,0-11.32-11.32L40.4,136.4a56,56,0,0,0,79.2,79.2l30.06-30.07a8,8,0,0,0-11.32-11.31Z" /></svg></span><span class="vellum-heading-anchor-copied" x-show="copied" x-cloak="">Copied</span></button></h2>
-<div class="vellum-code" data-vellum-code=""><div class="vellum-code-header"><span class="vellum-code-header-meta"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="vellum-code-lang-icon" data-language="php"><path d="M213.66,82.34l-56-56A8,8,0,0,0,152,24H56A16,16,0,0,0,40,40V216a16,16,0,0,0,16,16H200a16,16,0,0,0,16-16V88A8,8,0,0,0,213.66,82.34Zm-104,88a8,8,0,0,1-11.32,11.32l-24-24a8,8,0,0,1,0-11.32l24-24a8,8,0,0,1,11.32,11.32L91.31,152Zm72-12.68-24,24a8,8,0,0,1-11.32-11.32L164.69,152l-18.35-18.34a8,8,0,0,1,11.32-11.32l24,24A8,8,0,0,1,181.66,157.66ZM152,88V44l44,44Z" /></svg><span class="vellum-code-title">php</span></span><button type="button" class="vellum-code-copy" x-data="{ copied: false }" @click="navigator.clipboard.writeText($el.closest('[data-vellum-code]').querySelector('code').textContent); copied = true; setTimeout(() =&gt; copied = false, 1500)" :aria-label="copied ? 'Copied' : 'Copy code'"><span class="vellum-code-copy-icon" x-show="!copied" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M184,64H40a8,8,0,0,0-8,8V216a8,8,0,0,0,8,8H184a8,8,0,0,0,8-8V72A8,8,0,0,0,184,64Zm-8,144H48V80H176ZM224,40V184a8,8,0,0,1-16,0V48H72a8,8,0,0,1,0-16H216A8,8,0,0,1,224,40Z" /></svg></span><span class="vellum-code-check-icon" x-show="copied" x-cloak="" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M229.66,77.66l-128,128a8,8,0,0,1-11.32,0l-56-56a8,8,0,0,1,11.32-11.32L96,188.69,218.34,66.34a8,8,0,0,1,11.32,11.32Z" /></svg></span></button></div><pre><code class="language-php"><span class="vellum-code-line"><span class="hl-value">'components'</span> =&gt; [
-</span><span class="vellum-code-line">    <span class="hl-value">'namespaces'</span> =&gt; [<span class="hl-value">'vellum'</span>],
-</span><span class="vellum-code-line">    <span class="hl-value">'allowlist'</span> =&gt; [
-</span><span class="vellum-code-line">        <span class="hl-value">'env'</span> =&gt; [],
-</span><span class="vellum-code-line">        <span class="hl-value">'config'</span> =&gt; [],
-</span><span class="vellum-code-line">        <span class="hl-value">'route'</span> =&gt; [],
-</span><span class="vellum-code-line">    ],
-</span><span class="vellum-code-line">],
-</span></code></pre></div>
-<p><code data-vellum-inline-code="">namespaces</code> is the list of Blade prefixes allowed as <code data-vellum-inline-code="">&lt;x-…&gt;</code> in Markdown. Add <code data-vellum-inline-code="">''</code> or <code data-vellum-inline-code="">'app'</code> to allow unprefixed host components such as <code data-vellum-inline-code="">&lt;x-alert&gt;</code>.</p>
-<p><code data-vellum-inline-code="">allowlist</code> is the only way <code data-vellum-inline-code="">&lt;x-vellum::env /&gt;</code>, <code data-vellum-inline-code="">config</code>, and <code data-vellum-inline-code="">route</code> resolve. Empty lists refuse every key.</p>
-<p>See <a href="../../../docs/extending">Extending</a> for registering your own components.</p>
 <h2 id="versions" class="vellum-heading">Versions<button type="button" class="vellum-heading-anchor" data-vellum-heading-copy="" aria-label="Copy link to heading" x-data="vellumHeadingCopy" @click="copy()"><span class="vellum-heading-anchor-icon" x-show="!copied" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="h-3.5 w-3.5"><path d="M165.66,90.34a8,8,0,0,1,0,11.32l-64,64a8,8,0,0,1-11.32-11.32l64-64A8,8,0,0,1,165.66,90.34ZM215.6,40.4a56,56,0,0,0-79.2,0L106.34,70.45a8,8,0,0,0,11.32,11.32l30.06-30a40,40,0,0,1,56.57,56.56l-30.07,30.06a8,8,0,0,0,11.31,11.32L215.6,119.6a56,56,0,0,0,0-79.2ZM138.34,174.22l-30.06,30.06a40,40,0,1,1-56.56-56.57l30.05-30.05a8,8,0,0,0-11.32-11.32L40.4,136.4a56,56,0,0,0,79.2,79.2l30.06-30.07a8,8,0,0,0-11.32-11.31Z" /></svg></span><span class="vellum-heading-anchor-copied" x-show="copied" x-cloak="">Copied</span></button></h2>
+<p>See <a href="../../../docs/versions">Versions</a>.</p>
 <div class="vellum-code" data-vellum-code=""><div class="vellum-code-header"><span class="vellum-code-header-meta"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="vellum-code-lang-icon" data-language="php"><path d="M213.66,82.34l-56-56A8,8,0,0,0,152,24H56A16,16,0,0,0,40,40V216a16,16,0,0,0,16,16H200a16,16,0,0,0,16-16V88A8,8,0,0,0,213.66,82.34Zm-104,88a8,8,0,0,1-11.32,11.32l-24-24a8,8,0,0,1,0-11.32l24-24a8,8,0,0,1,11.32,11.32L91.31,152Zm72-12.68-24,24a8,8,0,0,1-11.32-11.32L164.69,152l-18.35-18.34a8,8,0,0,1,11.32-11.32l24,24A8,8,0,0,1,181.66,157.66ZM152,88V44l44,44Z" /></svg><span class="vellum-code-title">php</span></span><button type="button" class="vellum-code-copy" x-data="{ copied: false }" @click="navigator.clipboard.writeText($el.closest('[data-vellum-code]').querySelector('code').textContent); copied = true; setTimeout(() =&gt; copied = false, 1500)" :aria-label="copied ? 'Copied' : 'Copy code'"><span class="vellum-code-copy-icon" x-show="!copied" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M184,64H40a8,8,0,0,0-8,8V216a8,8,0,0,0,8,8H184a8,8,0,0,0,8-8V72A8,8,0,0,0,184,64Zm-8,144H48V80H176ZM224,40V184a8,8,0,0,1-16,0V48H72a8,8,0,0,1,0-16H216A8,8,0,0,1,224,40Z" /></svg></span><span class="vellum-code-check-icon" x-show="copied" x-cloak="" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M229.66,77.66l-128,128a8,8,0,0,1-11.32,0l-56-56a8,8,0,0,1,11.32-11.32L96,188.69,218.34,66.34a8,8,0,0,1,11.32,11.32Z" /></svg></span></button></div><pre><code class="language-php"><span class="vellum-code-line"><span class="hl-value">'versions'</span> =&gt; [
 </span><span class="vellum-code-line">    <span class="hl-value">'enabled'</span> =&gt; <span class="hl-keyword">false</span>,
 </span><span class="vellum-code-line">    <span class="hl-value">'latest'</span> =&gt; <span class="hl-value">'v2'</span>,
 </span><span class="vellum-code-line">    <span class="hl-value">'list'</span> =&gt; [<span class="hl-value">'v2'</span>, <span class="hl-value">'v1'</span>],
 </span><span class="vellum-code-line">],
 </span></code></pre></div>
-<p>When enabled, Markdown lives in version folders (<code data-vellum-inline-code="">docs/v2/</code>, <code data-vellum-inline-code="">docs/v1/</code>). The <code data-vellum-inline-code="">latest</code> folder is served at <code data-vellum-inline-code="">/docs/...</code> with no version in the URL. Other folders are at <code data-vellum-inline-code="">/docs/v1/...</code>. Visiting <code data-vellum-inline-code="">/docs/v2/...</code> redirects to the unprefixed URL with HTTP 301. The switcher labels <code data-vellum-inline-code="">latest</code> as <strong>Latest</strong>. Changelog stays at <code data-vellum-inline-code="">/docs/changelog</code> for every version. Do not detect versions from git tags.</p>
 <h2 id="search" class="vellum-heading">Search<button type="button" class="vellum-heading-anchor" data-vellum-heading-copy="" aria-label="Copy link to heading" x-data="vellumHeadingCopy" @click="copy()"><span class="vellum-heading-anchor-icon" x-show="!copied" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="h-3.5 w-3.5"><path d="M165.66,90.34a8,8,0,0,1,0,11.32l-64,64a8,8,0,0,1-11.32-11.32l64-64A8,8,0,0,1,165.66,90.34ZM215.6,40.4a56,56,0,0,0-79.2,0L106.34,70.45a8,8,0,0,0,11.32,11.32l30.06-30a40,40,0,0,1,56.57,56.56l-30.07,30.06a8,8,0,0,0,11.31,11.32L215.6,119.6a56,56,0,0,0,0-79.2ZM138.34,174.22l-30.06,30.06a40,40,0,1,1-56.56-56.57l30.05-30.05a8,8,0,0,0-11.32-11.32L40.4,136.4a56,56,0,0,0,79.2,79.2l30.06-30.07a8,8,0,0,0-11.32-11.31Z" /></svg></span><span class="vellum-heading-anchor-copied" x-show="copied" x-cloak="">Copied</span></button></h2>
+<p>See <a href="../../../docs/search">Search</a>.</p>
 <div class="vellum-code" data-vellum-code=""><div class="vellum-code-header"><span class="vellum-code-header-meta"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="vellum-code-lang-icon" data-language="php"><path d="M213.66,82.34l-56-56A8,8,0,0,0,152,24H56A16,16,0,0,0,40,40V216a16,16,0,0,0,16,16H200a16,16,0,0,0,16-16V88A8,8,0,0,0,213.66,82.34Zm-104,88a8,8,0,0,1-11.32,11.32l-24-24a8,8,0,0,1,0-11.32l24-24a8,8,0,0,1,11.32,11.32L91.31,152Zm72-12.68-24,24a8,8,0,0,1-11.32-11.32L164.69,152l-18.35-18.34a8,8,0,0,1,11.32-11.32l24,24A8,8,0,0,1,181.66,157.66ZM152,88V44l44,44Z" /></svg><span class="vellum-code-title">php</span></span><button type="button" class="vellum-code-copy" x-data="{ copied: false }" @click="navigator.clipboard.writeText($el.closest('[data-vellum-code]').querySelector('code').textContent); copied = true; setTimeout(() =&gt; copied = false, 1500)" :aria-label="copied ? 'Copied' : 'Copy code'"><span class="vellum-code-copy-icon" x-show="!copied" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M184,64H40a8,8,0,0,0-8,8V216a8,8,0,0,0,8,8H184a8,8,0,0,0,8-8V72A8,8,0,0,0,184,64Zm-8,144H48V80H176ZM224,40V184a8,8,0,0,1-16,0V48H72a8,8,0,0,1,0-16H216A8,8,0,0,1,224,40Z" /></svg></span><span class="vellum-code-check-icon" x-show="copied" x-cloak="" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M229.66,77.66l-128,128a8,8,0,0,1-11.32,0l-56-56a8,8,0,0,1,11.32-11.32L96,188.69,218.34,66.34a8,8,0,0,1,11.32,11.32Z" /></svg></span></button></div><pre><code class="language-php"><span class="vellum-code-line"><span class="hl-value">'search'</span> =&gt; [
 </span><span class="vellum-code-line">    <span class="hl-value">'enabled'</span> =&gt; <span class="hl-keyword">true</span>,
 </span><span class="vellum-code-line">    <span class="hl-value">'hotkey'</span> =&gt; <span class="hl-value">'k'</span>,
@@ -1250,36 +1423,66 @@
 </span><span class="vellum-code-line">    ],
 </span><span class="vellum-code-line">],
 </span></code></pre></div>
-<p><code data-vellum-inline-code="">minisearch</code> is the default. It needs no extra services and works on every host. The live index is <code data-vellum-inline-code="">/docs/_vellum/search.json</code>, filtered for the current user and cached per visibility set (guest, auth, and per-gate combinations). Responses send an ETag (index hash plus visibility) so <code data-vellum-inline-code="">must-revalidate</code> can 304. It is not a public immutable file.</p>
-<p><code data-vellum-inline-code="">scout</code> is opt-in for people who already run Meilisearch or Typesense and want heading-level relevance at scale. Install Laravel Scout (<code data-vellum-inline-code="">composer require laravel/scout</code>) and set <code data-vellum-inline-code="">VELLUM_SEARCH_DRIVER=scout</code>. The same visibility filter runs at query time. <code data-vellum-inline-code="">vellum:build</code> and <code data-vellum-inline-code="">vellum:index</code> sync Scout when that driver is on.</p>
-<p><code data-vellum-inline-code="">vellum:export</code> always writes MiniSearch JSON, regardless of <code data-vellum-inline-code="">driver</code>. Gated pages are dropped from the exported index.</p>
-<h2 id="access" class="vellum-heading">Access<button type="button" class="vellum-heading-anchor" data-vellum-heading-copy="" aria-label="Copy link to heading" x-data="vellumHeadingCopy" @click="copy()"><span class="vellum-heading-anchor-icon" x-show="!copied" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="h-3.5 w-3.5"><path d="M165.66,90.34a8,8,0,0,1,0,11.32l-64,64a8,8,0,0,1-11.32-11.32l64-64A8,8,0,0,1,165.66,90.34ZM215.6,40.4a56,56,0,0,0-79.2,0L106.34,70.45a8,8,0,0,0,11.32,11.32l30.06-30a40,40,0,0,1,56.57,56.56l-30.07,30.06a8,8,0,0,0,11.31,11.32L215.6,119.6a56,56,0,0,0,0-79.2ZM138.34,174.22l-30.06,30.06a40,40,0,1,1-56.56-56.57l30.05-30.05a8,8,0,0,0-11.32-11.32L40.4,136.4a56,56,0,0,0,79.2,79.2l30.06-30.07a8,8,0,0,0-11.32-11.31Z" /></svg></span><span class="vellum-heading-anchor-copied" x-show="copied" x-cloak="">Copied</span></button></h2>
-<div class="vellum-code" data-vellum-code=""><div class="vellum-code-header"><span class="vellum-code-header-meta"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="vellum-code-lang-icon" data-language="yaml"><path d="M213.66,82.34l-56-56A8,8,0,0,0,152,24H56A16,16,0,0,0,40,40V216a16,16,0,0,0,16,16H200a16,16,0,0,0,16-16V88A8,8,0,0,0,213.66,82.34ZM160,176H96a8,8,0,0,1,0-16h64a8,8,0,0,1,0,16Zm0-32H96a8,8,0,0,1,0-16h64a8,8,0,0,1,0,16Zm-8-56V44l44,44Z" /></svg><span class="vellum-code-title">yaml</span></span><button type="button" class="vellum-code-copy" x-data="{ copied: false }" @click="navigator.clipboard.writeText($el.closest('[data-vellum-code]').querySelector('code').textContent); copied = true; setTimeout(() =&gt; copied = false, 1500)" :aria-label="copied ? 'Copied' : 'Copy code'"><span class="vellum-code-copy-icon" x-show="!copied" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M184,64H40a8,8,0,0,0-8,8V216a8,8,0,0,0,8,8H184a8,8,0,0,0,8-8V72A8,8,0,0,0,184,64Zm-8,144H48V80H176ZM224,40V184a8,8,0,0,1-16,0V48H72a8,8,0,0,1,0-16H216A8,8,0,0,1,224,40Z" /></svg></span><span class="vellum-code-check-icon" x-show="copied" x-cloak="" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M229.66,77.66l-128,128a8,8,0,0,1-11.32,0l-56-56a8,8,0,0,1,11.32-11.32L96,188.69,218.34,66.34a8,8,0,0,1,11.32,11.32Z" /></svg></span></button></div><pre><code class="language-yaml"><span class="vellum-code-line"><span class="hl-property">-</span>--
-</span><span class="vellum-code-line"><span class="hl-keyword">title</span><span class="hl-property">:</span> Billing
-</span><span class="vellum-code-line"><span class="hl-keyword">access</span><span class="hl-property">:</span> auth
-</span><span class="vellum-code-line"><span class="hl-property">-</span>--
-</span></code></pre></div>
-<p><code data-vellum-inline-code="">access</code> is <code data-vellum-inline-code="">guest</code> (default), <code data-vellum-inline-code="">auth</code>, or a Laravel gate name. It is resolved once per page into the same visibility set search uses, then applied to the sidebar, the page route, raw Markdown, and search.</p>
-<p>Folder access inherits downward. Set it on <code data-vellum-inline-code="">meta.json</code> or <code data-vellum-inline-code="">_meta.md</code>. A page's own <code data-vellum-inline-code="">access</code> wins.</p>
-<div class="vellum-code" data-vellum-code=""><div class="vellum-code-header"><span class="vellum-code-header-meta"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="vellum-code-lang-icon" data-language="json"><path d="M216,40H40A16,16,0,0,0,24,56V200a16,16,0,0,0,16,16H216a16,16,0,0,0,16-16V56A16,16,0,0,0,216,40ZM88,155.84c.29,14.26.41,20.16,16,20.16a8,8,0,0,1,0,16c-31.27,0-31.72-22.43-32-35.84C71.71,141.9,71.59,136,56,136a8,8,0,0,1,0-16c15.59,0,15.71-5.9,16-20.16C72.28,86.43,72.73,64,104,64a8,8,0,0,1,0,16c-15.59,0-15.71,5.9-16,20.16-.17,8.31-.41,20.09-8,27.84C87.59,135.75,87.83,147.53,88,155.84ZM200,136c-15.59,0-15.71,5.9-16,20.16-.28,13.41-.73,35.84-32,35.84a8,8,0,0,1,0-16c15.59,0,15.71-5.9,16-20.16.17-8.31.41-20.09,8-27.84-7.6-7.75-7.84-19.53-8-27.84C167.71,85.9,167.59,80,152,80a8,8,0,0,1,0-16c31.27,0,31.72,22.43,32,35.84.29,14.26.41,20.16,16,20.16a8,8,0,0,1,0,16Z" /></svg><span class="vellum-code-title">json</span></span><button type="button" class="vellum-code-copy" x-data="{ copied: false }" @click="navigator.clipboard.writeText($el.closest('[data-vellum-code]').querySelector('code').textContent); copied = true; setTimeout(() =&gt; copied = false, 1500)" :aria-label="copied ? 'Copied' : 'Copy code'"><span class="vellum-code-copy-icon" x-show="!copied" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M184,64H40a8,8,0,0,0-8,8V216a8,8,0,0,0,8,8H184a8,8,0,0,0,8-8V72A8,8,0,0,0,184,64Zm-8,144H48V80H176ZM224,40V184a8,8,0,0,1-16,0V48H72a8,8,0,0,1,0-16H216A8,8,0,0,1,224,40Z" /></svg></span><span class="vellum-code-check-icon" x-show="copied" x-cloak="" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M229.66,77.66l-128,128a8,8,0,0,1-11.32,0l-56-56a8,8,0,0,1,11.32-11.32L96,188.69,218.34,66.34a8,8,0,0,1,11.32,11.32Z" /></svg></span></button></div><pre><code class="language-json"><span class="vellum-code-line"><span class="hl-property">{</span>
-</span><span class="vellum-code-line">  <span class="hl-keyword">&quot;title&quot;</span>: <span class="hl-value">&quot;Billing&quot;</span>,
-</span><span class="vellum-code-line">  <span class="hl-keyword">&quot;access&quot;</span>: <span class="hl-value">&quot;auth&quot;</span>
-</span><span class="vellum-code-line"><span class="hl-property">}</span>
-</span></code></pre></div>
-<div class="vellum-code" data-vellum-code=""><div class="vellum-code-header"><span class="vellum-code-header-meta"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="vellum-code-lang-icon" data-language="yaml"><path d="M213.66,82.34l-56-56A8,8,0,0,0,152,24H56A16,16,0,0,0,40,40V216a16,16,0,0,0,16,16H200a16,16,0,0,0,16-16V88A8,8,0,0,0,213.66,82.34ZM160,176H96a8,8,0,0,1,0-16h64a8,8,0,0,1,0,16Zm0-32H96a8,8,0,0,1,0-16h64a8,8,0,0,1,0,16Zm-8-56V44l44,44Z" /></svg><span class="vellum-code-title">yaml</span></span><button type="button" class="vellum-code-copy" x-data="{ copied: false }" @click="navigator.clipboard.writeText($el.closest('[data-vellum-code]').querySelector('code').textContent); copied = true; setTimeout(() =&gt; copied = false, 1500)" :aria-label="copied ? 'Copied' : 'Copy code'"><span class="vellum-code-copy-icon" x-show="!copied" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M184,64H40a8,8,0,0,0-8,8V216a8,8,0,0,0,8,8H184a8,8,0,0,0,8-8V72A8,8,0,0,0,184,64Zm-8,144H48V80H176ZM224,40V184a8,8,0,0,1-16,0V48H72a8,8,0,0,1,0-16H216A8,8,0,0,1,224,40Z" /></svg></span><span class="vellum-code-check-icon" x-show="copied" x-cloak="" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M229.66,77.66l-128,128a8,8,0,0,1-11.32,0l-56-56a8,8,0,0,1,11.32-11.32L96,188.69,218.34,66.34a8,8,0,0,1,11.32,11.32Z" /></svg></span></button></div><pre><code class="language-yaml"><span class="vellum-code-line"><span class="hl-property">-</span>--
-</span><span class="vellum-code-line"><span class="hl-keyword">access</span><span class="hl-property">:</span> auth
-</span><span class="vellum-code-line"><span class="hl-property">-</span>--
-</span></code></pre></div>
-<p>Guests and users who fail the gate get a 404. <code data-vellum-inline-code="">vellum:export</code> runs as a guest: gated pages are omitted, and each one is logged.</p>
-<h2 id="theme" class="vellum-heading">Theme<button type="button" class="vellum-heading-anchor" data-vellum-heading-copy="" aria-label="Copy link to heading" x-data="vellumHeadingCopy" @click="copy()"><span class="vellum-heading-anchor-icon" x-show="!copied" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="h-3.5 w-3.5"><path d="M165.66,90.34a8,8,0,0,1,0,11.32l-64,64a8,8,0,0,1-11.32-11.32l64-64A8,8,0,0,1,165.66,90.34ZM215.6,40.4a56,56,0,0,0-79.2,0L106.34,70.45a8,8,0,0,0,11.32,11.32l30.06-30a40,40,0,0,1,56.57,56.56l-30.07,30.06a8,8,0,0,0,11.31,11.32L215.6,119.6a56,56,0,0,0,0-79.2ZM138.34,174.22l-30.06,30.06a40,40,0,1,1-56.56-56.57l30.05-30.05a8,8,0,0,0-11.32-11.32L40.4,136.4a56,56,0,0,0,79.2,79.2l30.06-30.07a8,8,0,0,0-11.32-11.31Z" /></svg></span><span class="vellum-heading-anchor-copied" x-show="copied" x-cloak="">Copied</span></button></h2>
-<div class="vellum-code" data-vellum-code=""><div class="vellum-code-header"><span class="vellum-code-header-meta"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="vellum-code-lang-icon" data-language="php"><path d="M213.66,82.34l-56-56A8,8,0,0,0,152,24H56A16,16,0,0,0,40,40V216a16,16,0,0,0,16,16H200a16,16,0,0,0,16-16V88A8,8,0,0,0,213.66,82.34Zm-104,88a8,8,0,0,1-11.32,11.32l-24-24a8,8,0,0,1,0-11.32l24-24a8,8,0,0,1,11.32,11.32L91.31,152Zm72-12.68-24,24a8,8,0,0,1-11.32-11.32L164.69,152l-18.35-18.34a8,8,0,0,1,11.32-11.32l24,24A8,8,0,0,1,181.66,157.66ZM152,88V44l44,44Z" /></svg><span class="vellum-code-title">php</span></span><button type="button" class="vellum-code-copy" x-data="{ copied: false }" @click="navigator.clipboard.writeText($el.closest('[data-vellum-code]').querySelector('code').textContent); copied = true; setTimeout(() =&gt; copied = false, 1500)" :aria-label="copied ? 'Copied' : 'Copy code'"><span class="vellum-code-copy-icon" x-show="!copied" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M184,64H40a8,8,0,0,0-8,8V216a8,8,0,0,0,8,8H184a8,8,0,0,0,8-8V72A8,8,0,0,0,184,64Zm-8,144H48V80H176ZM224,40V184a8,8,0,0,1-16,0V48H72a8,8,0,0,1,0-16H216A8,8,0,0,1,224,40Z" /></svg></span><span class="vellum-code-check-icon" x-show="copied" x-cloak="" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M229.66,77.66l-128,128a8,8,0,0,1-11.32,0l-56-56a8,8,0,0,1,11.32-11.32L96,188.69,218.34,66.34a8,8,0,0,1,11.32,11.32Z" /></svg></span></button></div><pre><code class="language-php"><span class="vellum-code-line"><span class="hl-value">'theme'</span> =&gt; [
-</span><span class="vellum-code-line">    <span class="hl-value">'preset'</span> =&gt; <span class="hl-value">'neutral'</span>,
-</span><span class="vellum-code-line">    <span class="hl-value">'primary'</span> =&gt; <span class="hl-keyword">null</span>,
-</span><span class="vellum-code-line">    <span class="hl-value">'radius'</span> =&gt; <span class="hl-value">'0.5rem'</span>,
-</span><span class="vellum-code-line">    <span class="hl-value">'default'</span> =&gt; <span class="hl-value">'system'</span>,
+<h2 id="components" class="vellum-heading">Components<button type="button" class="vellum-heading-anchor" data-vellum-heading-copy="" aria-label="Copy link to heading" x-data="vellumHeadingCopy" @click="copy()"><span class="vellum-heading-anchor-icon" x-show="!copied" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="h-3.5 w-3.5"><path d="M165.66,90.34a8,8,0,0,1,0,11.32l-64,64a8,8,0,0,1-11.32-11.32l64-64A8,8,0,0,1,165.66,90.34ZM215.6,40.4a56,56,0,0,0-79.2,0L106.34,70.45a8,8,0,0,0,11.32,11.32l30.06-30a40,40,0,0,1,56.57,56.56l-30.07,30.06a8,8,0,0,0,11.31,11.32L215.6,119.6a56,56,0,0,0,0-79.2ZM138.34,174.22l-30.06,30.06a40,40,0,1,1-56.56-56.57l30.05-30.05a8,8,0,0,0-11.32-11.32L40.4,136.4a56,56,0,0,0,79.2,79.2l30.06-30.07a8,8,0,0,0-11.32-11.31Z" /></svg></span><span class="vellum-heading-anchor-copied" x-show="copied" x-cloak="">Copied</span></button></h2>
+<p>See <a href="../../../docs/value-tags">Value tags</a> and <a href="../../../docs/extending">Extending</a>.</p>
+<div class="vellum-code" data-vellum-code=""><div class="vellum-code-header"><span class="vellum-code-header-meta"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="vellum-code-lang-icon" data-language="php"><path d="M213.66,82.34l-56-56A8,8,0,0,0,152,24H56A16,16,0,0,0,40,40V216a16,16,0,0,0,16,16H200a16,16,0,0,0,16-16V88A8,8,0,0,0,213.66,82.34Zm-104,88a8,8,0,0,1-11.32,11.32l-24-24a8,8,0,0,1,0-11.32l24-24a8,8,0,0,1,11.32,11.32L91.31,152Zm72-12.68-24,24a8,8,0,0,1-11.32-11.32L164.69,152l-18.35-18.34a8,8,0,0,1,11.32-11.32l24,24A8,8,0,0,1,181.66,157.66ZM152,88V44l44,44Z" /></svg><span class="vellum-code-title">php</span></span><button type="button" class="vellum-code-copy" x-data="{ copied: false }" @click="navigator.clipboard.writeText($el.closest('[data-vellum-code]').querySelector('code').textContent); copied = true; setTimeout(() =&gt; copied = false, 1500)" :aria-label="copied ? 'Copied' : 'Copy code'"><span class="vellum-code-copy-icon" x-show="!copied" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M184,64H40a8,8,0,0,0-8,8V216a8,8,0,0,0,8,8H184a8,8,0,0,0,8-8V72A8,8,0,0,0,184,64Zm-8,144H48V80H176ZM224,40V184a8,8,0,0,1-16,0V48H72a8,8,0,0,1,0-16H216A8,8,0,0,1,224,40Z" /></svg></span><span class="vellum-code-check-icon" x-show="copied" x-cloak="" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M229.66,77.66l-128,128a8,8,0,0,1-11.32,0l-56-56a8,8,0,0,1,11.32-11.32L96,188.69,218.34,66.34a8,8,0,0,1,11.32,11.32Z" /></svg></span></button></div><pre><code class="language-php"><span class="vellum-code-line"><span class="hl-value">'components'</span> =&gt; [
+</span><span class="vellum-code-line">    <span class="hl-value">'namespaces'</span> =&gt; [<span class="hl-value">'vellum'</span>],
+</span><span class="vellum-code-line">    <span class="hl-value">'allowlist'</span> =&gt; [
+</span><span class="vellum-code-line">        <span class="hl-value">'env'</span> =&gt; [],
+</span><span class="vellum-code-line">        <span class="hl-value">'config'</span> =&gt; [],
+</span><span class="vellum-code-line">        <span class="hl-value">'route'</span> =&gt; [],
+</span><span class="vellum-code-line">    ],
 </span><span class="vellum-code-line">],
 </span></code></pre></div>
-<p>Presets: <code data-vellum-inline-code="">neutral</code>, <code data-vellum-inline-code="">black</code>, <code data-vellum-inline-code="">vitepress</code>, <code data-vellum-inline-code="">dusk</code>, <code data-vellum-inline-code="">catppuccin</code>, <code data-vellum-inline-code="">ocean</code>, <code data-vellum-inline-code="">purple</code>, <code data-vellum-inline-code="">solar</code>, <code data-vellum-inline-code="">emerald</code>, <code data-vellum-inline-code="">ruby</code>, <code data-vellum-inline-code="">aspen</code>.</p>
+<h2 id="changelog" class="vellum-heading">Changelog<button type="button" class="vellum-heading-anchor" data-vellum-heading-copy="" aria-label="Copy link to heading" x-data="vellumHeadingCopy" @click="copy()"><span class="vellum-heading-anchor-icon" x-show="!copied" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="h-3.5 w-3.5"><path d="M165.66,90.34a8,8,0,0,1,0,11.32l-64,64a8,8,0,0,1-11.32-11.32l64-64A8,8,0,0,1,165.66,90.34ZM215.6,40.4a56,56,0,0,0-79.2,0L106.34,70.45a8,8,0,0,0,11.32,11.32l30.06-30a40,40,0,0,1,56.57,56.56l-30.07,30.06a8,8,0,0,0,11.31,11.32L215.6,119.6a56,56,0,0,0,0-79.2ZM138.34,174.22l-30.06,30.06a40,40,0,1,1-56.56-56.57l30.05-30.05a8,8,0,0,0-11.32-11.32L40.4,136.4a56,56,0,0,0,79.2,79.2l30.06-30.07a8,8,0,0,0-11.32-11.31Z" /></svg></span><span class="vellum-heading-anchor-copied" x-show="copied" x-cloak="">Copied</span></button></h2>
+<p>See <a href="../../../docs/releases">Release notes</a>.</p>
+<div class="vellum-code" data-vellum-code=""><div class="vellum-code-header"><span class="vellum-code-header-meta"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="vellum-code-lang-icon" data-language="php"><path d="M213.66,82.34l-56-56A8,8,0,0,0,152,24H56A16,16,0,0,0,40,40V216a16,16,0,0,0,16,16H200a16,16,0,0,0,16-16V88A8,8,0,0,0,213.66,82.34Zm-104,88a8,8,0,0,1-11.32,11.32l-24-24a8,8,0,0,1,0-11.32l24-24a8,8,0,0,1,11.32,11.32L91.31,152Zm72-12.68-24,24a8,8,0,0,1-11.32-11.32L164.69,152l-18.35-18.34a8,8,0,0,1,11.32-11.32l24,24A8,8,0,0,1,181.66,157.66ZM152,88V44l44,44Z" /></svg><span class="vellum-code-title">php</span></span><button type="button" class="vellum-code-copy" x-data="{ copied: false }" @click="navigator.clipboard.writeText($el.closest('[data-vellum-code]').querySelector('code').textContent); copied = true; setTimeout(() =&gt; copied = false, 1500)" :aria-label="copied ? 'Copied' : 'Copy code'"><span class="vellum-code-copy-icon" x-show="!copied" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M184,64H40a8,8,0,0,0-8,8V216a8,8,0,0,0,8,8H184a8,8,0,0,0,8-8V72A8,8,0,0,0,184,64Zm-8,144H48V80H176ZM224,40V184a8,8,0,0,1-16,0V48H72a8,8,0,0,1,0-16H216A8,8,0,0,1,224,40Z" /></svg></span><span class="vellum-code-check-icon" x-show="copied" x-cloak="" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M229.66,77.66l-128,128a8,8,0,0,1-11.32,0l-56-56a8,8,0,0,1,11.32-11.32L96,188.69,218.34,66.34a8,8,0,0,1,11.32,11.32Z" /></svg></span></button></div><pre><code class="language-php"><span class="vellum-code-line"><span class="hl-value">'changelog'</span> =&gt; [
+</span><span class="vellum-code-line">    <span class="hl-value">'path'</span> =&gt; <span class="hl-property">env</span>(<span class="hl-value">'VELLUM_CHANGELOG'</span>, <span class="hl-property">base_path</span>(<span class="hl-value">'CHANGELOG.md'</span>)),
+</span><span class="vellum-code-line">    <span class="hl-value">'unreleased'</span> =&gt; <span class="hl-keyword">false</span>,
+</span><span class="vellum-code-line">],
+</span></code></pre></div>
+<h2 id="frontmatter" class="vellum-heading">Frontmatter<button type="button" class="vellum-heading-anchor" data-vellum-heading-copy="" aria-label="Copy link to heading" x-data="vellumHeadingCopy" @click="copy()"><span class="vellum-heading-anchor-icon" x-show="!copied" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="h-3.5 w-3.5"><path d="M165.66,90.34a8,8,0,0,1,0,11.32l-64,64a8,8,0,0,1-11.32-11.32l64-64A8,8,0,0,1,165.66,90.34ZM215.6,40.4a56,56,0,0,0-79.2,0L106.34,70.45a8,8,0,0,0,11.32,11.32l30.06-30a40,40,0,0,1,56.57,56.56l-30.07,30.06a8,8,0,0,0,11.31,11.32L215.6,119.6a56,56,0,0,0,0-79.2ZM138.34,174.22l-30.06,30.06a40,40,0,1,1-56.56-56.57l30.05-30.05a8,8,0,0,0-11.32-11.32L40.4,136.4a56,56,0,0,0,79.2,79.2l30.06-30.07a8,8,0,0,0-11.32-11.31Z" /></svg></span><span class="vellum-heading-anchor-copied" x-show="copied" x-cloak="">Copied</span></button></h2>
+<p>Frozen page keys:</p>
+<div class="vellum-table"><table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code data-vellum-inline-code="">title</code></td>
+<td>Page title (falls back to the first heading or the file name)</td>
+</tr>
+<tr>
+<td><code data-vellum-inline-code="">description</code></td>
+<td>Meta description and prev/next cards</td>
+</tr>
+<tr>
+<td><code data-vellum-inline-code="">slug</code></td>
+<td>Override the URL slug</td>
+</tr>
+<tr>
+<td><code data-vellum-inline-code="">icon</code></td>
+<td>Sidebar icon name</td>
+</tr>
+<tr>
+<td><code data-vellum-inline-code="">order</code></td>
+<td>Sort among siblings when <code data-vellum-inline-code="">meta.json</code> does not list pages</td>
+</tr>
+<tr>
+<td><code data-vellum-inline-code="">full</code></td>
+<td>Hide the table of contents column</td>
+</tr>
+<tr>
+<td><code data-vellum-inline-code="">access</code></td>
+<td><code data-vellum-inline-code="">guest</code>, <code data-vellum-inline-code="">auth</code>, or a gate name. See <a href="../../../docs/gating">Gating</a>.</td>
+</tr>
+</tbody>
+</table></div>
+<p>Folder <code data-vellum-inline-code="">meta.json</code>: <code data-vellum-inline-code="">title</code>, <code data-vellum-inline-code="">icon</code>, <code data-vellum-inline-code="">defaultOpen</code>, <code data-vellum-inline-code="">pages</code>, <code data-vellum-inline-code="">access</code>. <code data-vellum-inline-code="">_meta.md</code> can set <code data-vellum-inline-code="">access</code> (and the usual matter) for the folder.</p>
+<p>Unknown keys are stored and ignored. Do not rely on that as an API.</p>
                     </div>
                 </article>
 
@@ -1288,31 +1491,31 @@
                     <a
                 href="../../../docs/getting-started/installation"
                 data-vellum-pagination-prev
-                aria-label="Previous: Installation"
                 x-data="vellumPrefetchHover"
                 x-on:pointerenter="onEnter()"
                 class="group flex flex-col gap-2 rounded-lg border border-border p-4 text-sm transition-colors hover:bg-accent/50"
             >
                 <span class="inline-flex items-center gap-1.5 font-semibold text-foreground">
+                    <span class="sr-only">Previous:</span>
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="h-4 w-4 shrink-0 -mx-1"><path d="M165.66,202.34a8,8,0,0,1-11.32,11.32l-80-80a8,8,0,0,1,0-11.32l80-80a8,8,0,0,1,11.32,11.32L91.31,128Z" /></svg>
                     Installation
                 </span>
-                                    <span class="truncate text-muted-foreground">Install Vellum in a Laravel application.</span>
+                                    <span class="truncate text-muted-foreground">Install Vellum in a Laravel application in under five minutes.</span>
                             </a>
         
                     <a
-                href="../../../docs/components"
+                href="../../../docs/getting-started/upgrade"
                 data-vellum-pagination-next
-                aria-label="Next: Components"
                 x-data="vellumPrefetchHover"
                 x-on:pointerenter="onEnter()"
                 class="group flex flex-col gap-2 rounded-lg border border-border p-4 text-end text-sm transition-colors hover:bg-accent/50"
             >
                 <span class="inline-flex flex-row-reverse items-center gap-1.5 font-semibold text-foreground">
+                    <span class="sr-only">Next:</span>
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="h-4 w-4 shrink-0 -mx-1"><path d="M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z" /></svg>
-                    Components
+                    Upgrade from 0.2 to 0.5
                 </span>
-                                    <span class="truncate text-muted-foreground">Built-in directives and value tags.</span>
+                                    <span class="truncate text-muted-foreground">One-page path from Vellum 0.2 to the 0.5 stability freeze.</span>
                             </a>
             </nav>
                                     </div>
@@ -1321,7 +1524,7 @@
             <aside
             data-vellum-toc
             class="hidden w-[220px] shrink-0 lg:block"
-            x-data="vellumScrollSpy(JSON.parse('[{\u0022id\u0022:\u0022content-and-routing\u0022,\u0022text\u0022:\u0022Content and routing\u0022},{\u0022id\u0022:\u0022changelog\u0022,\u0022text\u0022:\u0022Changelog\u0022},{\u0022id\u0022:\u0022components\u0022,\u0022text\u0022:\u0022Components\u0022},{\u0022id\u0022:\u0022versions\u0022,\u0022text\u0022:\u0022Versions\u0022},{\u0022id\u0022:\u0022search\u0022,\u0022text\u0022:\u0022Search\u0022},{\u0022id\u0022:\u0022access\u0022,\u0022text\u0022:\u0022Access\u0022},{\u0022id\u0022:\u0022theme\u0022,\u0022text\u0022:\u0022Theme\u0022}]'))"
+            x-data="vellumScrollSpy(JSON.parse('[{\u0022id\u0022:\u0022site-and-routing\u0022,\u0022text\u0022:\u0022Site and routing\u0022},{\u0022id\u0022:\u0022theme\u0022,\u0022text\u0022:\u0022Theme\u0022},{\u0022id\u0022:\u0022versions\u0022,\u0022text\u0022:\u0022Versions\u0022},{\u0022id\u0022:\u0022search\u0022,\u0022text\u0022:\u0022Search\u0022},{\u0022id\u0022:\u0022components\u0022,\u0022text\u0022:\u0022Components\u0022},{\u0022id\u0022:\u0022changelog\u0022,\u0022text\u0022:\u0022Changelog\u0022},{\u0022id\u0022:\u0022frontmatter\u0022,\u0022text\u0022:\u0022Frontmatter\u0022}]'))"
         >
             <div class="sticky top-0 max-h-screen overflow-y-auto py-6 pl-2">
                 <p class="mb-3 flex items-center gap-2 text-[13px] font-medium text-muted-foreground">
@@ -1341,42 +1544,32 @@
     </svg>
     <span class="vellum-toc-thumb-dot" data-vellum-toc-dot aria-hidden="true"></span>
     <a
-        href="#content-and-routing"
+        href="#site-and-routing"
         data-vellum-toc-link
-        data-vellum-toc-id="content-and-routing"
+        data-vellum-toc-id="site-and-routing"
         data-vellum-toc-level="0"
-        x-on:click.prevent="scrollTo('content-and-routing')"
-        class="vellum-toc-link relative z-10 block py-1 text-[13px] leading-snug text-muted-foreground transition-colors hover:font-semibold hover:text-foreground"
-        :class="activeId === 'content-and-routing' ? 'is-active font-semibold text-foreground' : 'text-muted-foreground'"
+        x-on:click.prevent="scrollTo('site-and-routing')"
+        class="vellum-toc-link relative z-10 block min-h-6 py-1.5 text-[13px] leading-snug text-muted-foreground transition-colors hover:font-semibold hover:text-foreground"
+        :class="activeId === 'site-and-routing' ? 'is-active font-semibold text-foreground' : 'text-muted-foreground'"
         style="--vellum-toc-level: 0"
-    >Content and routing</a>
+    >Site and routing</a>
             <a
-        href="#changelog"
+        href="#theme"
         data-vellum-toc-link
-        data-vellum-toc-id="changelog"
+        data-vellum-toc-id="theme"
         data-vellum-toc-level="0"
-        x-on:click.prevent="scrollTo('changelog')"
-        class="vellum-toc-link relative z-10 block py-1 text-[13px] leading-snug text-muted-foreground transition-colors hover:font-semibold hover:text-foreground"
-        :class="activeId === 'changelog' ? 'is-active font-semibold text-foreground' : 'text-muted-foreground'"
+        x-on:click.prevent="scrollTo('theme')"
+        class="vellum-toc-link relative z-10 block min-h-6 py-1.5 text-[13px] leading-snug text-muted-foreground transition-colors hover:font-semibold hover:text-foreground"
+        :class="activeId === 'theme' ? 'is-active font-semibold text-foreground' : 'text-muted-foreground'"
         style="--vellum-toc-level: 0"
-    >Changelog</a>
-            <a
-        href="#components"
-        data-vellum-toc-link
-        data-vellum-toc-id="components"
-        data-vellum-toc-level="0"
-        x-on:click.prevent="scrollTo('components')"
-        class="vellum-toc-link relative z-10 block py-1 text-[13px] leading-snug text-muted-foreground transition-colors hover:font-semibold hover:text-foreground"
-        :class="activeId === 'components' ? 'is-active font-semibold text-foreground' : 'text-muted-foreground'"
-        style="--vellum-toc-level: 0"
-    >Components</a>
+    >Theme</a>
             <a
         href="#versions"
         data-vellum-toc-link
         data-vellum-toc-id="versions"
         data-vellum-toc-level="0"
         x-on:click.prevent="scrollTo('versions')"
-        class="vellum-toc-link relative z-10 block py-1 text-[13px] leading-snug text-muted-foreground transition-colors hover:font-semibold hover:text-foreground"
+        class="vellum-toc-link relative z-10 block min-h-6 py-1.5 text-[13px] leading-snug text-muted-foreground transition-colors hover:font-semibold hover:text-foreground"
         :class="activeId === 'versions' ? 'is-active font-semibold text-foreground' : 'text-muted-foreground'"
         style="--vellum-toc-level: 0"
     >Versions</a>
@@ -1386,30 +1579,40 @@
         data-vellum-toc-id="search"
         data-vellum-toc-level="0"
         x-on:click.prevent="scrollTo('search')"
-        class="vellum-toc-link relative z-10 block py-1 text-[13px] leading-snug text-muted-foreground transition-colors hover:font-semibold hover:text-foreground"
+        class="vellum-toc-link relative z-10 block min-h-6 py-1.5 text-[13px] leading-snug text-muted-foreground transition-colors hover:font-semibold hover:text-foreground"
         :class="activeId === 'search' ? 'is-active font-semibold text-foreground' : 'text-muted-foreground'"
         style="--vellum-toc-level: 0"
     >Search</a>
             <a
-        href="#access"
+        href="#components"
         data-vellum-toc-link
-        data-vellum-toc-id="access"
+        data-vellum-toc-id="components"
         data-vellum-toc-level="0"
-        x-on:click.prevent="scrollTo('access')"
-        class="vellum-toc-link relative z-10 block py-1 text-[13px] leading-snug text-muted-foreground transition-colors hover:font-semibold hover:text-foreground"
-        :class="activeId === 'access' ? 'is-active font-semibold text-foreground' : 'text-muted-foreground'"
+        x-on:click.prevent="scrollTo('components')"
+        class="vellum-toc-link relative z-10 block min-h-6 py-1.5 text-[13px] leading-snug text-muted-foreground transition-colors hover:font-semibold hover:text-foreground"
+        :class="activeId === 'components' ? 'is-active font-semibold text-foreground' : 'text-muted-foreground'"
         style="--vellum-toc-level: 0"
-    >Access</a>
+    >Components</a>
             <a
-        href="#theme"
+        href="#changelog"
         data-vellum-toc-link
-        data-vellum-toc-id="theme"
+        data-vellum-toc-id="changelog"
         data-vellum-toc-level="0"
-        x-on:click.prevent="scrollTo('theme')"
-        class="vellum-toc-link relative z-10 block py-1 text-[13px] leading-snug text-muted-foreground transition-colors hover:font-semibold hover:text-foreground"
-        :class="activeId === 'theme' ? 'is-active font-semibold text-foreground' : 'text-muted-foreground'"
+        x-on:click.prevent="scrollTo('changelog')"
+        class="vellum-toc-link relative z-10 block min-h-6 py-1.5 text-[13px] leading-snug text-muted-foreground transition-colors hover:font-semibold hover:text-foreground"
+        :class="activeId === 'changelog' ? 'is-active font-semibold text-foreground' : 'text-muted-foreground'"
         style="--vellum-toc-level: 0"
-    >Theme</a>
+    >Changelog</a>
+            <a
+        href="#frontmatter"
+        data-vellum-toc-link
+        data-vellum-toc-id="frontmatter"
+        data-vellum-toc-level="0"
+        x-on:click.prevent="scrollTo('frontmatter')"
+        class="vellum-toc-link relative z-10 block min-h-6 py-1.5 text-[13px] leading-snug text-muted-foreground transition-colors hover:font-semibold hover:text-foreground"
+        :class="activeId === 'frontmatter' ? 'is-active font-semibold text-foreground' : 'text-muted-foreground'"
+        style="--vellum-toc-level: 0"
+    >Frontmatter</a>
     </nav>
             </div>
         </aside>

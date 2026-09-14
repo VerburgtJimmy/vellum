@@ -12,6 +12,5 @@ Built-ins use `:::` as the stable authoring syntax. The Blade views under `resou
 ::card[Tabs](/docs/components/tabs){icon=book}
 ::card[Steps](/docs/components/steps){icon=book}
 ::card[Cards](/docs/components/cards){icon=book}
+::card[Value tags](/docs/value-tags){icon=book}
 :::
-
-Value tags (`env`, `config`, `route`) are also components. They only resolve when the key is in `vellum.components.allowlist`.

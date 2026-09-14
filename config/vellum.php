@@ -2,6 +2,11 @@
 
 declare(strict_types=1);
 
+/*
+ | 0.5 freezes these keys. Add values in the host app; do not rename
+ | keys or frontmatter names until 1.0.
+ */
+
 return [
     /*
     |--------------------------------------------------------------------------
@@ -42,13 +47,19 @@ return [
     | When enabled, docs live under version folders (e.g. v2/, v1/). The
     | latest version is served at /docs/... with no version segment. Other
     | versions are at /docs/v1/.... /docs/{latest}/... redirects to the
-    | unprefixed URL. The switcher labels the latest folder "Latest".
+    | unprefixed URL. List order is switcher order. Optional labels
+    | override the switcher text (folder and URL stay the list slug).
+    | Unlabelled latest is "Latest".
     |
     */
     'versions' => [
         'enabled' => false,
         'latest' => 'v2',
         'list' => ['v2', 'v1'],
+        'labels' => [
+            // 'v1' => '1.x (LTS)',
+            // 'next' => 'Next',
+        ],
     ],
 
     /*

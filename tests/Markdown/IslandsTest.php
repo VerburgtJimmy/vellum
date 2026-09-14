@@ -2,13 +2,12 @@
 
 declare(strict_types=1);
 
-use Illuminate\Support\Facades\Blade;
 use Vellum\Exceptions\UnknownComponentException;
 use Vellum\Markdown\Islands\IslandRenderer;
 use Vellum\Markdown\Islands\MarkdownPipeline;
 
 beforeEach(function (): void {
-    Blade::anonymousComponentPath(__DIR__.'/../fixtures/components');
+    $this->registerFixtureComponents();
     config()->set('vellum.components.namespaces', ['vellum', '']);
 });
 
@@ -179,8 +178,9 @@ MD);
         ->and($html)->toContain('role="tablist"')
         ->and($html)->toContain('npm body')
         ->and($html)->toContain('pnpm body')
-        ->and($html)->toContain('id="vellum-tab-npm"')
-        ->and($html)->toContain('id="vellum-tab-pnpm"')
+        ->and($html)->toContain('data-value="npm"')
+        ->and($html)->toContain('data-value="pnpm"')
+        ->and($html)->toContain('vellumTabs(')
         ->and($html)->not->toContain('VELLUMISLAND');
 });
 

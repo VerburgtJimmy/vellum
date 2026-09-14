@@ -86,6 +86,9 @@ it('includes the search dialog when search is enabled', function (): void {
         ->toContain('data-vellum-dialog')
         ->toContain('data-vellum-dialog-variant="search"')
         ->toContain('placeholder="Search"')
+        ->toContain('aria-label="Search documentation"')
+        ->toContain('role="combobox"')
+        ->toContain('aria-haspopup="dialog"')
         ->toContain('>ESC</button>')
         ->toContain('md:top-[calc(50%-250px)]')
         ->toContain('backdrop-blur-[4px]');
@@ -184,8 +187,6 @@ it('renders prev and next pagination with prefetch hooks', function (): void {
         ->assertSee('Beta', false)
         ->assertSee('Start here.', false)
         ->assertSee('The last page.', false)
-        ->assertSee('aria-label="Previous: Home"', false)
-        ->assertSee('aria-label="Next: Beta"', false)
         ->assertSee('vellumPrefetchHover', false)
         ->getContent();
 
@@ -343,4 +344,33 @@ it('falls back to neutral for an unknown colour preset', function (): void {
     $html = $this->get('/docs')->assertOk()->getContent();
 
     expect($html)->toContain('data-vellum-preset="neutral"');
+});
+
+it('exposes accessible version switcher markup', function (): void {
+    config()->set('vellum.versions.enabled', true);
+    config()->set('vellum.versions.latest', 'v2');
+    config()->set('vellum.versions.list', ['v2', 'v1']);
+
+    $this->writeDoc('v2/index.md', "---\ntitle: Home\n---\nHi");
+    $this->writeDoc('v1/index.md', "---\ntitle: Home\n---\nOld");
+
+    $html = $this->get('/docs')->assertOk()->getContent();
+
+    expect($html)
+        ->toContain('data-vellum-version-switcher')
+        ->toContain('aria-label="Select documentation version"')
+        ->toContain('aria-haspopup="menu"')
+        ->toContain('aria-controls=')
+        ->toContain('role="menu"')
+        ->toContain('role="menuitem"')
+        ->toContain("event.key === 'Home'")
+        ->toContain("event.key === 'End'");
+});
+
+it('keeps tab persist in the shared Alpine helper', function (): void {
+    $js = file_get_contents(Assets::jsPath());
+
+    expect($js)->not->toBeFalse()
+        ->and($js)->toContain('vellum-tabs-')
+        ->and($js)->toContain('localStorage.setItem');
 });

@@ -18,7 +18,8 @@
     data-vellum-search-trigger-variant="{{ $variant }}"
     data-vellum-button
     class="{{ $classes }}"
-    @if ($variant === 'icon') aria-label="Open search" @endif
+    @if ($variant === 'icon') aria-label="Search" @endif
+    aria-haspopup="dialog"
     x-on:click="$dispatch('vellum-search-open')"
 >
     <span class="inline-flex min-w-0 items-center gap-2">

@@ -1,5 +1,5 @@
 {
     "title": "Components",
     "defaultOpen": true,
-    "pages": ["index", "callouts", "tabs", "steps", "cards", "values"]
+    "pages": ["index", "callouts", "tabs", "steps", "cards"]
 }

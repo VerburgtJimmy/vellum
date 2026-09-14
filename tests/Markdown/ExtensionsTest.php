@@ -93,10 +93,12 @@ MD);
 
     expect($html)->toContain('data-vellum-tabs')
         ->and($html)->toContain('data-persist="pkg-manager"')
-        ->and($html)->toContain('vellum-tabs-pkg-manager')
+        ->and($html)->toContain('vellumTabs(')
         ->and($html)->toContain('vellum-tabs-code')
         ->and($html)->toContain('vellum-code-embedded')
         ->and($html)->toContain('role="tablist"')
+        ->and($html)->toContain('aria-orientation="horizontal"')
+        ->and($html)->toContain('data-value="npm"')
         ->and($html)->toContain('npm')
         ->and($html)->toContain('pnpm')
         ->and($html)->toMatchSnapshot();
@@ -204,8 +206,8 @@ MD);
         ->and($html)->toContain('data-vellum-callout="note"')
         ->and($html)->toContain('Inside tab')
         ->and($html)->toContain('Second panel')
-        ->and($html)->toContain('vellum-tab-one')
-        ->and($html)->toContain('vellum-tab-two')
+        ->and($html)->toContain('data-value="one"')
+        ->and($html)->toContain('data-value="two"')
         ->and($html)->not->toContain('::tab[Two]')
         ->and($html)->toMatchSnapshot();
 });
@@ -245,8 +247,8 @@ MD);
         ->and($html)->toContain('data-vellum-tabs')
         ->and($html)->toContain('Alpha')
         ->and($html)->toContain('Beta')
-        ->and($html)->toContain('vellum-tab-a')
-        ->and($html)->toContain('vellum-tab-b')
+        ->and($html)->toContain('data-value="a"')
+        ->and($html)->toContain('data-value="b"')
         ->and($html)->not->toContain('::tab[A]')
         ->and($html)->toMatchSnapshot();
 });

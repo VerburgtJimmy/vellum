@@ -1,0 +1,36 @@
+name: Bug
+description: Something does not work as documented
+title: "[Bug] "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: Search existing issues first. Security reports go to hey@jimmyverburgt.com, not here.
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you expected, what you got, and how to reproduce it.
+    validations:
+      required: true
+  - type: input
+    id: php
+    attributes:
+      label: PHP
+      placeholder: "8.4.10"
+    validations:
+      required: true
+  - type: input
+    id: laravel
+    attributes:
+      label: Laravel
+      placeholder: "12.20"
+    validations:
+      required: true
+  - type: input
+    id: vellum
+    attributes:
+      label: Vellum
+      placeholder: "0.5.0"
+    validations:
+      required: true

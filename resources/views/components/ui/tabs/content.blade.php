@@ -15,6 +15,9 @@
     role="tabpanel"
     data-vellum-tabs-content
     data-value="{{ $value }}"
+    :id="{{ '$id' }}('panel-' + @js($value))"
+    :aria-labelledby="{{ '$id' }}('tab-' + @js($value))"
+    :aria-hidden="(active !== @js($value)).toString()"
     x-show="active === @js($value)"
     x-cloak
     {{ $attributes->except('class')->merge(['class' => $classes]) }}

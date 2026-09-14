@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Vellum\Tests;
 
 use Illuminate\Foundation\Application;
+use Illuminate\Support\Facades\Blade;
 use Orchestra\Testbench\TestCase as Orchestra;
 use Vellum\VellumServiceProvider;
 
@@ -82,6 +83,21 @@ abstract class TestCase extends Orchestra
     protected function fixtureId(): string
     {
         return md5(static::class.$this->name());
+    }
+
+    /**
+     * Host Markdown components under tests/fixtures/components.
+     * realpath() so every test file registers the same Blade anonymous namespace.
+     */
+    protected function registerFixtureComponents(): void
+    {
+        $path = realpath(__DIR__.'/fixtures/components');
+
+        if ($path === false) {
+            throw new \RuntimeException('Fixture components directory is missing.');
+        }
+
+        Blade::anonymousComponentPath($path);
     }
 
     protected function writeDoc(string $relativePath, string $contents): string

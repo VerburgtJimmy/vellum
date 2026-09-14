@@ -11,12 +11,9 @@
     $currentVersion = is_string($currentVersion) && $currentVersion !== ''
         ? $currentVersion
         : ($versions[0] ?? null);
-    $latest = config('vellum.versions.latest');
-    $labels = [];
-
-    foreach ($versions as $version) {
-        $labels[$version] = $version === $latest ? 'Latest' : $version;
-    }
+    $labels = \Vellum\Support\VersionLabel::map($versions);
+    static $menuSeq = 0;
+    $menuId = 'vellum-version-menu-'.(++$menuSeq);
 @endphp
 
 @if ($enabled && $versions !== [] && $currentVersion !== null)
@@ -67,6 +64,18 @@
                 event.preventDefault()
                 this.active = (this.active - 1 + this.versions.length) % this.versions.length
                 this.$refs.menu?.querySelectorAll('[role=menuitem]')[this.active]?.focus()
+                return
+            }
+            if (event.key === 'Home') {
+                event.preventDefault()
+                this.active = 0
+                this.$refs.menu?.querySelectorAll('[role=menuitem]')[this.active]?.focus()
+                return
+            }
+            if (event.key === 'End') {
+                event.preventDefault()
+                this.active = this.versions.length - 1
+                this.$refs.menu?.querySelectorAll('[role=menuitem]')[this.active]?.focus()
             }
         },
     }"
@@ -80,6 +89,7 @@
         class="inline-flex h-8 items-center gap-1 rounded-md border border-border bg-background px-2 text-xs font-medium text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         aria-label="Select documentation version"
         aria-haspopup="menu"
+        aria-controls="{{ $menuId }}"
         :aria-expanded="open.toString()"
         x-on:click="toggle()"
         x-on:keydown="onTriggerKeydown($event)"
@@ -93,6 +103,7 @@
         x-cloak
         x-show="open"
         x-transition.opacity
+        id="{{ $menuId }}"
         class="absolute left-0 top-full z-50 mt-1 min-w-[6.5rem] rounded-md border border-border bg-popover p-1 text-popover-foreground shadow-md"
         role="menu"
         aria-label="Documentation versions"

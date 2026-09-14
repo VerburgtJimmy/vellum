@@ -2,8 +2,6 @@
 
 declare(strict_types=1);
 
-use Illuminate\Support\Facades\Blade;
-
 it('serves the index document at /docs', function (): void {
     $this->writeDoc('index.md', <<<'MD'
 ---
@@ -78,6 +76,26 @@ it('renders the version switcher when versions are enabled', function (): void {
         ->assertSee('aria-haspopup="menu"', false);
 });
 
+it('renders configured version labels in the switcher', function (): void {
+    config()->set('vellum.versions.enabled', true);
+    config()->set('vellum.versions.latest', 'v1');
+    config()->set('vellum.versions.list', ['next', 'v1']);
+    config()->set('vellum.versions.labels', [
+        'v1' => '1.x (LTS)',
+        'next' => 'Next',
+    ]);
+
+    $this->writeDoc('v1/index.md', "---\ntitle: Home\n---\nStable");
+    $this->writeDoc('next/index.md', "---\ntitle: Home\n---\nPreview");
+
+    $this->get('/docs')
+        ->assertOk()
+        ->assertSee('data-vellum-version-switcher', false)
+        ->assertSee('1.x (LTS)', false)
+        ->assertSee('Next', false)
+        ->assertDontSee('>Latest</', false);
+});
+
 it('compiles on demand when the cache is cold', function (): void {
     $this->writeDoc('cold.md', "---\ntitle: Cold\n---\nCached later");
 
@@ -112,7 +130,7 @@ it('serves raw markdown for the index page', function (): void {
 });
 
 it('renders nested markdown components on a document page', function (): void {
-    Blade::anonymousComponentPath(__DIR__.'/../fixtures/components');
+    $this->registerFixtureComponents();
     config()->set('vellum.components.namespaces', ['vellum', '']);
 
     $this->writeDoc('index.md', <<<'MD'

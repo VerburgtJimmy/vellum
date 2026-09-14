@@ -438,12 +438,22 @@ function vellumOpenMenu() {
 }
 
 /**
- * Tabs root state: roving tabindex and arrow-key navigation.
+ * Tabs root state: roving tabindex, arrow-key navigation, optional persist.
  */
-function vellumTabs(initial = '') {
+function vellumTabs(initial = '', persist = null) {
   return {
     active: initial,
+    persist,
     init() {
+      if (this.persist) {
+        try {
+          const stored = localStorage.getItem('vellum-tabs-' + this.persist)
+          const tabs = [...this.$el.querySelectorAll('[role="tab"]')]
+          if (stored && tabs.some((tab) => tab.getAttribute('data-value') === stored)) {
+            this.active = stored
+          }
+        } catch (e) {}
+      }
       if (!this.active) {
         const first = this.$el.querySelector('[role="tab"]')
         this.active = first?.getAttribute('data-value') ?? ''
@@ -451,6 +461,12 @@ function vellumTabs(initial = '') {
     },
     select(value) {
       this.active = value
+      if (!this.persist) {
+        return
+      }
+      try {
+        localStorage.setItem('vellum-tabs-' + this.persist, value)
+      } catch (e) {}
     },
     onListKeydown(event) {
       const tabs = [...this.$el.querySelectorAll('[role="tab"]')]

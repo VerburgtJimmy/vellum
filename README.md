@@ -2,7 +2,10 @@
 
 Markdown documentation sites for Laravel.
 
-Pre-1.0: the API may change.
+[![CI](https://github.com/VerburgtJimmy/vellum/actions/workflows/ci.yml/badge.svg)](https://github.com/VerburgtJimmy/vellum/actions/workflows/ci.yml)
+[![Packagist](https://img.shields.io/packagist/v/jimmyverburgt/vellum.svg)](https://packagist.org/packages/jimmyverburgt/vellum)
+
+0.5 freezes `config/vellum.php` keys and page frontmatter. Breaking changes wait for 1.0.
 
 ## Requirements
 
@@ -30,9 +33,9 @@ php artisan vellum:build
 - Markdown plus components (`<x-...>` islands, allowlisted env/config/route tags)
 - Changelog page and Atom feed
 - Client-side search (MiniSearch by default; Laravel Scout optional)
-- Optional versioned docs
+- Optional versioned docs and page gating
 - Static HTML export (`vellum:export`)
-- Light / dark / system theme
+- Light / dark / system theme with eleven colour presets
 
 ## Screenshots
 
@@ -85,8 +88,8 @@ Optional `'fonts'` injects HTML into the layout head (for example a `<link>` tag
 ## Publishing
 
 ```bash
-git tag v0.3.0
-git push origin v0.3.0
+git tag v0.5.0
+git push origin v0.5.0
 ```
 
 Submit the repo once at [https://packagist.org/packages/submit](https://packagist.org/packages/submit). Packagist reads the Git tag; do not add a `version` field to `composer.json`.

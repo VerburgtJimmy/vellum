@@ -86,7 +86,7 @@ it('nests headings into a toc tree', function (): void {
         ->and($tree[1]['children'])->toBe([]);
 });
 
-it('demotes step headings to h3 nested under the preceding h2', function (): void {
+it('keeps step headings at the markdown heading level', function (): void {
     $converted = (new MarkdownRenderer)->convert(<<<'MD'
 ## Steps
 
@@ -96,16 +96,8 @@ Hi
 :::
 MD);
 
-    expect($converted['html'])->toMatch('/<h3[^>]*id="install-the-package"/')
+    expect($converted['html'])->toMatch('/<h2[^>]*id="install-the-package"/')
         ->and($converted['headings'])->toHaveCount(2)
         ->and($converted['headings'][0])->toMatchArray(['id' => 'steps', 'text' => 'Steps', 'level' => 2])
-        ->and($converted['headings'][1])->toMatchArray(['id' => 'install-the-package', 'text' => 'Install the package', 'level' => 3]);
-
-    $tree = (new HeadingExtractor)->nest($converted['headings']);
-
-    expect($tree)->toHaveCount(1)
-        ->and($tree[0]['id'])->toBe('steps')
-        ->and($tree[0]['children'])->toHaveCount(1)
-        ->and($tree[0]['children'][0]['id'])->toBe('install-the-package')
-        ->and($tree[0]['children'][0]['level'])->toBe(3);
+        ->and($converted['headings'][1])->toMatchArray(['id' => 'install-the-package', 'text' => 'Install the package', 'level' => 2]);
 });

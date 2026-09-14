@@ -1,3 +1,50 @@
-<div class="vellum-tabs vellum-tabs-code" data-vellum-tabs="" x-data="{ active: (typeof localStorage !== &quot;undefined&quot; &amp;&amp; localStorage.getItem(&quot;vellum-tabs-pkg-manager&quot;)) || &quot;npm&quot;, set(id) { this.active = id; localStorage.setItem(&quot;vellum-tabs-pkg-manager&quot;, id) } }" data-persist="pkg-manager"><div class="vellum-tabs-list" role="tablist"><button type="button" class="vellum-tabs-trigger" role="tab" :aria-selected="active === 'npm'" @click="set('npm')" id="vellum-tab-npm">npm</button><button type="button" class="vellum-tabs-trigger" role="tab" :aria-selected="active === 'pnpm'" @click="set('pnpm')" id="vellum-tab-pnpm">pnpm</button></div><div class="vellum-tabs-panel" role="tabpanel" x-show="active === 'npm'" aria-labelledby="vellum-tab-npm" x-cloak=""><div class="vellum-code vellum-code-embedded" data-vellum-code=""><button type="button" class="vellum-code-copy" x-data="{ copied: false }" @click="navigator.clipboard.writeText($el.closest('[data-vellum-code]').querySelector('code').textContent); copied = true; setTimeout(() =&gt; copied = false, 1500)" :aria-label="copied ? 'Copied' : 'Copy code'"><span class="vellum-code-copy-icon" x-show="!copied" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M184,64H40a8,8,0,0,0-8,8V216a8,8,0,0,0,8,8H184a8,8,0,0,0,8-8V72A8,8,0,0,0,184,64Zm-8,144H48V80H176ZM224,40V184a8,8,0,0,1-16,0V48H72a8,8,0,0,1,0-16H216A8,8,0,0,1,224,40Z" /></svg></span><span class="vellum-code-check-icon" x-show="copied" x-cloak="" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M229.66,77.66l-128,128a8,8,0,0,1-11.32,0l-56-56a8,8,0,0,1,11.32-11.32L96,188.69,218.34,66.34a8,8,0,0,1,11.32,11.32Z" /></svg></span></button><pre><code class="language-bash"><span class="vellum-code-line"><span class="hl-property">npm</span> <span class="hl-number">install</span> vellum
-</span></code></pre></div></div><div class="vellum-tabs-panel" role="tabpanel" x-show="active === 'pnpm'" aria-labelledby="vellum-tab-pnpm" x-cloak=""><div class="vellum-code vellum-code-embedded" data-vellum-code=""><button type="button" class="vellum-code-copy" x-data="{ copied: false }" @click="navigator.clipboard.writeText($el.closest('[data-vellum-code]').querySelector('code').textContent); copied = true; setTimeout(() =&gt; copied = false, 1500)" :aria-label="copied ? 'Copied' : 'Copy code'"><span class="vellum-code-copy-icon" x-show="!copied" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M184,64H40a8,8,0,0,0-8,8V216a8,8,0,0,0,8,8H184a8,8,0,0,0,8-8V72A8,8,0,0,0,184,64Zm-8,144H48V80H176ZM224,40V184a8,8,0,0,1-16,0V48H72a8,8,0,0,1,0-16H216A8,8,0,0,1,224,40Z" /></svg></span><span class="vellum-code-check-icon" x-show="copied" x-cloak="" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M229.66,77.66l-128,128a8,8,0,0,1-11.32,0l-56-56a8,8,0,0,1,11.32-11.32L96,188.69,218.34,66.34a8,8,0,0,1,11.32,11.32Z" /></svg></span></button><pre><code class="language-bash"><span class="vellum-code-line"><span class="hl-property">pnpm</span> <span class="hl-number">add</span> vellum
-</span></code></pre></div></div></div>
+<div
+    class="vellum-tabs vellum-tabs-code"
+    data-vellum-tabs
+    x-data="vellumTabs('npm', 'pkg-manager')"
+     data-persist="pkg-manager" >
+    <div class="vellum-tabs-list" role="tablist" aria-orientation="horizontal" x-on:keydown="onListKeydown($event)">
+                                <button
+                type="button"
+                class="vellum-tabs-trigger"
+                role="tab"
+                id="vt1-tab-npm"
+                data-value="npm"
+                aria-controls="vt1-panel-npm"
+                :aria-selected="(active === 'npm').toString()"
+                :tabindex="active === 'npm' ? 0 : -1"
+                x-on:click="select('npm')"
+            >npm</button>
+                                <button
+                type="button"
+                class="vellum-tabs-trigger"
+                role="tab"
+                id="vt1-tab-pnpm"
+                data-value="pnpm"
+                aria-controls="vt1-panel-pnpm"
+                :aria-selected="(active === 'pnpm').toString()"
+                :tabindex="active === 'pnpm' ? 0 : -1"
+                x-on:click="select('pnpm')"
+            >pnpm</button>
+            </div>
+                    <div
+            class="vellum-tabs-panel"
+            role="tabpanel"
+            id="vt1-panel-npm"
+            data-value="npm"
+            aria-labelledby="vt1-tab-npm"
+            :aria-hidden="(active !== 'npm').toString()"
+            x-show="active === 'npm'"
+                    ><div class="vellum-code vellum-code-embedded" data-vellum-code=""><button type="button" class="vellum-code-copy" x-data="{ copied: false }" @click="navigator.clipboard.writeText($el.closest('[data-vellum-code]').querySelector('code').textContent); copied = true; setTimeout(() =&gt; copied = false, 1500)" :aria-label="copied ? 'Copied' : 'Copy code'"><span class="vellum-code-copy-icon" x-show="!copied" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M184,64H40a8,8,0,0,0-8,8V216a8,8,0,0,0,8,8H184a8,8,0,0,0,8-8V72A8,8,0,0,0,184,64Zm-8,144H48V80H176ZM224,40V184a8,8,0,0,1-16,0V48H72a8,8,0,0,1,0-16H216A8,8,0,0,1,224,40Z" /></svg></span><span class="vellum-code-check-icon" x-show="copied" x-cloak="" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M229.66,77.66l-128,128a8,8,0,0,1-11.32,0l-56-56a8,8,0,0,1,11.32-11.32L96,188.69,218.34,66.34a8,8,0,0,1,11.32,11.32Z" /></svg></span></button><pre><code class="language-bash"><span class="vellum-code-line"><span class="hl-property">npm</span> <span class="hl-number">install</span> vellum
+</span></code></pre></div></div>
+                    <div
+            class="vellum-tabs-panel"
+            role="tabpanel"
+            id="vt1-panel-pnpm"
+            data-value="pnpm"
+            aria-labelledby="vt1-tab-pnpm"
+            :aria-hidden="(active !== 'pnpm').toString()"
+            x-show="active === 'pnpm'"
+             x-cloak         ><div class="vellum-code vellum-code-embedded" data-vellum-code=""><button type="button" class="vellum-code-copy" x-data="{ copied: false }" @click="navigator.clipboard.writeText($el.closest('[data-vellum-code]').querySelector('code').textContent); copied = true; setTimeout(() =&gt; copied = false, 1500)" :aria-label="copied ? 'Copied' : 'Copy code'"><span class="vellum-code-copy-icon" x-show="!copied" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M184,64H40a8,8,0,0,0-8,8V216a8,8,0,0,0,8,8H184a8,8,0,0,0,8-8V72A8,8,0,0,0,184,64Zm-8,144H48V80H176ZM224,40V184a8,8,0,0,1-16,0V48H72a8,8,0,0,1,0-16H216A8,8,0,0,1,224,40Z" /></svg></span><span class="vellum-code-check-icon" x-show="copied" x-cloak="" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M229.66,77.66l-128,128a8,8,0,0,1-11.32,0l-56-56a8,8,0,0,1,11.32-11.32L96,188.69,218.34,66.34a8,8,0,0,1,11.32,11.32Z" /></svg></span></button><pre><code class="language-bash"><span class="vellum-code-line"><span class="hl-property">pnpm</span> <span class="hl-number">add</span> vellum
+</span></code></pre></div></div>
+    </div>

@@ -63,6 +63,11 @@
                     data-vellum-dialog-panel
                     role="dialog"
                     aria-modal="true"
+                    @if ($isSearch)
+                        aria-label="Search documentation"
+                    @elseif ($isSheet)
+                        aria-label="Documentation navigation"
+                    @endif
                     x-trap.noscroll="true"
                     x-on:click.stop
                     class="{{ $panelClasses }}"

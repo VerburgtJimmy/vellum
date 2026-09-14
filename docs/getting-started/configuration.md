@@ -1,66 +1,57 @@
 ---
 title: Configuration
-description: Config keys that shape a Vellum site.
+description: Frozen config keys and frontmatter for Vellum 0.5.
 ---
 
-Published as `config/vellum.php`.
+Published as `config/vellum.php`. **0.5 freezes these names.** Add values, do not rename keys.
 
-## Content and routing
+## Site and routing
 
 | Key | Default | Purpose |
 | --- | --- | --- |
 | `name` | `env('APP_NAME')` | Site name in the header and titles |
 | `path` | `resource_path('docs')` | Markdown root |
 | `route.prefix` | `docs` | URL prefix |
+| `route.middleware` | `['web']` | Route middleware |
+| `route.domain` | `null` | Optional domain |
 | `repo` | `null` | Base URL for "Edit on GitHub" |
+| `logo` | `null` | SVG path or Blade view in the header |
+| `links` | `[]` | Extra header links (`label`, `href`, optional `icon`) |
+| `layout.search` | `sidebar` | `sidebar` or `header` |
+| `fonts` | `null` | HTML injected into the layout head |
+| `cache.path` | `storage_path('framework/vellum')` | Compile cache |
+| `export.out` | `public_path('docs-static')` | Static export directory |
+| `export.base_url` | `/` | Prefix inside the export |
 
-## Changelog
+## Theme
 
-```php
-'changelog' => [
-    'path' => env('VELLUM_CHANGELOG', base_path('CHANGELOG.md')),
-    'unreleased' => false,
-],
-```
-
-`path` is a Keep a Changelog file. Set it to `null` to disable the page and feed.
-
-The page is `/docs/changelog`. The Atom feed is `/docs/changelog.atom`. `[Unreleased]` stays in the source file for authors. The feed never includes it. The HTML page shows it only when `unreleased` is `true`.
-
-Headings may be `## [1.2.0] - 2026-09-13` or `## 1.2.0`.
-
-## Components
+See [Theming](/docs/theming) for all eleven presets.
 
 ```php
-'components' => [
-    'namespaces' => ['vellum'],
-    'allowlist' => [
-        'env' => [],
-        'config' => [],
-        'route' => [],
-    ],
+'theme' => [
+    'preset' => 'neutral',
+    'primary' => null,
+    'radius' => '0.5rem',
+    'default' => 'system',
 ],
 ```
-
-`namespaces` is the list of Blade prefixes allowed as `<x-…>` in Markdown. Add `''` or `'app'` to allow unprefixed host components such as `<x-alert>`.
-
-`allowlist` is the only way `<x-vellum::env />`, `config`, and `route` resolve. Empty lists refuse every key.
-
-See [Extending](/docs/extending) for registering your own components.
 
 ## Versions
+
+See [Versions](/docs/versions).
 
 ```php
 'versions' => [
     'enabled' => false,
     'latest' => 'v2',
     'list' => ['v2', 'v1'],
+    'labels' => [],
 ],
 ```
 
-When enabled, Markdown lives in version folders (`docs/v2/`, `docs/v1/`). The `latest` folder is served at `/docs/...` with no version in the URL. Other folders are at `/docs/v1/...`. Visiting `/docs/v2/...` redirects to the unprefixed URL with HTTP 301. The switcher labels `latest` as **Latest**. Changelog stays at `/docs/changelog` for every version. Do not detect versions from git tags.
-
 ## Search
+
+See [Search](/docs/search).
 
 ```php
 'search' => [
@@ -73,49 +64,46 @@ When enabled, Markdown lives in version folders (`docs/v2/`, `docs/v1/`). The `l
 ],
 ```
 
-`minisearch` is the default. It needs no extra services and works on every host. The live index is `/docs/_vellum/search.json`, filtered for the current user and cached per visibility set (guest, auth, and per-gate combinations). Responses send an ETag (index hash plus visibility) so `must-revalidate` can 304. It is not a public immutable file.
+## Components
 
-`scout` is opt-in for people who already run Meilisearch or Typesense and want heading-level relevance at scale. Install Laravel Scout (`composer require laravel/scout`) and set `VELLUM_SEARCH_DRIVER=scout`. The same visibility filter runs at query time. `vellum:build` and `vellum:index` sync Scout when that driver is on.
-
-`vellum:export` always writes MiniSearch JSON, regardless of `driver`. Gated pages are dropped from the exported index.
-
-## Access
-
-```yaml
----
-title: Billing
-access: auth
----
-```
-
-`access` is `guest` (default), `auth`, or a Laravel gate name. It is resolved once per page into the same visibility set search uses, then applied to the sidebar, the page route, raw Markdown, and search.
-
-Folder access inherits downward. Set it on `meta.json` or `_meta.md`. A page's own `access` wins.
-
-```json
-{
-  "title": "Billing",
-  "access": "auth"
-}
-```
-
-```yaml
----
-access: auth
----
-```
-
-Guests and users who fail the gate get a 404. `vellum:export` runs as a guest: gated pages are omitted, and each one is logged.
-
-## Theme
+See [Value tags](/docs/value-tags) and [Extending](/docs/extending).
 
 ```php
-'theme' => [
-    'preset' => 'neutral',
-    'primary' => null,
-    'radius' => '0.5rem',
-    'default' => 'system',
+'components' => [
+    'namespaces' => ['vellum'],
+    'allowlist' => [
+        'env' => [],
+        'config' => [],
+        'route' => [],
+    ],
 ],
 ```
 
-Presets: `neutral`, `black`, `vitepress`, `dusk`, `catppuccin`, `ocean`, `purple`, `solar`, `emerald`, `ruby`, `aspen`.
+## Changelog
+
+See [Release notes](/docs/releases).
+
+```php
+'changelog' => [
+    'path' => env('VELLUM_CHANGELOG', base_path('CHANGELOG.md')),
+    'unreleased' => false,
+],
+```
+
+## Frontmatter
+
+Frozen page keys:
+
+| Key | Purpose |
+| --- | --- |
+| `title` | Page title (falls back to the first heading or the file name) |
+| `description` | Meta description and prev/next cards |
+| `slug` | Override the URL slug |
+| `icon` | Sidebar icon name |
+| `order` | Sort among siblings when `meta.json` does not list pages |
+| `full` | Hide the table of contents column |
+| `access` | `guest`, `auth`, or a gate name. See [Gating](/docs/gating). |
+
+Folder `meta.json`: `title`, `icon`, `defaultOpen`, `pages`, `access`. `_meta.md` can set `access` (and the usual matter) for the folder.
+
+Unknown keys are stored and ignored. Do not rely on that as an API.

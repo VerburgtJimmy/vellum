@@ -1,1 +1,48 @@
-<div class="vellum-tabs" data-vellum-tabs="" x-data="{ active: &quot;one&quot;, set(id) { this.active = id } }"><div class="vellum-tabs-list" role="tablist"><button type="button" class="vellum-tabs-trigger" role="tab" :aria-selected="active === 'one'" @click="set('one')" id="vellum-tab-one">One</button><button type="button" class="vellum-tabs-trigger" role="tab" :aria-selected="active === 'two'" @click="set('two')" id="vellum-tab-two">Two</button></div><div class="vellum-tabs-panel" role="tabpanel" x-show="active === 'one'" aria-labelledby="vellum-tab-one"><div class="vellum-callout vellum-callout-note" data-vellum-callout="note"><span class="vellum-callout-rail" aria-hidden="true"></span><span class="vellum-callout-icon vellum-callout-icon-note" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="vellum-callout-glyph"><path d="M176,232a8,8,0,0,1-8,8H88a8,8,0,0,1,0-16h80A8,8,0,0,1,176,232Zm40-128a87.55,87.55,0,0,1-33.64,69.21A16.24,16.24,0,0,0,176,186v6a16,16,0,0,1-16,16H96a16,16,0,0,1-16-16v-6a16,16,0,0,0-6.23-12.66A87.59,87.59,0,0,1,40,104.49C39.74,56.83,78.26,17.14,125.88,16A88,88,0,0,1,216,104Zm-32.11-9.34a57.6,57.6,0,0,0-46.56-46.55,8,8,0,0,0-2.66,15.78c16.57,2.79,30.63,16.85,33.44,33.45A8,8,0,0,0,176,104a9,9,0,0,0,1.35-.11A8,8,0,0,0,183.89,94.66Z" /></svg></span><div class="vellum-callout-body"><div class="vellum-callout-content"><p>Inside tab</p></div></div></div></div><div class="vellum-tabs-panel" role="tabpanel" x-show="active === 'two'" aria-labelledby="vellum-tab-two" x-cloak=""><p>Second panel</p></div></div>
+<div
+    class="vellum-tabs"
+    data-vellum-tabs
+    x-data="vellumTabs('one', null)"
+    >
+    <div class="vellum-tabs-list" role="tablist" aria-orientation="horizontal" x-on:keydown="onListKeydown($event)">
+                                <button
+                type="button"
+                class="vellum-tabs-trigger"
+                role="tab"
+                id="vt1-tab-one"
+                data-value="one"
+                aria-controls="vt1-panel-one"
+                :aria-selected="(active === 'one').toString()"
+                :tabindex="active === 'one' ? 0 : -1"
+                x-on:click="select('one')"
+            >One</button>
+                                <button
+                type="button"
+                class="vellum-tabs-trigger"
+                role="tab"
+                id="vt1-tab-two"
+                data-value="two"
+                aria-controls="vt1-panel-two"
+                :aria-selected="(active === 'two').toString()"
+                :tabindex="active === 'two' ? 0 : -1"
+                x-on:click="select('two')"
+            >Two</button>
+            </div>
+                    <div
+            class="vellum-tabs-panel"
+            role="tabpanel"
+            id="vt1-panel-one"
+            data-value="one"
+            aria-labelledby="vt1-tab-one"
+            :aria-hidden="(active !== 'one').toString()"
+            x-show="active === 'one'"
+                    ><div class="vellum-callout vellum-callout-note" data-vellum-callout="note"><span class="vellum-callout-rail" aria-hidden="true"></span><span class="vellum-callout-icon vellum-callout-icon-note" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" stroke="none" stroke-width="0" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="vellum-callout-glyph"><path d="M176,232a8,8,0,0,1-8,8H88a8,8,0,0,1,0-16h80A8,8,0,0,1,176,232Zm40-128a87.55,87.55,0,0,1-33.64,69.21A16.24,16.24,0,0,0,176,186v6a16,16,0,0,1-16,16H96a16,16,0,0,1-16-16v-6a16,16,0,0,0-6.23-12.66A87.59,87.59,0,0,1,40,104.49C39.74,56.83,78.26,17.14,125.88,16A88,88,0,0,1,216,104Zm-32.11-9.34a57.6,57.6,0,0,0-46.56-46.55,8,8,0,0,0-2.66,15.78c16.57,2.79,30.63,16.85,33.44,33.45A8,8,0,0,0,176,104a9,9,0,0,0,1.35-.11A8,8,0,0,0,183.89,94.66Z" /></svg></span><div class="vellum-callout-body"><div class="vellum-callout-content"><p>Inside tab</p></div></div></div></div>
+                    <div
+            class="vellum-tabs-panel"
+            role="tabpanel"
+            id="vt1-panel-two"
+            data-value="two"
+            aria-labelledby="vt1-tab-two"
+            :aria-hidden="(active !== 'two').toString()"
+            x-show="active === 'two'"
+             x-cloak         ><p>Second panel</p></div>
+    </div>

@@ -13,13 +13,16 @@
     "authors": [
         {
             "name": "Jimmy Verburgt",
-            "email": "jimmy@jimmyverburgt.com",
+            "email": "hey@jimmyverburgt.com",
             "role": "Developer"
         }
     ],
     "support": {
+        "email": "hey@jimmyverburgt.com",
         "issues": "https://github.com/VerburgtJimmy/vellum/issues",
-        "source": "https://github.com/VerburgtJimmy/vellum"
+        "source": "https://github.com/VerburgtJimmy/vellum",
+        "docs": "https://github.com/VerburgtJimmy/vellum#readme",
+        "security": "https://github.com/VerburgtJimmy/vellum/security/policy"
     },
     "require": {
         "php": "^8.4",

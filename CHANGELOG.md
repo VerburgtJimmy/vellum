@@ -7,7 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-Versioned docs URLs and search drivers. Pre-1.0: the API may change.
+0.5 stability freeze. Config keys and frontmatter names do not change until 1.0.
+
+### Added
+
+- Package docs for why Vellum, versions, gating, search drivers, changelog, export, theming (all eleven presets), and the 0.2 to 0.5 upgrade path
+- `CONTRIBUTING.md`, `SECURITY.md`, GitHub issue and pull request templates
+- `versions.labels`: switcher display names (`1.x (LTS)`, `Next`) while folders and URLs stay the list slug
+
+### Changed
+
+- Markdown tabs and UI tabs share `vellumTabs()` for arrow keys, Home/End, and `aria-controls`
+- Search dialog labelled for assistive tech (`combobox` + `listbox`); version switcher menu has Home/End and `aria-controls`
+
+## [0.4.0] - 2026-09-13
+
+Versioned docs URLs and search drivers.
 
 ### Added
 
@@ -109,7 +124,8 @@ Initial public release. Pre-1.0: the API may change.
 
 Tag `v0.1.0` and push the tag, then submit `https://github.com/VerburgtJimmy/vellum` on Packagist if the package is not listed yet. Do not hardcode `"version"` in `composer.json`.
 
-[Unreleased]: https://github.com/VerburgtJimmy/vellum/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/VerburgtJimmy/vellum/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/VerburgtJimmy/vellum/releases/tag/v0.4.0
 [0.3.0]: https://github.com/VerburgtJimmy/vellum/releases/tag/v0.3.0
 [0.2.0]: https://github.com/VerburgtJimmy/vellum/releases/tag/v0.2.0
 [0.1.0]: https://github.com/VerburgtJimmy/vellum/releases/tag/v0.1.0

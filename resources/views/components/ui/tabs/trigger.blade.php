@@ -16,6 +16,8 @@
     role="tab"
     data-vellum-tabs-trigger
     data-value="{{ $value }}"
+    :id="{{ '$id' }}('tab-' + @js($value))"
+    :aria-controls="{{ '$id' }}('panel-' + @js($value))"
     :data-state="active === @js($value) ? 'active' : 'inactive'"
     :aria-selected="(active === @js($value)).toString()"
     :tabindex="active === @js($value) ? 0 : -1"
