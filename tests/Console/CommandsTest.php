@@ -17,6 +17,26 @@ it('builds all documents via artisan', function (): void {
         ->and(is_file($this->cachePath().'/guides/one.php'))->toBeTrue();
 });
 
+it('warns once when the configured preset was removed in 0.5', function (): void {
+    config()->set('vellum.theme.preset', 'catppuccin');
+    $this->writeDoc('index.md', "---\ntitle: Home\n---\nHi");
+    $this->writeDoc('guides/one.md', "---\ntitle: One\n---\nOne");
+
+    $this->artisan('vellum:build')
+        ->expectsOutputToContain('Colour preset "catppuccin" was removed in 0.5')
+        ->expectsOutputToContain('neutral, ocean, laravel')
+        ->assertSuccessful();
+});
+
+it('stays quiet for a preset that still ships', function (): void {
+    config()->set('vellum.theme.preset', 'ocean');
+    $this->writeDoc('index.md', "---\ntitle: Home\n---\nHi");
+
+    $this->artisan('vellum:build')
+        ->doesntExpectOutputToContain('was removed in 0.5')
+        ->assertSuccessful();
+});
+
 it('clears the cache via artisan', function (): void {
     $this->writeDoc('index.md', "---\ntitle: Home\n---\nHi");
 

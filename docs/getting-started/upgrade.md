@@ -28,7 +28,22 @@ Diff the published file against yours. Keep your values; take the new keys.
 | `changelog.unreleased` | `false` | Show `[Unreleased]` on the HTML page. The feed never includes it. |
 | `versions.labels` | `[]` | Switcher text per slug (`1.x (LTS)`, `Next`). Folder and URL stay the slug. |
 
-Already in 0.2 and still valid: `layout.search` (`sidebar` or `header`), `theme.preset` (eleven names, listed on [Theming](/docs/theming)), `theme.primary`, `theme.radius`, `theme.default`.
+Already in 0.2 and still valid: `layout.search` (`sidebar` or `header`), `theme.preset`, `theme.primary`, `theme.radius`, `theme.default`.
+
+## Colour presets
+
+0.5 ships three presets: `neutral`, `ocean` and `laravel`. These nine were removed: `black`, `vitepress`, `dusk`, `catppuccin`, `purple`, `solar`, `emerald`, `ruby`, `aspen`.
+
+Nothing breaks if you were using one. The site falls back to `neutral`, and `vellum:build` warns once with the name you set. Most of those presets existed to change a single accent colour; `theme.accent` now does that on any preset:
+
+```php
+'theme' => [
+    'preset' => 'neutral',
+    'accent' => '#7c3aed',
+],
+```
+
+The presets that stayed were retuned to clear WCAG AA (4.5:1) for body text, secondary text, links and button labels in both modes. See [Theming](/docs/theming).
 
 ## Version URLs
 

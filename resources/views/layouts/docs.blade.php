@@ -6,6 +6,7 @@
     $themeRadius = config('vellum.theme.radius', '0.5rem');
     $themePrimary = config('vellum.theme.primary');
     $themePreset = Theme::preset();
+    $themeAccent = Theme::accent();
     $rootStyles = ['--radius: '.$themeRadius];
 
     if ($themePrimary !== null && $themePrimary !== '') {
@@ -52,6 +53,14 @@
     @endif
     <style>:root { {{ implode('; ', $rootStyles) }} }</style>
     <link rel="stylesheet" href="{{ Assets::cssUrl() }}">
+    @if ($themeAccent)
+        {{-- After the stylesheet so the accent wins the tie with the preset block. --}}
+        <style>
+            @foreach ($themeAccent as $mode => $accent)
+html[data-vellum-preset]{{ $mode === 'dark' ? '.dark' : '' }} { --primary: {{ $accent['color'] }}; --primary-foreground: {{ $accent['foreground'] }}; --ring: {{ $accent['color'] }} }
+            @endforeach
+        </style>
+    @endif
     <script type="module" src="{{ Assets::jsUrl() }}"></script>
     @yield('head')
 </head>

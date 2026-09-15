@@ -40,7 +40,7 @@
 <aside
     data-vellum-sidebar
     {{ $attributes->except('class')->merge(['class' => Cn::merge(
-        'flex h-full w-[250px] shrink-0 flex-col border-r border-border bg-background',
+        'flex h-full w-[250px] shrink-0 flex-col border-r border-border',
         $attributes->get('class'),
     )]) }}
     @if ($chrome)

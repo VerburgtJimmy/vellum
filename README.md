@@ -35,7 +35,7 @@ php artisan vellum:build
 - Client-side search (MiniSearch by default; Laravel Scout optional)
 - Optional versioned docs and page gating
 - Static HTML export (`vellum:export`)
-- Light / dark / system theme with eleven colour presets
+- Light / dark / system theme, three contrast-tested presets, and a brand accent
 
 ## Screenshots
 
@@ -59,12 +59,20 @@ Theme:
 
 ```php
 'theme' => [
-    'preset' => 'neutral', // black, vitepress, dusk, catppuccin, ocean, purple, solar, emerald, ruby, aspen
+    'preset' => 'neutral', // neutral | ocean | laravel
     'primary' => null,     // oklch hue, used by Neutral
+    'accent' => null,      // '#7c3aed', or ['light' => '#...', 'dark' => '#...']
     'radius' => '0.5rem',
     'default' => 'system', // light | dark | system
 ],
 ```
+
+`accent` recolours links, buttons and the focus ring on any preset. Give it one colour or
+one per mode; the button label colour is derived from it.
+
+Every shipped preset clears **WCAG AA (4.5:1)** in both light and dark for body text,
+secondary text, links and button labels. `tests/Support/PresetContrastTest.php` reads the
+stylesheets and fails the build if a palette edit drops below that.
 
 Optional `'fonts'` injects HTML into the layout head (for example a `<link>` tag).
 

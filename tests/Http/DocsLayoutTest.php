@@ -323,17 +323,47 @@ it('keeps line-number gutters unselectable in css', function (): void {
         ->and($css)->not->toMatch('/\[data-vellum-page-row\]\{[^}]*justify-content:\s*center/')
         ->and($css)->toContain('data-vellum-sidebar-hotzone')
         ->and($css)->toMatch('/data-vellum-preset[=]["\']?ocean/')
+        ->and($css)->toMatch('/data-vellum-preset[=]["\']?laravel/')
+        ->and($css)->toContain('#e32c03')
+        ->and($css)->toContain('#f53003')
+        ->and($css)->not->toMatch('/data-vellum-preset[=]["\']?catppuccin/')
         ->and($css)->not->toContain('margin-inline: -1rem');
 });
 
-it('applies a fumadocs colour preset from config', function (): void {
-    config()->set('vellum.theme.preset', 'ocean');
+it('applies the laravel colour preset from config', function (): void {
+    config()->set('vellum.theme.preset', 'laravel');
 
     $this->writeDoc('index.md', "---\ntitle: Home\n---\nHi");
 
     $html = $this->get('/docs')->assertOk()->getContent();
 
-    expect($html)->toContain('data-vellum-preset="ocean"');
+    expect($html)->toContain('data-vellum-preset="laravel"');
+});
+
+it('applies a configured accent to every preset', function (): void {
+    config()->set('vellum.theme.preset', 'ocean');
+    config()->set('vellum.theme.accent', '#7c3aed');
+
+    $this->writeDoc('index.md', "---\ntitle: Home\n---\nHi");
+
+    $html = $this->get('/docs')->assertOk()->getContent();
+
+    expect($html)->toContain('html[data-vellum-preset] { --primary: #7c3aed')
+        ->and($html)->toContain('--primary-foreground: #ffffff')
+        ->and($html)->toContain('html[data-vellum-preset].dark { --primary: #7c3aed');
+
+    // The accent has to come after the stylesheet to beat the preset block.
+    expect(strpos($html, 'html[data-vellum-preset] { --primary'))
+        ->toBeGreaterThan(strpos($html, 'vellum.css'));
+});
+
+it('omits the accent block when none is configured', function (): void {
+    config()->set('vellum.theme.accent', null);
+
+    $this->writeDoc('index.md', "---\ntitle: Home\n---\nHi");
+
+    expect($this->get('/docs')->assertOk()->getContent())
+        ->not->toContain('html[data-vellum-preset] { --primary');
 });
 
 it('falls back to neutral for an unknown colour preset', function (): void {

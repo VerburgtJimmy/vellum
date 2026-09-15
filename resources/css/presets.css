@@ -1,372 +1,54 @@
-/* Fumadocs-named palettes. Neutral is the :root default. */
-
-html[data-vellum-preset="black"] {
-  --background: hsl(0, 0%, 98%);
-  --foreground: hsl(0, 0%, 3.9%);
-  --card: hsl(0, 0%, 99.7%);
-  --card-foreground: hsl(0, 0%, 3.9%);
-  --popover: hsl(0, 0%, 100%);
-  --popover-foreground: hsl(0, 0%, 15.1%);
-  --primary: hsl(0, 0%, 9%);
-  --primary-foreground: hsl(0, 0%, 98%);
-  --secondary: hsl(0, 0%, 96.1%);
-  --secondary-foreground: hsl(0, 0%, 9%);
-  --muted: hsl(0, 0%, 96.1%);
-  --muted-foreground: hsl(0, 0%, 45.1%);
-  --accent: hsl(0, 0%, 94.1%);
-  --accent-foreground: hsl(0, 0%, 9%);
-  --border: hsla(0, 0%, 60%, 0.2);
-  --input: hsla(0, 0%, 60%, 0.2);
-  --ring: hsl(0, 0%, 63.9%);
-}
-
-html[data-vellum-preset="black"].dark {
-  --background: hsl(0, 0%, 2%);
-  --foreground: hsl(0, 0%, 98%);
-  --card: hsl(0, 0%, 4%);
-  --card-foreground: hsl(0, 0%, 98%);
-  --popover: hsl(0, 0%, 4%);
-  --popover-foreground: hsl(0, 0%, 98%);
-  --primary: hsl(0, 0%, 98%);
-  --primary-foreground: hsl(0, 0%, 9%);
-  --secondary: hsl(0, 0%, 12.9%);
-  --secondary-foreground: hsl(0, 0%, 98%);
-  --muted: hsl(0, 0%, 8%);
-  --muted-foreground: hsl(0, 0%, 60%);
-  --accent: hsl(0, 0%, 15%);
-  --accent-foreground: hsl(0, 0%, 100%);
-  --border: hsla(0, 0%, 50%, 0.2);
-  --input: hsla(0, 0%, 50%, 0.2);
-  --ring: hsl(0, 0%, 34.9%);
-}
-
-html[data-vellum-preset="vitepress"] {
-  --background: hsl(0, 0%, 100%);
-  --foreground: hsl(240, 6%, 25%);
-  --card: hsl(240, 8%, 97%);
-  --card-foreground: hsl(0, 0%, 3.9%);
-  --popover: hsl(0, 0%, 100%);
-  --popover-foreground: hsl(0, 0%, 15.1%);
-  --primary: hsl(226, 55%, 45%);
-  --primary-foreground: hsl(0, 0%, 98%);
-  --secondary: hsl(240, 6%, 97%);
-  --secondary-foreground: hsl(0, 0%, 9%);
-  --muted: hsl(0, 0%, 96.1%);
-  --muted-foreground: hsl(240, 6%, 50%);
-  --accent: hsl(0, 0%, 94.1%);
-  --accent-foreground: hsl(240, 6%, 25%);
-  --border: hsl(0, 0%, 89.8%);
-  --input: hsl(0, 0%, 89.8%);
-  --ring: hsl(0, 0%, 63.9%);
-}
-
-html[data-vellum-preset="vitepress"].dark {
-  --background: #1b1b1f;
-  --foreground: hsl(60, 100%, 98%);
-  --card: hsl(240, 4%, 9%);
-  --card-foreground: hsl(60, 100%, 98%);
-  --popover: hsl(240, 7%, 11%);
-  --popover-foreground: hsl(60, 100%, 98%);
-  --primary: hsl(234, 100%, 83%);
-  --primary-foreground: hsl(240, 7%, 11%);
-  --secondary: hsl(240, 5%, 19%);
-  --secondary-foreground: hsl(60, 100%, 98%);
-  --muted: hsl(0, 0%, 13%);
-  --muted-foreground: hsl(240, 5%, 58%);
-  --accent: hsl(240, 5.4%, 21%);
-  --accent-foreground: hsl(0, 0%, 100%);
-  --border: hsl(240, 5.2%, 18%);
-  --input: hsl(240, 5.2%, 18%);
-  --ring: hsl(234, 100%, 83%);
-}
-
-html[data-vellum-preset="dusk"] {
-  --background: hsl(250, 20%, 92%);
-  --foreground: hsl(220, 20%, 30%);
-  --card: hsl(250, 20%, 92%);
-  --card-foreground: hsl(250, 20%, 20%);
-  --popover: hsl(250, 40%, 96%);
-  --popover-foreground: hsl(250, 40%, 20%);
-  --primary: hsl(340, 40%, 48%);
-  --primary-foreground: hsl(240, 80%, 20%);
-  --secondary: hsl(250, 40%, 94%);
-  --secondary-foreground: hsl(240, 40%, 10%);
-  --muted: hsl(240, 30%, 94%);
-  --muted-foreground: hsl(240, 10%, 50%);
-  --accent: hsl(250, 30%, 90%);
-  --accent-foreground: hsl(250, 20%, 20%);
-  --border: hsl(240, 40%, 90%);
-  --input: hsl(240, 40%, 90%);
-  --ring: hsl(340, 40%, 48%);
-}
-
-html[data-vellum-preset="dusk"].dark {
-  --background: hsl(220, 15%, 6%);
-  --foreground: hsl(220, 15%, 87%);
-  --card: hsl(240, 20%, 5%);
-  --card-foreground: hsl(240, 15%, 87%);
-  --popover: hsl(240, 20%, 5%);
-  --popover-foreground: hsl(250, 20%, 90%);
-  --primary: hsl(340, 100%, 90%);
-  --primary-foreground: hsl(240, 40%, 4%);
-  --secondary: hsl(240, 20%, 15%);
-  --secondary-foreground: hsl(250, 20%, 90%);
-  --muted: hsl(220, 20%, 15%);
-  --muted-foreground: hsl(220, 15%, 60%);
-  --accent: hsl(250, 20%, 15%);
-  --accent-foreground: hsl(340, 5%, 90%);
-  --border: hsl(220, 15%, 15%);
-  --input: hsl(220, 15%, 15%);
-  --ring: hsl(340, 100%, 90%);
-}
-
-html[data-vellum-preset="catppuccin"] {
-  --background: hsl(220, 23%, 95%);
-  --foreground: hsl(234, 16%, 35%);
-  --card: hsl(220, 22%, 92%);
-  --card-foreground: hsl(234, 16%, 35%);
-  --popover: hsl(220, 22%, 92%);
-  --popover-foreground: hsl(234, 16%, 35%);
-  --primary: hsl(266, 85%, 58%);
-  --primary-foreground: hsl(220, 22%, 92%);
-  --secondary: hsl(220, 22%, 92%);
-  --secondary-foreground: hsl(234, 16%, 35%);
-  --muted: hsl(220, 22%, 92%);
-  --muted-foreground: hsl(233, 10%, 47%);
-  --accent: hsl(223, 16%, 83%);
-  --accent-foreground: hsl(234, 16%, 35%);
-  --border: hsl(223, 16%, 83%);
-  --input: hsl(223, 16%, 83%);
-  --ring: hsl(267, 84%, 81%);
-}
-
-html[data-vellum-preset="catppuccin"].dark {
-  --background: hsl(240, 21%, 15%);
-  --foreground: hsl(226, 64%, 88%);
-  --card: hsl(240, 21%, 12%);
-  --card-foreground: hsl(226, 64%, 88%);
-  --popover: hsl(240, 23%, 9%);
-  --popover-foreground: hsl(226, 64%, 88%);
-  --primary: hsl(267, 84%, 81%);
-  --primary-foreground: hsl(240, 23%, 9%);
-  --secondary: hsl(240, 21%, 12%);
-  --secondary-foreground: hsl(226, 64%, 88%);
-  --muted: hsl(240, 21%, 12%);
-  --muted-foreground: hsl(228, 24%, 72%);
-  --accent: hsl(237, 16%, 23%);
-  --accent-foreground: hsl(226, 64%, 88%);
-  --border: hsl(237, 16%, 23%);
-  --input: hsl(237, 16%, 23%);
-  --ring: hsl(267, 84%, 81%);
-}
+/*
+ | Colour presets. Neutral is the :root default in vellum.css; the two below
+ | are deltas on top of it. Every preset defines the same token set, gives the
+ | sidebar its own surface, and clears WCAG AA (4.5:1) for body text, secondary
+ | text, links and button labels in both modes. See tests/Support/PresetContrastTest.
+ */
 
 html[data-vellum-preset="ocean"] {
-  --background: hsl(0, 0%, 98%);
-  --foreground: hsl(0, 0%, 3.9%);
-  --card: hsl(220, 50%, 98%);
-  --card-foreground: hsl(0, 0%, 3.9%);
-  --popover: hsl(0, 0%, 98%);
-  --popover-foreground: hsl(0, 0%, 15.1%);
+  --background: hsl(220, 40%, 97%);
+  --foreground: hsl(220, 60%, 10%);
+  --card: hsl(0, 0%, 100%);
+  --card-foreground: hsl(220, 60%, 10%);
+  --popover: hsl(0, 0%, 100%);
+  --popover-foreground: hsl(220, 60%, 12%);
   --primary: hsl(210, 80%, 20.2%);
-  --primary-foreground: hsl(0, 0%, 98%);
-  --secondary: hsl(220, 90%, 96.1%);
-  --secondary-foreground: hsl(0, 0%, 9%);
-  --muted: hsl(220, 90%, 96.1%);
-  --muted-foreground: hsl(0, 0%, 45.1%);
-  --accent: hsl(220, 50%, 94.1%);
-  --accent-foreground: hsl(0, 0%, 9%);
-  --border: hsl(220, 50%, 89.8%);
-  --input: hsl(220, 50%, 89.8%);
-  --ring: hsl(220, 100%, 63.9%);
+  --primary-foreground: hsl(0, 0%, 100%);
+  --secondary: hsl(220, 60%, 93%);
+  --secondary-foreground: hsl(220, 60%, 12%);
+  --muted: hsl(220, 50%, 94%);
+  --muted-foreground: hsl(220, 25%, 40%);
+  --accent: hsl(220, 55%, 92%);
+  --accent-foreground: hsl(220, 60%, 12%);
+  --border: hsl(220, 35%, 88%);
+  --input: hsl(220, 35%, 88%);
+  --ring: hsl(210, 80%, 20.2%);
+  --sidebar: hsl(220, 42%, 95.5%);
+  --code: hsl(0, 0%, 100%);
+  --code-foreground: hsl(220, 45%, 16%);
 }
 
 html[data-vellum-preset="ocean"].dark {
   --background: hsl(220, 60%, 8%);
   --foreground: hsl(220, 60%, 94.5%);
-  --card: hsla(220, 56%, 15%, 0.4);
+  --card: hsl(220, 50%, 14%);
   --card-foreground: hsl(220, 60%, 94.5%);
-  --popover: hsl(220, 50%, 10%);
+  --popover: hsl(220, 50%, 12%);
   --popover-foreground: hsl(220, 60%, 94.5%);
   --primary: hsl(205, 100%, 85%);
-  --primary-foreground: hsl(0, 0%, 9%);
+  --primary-foreground: hsl(220, 60%, 10%);
   --secondary: hsl(220, 50%, 20%);
   --secondary-foreground: hsl(220, 80%, 90%);
-  --muted: hsl(220, 50%, 10%);
-  --muted-foreground: hsl(220, 30%, 65%);
+  --muted: hsl(220, 50%, 12%);
+  --muted-foreground: hsl(220, 30%, 68%);
   --accent: hsl(220, 40%, 20%);
   --accent-foreground: hsl(220, 80%, 90%);
   --border: hsla(220, 50%, 50%, 0.2);
   --input: hsla(220, 50%, 50%, 0.2);
   --ring: hsl(205, 100%, 85%);
-}
-
-html[data-vellum-preset="purple"] {
-  --background: hsl(256, 100%, 96%);
-  --foreground: hsl(256, 60%, 26%);
-  --card: hsl(256, 60%, 92%);
-  --card-foreground: hsl(256, 100%, 20%);
-  --popover: hsl(256, 60%, 96%);
-  --popover-foreground: hsl(256, 100%, 20%);
-  --primary: hsl(270, 100%, 52%);
-  --primary-foreground: hsl(270, 100%, 20%);
-  --secondary: hsl(270, 60%, 90%);
-  --secondary-foreground: hsl(256, 60%, 10%);
-  --muted: hsl(256, 60%, 94%);
-  --muted-foreground: hsl(256, 50%, 50%);
-  --accent: hsl(270, 40%, 88%);
-  --accent-foreground: hsl(270, 100%, 20%);
-  --border: hsla(270, 40%, 80%, 0.5);
-  --input: hsla(270, 40%, 80%, 0.5);
-  --ring: hsl(270, 100%, 52%);
-}
-
-html[data-vellum-preset="purple"].dark {
-  --background: hsl(256, 20%, 6%);
-  --foreground: hsl(256, 60%, 90%);
-  --card: hsl(256, 23%, 10%);
-  --card-foreground: hsl(256, 60%, 90%);
-  --popover: hsl(256, 23%, 6%);
-  --popover-foreground: hsl(256, 60%, 90%);
-  --primary: hsl(270, 100%, 86%);
-  --primary-foreground: hsl(256, 60%, 6%);
-  --secondary: hsl(270, 23%, 20%);
-  --secondary-foreground: hsl(256, 60%, 90%);
-  --muted: hsl(256, 23%, 10%);
-  --muted-foreground: hsl(256, 50%, 75%);
-  --accent: hsl(256, 23%, 22%);
-  --accent-foreground: hsl(270, 40%, 86%);
-  --border: hsla(270, 50%, 40%, 0.3);
-  --input: hsla(270, 50%, 40%, 0.3);
-  --ring: hsl(270, 100%, 86%);
-}
-
-html[data-vellum-preset="solar"] {
-  --primary: oklch(0.487 0.083 262.691);
-}
-
-html[data-vellum-preset="solar"].dark {
-  --background: hsl(0, 0%, 5.04%);
-  --primary: oklch(0.902 0.0461 259.51);
-}
-
-html[data-vellum-preset="emerald"] {
-  --background: hsl(165, 45%, 96%);
-  --foreground: hsl(165, 40%, 18%);
-  --card: hsl(165, 45%, 94%);
-  --card-foreground: hsl(165, 40%, 18%);
-  --popover: hsl(165, 45%, 97%);
-  --popover-foreground: hsl(165, 40%, 18%);
-  --primary: hsl(168, 70%, 40%);
-  --primary-foreground: hsl(168, 100%, 12%);
-  --secondary: hsl(168, 45%, 88%);
-  --secondary-foreground: hsl(168, 60%, 18%);
-  --muted: hsl(165, 40%, 92%);
-  --muted-foreground: hsl(165, 30%, 45%);
-  --accent: hsl(165, 50%, 90%);
-  --accent-foreground: hsl(168, 70%, 20%);
-  --border: hsla(168, 40%, 70%, 0.5);
-  --input: hsla(168, 40%, 70%, 0.5);
-  --ring: hsl(168, 70%, 40%);
-}
-
-html[data-vellum-preset="emerald"].dark {
-  --background: hsl(200, 30%, 7%);
-  --foreground: hsl(168, 40%, 88%);
-  --card: hsl(200, 30%, 10%);
-  --card-foreground: hsl(168, 40%, 88%);
-  --popover: hsl(200, 30%, 8%);
-  --popover-foreground: hsl(168, 40%, 88%);
-  --primary: hsl(168, 70%, 60%);
-  --primary-foreground: hsl(200, 40%, 8%);
-  --secondary: hsl(200, 30%, 16%);
-  --secondary-foreground: hsl(168, 40%, 88%);
-  --muted: hsl(200, 30%, 12%);
-  --muted-foreground: hsl(168, 25%, 65%);
-  --accent: hsl(200, 30%, 18%);
-  --accent-foreground: hsl(168, 70%, 75%);
-  --border: hsla(168, 40%, 35%, 0.35);
-  --input: hsla(168, 40%, 35%, 0.35);
-  --ring: hsl(168, 70%, 60%);
-}
-
-html[data-vellum-preset="ruby"] {
-  --background: hsl(0, 0%, 98%);
-  --foreground: hsl(350, 45%, 14%);
-  --card: hsl(0, 0%, 100%);
-  --card-foreground: hsl(350, 45%, 14%);
-  --popover: hsl(0, 0%, 100%);
-  --popover-foreground: hsl(350, 45%, 14%);
-  --primary: hsl(348, 85%, 45%);
-  --primary-foreground: hsl(0, 0%, 100%);
-  --secondary: hsl(348, 55%, 92%);
-  --secondary-foreground: hsl(348, 50%, 20%);
-  --muted: hsl(0, 0%, 94%);
-  --muted-foreground: hsl(348, 25%, 42%);
-  --accent: hsl(348, 70%, 95%);
-  --accent-foreground: hsl(348, 70%, 22%);
-  --border: hsla(348, 40%, 60%, 0.25);
-  --input: hsla(348, 40%, 60%, 0.25);
-  --ring: hsl(348, 85%, 45%);
-}
-
-html[data-vellum-preset="ruby"].dark {
-  --background: hsl(350, 30%, 6%);
-  --foreground: hsl(350, 30%, 92%);
-  --card: hsl(350, 30%, 9%);
-  --card-foreground: hsl(350, 30%, 92%);
-  --popover: hsl(350, 30%, 8%);
-  --popover-foreground: hsl(350, 30%, 92%);
-  --primary: hsl(348, 90%, 62%);
-  --primary-foreground: hsl(350, 30%, 8%);
-  --secondary: hsl(348, 30%, 14%);
-  --secondary-foreground: hsl(350, 30%, 92%);
-  --muted: hsl(350, 25%, 11%);
-  --muted-foreground: hsl(348, 25%, 65%);
-  --accent: hsl(348, 35%, 16%);
-  --accent-foreground: hsl(348, 70%, 82%);
-  --border: hsla(348, 40%, 45%, 0.25);
-  --input: hsla(348, 40%, 45%, 0.25);
-  --ring: hsl(348, 90%, 62%);
-}
-
-html[data-vellum-preset="aspen"] {
-  --background: hsl(75, 45%, 96%);
-  --foreground: hsl(75, 35%, 18%);
-  --card: hsl(75, 45%, 94%);
-  --card-foreground: hsl(75, 35%, 18%);
-  --popover: hsl(75, 45%, 97%);
-  --popover-foreground: hsl(75, 35%, 18%);
-  --primary: hsl(80, 60%, 40%);
-  --primary-foreground: hsl(80, 100%, 16%);
-  --secondary: hsl(80, 45%, 88%);
-  --secondary-foreground: hsl(80, 50%, 18%);
-  --muted: hsl(75, 40%, 92%);
-  --muted-foreground: hsl(75, 25%, 45%);
-  --accent: hsl(75, 50%, 90%);
-  --accent-foreground: hsl(80, 60%, 22%);
-  --border: hsla(80, 35%, 70%, 0.5);
-  --input: hsla(80, 35%, 70%, 0.5);
-  --ring: hsl(80, 60%, 40%);
-}
-
-html[data-vellum-preset="aspen"].dark {
-  --background: hsl(80, 25%, 7%);
-  --foreground: hsl(75, 35%, 88%);
-  --card: hsl(80, 25%, 10%);
-  --card-foreground: hsl(75, 35%, 88%);
-  --popover: hsl(80, 25%, 8%);
-  --popover-foreground: hsl(75, 35%, 88%);
-  --primary: hsl(80, 60%, 55%);
-  --primary-foreground: hsl(80, 35%, 8%);
-  --secondary: hsl(80, 25%, 16%);
-  --secondary-foreground: hsl(75, 35%, 88%);
-  --muted: hsl(80, 25%, 12%);
-  --muted-foreground: hsl(75, 25%, 65%);
-  --accent: hsl(80, 25%, 18%);
-  --accent-foreground: hsl(80, 60%, 75%);
-  --border: hsla(80, 35%, 35%, 0.35);
-  --input: hsla(80, 35%, 35%, 0.35);
-  --ring: hsl(80, 60%, 55%);
+  --sidebar: hsl(220, 60%, 6.5%);
+  --code: hsl(220, 50%, 11%);
+  --code-foreground: hsl(220, 40%, 90%);
 }
 
 html[data-vellum-preset="ocean"].dark [data-vellum-docs] {
@@ -374,28 +56,54 @@ html[data-vellum-preset="ocean"].dark [data-vellum-docs] {
   background-repeat: no-repeat;
 }
 
-html[data-vellum-preset="vitepress"] [data-vellum-sidebar] {
-  background-color: hsl(240, 8%, 97%);
+/*
+ | Laravel. The brand red is #f53003; it carries 3.96:1 on white, so text and
+ | fills use the darker #e32c03 and the brand red is kept for the active wash
+ | and the focus ring, which is how laravel.com uses it.
+ */
+
+html[data-vellum-preset="laravel"] {
+  --background: hsl(0, 0%, 100%);
+  --foreground: oklch(0.205 0 0);
+  --card: hsl(40, 8%, 97%);
+  --card-foreground: oklch(0.205 0 0);
+  --popover: hsl(0, 0%, 100%);
+  --popover-foreground: oklch(0.205 0 0);
+  --primary: #e32c03;
+  --primary-foreground: hsl(0, 0%, 100%);
+  --secondary: hsl(40, 10%, 95%);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: hsl(40, 10%, 95%);
+  --muted-foreground: hsl(45, 3%, 38%);
+  --accent: hsla(11, 98%, 48%, 0.08);
+  --accent-foreground: #c42602;
+  --border: hsl(40, 7%, 88%);
+  --input: hsl(40, 7%, 88%);
+  --ring: #f53003;
+  --sidebar: hsl(40, 10%, 97.5%);
+  --code: hsl(40, 8%, 98%);
+  --code-foreground: oklch(0.205 0 0);
 }
 
-html[data-vellum-preset="vitepress"].dark [data-vellum-sidebar] {
-  background-color: hsl(240, 4%, 9%);
-}
-
-html[data-vellum-preset="dusk"] [data-vellum-sidebar] {
-  background-color: hsl(250, 20%, 90%);
-}
-
-html[data-vellum-preset="dusk"].dark [data-vellum-sidebar] {
-  background-color: hsl(240, 20%, 5%);
-}
-
-html[data-vellum-preset="catppuccin"] [data-vellum-sidebar] {
-  --secondary: hsl(223, 16%, 83%);
-  --muted: hsl(223, 16%, 83%);
-}
-
-html[data-vellum-preset="catppuccin"].dark [data-vellum-sidebar] {
-  --secondary: hsl(237, 16%, 23%);
-  --muted: hsl(237, 16%, 23%);
+html[data-vellum-preset="laravel"].dark {
+  --background: oklch(0.205 0 0);
+  --foreground: oklch(0.97 0 0);
+  --card: #222221;
+  --card-foreground: oklch(0.97 0 0);
+  --popover: #191918;
+  --popover-foreground: #eeeeec;
+  --primary: hsl(11, 98%, 54%);
+  --primary-foreground: #1a1a1a;
+  --secondary: #2a2a28;
+  --secondary-foreground: oklch(0.97 0 0);
+  --muted: #2a2a28;
+  --muted-foreground: #b5b3ad;
+  --accent: hsla(5, 100%, 50%, 0.18);
+  --accent-foreground: #f7d9d3;
+  --border: hsla(45, 4%, 40%, 0.25);
+  --input: hsla(45, 4%, 40%, 0.25);
+  --ring: #f53003;
+  --sidebar: oklch(0.185 0 0);
+  --code: #1b1b1a;
+  --code-foreground: #e8e6e1;
 }

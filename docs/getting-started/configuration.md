@@ -25,12 +25,13 @@ Published as `config/vellum.php`. **0.5 freezes these names.** Add values, do no
 
 ## Theme
 
-See [Theming](/docs/theming) for all eleven presets.
+See [Theming](/docs/theming) for the presets, the accent, and the contrast target.
 
 ```php
 'theme' => [
     'preset' => 'neutral',
     'primary' => null,
+    'accent' => null,
     'radius' => '0.5rem',
     'default' => 'system',
 ],

@@ -8,6 +8,7 @@ use Illuminate\Console\Command;
 use Vellum\Content\ContentRepository;
 use Vellum\Search\ScoutIndexer;
 use Vellum\Search\SearchDriver;
+use Vellum\Support\Theme;
 
 /**
  * Compiles every Markdown document into the OPcache-friendly cache.
@@ -21,6 +22,14 @@ final class BuildCommand extends Command
     public function handle(): int
     {
         $started = microtime(true);
+
+        $removed = Theme::removedPreset();
+
+        if ($removed !== null) {
+            $this->warn(sprintf('Colour preset "%s" was removed in 0.5; using neutral.', $removed));
+            $this->line('  Set vellum.theme.preset to one of: '.implode(', ', Theme::PRESETS));
+        }
+
         $repository = ContentRepository::fromConfig();
         $version = $this->option('docs-version');
         $version = is_string($version) && $version !== '' ? $version : null;

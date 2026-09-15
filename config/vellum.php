@@ -114,11 +114,13 @@ return [
     |--------------------------------------------------------------------------
     */
     'theme' => [
-        // Fumadocs palettes: neutral (default), black, vitepress, dusk,
-        // catppuccin, ocean, purple, solar, emerald, ruby, aspen
+        // neutral (default), ocean, laravel
         'preset' => 'neutral',
         // oklch hue override for --primary on Neutral (null keeps the default)
         'primary' => null,
+        // Brand accent applied to every preset: one colour, or
+        // ['light' => '#...', 'dark' => '#...']. The label colour is derived.
+        'accent' => null,
         'radius' => '0.5rem',
         // light | dark | system
         'default' => 'system',

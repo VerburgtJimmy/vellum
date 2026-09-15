@@ -11,17 +11,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Package docs for why Vellum, versions, gating, search drivers, changelog, export, theming (all eleven presets), and the 0.2 to 0.5 upgrade path
+- Package docs for why Vellum, versions, gating, search drivers, changelog, export, theming, and the 0.2 to 0.5 upgrade path
+- `laravel` colour preset, matching laravel.com/docs warm sand neutrals and the Laravel red
+- `theme.accent`: a brand colour applied to links, buttons and the focus ring on any preset, as one value or `['light' => ..., 'dark' => ...]`. Hex, `hsl()` and `oklch()` are accepted, the button label colour is derived from it, and an unparseable value is ignored
+- `Vellum\Support\Color`: colour parsing, relative luminance and WCAG contrast
+- Contrast test over the real stylesheets: every shipped preset clears WCAG AA (4.5:1) for body text, secondary text, links and button labels, in both modes
 - `CONTRIBUTING.md`, `SECURITY.md`, GitHub issue and pull request templates
 - `versions.labels`: switcher display names (`1.x (LTS)`, `Next`) while folders and URLs stay the list slug
 
 ### Changed
 
+- Colour presets retuned to clear WCAG AA in light mode. Neutral's secondary text was 4.21:1, Laravel's link and button colours 3.96:1
+- Laravel preset uses `#e32c03` for text and fills and keeps `#f53003` for the active wash and the focus ring, the way laravel.com does
+- Code blocks take their surface from the theme (`--code`, `--code-foreground`) instead of a hard-coded white and `#191919`, so they match the page in every preset
+- The sidebar surface is a token (`--sidebar`) that every preset sets, instead of a tint on some presets and the page background on others
+- The card surface is now distinguishable from the page background in every preset, so callouts read as a surface
 - Markdown tabs and UI tabs share `vellumTabs()` for arrow keys, Home/End, and `aria-controls`
 - Search dialog labelled for assistive tech (`combobox` + `listbox`); version switcher menu has Home/End and `aria-controls`
 
 ### Removed
 
+- Colour presets `black`, `vitepress`, `dusk`, `catppuccin`, `purple`, `solar`, `emerald`, `ruby` and `aspen`. Most changed one accent colour, which `theme.accent` now does on any preset; several could not reach WCAG AA in light mode without losing the character that named them. A removed name falls back to `neutral` and `vellum:build` warns once
 - Cloudflare Workers demo (`bin/build-demo`, `wrangler.toml`, committed `demo-dist`). The public site is now a Laravel app that serves `docs/` through the package
 
 ## [0.4.0] - 2026-09-13
