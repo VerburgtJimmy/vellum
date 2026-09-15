@@ -16,10 +16,11 @@ final class ImageExtension implements ExtensionInterface
 {
     public function __construct(
         private readonly ?string $contentPath = null,
+        private readonly ?string $assetPrefix = null,
     ) {}
 
     public function register(EnvironmentBuilderInterface $environment): void
     {
-        $environment->addRenderer(Image::class, new ImageRenderer($this->contentPath), 10);
+        $environment->addRenderer(Image::class, new ImageRenderer($this->contentPath, $this->assetPrefix), 10);
     }
 }

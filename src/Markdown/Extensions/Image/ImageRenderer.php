@@ -24,8 +24,13 @@ final class ImageRenderer implements ConfigurationAwareInterface, NodeRendererIn
 {
     private ConfigurationInterface $config;
 
+    /**
+     * @param  string|null  $contentPath  Root that relative image URLs resolve against.
+     * @param  string|null  $assetPrefix  Extra URL segment, used for the version folder.
+     */
     public function __construct(
         private readonly ?string $contentPath = null,
+        private readonly ?string $assetPrefix = null,
     ) {}
 
     public function setConfiguration(ConfigurationInterface $configuration): void
@@ -90,8 +95,11 @@ final class ImageRenderer implements ConfigurationAwareInterface, NodeRendererIn
         }
 
         $prefix = trim((string) config('vellum.route.prefix', 'docs'), '/');
+        $asset = $this->assetPrefix === null || $this->assetPrefix === ''
+            ? $relative
+            : trim($this->assetPrefix, '/').'/'.$relative;
 
-        return '/'.$prefix.'/_vellum/files/'.$relative;
+        return '/'.$prefix.'/_vellum/files/'.$asset;
     }
 
     /**

@@ -323,3 +323,26 @@ it('republishes the config only when --force is given', function (): void {
         }
     }
 });
+
+it('warns when a docs page is shadowed by the changelog route', function (): void {
+    config()->set('vellum.changelog.path', $this->docsPath().'/CHANGELOG.md');
+    file_put_contents($this->docsPath().'/CHANGELOG.md', "# Changelog\n\n## [1.0.0] - 2026-01-02\n\n- Shipped\n");
+
+    $this->writeDoc('index.md', "---\ntitle: Home\n---\nHi");
+    $this->writeDoc('changelog.md', "---\ntitle: My Changelog\n---\nMine");
+
+    $this->artisan('vellum:build')
+        ->expectsOutputToContain('shadowed by the changelog route')
+        ->assertSuccessful();
+});
+
+it('does not warn about a changelog page when the changelog route is off', function (): void {
+    config()->set('vellum.changelog', null);
+
+    $this->writeDoc('index.md', "---\ntitle: Home\n---\nHi");
+    $this->writeDoc('changelog.md', "---\ntitle: My Changelog\n---\nMine");
+
+    $this->artisan('vellum:build')
+        ->doesntExpectOutputToContain('shadowed by the changelog route')
+        ->assertSuccessful();
+});

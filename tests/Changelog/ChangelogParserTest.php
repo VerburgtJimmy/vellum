@@ -83,3 +83,54 @@ MD;
         ->and($changelog->visible()[0]->unreleased)->toBeTrue()
         ->and($changelog->visibleHeadings()[0]['id'])->toBe('unreleased');
 });
+
+it('drops an impossible date rather than emit it', function (string $heading): void {
+    $changelog = (new ChangelogParser)->parse(
+        "# Changelog\n\n## {$heading}\n\n- Something\n",
+        '/tmp/CHANGELOG.md',
+        1_700_000_000,
+    );
+
+    expect($changelog->releases[0]->date)->toBeNull()
+        ->and($changelog->releases[0]->version)->toBe('1.0.0');
+})->with([
+    'month 13' => '[1.0.0] - 2026-13-45',
+    'day 45' => '[1.0.0] - 2026-09-45',
+    'day 31 in a 30 day month' => '[1.0.0] - 2026-09-31',
+    'february 30' => '[1.0.0] - 2026-02-30',
+    'month zero' => '[1.0.0] - 2026-00-10',
+]);
+
+it('keeps a real date, including a leap day', function (string $heading, string $expected): void {
+    $changelog = (new ChangelogParser)->parse(
+        "# Changelog\n\n## {$heading}\n\n- Something\n",
+        '/tmp/CHANGELOG.md',
+        1_700_000_000,
+    );
+
+    expect($changelog->releases[0]->date)->toBe($expected);
+})->with([
+    ['[1.0.0] - 2026-09-13', '2026-09-13'],
+    ['[1.0.0] - 2024-02-29', '2024-02-29'],
+    ['1.0.0 - 2026-12-31', '2026-12-31'],
+]);
+
+it('emits a valid atom timestamp for every release', function (): void {
+    config()->set('vellum.changelog.path', $this->docsPath().'/CHANGELOG.md');
+    file_put_contents(
+        $this->docsPath().'/CHANGELOG.md',
+        "# Changelog\n\n## [1.1.0] - 2026-13-45\n\n- Bad date\n\n## [1.0.0] - 2026-01-02\n\n- Good date\n",
+    );
+
+    $feed = $this->get('/docs/changelog.atom')->assertOk()->getContent();
+
+    expect($feed)->not->toContain('2026-13-45');
+
+    $xml = simplexml_load_string((string) $feed);
+
+    expect($xml)->not->toBeFalse();
+
+    foreach ($xml->entry as $entry) {
+        expect(strtotime((string) $entry->updated))->not->toBeFalse();
+    }
+});

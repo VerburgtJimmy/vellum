@@ -39,6 +39,12 @@ final class FrontMatterParser
     {
         $label = $path ?? 'inline content';
 
+        // An editor-written BOM sits before the opening ---, which would
+        // otherwise make the whole block parse as body text.
+        if (str_starts_with($contents, "\xEF\xBB\xBF")) {
+            $contents = substr($contents, 3);
+        }
+
         if (! preg_match('/\A---\r?\n/', $contents)) {
             return [
                 'matter' => [],

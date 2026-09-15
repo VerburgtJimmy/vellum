@@ -111,6 +111,10 @@ final class ChangelogParser
             $date = $match[2];
         }
 
+        if ($date !== null && ! self::isRealDate($date)) {
+            $date = null;
+        }
+
         $unreleased = strcasecmp($version, 'Unreleased') === 0;
 
         return [
@@ -119,6 +123,20 @@ final class ChangelogParser
             'date' => $date,
             'id' => $unreleased ? 'unreleased' : $version,
         ];
+    }
+
+    /**
+     * The heading pattern matches any yyyy-mm-dd shape, so 2026-13-45 gets
+     * through it. An impossible date would go straight into the Atom feed,
+     * which readers reject, so treat it as no date at all.
+     */
+    private static function isRealDate(string $date): bool
+    {
+        if (preg_match('/^(\d{4})-(\d{2})-(\d{2})$/', $date, $parts) !== 1) {
+            return false;
+        }
+
+        return checkdate((int) $parts[2], (int) $parts[3], (int) $parts[1]);
     }
 
     /**

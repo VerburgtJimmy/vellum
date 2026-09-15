@@ -15,9 +15,28 @@ final class Access
         private readonly FrontMatterParser $frontMatterParser = new FrontMatterParser,
     ) {}
 
+    /**
+     * The two values Vellum resolves itself. Anything else is a gate name.
+     */
+    private const RESERVED = ['guest', 'auth'];
+
     public static function normalize(mixed $value): string
     {
-        return is_string($value) && $value !== '' ? $value : 'guest';
+        if (! is_string($value)) {
+            return 'guest';
+        }
+
+        $value = trim($value);
+
+        if ($value === '') {
+            return 'guest';
+        }
+
+        // Fold case for the reserved words only: "Auth" is a typo for "auth",
+        // but a gate is registered under an exact name and may well be capitalised.
+        $lower = strtolower($value);
+
+        return in_array($lower, self::RESERVED, true) ? $lower : $value;
     }
 
     /**

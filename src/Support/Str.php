@@ -31,4 +31,16 @@ final class Str
 
         return trim($matches[1]);
     }
+
+    /**
+     * Drop a "# Title" line that opens the body.
+     *
+     * Used when the title falls back to that heading: the layout renders its own
+     * h1, so leaving it would ship two. Only a leading heading is removed, so a
+     * "# " line further down (or inside a fence) is left alone.
+     */
+    public static function withoutLeadingHeading(string $markdown): string
+    {
+        return preg_replace('/\A\s*#[ \t]+[^\r\n]*(?:\r?\n)?/', '', $markdown, 1) ?? $markdown;
+    }
 }

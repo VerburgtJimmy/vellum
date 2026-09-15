@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Vellum\Content;
 
 use Vellum\Cache\CompiledStore;
+use Vellum\Exceptions\DuplicateSlugException;
 use Vellum\Exceptions\UnknownDirectiveException;
 use Vellum\Markdown\Islands\MarkdownPipeline;
 use Vellum\Markdown\MarkdownRenderer;
@@ -32,6 +33,14 @@ final class ContentRepository
         private readonly Access $access = new Access,
         private readonly SearchVisibility $visibility = new SearchVisibility,
     ) {}
+
+    /**
+     * Pipelines keyed by version folder. Images resolve against the version
+     * root, so each version needs its own renderer.
+     *
+     * @var array<string, MarkdownPipeline>
+     */
+    private array $versionPipelines = [];
 
     /**
      * Build a repository from Laravel config values.
@@ -95,8 +104,16 @@ final class ContentRepository
         }
 
         $documents = [];
+        $seen = [];
 
         foreach ($this->discoverSourceFiles($version) as $source) {
+            $slug = $source['slug'];
+
+            if (isset($seen[$slug])) {
+                throw DuplicateSlugException::forPaths($slug, $seen[$slug], $source['path']);
+            }
+
+            $seen[$slug] = $source['path'];
             $documents[] = $this->compileFile($source['path'], $source['slug'], $source['version']);
         }
 
@@ -438,9 +455,16 @@ final class ContentRepository
             : $this->relativePath($this->contentPath, $absolutePath);
 
         $slug ??= $this->slugFromRelativePath($relative, $absolutePath, $matter);
+        $title = $this->resolveTitle($matter, $body, $relative);
+
+        // The title came from the body's own heading and the layout renders an
+        // h1 of its own, so drop the heading rather than ship two.
+        if ($this->matterTitle($matter) === null && Str::firstHeading($body) !== null) {
+            $body = Str::withoutLeadingHeading($body);
+        }
 
         try {
-            $rendered = $this->pipeline->convert($body);
+            $rendered = $this->pipelineFor($version)->convert($body);
         } catch (UnknownDirectiveException $exception) {
             throw $exception->withFile($absolutePath);
         }
@@ -448,7 +472,6 @@ final class ContentRepository
         $html = $rendered['html'];
         $headings = $rendered['headings'];
         $islands = $rendered['islands'];
-        $title = $this->resolveTitle($matter, $body, $relative);
         $mtime = (int) filemtime($absolutePath);
 
         $description = isset($matter['description']) && is_string($matter['description'])
@@ -480,6 +503,25 @@ final class ContentRepository
         $this->store->put($document);
 
         return $document;
+    }
+
+    /**
+     * The pipeline a document should render through.
+     *
+     * Versioned docs live under <root>/<version>, so "assets/x.png" has to
+     * resolve there and the emitted URL has to carry the version segment.
+     */
+    private function pipelineFor(?string $version): MarkdownPipeline
+    {
+        if (! $this->versionsEnabled || $version === null || $version === '') {
+            return $this->pipeline;
+        }
+
+        return $this->versionPipelines[$version] ??= new MarkdownPipeline(new MarkdownRenderer(
+            contentPath: $this->contentPath.DIRECTORY_SEPARATOR.$version,
+            appUrl: (string) config('app.url', ''),
+            assetPrefix: $version,
+        ));
     }
 
     private function shouldRecompile(Document $document): bool
@@ -617,12 +659,37 @@ final class ContentRepository
     }
 
     /**
+     * The frontmatter title, if usable. YAML turns an unquoted `title: 2024`
+     * into an int, which used to be discarded in favour of the filename.
+     *
+     * @param  array<string, mixed>  $matter
+     */
+    private function matterTitle(array $matter): ?string
+    {
+        $title = $matter['title'] ?? null;
+
+        if (is_int($title) || is_float($title)) {
+            $title = (string) $title;
+        }
+
+        if (! is_string($title)) {
+            return null;
+        }
+
+        $title = trim($title);
+
+        return $title === '' ? null : $title;
+    }
+
+    /**
      * @param  array<string, mixed>  $matter
      */
     private function resolveTitle(array $matter, string $body, string $relative): string
     {
-        if (isset($matter['title']) && is_string($matter['title']) && $matter['title'] !== '') {
-            return $matter['title'];
+        $title = $this->matterTitle($matter);
+
+        if ($title !== null) {
+            return $title;
         }
 
         $heading = Str::firstHeading($body);
