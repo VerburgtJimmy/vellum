@@ -243,6 +243,7 @@
 }
 
 .vellum-prose :where(input[type='checkbox']) {
+  --vellum-check: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256'%3E%3Cpath d='M229.66,77.66l-128,128a8,8,0,0,1-11.32,0l-56-56a8,8,0,0,1,11.32-11.32L96,188.69,218.34,66.34a8,8,0,0,1,11.32,11.32Z'/%3E%3C/svg%3E");
   appearance: none;
   -webkit-appearance: none;
   display: inline-block;
@@ -254,10 +255,8 @@
   border: 1.5px solid var(--muted-foreground);
   border-radius: 0.25rem;
   background-color: var(--muted);
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: 0.7rem 0.7rem;
   color: var(--muted-foreground);
+  position: relative;
   opacity: 1;
 }
 
@@ -266,12 +265,24 @@
   cursor: default;
 }
 
-.vellum-prose :where(input[type='checkbox']:checked) {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256'%3E%3Cpath fill='oklch(0.556 0 0)' d='M229.66,77.66l-128,128a8,8,0,0,1-11.32,0l-56-56a8,8,0,0,1,11.32-11.32L96,188.69,218.34,66.34a8,8,0,0,1,11.32,11.32Z'/%3E%3C/svg%3E");
-}
-
-.dark .vellum-prose :where(input[type='checkbox']:checked) {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256'%3E%3Cpath fill='oklch(0.72 0 0)' d='M229.66,77.66l-128,128a8,8,0,0,1-11.32,0l-56-56a8,8,0,0,1,11.32-11.32L96,188.69,218.34,66.34a8,8,0,0,1,11.32,11.32Z'/%3E%3C/svg%3E");
+/* A masked pseudo-element rather than a background image with the colour baked
+   into the data URL. The tick then tracks --muted-foreground through both modes
+   and all three presets; the old pair of URLs only matched neutral, and had
+   drifted from even that. Masking the input itself would take the box with it,
+   hence ::before. */
+.vellum-prose :where(input[type='checkbox']:checked)::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-color: currentColor;
+  -webkit-mask-image: var(--vellum-check);
+  mask-image: var(--vellum-check);
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-size: 0.7rem 0.7rem;
+  mask-size: 0.7rem 0.7rem;
 }
 
 .vellum-prose :where(a):not([data-vellum-button]):not(.vellum-card) {
@@ -744,9 +755,12 @@
   border-bottom: 2px solid transparent;
 }
 
+/* The label reads as body text, not accent text: --primary is configurable and
+   a light accent against --card fails AA badly. The underline carries the
+   accent instead, where contrast is not a legibility question. */
 .vellum-tabs-code .vellum-tabs-trigger[aria-selected='true'] {
   background: transparent;
-  color: var(--primary);
+  color: var(--foreground);
   border-bottom-color: var(--primary);
 }
 

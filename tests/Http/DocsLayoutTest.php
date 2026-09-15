@@ -318,7 +318,12 @@ it('keeps line-number gutters unselectable in css', function (): void {
         ->and($css)->toMatch('/\.vellum-tabs-code \.vellum-code\{[^}]*background:var\(--muted\)/')
         ->and($css)->not->toContain('#191919')
         ->and($css)->toContain('input[type=checkbox]')
-        ->and($css)->toContain('oklch(0.72 0 0)')
+        // The tick is a mask filled with currentColor, so it follows
+        // --muted-foreground rather than carrying a colour of its own.
+        ->and($css)->toMatch('/input\[type=checkbox\]:checked\):before\{[^}]*background-color:currentColor/')
+        ->and($css)->toMatch('/input\[type=checkbox\]:checked\):before\{[^}]*mask-image:var\(--vellum-check\)/')
+        ->and($css)->not->toMatch('/--vellum-check:url\([^)]*fill=/')
+        ->and($css)->toContain('muted-foreground:oklch(72% 0 0)')
         ->and($css)->toContain('vellum-toc-link')
         ->and($css)->toContain('.vellum-toc-link.is-active')
         ->and($css)->toContain('data-vellum-sidebar-peek')
@@ -405,4 +410,16 @@ it('keeps tab persist in the shared Alpine helper', function (): void {
     expect($js)->not->toBeFalse()
         ->and($js)->toContain('vellum-tabs-')
         ->and($js)->toContain('localStorage.setItem');
+});
+
+it('keeps the active code tab label readable whatever the accent is', function (): void {
+    $css = file_get_contents(Assets::cssPath());
+
+    // The accent is configurable and may be very light, so it carries the
+    // underline while the label stays on --foreground.
+    expect($css)->not->toBeFalse()
+        ->and($css)->toMatch('/\.vellum-tabs-code \.vellum-tabs-trigger\[aria-selected=["\']?true["\']?\]\{[^}]*color:var\(--foreground\)/')
+        ->and($css)->toMatch('/\.vellum-tabs-code \.vellum-tabs-trigger\[aria-selected=["\']?true["\']?\]\{[^}]*border-bottom-color:var\(--primary\)/')
+        // [;{] so this does not match border-bottom-color, which should be --primary.
+        ->and($css)->not->toMatch('/\.vellum-tabs-code \.vellum-tabs-trigger\[aria-selected=["\']?true["\']?\]\{[^}]*[;{]color:var\(--primary\)/');
 });
