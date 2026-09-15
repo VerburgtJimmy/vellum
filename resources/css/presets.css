@@ -1,54 +1,53 @@
 /*
- | Colour presets. Neutral is the :root default in vellum.css; the two below
- | are deltas on top of it. Every preset defines the same token set, gives the
- | sidebar its own surface, and clears WCAG AA (4.5:1) for body text, secondary
- | text, links and button labels in both modes. See tests/Support/PresetContrastTest.
+ | Colour presets. Neutral is the :root default in vellum.css; the two below are
+ | deltas on top of it.
+ |
+ | Surface model, identical in every preset and both modes:
+ |   background  the canvas, at the light or dark extreme, carrying prose
+ |   card        one step toward mid-grey: sidebar, callouts, popovers
+ |   muted       a second step: code blocks, table headers, tab strips, steps
+ | Surfaces only ever move away from the canvas in one direction per mode, which
+ | is what tests/Support/PresetContrastTest checks along with WCAG AA text.
  */
 
 html[data-vellum-preset="ocean"] {
-  --background: hsl(220, 40%, 97%);
+  --background: hsl(220, 60%, 99%);
   --foreground: hsl(220, 60%, 10%);
-  --card: hsl(0, 0%, 100%);
+  --card: hsl(220, 45%, 95.5%);
   --card-foreground: hsl(220, 60%, 10%);
-  --popover: hsl(0, 0%, 100%);
+  --popover: hsl(220, 60%, 99%);
   --popover-foreground: hsl(220, 60%, 12%);
   --primary: hsl(210, 80%, 20.2%);
   --primary-foreground: hsl(0, 0%, 100%);
-  --secondary: hsl(220, 60%, 93%);
+  --secondary: hsl(220, 45%, 94%);
   --secondary-foreground: hsl(220, 60%, 12%);
-  --muted: hsl(220, 50%, 94%);
+  --muted: hsl(220, 40%, 93%);
   --muted-foreground: hsl(220, 25%, 40%);
-  --accent: hsl(220, 55%, 92%);
+  --accent: hsl(220, 45%, 91%);
   --accent-foreground: hsl(220, 60%, 12%);
   --border: hsl(220, 35%, 88%);
   --input: hsl(220, 35%, 88%);
   --ring: hsl(210, 80%, 20.2%);
-  --sidebar: hsl(220, 42%, 95.5%);
-  --code: hsl(0, 0%, 100%);
-  --code-foreground: hsl(220, 45%, 16%);
 }
 
 html[data-vellum-preset="ocean"].dark {
-  --background: hsl(220, 60%, 8%);
+  --background: hsl(220, 65%, 6%);
   --foreground: hsl(220, 60%, 94.5%);
-  --card: hsl(220, 50%, 14%);
+  --card: hsl(220, 55%, 10%);
   --card-foreground: hsl(220, 60%, 94.5%);
-  --popover: hsl(220, 50%, 12%);
+  --popover: hsl(220, 55%, 10%);
   --popover-foreground: hsl(220, 60%, 94.5%);
   --primary: hsl(205, 100%, 85%);
   --primary-foreground: hsl(220, 60%, 10%);
-  --secondary: hsl(220, 50%, 20%);
+  --secondary: hsl(220, 50%, 14%);
   --secondary-foreground: hsl(220, 80%, 90%);
-  --muted: hsl(220, 50%, 12%);
+  --muted: hsl(220, 50%, 14%);
   --muted-foreground: hsl(220, 30%, 68%);
-  --accent: hsl(220, 40%, 20%);
+  --accent: hsl(220, 45%, 19%);
   --accent-foreground: hsl(220, 80%, 90%);
-  --border: hsla(220, 50%, 50%, 0.2);
-  --input: hsla(220, 50%, 50%, 0.2);
+  --border: hsla(220, 50%, 55%, 0.22);
+  --input: hsla(220, 50%, 55%, 0.22);
   --ring: hsl(205, 100%, 85%);
-  --sidebar: hsl(220, 60%, 6.5%);
-  --code: hsl(220, 50%, 11%);
-  --code-foreground: hsl(220, 40%, 90%);
 }
 
 html[data-vellum-preset="ocean"].dark [data-vellum-docs] {
@@ -65,45 +64,39 @@ html[data-vellum-preset="ocean"].dark [data-vellum-docs] {
 html[data-vellum-preset="laravel"] {
   --background: hsl(0, 0%, 100%);
   --foreground: oklch(0.205 0 0);
-  --card: hsl(40, 8%, 97%);
+  --card: hsl(40, 12%, 96.5%);
   --card-foreground: oklch(0.205 0 0);
   --popover: hsl(0, 0%, 100%);
   --popover-foreground: oklch(0.205 0 0);
   --primary: #e32c03;
   --primary-foreground: hsl(0, 0%, 100%);
-  --secondary: hsl(40, 10%, 95%);
+  --secondary: hsl(40, 12%, 95%);
   --secondary-foreground: oklch(0.205 0 0);
-  --muted: hsl(40, 10%, 95%);
+  --muted: hsl(40, 12%, 93.5%);
   --muted-foreground: hsl(45, 3%, 38%);
   --accent: hsla(11, 98%, 48%, 0.08);
   --accent-foreground: #c42602;
   --border: hsl(40, 7%, 88%);
   --input: hsl(40, 7%, 88%);
   --ring: #f53003;
-  --sidebar: hsl(40, 10%, 97.5%);
-  --code: hsl(40, 8%, 98%);
-  --code-foreground: oklch(0.205 0 0);
 }
 
 html[data-vellum-preset="laravel"].dark {
-  --background: oklch(0.205 0 0);
+  --background: oklch(0.155 0 0);
   --foreground: oklch(0.97 0 0);
-  --card: #222221;
+  --card: #1f1f1e;
   --card-foreground: oklch(0.97 0 0);
-  --popover: #191918;
+  --popover: #1f1f1e;
   --popover-foreground: #eeeeec;
   --primary: hsl(11, 98%, 54%);
   --primary-foreground: #1a1a1a;
-  --secondary: #2a2a28;
+  --secondary: #262625;
   --secondary-foreground: oklch(0.97 0 0);
-  --muted: #2a2a28;
+  --muted: #262625;
   --muted-foreground: #b5b3ad;
   --accent: hsla(5, 100%, 50%, 0.18);
   --accent-foreground: #f7d9d3;
-  --border: hsla(45, 4%, 40%, 0.25);
-  --input: hsla(45, 4%, 40%, 0.25);
+  --border: hsla(45, 4%, 45%, 0.28);
+  --input: hsla(45, 4%, 45%, 0.28);
   --ring: #f53003;
-  --sidebar: oklch(0.185 0 0);
-  --code: #1b1b1a;
-  --code-foreground: #e8e6e1;
 }

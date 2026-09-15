@@ -23,10 +23,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Colour presets retuned to clear WCAG AA in light mode. Neutral's secondary text was 4.21:1, Laravel's link and button colours 3.96:1
 - Laravel preset uses `#e32c03` for text and fills and keeps `#f53003` for the active wash and the focus ring, the way laravel.com does
-- Code blocks take their surface from the theme (`--code`, `--code-foreground`) instead of a hard-coded white and `#191919`, so they match the page in every preset
-- The sidebar surface is a token (`--sidebar`) that every preset sets, instead of a tint on some presets and the page background on others
-- The card surface is now distinguishable from the page background in every preset, so callouts read as a surface
-- Neutral's `--muted` was 1.003:1 against the page in light mode, so table headers, tab strips and step markers had no visible surface. It now matches the step the other presets and dark mode already had
+- Code blocks take the shared `--muted` surface instead of a hard-coded white and `#191919`, so they match the page in every preset
+- The sidebar takes the shared `--card` surface, instead of a tint on some presets and the page background on others
+- Surfaces follow one rule in every preset and both modes: `--background` is the canvas at the light or dark extreme, `--card` is one step toward mid-grey for the sidebar, callouts and popovers, and `--muted` is a second step for code blocks, table headers, tab strips and step markers. Surfaces only ever move away from the canvas, darker in light and lighter in dark, so prose sits on the cleanest area and nesting reads correctly
+- Light mode canvases are near-white and dark canvases near-black, replacing a mid-grey page with lighter elements sitting on top of it
+- Neutral's `--muted` was 1.003:1 against the page in light mode, so table headers, tab strips and step markers had no visible surface
 - Markdown tabs and UI tabs share `vellumTabs()` for arrow keys, Home/End, and `aria-controls`
 - Search dialog labelled for assistive tech (`combobox` + `listbox`); version switcher menu has Home/End and `aria-controls`
 

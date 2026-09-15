@@ -23,9 +23,8 @@ description: Three contrast-tested presets, a brand accent, radius, and light / 
 
 Unknown names fall back to `neutral`.
 
-Every preset defines the same token set, including its own sidebar and code-block
-surface, and each one is tested for WCAG AA contrast in both light and dark. See
-[Contrast](#contrast).
+Every preset defines the same token set and is tested in both modes. See
+[Surfaces](#surfaces) and [Contrast](#contrast).
 
 :::note
 0.5 removed nine presets: `black`, `vitepress`, `dusk`, `catppuccin`, `purple`, `solar`,
@@ -33,6 +32,21 @@ surface, and each one is tested for WCAG AA contrast in both light and dark. See
 once. Most of them existed to change one accent colour, which `accent` now does on any
 preset.
 :::
+
+## Surfaces
+
+Three layers, the same in every preset and both modes:
+
+| Token | Carries | Position |
+| --- | --- | --- |
+| `--background` | prose | the canvas, at the light or dark extreme |
+| `--card` | sidebar, callouts, popovers | one step toward mid-grey |
+| `--muted` | code blocks, table headers, tab strips, step markers | a second step |
+
+Surfaces only move one way from the canvas: darker in light mode, lighter in dark. That
+keeps the reading surface the cleanest area of the page, makes nesting read correctly (a
+code block inside a callout sits one step deeper), and means a surface can never collide
+with the canvas. The contrast test enforces the direction and the order.
 
 ## Accent
 
