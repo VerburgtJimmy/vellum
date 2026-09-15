@@ -91,3 +91,26 @@ it('keeps readable text in every preset', function (string $preset, string $mode
         );
     }
 })->with('preset modes');
+
+it('keeps recessed surfaces visible against the page', function (string $preset, string $mode): void {
+    $tokens = presetTokens($preset, $mode);
+
+    // --card carries callouts, --muted carries table headers, tab strips and
+    // step markers. If either matches the page, those components lose their shape.
+    $surfaces = ['--card', '--muted'];
+
+    foreach ($surfaces as $key) {
+        $surface = Color::parse($tokens[$key] ?? '');
+        $background = Color::parse($tokens['--background'] ?? '');
+
+        expect($surface)->not->toBeNull("{$preset} {$mode}: cannot read {$key}");
+        expect($background)->not->toBeNull("{$preset} {$mode}: cannot read --background");
+
+        $ratio = Color::contrast($surface, $background);
+
+        expect($ratio)->toBeGreaterThanOrEqual(
+            1.04,
+            sprintf('%s %s: %s is %.3f against the page, too close to read as a surface', $preset, $mode, $key, $ratio),
+        );
+    }
+})->with('preset modes');

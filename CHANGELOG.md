@@ -26,6 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Code blocks take their surface from the theme (`--code`, `--code-foreground`) instead of a hard-coded white and `#191919`, so they match the page in every preset
 - The sidebar surface is a token (`--sidebar`) that every preset sets, instead of a tint on some presets and the page background on others
 - The card surface is now distinguishable from the page background in every preset, so callouts read as a surface
+- Neutral's `--muted` was 1.003:1 against the page in light mode, so table headers, tab strips and step markers had no visible surface. It now matches the step the other presets and dark mode already had
 - Markdown tabs and UI tabs share `vellumTabs()` for arrow keys, Home/End, and `aria-controls`
 - Search dialog labelled for assistive tech (`combobox` + `listbox`); version switcher menu has Home/End and `aria-controls`
 
