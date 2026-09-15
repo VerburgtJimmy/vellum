@@ -13,6 +13,10 @@
         "export",
         "theming",
         "extending",
-        { "title": "Changelog", "slug": "changelog" }
+        "credits",
+        {
+            "title": "Changelog",
+            "slug": "changelog"
+        }
     ]
 }
