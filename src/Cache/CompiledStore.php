@@ -6,6 +6,7 @@ namespace Vellum\Cache;
 
 use Vellum\Content\Document;
 use Vellum\Markdown\Islands\Island;
+use Vellum\Support\Slug;
 
 /**
  * Reads and writes compiled documents as OPcache-friendly PHP return files.
@@ -29,6 +30,11 @@ final class CompiledStore
     public function pathFor(string $slug, ?string $version = null): string
     {
         $slug = trim($slug, '/');
+
+        if (! Slug::isSafe($slug)) {
+            throw new \InvalidArgumentException('Refusing to resolve a compiled path for unsafe slug: '.$slug);
+        }
+
         $file = ($slug === '' ? 'index' : $slug).'.php';
         $dir = $this->versionPath($version);
 

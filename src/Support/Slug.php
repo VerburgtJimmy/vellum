@@ -24,6 +24,33 @@ final class Slug
     }
 
     /**
+     * Whether a request slug is safe to resolve against the content root.
+     *
+     * Rejects empty, "." and ".." segments, backslashes and null bytes, so a
+     * request can never address a file outside the docs directory.
+     */
+    public static function isSafe(string $slug): bool
+    {
+        $slug = trim($slug, '/');
+
+        if ($slug === '') {
+            return true;
+        }
+
+        if (str_contains($slug, "\0") || str_contains($slug, '\\')) {
+            return false;
+        }
+
+        foreach (explode('/', $slug) as $segment) {
+            if ($segment === '' || $segment === '.' || $segment === '..') {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
      * Build a document slug from a relative path like "guides/authentication.md".
      */
     public static function fromRelativePath(string $relativePath): string

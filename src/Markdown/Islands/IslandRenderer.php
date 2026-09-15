@@ -61,16 +61,17 @@ final class IslandRenderer
         $slot = $this->render($island->slotHtml, $island->children);
 
         $name = $this->safeName($island->name);
-        $attributes = $this->attributeString($island->attributes);
+        $bound = $this->boundAttributes($island->attributes);
+        $attributes = $bound['template'];
 
         try {
             if ($island->selfClosing) {
-                return Blade::render('<x-'.$name.$attributes.' />');
+                return Blade::render('<x-'.$name.$attributes.' />', $bound['data']);
             }
 
             return Blade::render(
                 '<x-'.$name.$attributes.'>{!! $slot !!}</x-'.$name.'>',
-                ['slot' => $slot],
+                $bound['data'] + ['slot' => $slot],
             );
         } catch (UnknownComponentException $exception) {
             throw $exception;
@@ -173,21 +174,30 @@ final class IslandRenderer
     }
 
     /**
+     * Build bound attributes so values reach the component as data.
+     *
+     * Interpolating a value into the template string would let Blade compile
+     * `{{ … }}` inside it; docs attributes are quoted strings and stay literal.
+     *
      * @param  array<string, string>  $attributes
+     * @return array{template: string, data: array<string, string>}
      */
-    private function attributeString(array $attributes): string
+    private function boundAttributes(array $attributes): array
     {
-        $out = '';
+        $template = '';
+        $data = [];
 
         foreach ($attributes as $key => $value) {
             if (preg_match('/^[a-zA-Z_][\w:-]*$/', $key) !== 1) {
                 continue;
             }
 
-            $out .= ' '.$key.'="'.e($value).'"';
+            $variable = '__vellumAttr'.count($data);
+            $data[$variable] = $value;
+            $template .= ' :'.$key.'="$'.$variable.'"';
         }
 
-        return $out;
+        return ['template' => $template, 'data' => $data];
     }
 
     private function replacePlaceholder(string $html, string $placeholder, string $replacement): string

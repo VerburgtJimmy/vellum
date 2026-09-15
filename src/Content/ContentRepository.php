@@ -220,6 +220,11 @@ final class ContentRepository
     public function find(string $slug, ?string $version = null): ?Document
     {
         $slug = trim($slug, '/');
+
+        if (! Slug::isSafe($slug)) {
+            return null;
+        }
+
         $version = $this->resolveVersion($version);
 
         $compiled = $this->store->get($slug, $version);
@@ -503,6 +508,10 @@ final class ContentRepository
 
     private function resolveSourcePath(string $slug, ?string $version): ?string
     {
+        if (! Slug::isSafe($slug)) {
+            return null;
+        }
+
         $roots = [];
 
         if ($this->versionsEnabled && $version !== null) {
@@ -519,8 +528,10 @@ final class ContentRepository
             $candidates = $this->candidatePathsForSlug($root, $slug);
 
             foreach ($candidates as $candidate) {
-                if (is_file($candidate)) {
-                    return $candidate;
+                $resolved = $this->containedPath($root, $candidate);
+
+                if ($resolved !== null) {
+                    return $resolved;
                 }
             }
         }
@@ -533,6 +544,32 @@ final class ContentRepository
         }
 
         return null;
+    }
+
+    /**
+     * Resolve a candidate to a real file, but only when it stays inside the root.
+     * Symlinks that point outside the docs directory are refused here too.
+     */
+    private function containedPath(string $root, string $candidate): ?string
+    {
+        if (! is_file($candidate)) {
+            return null;
+        }
+
+        $real = realpath($candidate);
+        $realRoot = realpath($root);
+
+        if ($real === false || $realRoot === false) {
+            return null;
+        }
+
+        if (! str_starts_with($real, rtrim($realRoot, DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR)) {
+            return null;
+        }
+
+        // The candidate, not the resolved path: a symlinked content root would
+        // otherwise stop matching for folder access inheritance.
+        return $candidate;
     }
 
     /**

@@ -196,3 +196,32 @@ MD);
     expect($html)->toContain('@click')
         ->and($html)->toContain('data-test-alert');
 });
+
+it('never compiles blade inside a component attribute value', function (string $value): void {
+    $html = (new MarkdownPipeline)->render('<x-alert type="'.$value.'">Body</x-alert>');
+
+    expect($html)->toContain('data-test-alert')
+        ->and($html)->toContain('Body')
+        ->and($html)->not->toContain(gethostname() ?: 'unreachable-hostname')
+        ->and(html_entity_decode($html, ENT_QUOTES | ENT_HTML5))->toContain($value);
+})->with([
+    '{{ php_uname() }}',
+    '{!! php_uname() !!}',
+    '@php echo php_uname(); @endphp',
+    '@if (true) yes @endif',
+    '{{-- comment --}}',
+]);
+
+it('passes an attribute value through as data, escaped exactly once', function (): void {
+    $html = (new MarkdownPipeline)->render('<x-alert type="Tom & Jerry">Body</x-alert>');
+
+    expect($html)->toContain('data-type="Tom &amp; Jerry"')
+        ->and($html)->not->toContain('&amp;amp;');
+});
+
+it('keeps blade literal in a self-closing component attribute', function (): void {
+    $html = (new MarkdownPipeline)->render('<x-alert type="{{ php_uname() }}" />');
+
+    expect($html)->toContain('data-test-alert')
+        ->and($html)->not->toContain(gethostname() ?: 'unreachable-hostname');
+});
