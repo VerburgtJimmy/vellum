@@ -10,17 +10,17 @@
   --radius: 0.5rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
-  --card: oklch(0.965 0 0);
+  --card: oklch(0.982 0 0);
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.28 0 0);
   --primary: oklch(0.205 0.02 var(--vellum-primary-hue));
   --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.945 0 0);
+  --secondary: oklch(0.965 0 0);
   --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.94 0 0);
+  --muted: oklch(0.972 0 0);
   --muted-foreground: oklch(0.52 0 0);
-  --accent: oklch(0.925 0 0);
+  --accent: oklch(0.955 0 0);
   --accent-foreground: oklch(0.205 0 0);
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.985 0 0);
@@ -533,38 +533,38 @@
 
 /* GitHub Light / GitHub Dark — the Fumadocs Shiki default. */
 .hl-keyword,
-.hl-operator { color: #d73a49; }
+.hl-operator { color: #cf222e; }
 .hl-property,
 .hl-generic,
-.hl-attribute { color: #6f42c1; }
-.hl-type { color: #005cc5; }
-.hl-variable { color: #e36209; }
+.hl-attribute { color: #7c3aed; }
+.hl-type { color: #0550ae; }
+.hl-variable { color: #b04300; }
 .hl-value,
-.hl-literal { color: #032f62; }
-.hl-number { color: #005cc5; }
+.hl-literal { color: #0a7c3f; }
+.hl-number { color: #0e7490; }
 .hl-comment,
 .hl-comment span,
-.hl-injection { color: #6a737d; }
-.hl-addition { color: #22863a; }
-.hl-deletion { color: #b31d28; }
+.hl-injection { color: #5f6b7a; }
+.hl-addition { color: #116329; }
+.hl-deletion { color: #a40e26; }
 .hl-strong { font-weight: 700; }
 .hl-em { font-style: italic; }
 
 .dark .hl-keyword,
-.dark .hl-operator { color: #f97583; }
+.dark .hl-operator { color: #ff7b72; }
 .dark .hl-property,
 .dark .hl-generic,
-.dark .hl-attribute { color: #b392f0; }
-.dark .hl-type { color: #79b8ff; }
-.dark .hl-variable { color: #ffab70; }
+.dark .hl-attribute { color: #d2a8ff; }
+.dark .hl-type { color: #79c0ff; }
+.dark .hl-variable { color: #ffa657; }
 .dark .hl-value,
-.dark .hl-literal { color: #9ecbff; }
-.dark .hl-number { color: #79b8ff; }
+.dark .hl-literal { color: #7ee787; }
+.dark .hl-number { color: #56d4dd; }
 .dark .hl-comment,
 .dark .hl-comment span,
-.dark .hl-injection { color: #959da5; }
-.dark .hl-addition { color: #85e89d; }
-.dark .hl-deletion { color: #fdaeb7; }
+.dark .hl-injection { color: #9198a1; }
+.dark .hl-addition { color: #56d364; }
+.dark .hl-deletion { color: #ffa198; }
 
 .vellum-prose .footnote-ref {
   font-size: 0.75em;

@@ -80,6 +80,10 @@ Vellum targets **WCAG AA (4.5:1)** in every shipped preset, in both modes, for:
 - link and accent text
 - button labels on a filled button
 
+Syntax highlighting is one palette for light and one for dark, shared by every preset, and
+every token in it clears 4.5:1 on every preset's code surface. The presets change what the
+code block sits on, not what the code is coloured.
+
 `tests/Support/PresetContrastTest.php` reads the real stylesheets and fails the build if
 a palette edit drops below that. A custom `accent` is your own responsibility: pick one
 that clears 4.5:1 against your page background.

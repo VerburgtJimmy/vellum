@@ -13,17 +13,17 @@
 html[data-vellum-preset="ocean"] {
   --background: hsl(220, 60%, 99%);
   --foreground: hsl(220, 60%, 10%);
-  --card: hsl(220, 45%, 95.5%);
+  --card: hsl(220, 50%, 97%);
   --card-foreground: hsl(220, 60%, 10%);
   --popover: hsl(220, 60%, 99%);
   --popover-foreground: hsl(220, 60%, 12%);
   --primary: hsl(210, 80%, 20.2%);
   --primary-foreground: hsl(0, 0%, 100%);
-  --secondary: hsl(220, 45%, 94%);
+  --secondary: hsl(220, 45%, 95%);
   --secondary-foreground: hsl(220, 60%, 12%);
-  --muted: hsl(220, 40%, 93%);
+  --muted: hsl(220, 45%, 96%);
   --muted-foreground: hsl(220, 25%, 40%);
-  --accent: hsl(220, 45%, 91%);
+  --accent: hsl(220, 45%, 93.5%);
   --accent-foreground: hsl(220, 60%, 12%);
   --border: hsl(220, 35%, 88%);
   --input: hsl(220, 35%, 88%);
@@ -64,15 +64,15 @@ html[data-vellum-preset="ocean"].dark [data-vellum-docs] {
 html[data-vellum-preset="laravel"] {
   --background: hsl(0, 0%, 100%);
   --foreground: oklch(0.205 0 0);
-  --card: hsl(40, 12%, 96.5%);
+  --card: hsl(40, 14%, 97.7%);
   --card-foreground: oklch(0.205 0 0);
   --popover: hsl(0, 0%, 100%);
   --popover-foreground: oklch(0.205 0 0);
   --primary: #e32c03;
   --primary-foreground: hsl(0, 0%, 100%);
-  --secondary: hsl(40, 12%, 95%);
+  --secondary: hsl(40, 14%, 95.5%);
   --secondary-foreground: oklch(0.205 0 0);
-  --muted: hsl(40, 12%, 93.5%);
+  --muted: hsl(40, 14%, 96.3%);
   --muted-foreground: hsl(45, 3%, 38%);
   --accent: hsla(11, 98%, 48%, 0.08);
   --accent-foreground: #c42602;

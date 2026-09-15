@@ -58,6 +58,45 @@ function presetTokens(string $preset, string $mode): array
     );
 }
 
+/**
+ * The syntax palette, read from the stylesheet. One palette per mode, shared by
+ * every preset, so it has to clear AA on every preset's code surface.
+ *
+ * @return array<string, string>
+ */
+function syntaxColours(string $mode): array
+{
+    $css = file_get_contents(__DIR__.'/../../resources/css/vellum.css');
+    $colours = [];
+
+    foreach (explode('}', $css) as $rule) {
+        $brace = strpos($rule, '{');
+
+        if ($brace === false) {
+            continue;
+        }
+
+        $selector = substr($rule, 0, $brace);
+
+        if (! str_contains($selector, '.hl-')) {
+            continue;
+        }
+
+        if (str_contains($selector, '.dark') !== ($mode === 'dark')) {
+            continue;
+        }
+
+        if (preg_match('/color:\s*(#[0-9a-fA-F]{3,8})/', substr($rule, $brace + 1), $colour) !== 1) {
+            continue;
+        }
+
+        preg_match('/\.hl-([\w-]+)/', $selector, $token);
+        $colours[$token[1]] = $colour[1];
+    }
+
+    return $colours;
+}
+
 dataset('preset modes', function (): Generator {
     foreach (Theme::PRESETS as $preset) {
         foreach (['light', 'dark'] as $mode) {
@@ -124,6 +163,23 @@ it('moves every surface one way from the canvas', function (string $preset, stri
         expect($ratio)->toBeGreaterThanOrEqual(
             1.04,
             sprintf('%s %s: %s is %.3f against the canvas, too close to read as a surface', $preset, $mode, $key, $ratio),
+        );
+    }
+})->with('preset modes');
+
+it('keeps syntax highlighting readable on every code surface', function (string $preset, string $mode): void {
+    $surface = Color::parse(presetTokens($preset, $mode)['--muted'] ?? '');
+    $colours = syntaxColours($mode);
+
+    expect($surface)->not->toBeNull()
+        ->and($colours)->not->toBeEmpty();
+
+    foreach ($colours as $token => $hex) {
+        $ratio = Color::contrast(Color::parse($hex), $surface);
+
+        expect($ratio)->toBeGreaterThanOrEqual(
+            4.5,
+            sprintf('%s %s: .hl-%s (%s) is %.2f:1 on the code surface, needs 4.5:1', $preset, $mode, $token, $hex, $ratio),
         );
     }
 })->with('preset modes');
