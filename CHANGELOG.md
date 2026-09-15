@@ -28,6 +28,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Surfaces follow one rule in every preset and both modes: `--background` is the canvas at the light or dark extreme, `--card` is one step toward mid-grey for the sidebar, callouts and popovers, and `--muted` is a second step for code blocks, table headers, tab strips and step markers. Surfaces only ever move away from the canvas, darker in light and lighter in dark, so prose sits on the cleanest area and nesting reads correctly
 - Light mode canvases are near-white and dark canvases near-black, replacing a mid-grey page with lighter elements sitting on top of it
 - Light-mode surfaces are lighter: the code block sat at 1.19:1 from the canvas, roughly twice the step GitHub, VitePress and Fumadocs use, and is now 1.08:1
+- Code tabs are tighter: the active underline sits closer to the label, the header is 39px instead of 49px, and the code is inset by 0.25rem instead of 0.5rem
+- Code tabs take the same two surfaces as everything else, `--card` for the frame and `--muted` for the code, instead of a hard-coded grey frame around a pure white block
 - Syntax highlighting is more colourful. Strings are green, numbers teal, types blue, variables orange, keywords red, and every token clears 4.5:1 on every preset's code surface in both modes
 - Neutral's `--muted` was 1.003:1 against the page in light mode, so table headers, tab strips and step markers had no visible surface
 - Markdown tabs and UI tabs share `vellumTabs()` for arrow keys, Home/End, and `aria-controls`
