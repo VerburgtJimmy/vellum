@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\File;
  */
 final class InstallCommand extends Command
 {
-    protected $signature = 'vellum:install {--force : Overwrite existing stub files}';
+    protected $signature = 'vellum:install {--force : Overwrite the published config and existing stub files}';
 
     protected $description = 'Install Vellum config, docs stubs, and public assets';
 
@@ -21,7 +21,7 @@ final class InstallCommand extends Command
         $packageRoot = dirname(__DIR__, 2);
         $force = (bool) $this->option('force');
 
-        $this->publishConfig($packageRoot);
+        $this->publishConfig($packageRoot, $force);
         $this->copyStubs($packageRoot, $force);
         $this->copyDist($packageRoot);
 
@@ -33,12 +33,12 @@ final class InstallCommand extends Command
         return self::SUCCESS;
     }
 
-    private function publishConfig(string $packageRoot): void
+    private function publishConfig(string $packageRoot, bool $force): void
     {
         $target = config_path('vellum.php');
 
-        if (is_file($target)) {
-            $this->line('Config already exists: '.$target);
+        if (is_file($target) && ! $force) {
+            $this->line('Config already exists: '.$target.' (use --force to overwrite)');
 
             return;
         }

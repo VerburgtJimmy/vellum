@@ -11,6 +11,8 @@ use RuntimeException;
  */
 final class UnknownComponentException extends RuntimeException
 {
+    use RendersDocsError;
+
     public static function notAllowed(string $name): self
     {
         return new self("Component [{$name}] is not in vellum.components.namespaces.");

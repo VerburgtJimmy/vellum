@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Vellum\Content;
 
 use Vellum\Cache\CompiledStore;
+use Vellum\Exceptions\UnknownDirectiveException;
 use Vellum\Markdown\Islands\MarkdownPipeline;
 use Vellum\Markdown\MarkdownRenderer;
 use Vellum\Search\SearchVisibility;
@@ -437,7 +438,13 @@ final class ContentRepository
             : $this->relativePath($this->contentPath, $absolutePath);
 
         $slug ??= $this->slugFromRelativePath($relative, $absolutePath, $matter);
-        $rendered = $this->pipeline->convert($body);
+
+        try {
+            $rendered = $this->pipeline->convert($body);
+        } catch (UnknownDirectiveException $exception) {
+            throw $exception->withFile($absolutePath);
+        }
+
         $html = $rendered['html'];
         $headings = $rendered['headings'];
         $islands = $rendered['islands'];

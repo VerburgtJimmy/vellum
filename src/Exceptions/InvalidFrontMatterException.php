@@ -11,6 +11,8 @@ use RuntimeException;
  */
 final class InvalidFrontMatterException extends RuntimeException
 {
+    use RendersDocsError;
+
     public static function forFile(string $path, string $reason, ?\Throwable $previous = null): self
     {
         return new self("Invalid frontmatter in [{$path}]: {$reason}", 0, $previous);

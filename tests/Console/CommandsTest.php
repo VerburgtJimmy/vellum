@@ -285,3 +285,41 @@ it('fails vellum:index when scout is configured without laravel/scout', function
     expect(fn () => $this->artisan('vellum:index'))
         ->toThrow(RuntimeException::class, 'laravel/scout is not installed');
 });
+
+it('republishes the config only when --force is given', function (): void {
+    $configTarget = config_path('vellum.php');
+    $hadConfig = is_file($configTarget);
+    $backup = $hadConfig ? file_get_contents($configTarget) : null;
+
+    // A valid config, so a failure here cannot leave the skeleton app unbootable.
+    $edited = "<?php\n\nreturn ['name' => 'Edited by hand'];\n";
+
+    try {
+        file_put_contents($configTarget, $edited);
+
+        $this->artisan('vellum:install')
+            ->expectsOutputToContain('use --force to overwrite')
+            ->assertSuccessful();
+
+        expect(file_get_contents($configTarget))->toBe($edited);
+
+        $this->artisan('vellum:install', ['--force' => true])
+            ->expectsOutputToContain('Published config')
+            ->assertSuccessful();
+
+        expect(file_get_contents($configTarget))
+            ->toBe(file_get_contents(dirname(__DIR__, 2).'/config/vellum.php'));
+    } finally {
+        if ($backup !== null) {
+            file_put_contents($configTarget, $backup);
+        } elseif (is_file($configTarget)) {
+            unlink($configTarget);
+        }
+
+        $publicTarget = public_path('vendor/vellum');
+
+        if (is_dir($publicTarget)) {
+            $this->deleteDirectory($publicTarget);
+        }
+    }
+});
