@@ -325,8 +325,12 @@ it('republishes the config only when --force is given', function (): void {
 });
 
 it('warns when a docs page is shadowed by the changelog route', function (): void {
-    config()->set('vellum.changelog.path', $this->docsPath().'/CHANGELOG.md');
-    file_put_contents($this->docsPath().'/CHANGELOG.md', "# Changelog\n\n## [1.0.0] - 2026-01-02\n\n- Shipped\n");
+    // Outside the docs directory, where a real changelog.path points. Inside it,
+    // CHANGELOG.md is also discovered as a page and collides with changelog.md on
+    // a case-sensitive filesystem.
+    $changelog = sys_get_temp_dir().'/vellum-tests/CHANGELOG-'.$this->fixtureId().'.md';
+    file_put_contents($changelog, "# Changelog\n\n## [1.0.0] - 2026-01-02\n\n- Shipped\n");
+    config()->set('vellum.changelog.path', $changelog);
 
     $this->writeDoc('index.md', "---\ntitle: Home\n---\nHi");
     $this->writeDoc('changelog.md', "---\ntitle: My Changelog\n---\nMine");
@@ -334,6 +338,8 @@ it('warns when a docs page is shadowed by the changelog route', function (): voi
     $this->artisan('vellum:build')
         ->expectsOutputToContain('shadowed by the changelog route')
         ->assertSuccessful();
+
+    unlink($changelog);
 });
 
 it('does not warn about a changelog page when the changelog route is off', function (): void {

@@ -116,9 +116,10 @@ it('keeps a real date, including a leap day', function (string $heading, string 
 ]);
 
 it('emits a valid atom timestamp for every release', function (): void {
-    config()->set('vellum.changelog.path', $this->docsPath().'/CHANGELOG.md');
+    $changelog = sys_get_temp_dir().'/vellum-tests/CHANGELOG-'.$this->fixtureId().'.md';
+    config()->set('vellum.changelog.path', $changelog);
     file_put_contents(
-        $this->docsPath().'/CHANGELOG.md',
+        $changelog,
         "# Changelog\n\n## [1.1.0] - 2026-13-45\n\n- Bad date\n\n## [1.0.0] - 2026-01-02\n\n- Good date\n",
     );
 
@@ -133,4 +134,6 @@ it('emits a valid atom timestamp for every release', function (): void {
     foreach ($xml->entry as $entry) {
         expect(strtotime((string) $entry->updated))->not->toBeFalse();
     }
+
+    unlink($changelog);
 });
