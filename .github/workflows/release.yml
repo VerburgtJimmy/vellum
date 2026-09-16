@@ -1,0 +1,59 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Publish GitHub release
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Take the release notes from the changelog
+        id: notes
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          if python3 .github/scripts/changelog-section.py "$TAG" > notes.md; then
+            echo "source=changelog" >> "$GITHUB_OUTPUT"
+          else
+            echo "source=generated" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+          SOURCE: ${{ steps.notes.outputs.source }}
+        run: |
+          # A tag with a suffix, v1.0.0-beta.1, is a prerelease.
+          case "$TAG" in
+            *-*) PRERELEASE="--prerelease" ;;
+            *)   PRERELEASE="" ;;
+          esac
+
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            if [ "$SOURCE" = "changelog" ]; then
+              gh release edit "$TAG" --title "$TAG" --notes-file notes.md
+              echo "Updated $TAG from the changelog." >> "$GITHUB_STEP_SUMMARY"
+            else
+              echo "No changelog section for $TAG; left the existing release alone." >> "$GITHUB_STEP_SUMMARY"
+            fi
+            exit 0
+          fi
+
+          if [ "$SOURCE" = "changelog" ]; then
+            # shellcheck disable=SC2086
+            gh release create "$TAG" --title "$TAG" --verify-tag --notes-file notes.md $PRERELEASE
+            echo "Published $TAG from the changelog." >> "$GITHUB_STEP_SUMMARY"
+          else
+            # shellcheck disable=SC2086
+            gh release create "$TAG" --title "$TAG" --verify-tag --generate-notes $PRERELEASE
+            echo "Published $TAG with generated notes: no CHANGELOG section found." >> "$GITHUB_STEP_SUMMARY"
+          fi

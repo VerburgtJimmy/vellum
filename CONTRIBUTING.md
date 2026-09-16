@@ -36,6 +36,10 @@ git push origin v0.5.0
 Packagist reads the Git tag. Do not add a `version` field to `composer.json`. The repo is
 submitted once at [packagist.org/packages/submit](https://packagist.org/packages/submit).
 
+Pushing the tag triggers `.github/workflows/release.yml`, which publishes a GitHub release
+using the matching `## [x.y.z]` section of `CHANGELOG.md` as the notes. Write that section
+before tagging. Without one the release is still created, from generated notes.
+
 `.gitattributes` keeps tests, CI config and build tooling out of the released archive, so
 check anything new at the repo root against it before tagging.
 
