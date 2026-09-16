@@ -103,10 +103,17 @@ does.
 
 ## The site has no styling
 
-`vellum:install` copies the CSS and JS to `public/vendor/vellum`. Those files are a build
-artifact of the package, so a server that has never had `vellum:install` run on it has no
-stylesheet to serve. Either commit `public/vendor/vellum` or run `vellum:install` as a
-deploy step; running it again is safe, since it only ever overwrites the assets.
+Vellum registers routes at `/vendor/vellum/vellum.css` and `/vendor/vellum/vellum.js`
+that serve the compiled assets straight from the package, so styling works on a server
+where `vellum:install` has never run. You do not need to publish or commit anything.
+
+`vellum:install` also copies those files into `public/vendor/vellum`. When they are there
+the web server answers for them as static files and the routes never run, which is one
+less PHP process per asset. Both paths work; the copy is an optimisation.
+
+If a page really is unstyled, the routes are not reachable. Check that the package is
+discovered (`php artisan route:list | grep vellum.assets`), and that nothing in the app
+is intercepting `/vendor/*`.
 
 ## Search returns nothing
 
