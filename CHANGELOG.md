@@ -5,6 +5,12 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.2]
+
+### Fixed
+
+- A `versions.latest` left in config while `versions.enabled` is `false` no longer reaches URL building. The changelog page declared a canonical of `/docs/v2/changelog`, a URL the router does not match, so search engines were pointed at a 404 and the page would not have been indexed. The 404 page written by `vellum:export` built its version switcher the same way. `latestVersion()` now returns `null` when versioning is off, which is what every other caller already checked for itself
+
 ## [0.5.1] - 2026-09-16
 
 ### Fixed
