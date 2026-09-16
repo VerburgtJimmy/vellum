@@ -95,3 +95,28 @@ it('collapses the title through the helper', function (string $title, string $ex
     ['', 'Vellum'],
     ['  Vellum  ', 'Vellum'],
 ]);
+
+it('does not version-prefix the changelog canonical when versions are off', function (): void {
+    // A 'latest' left behind in config must not leak into URLs once the
+    // feature is switched off: /docs/v2/changelog is not a route.
+    config()->set('vellum.versions', [
+        'enabled' => false,
+        'latest' => 'v2',
+        'list' => ['v2', 'v1'],
+        'labels' => [],
+    ]);
+
+    $path = sys_get_temp_dir().'/vellum-tests/changelog-'.$this->fixtureId().'.md';
+    file_put_contents($path, "# Changelog\n\n## [0.1.0] - 2026-09-11\n\n- First release\n");
+    config()->set('vellum.changelog', ['path' => $path, 'unreleased' => false]);
+
+    $this->writeDoc('index.md', "---\ntitle: Home\n---\nHi");
+
+    $html = (string) $this->get('/docs/changelog')->assertOk()->getContent();
+
+    expect($html)
+        ->toContain('<link rel="canonical" href="https://docs.example.com/docs/changelog">')
+        ->not->toContain('/docs/v2/changelog');
+
+    unlink($path);
+});

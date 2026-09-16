@@ -335,9 +335,14 @@ final class ContentRepository
             && $version === $this->latestVersion;
     }
 
+    /**
+     * Null when versioning is off, even if a 'latest' is still sitting in
+     * config. Callers build URLs from this, and a version segment that the
+     * router will not match is worse than no segment at all.
+     */
     public function latestVersion(): ?string
     {
-        return $this->latestVersion;
+        return $this->versionsEnabled ? $this->latestVersion : null;
     }
 
     public function versionsEnabled(): bool
