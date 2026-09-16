@@ -5,6 +5,16 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.1] - 2026-09-16
+
+### Fixed
+
+- Prose links now take `--primary`, which is what the documentation has always said. `theming.md` and the README both described `theme.accent` as recolouring links, and `PresetContrastTest` held `--primary` against `--background` at 4.5:1 under the label "link", but links were `--foreground` and `--primary` only reached a highlighted-line background, a border and the code tab underline. Setting an accent had no effect on link colour. Measured on rendered pixels after the change: neutral 18.04:1 light and 18.32:1 dark, ocean 12.31 and 13.90, laravel 4.54 and 5.54. Neutral's `--primary` is all but black, so that preset looks unchanged
+
+### Changed
+
+- Code blocks and table wrappers use the same thin, rounded scrollbar as the sidebar instead of the browser default, 6px rather than the sidebar's 8px since they sit inside content rather than beside it
+
 ## [0.5.0] - 2026-09-16
 
 0.5 stability freeze. Config keys and frontmatter names do not change until 1.0.
@@ -63,6 +73,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The checked-checkbox tick had its colour baked into a data URL, which had drifted from `--muted-foreground` in light mode and never matched the `ocean` or `laravel` presets at all
 - The last sidebar item sat against the footer bar with no clearance
 - The index page title rendered as "Vellum · Vellum" when the page title equalled the site name
+- A long URL or identifier in inline backticks had no break opportunity and pushed the page wider than a phone viewport. It wraps now
 - `vellum:build` warns when a page is shadowed by the changelog route
 
 ### Removed
