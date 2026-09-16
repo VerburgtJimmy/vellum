@@ -377,6 +377,38 @@
   background: color-mix(in oklch, var(--muted) 80%, var(--background));
 }
 
+/* Inline scroll regions: a code block wider than the column, or a table on a
+   narrow screen. The sidebar already has a thin scrollbar, so a default OS one
+   sitting next to it reads as an accident. Thinner than the sidebar's because
+   these sit inside content rather than beside it. */
+.vellum-prose :where(pre),
+.vellum-table {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in oklch, var(--foreground) 20%, transparent) transparent;
+}
+
+.vellum-prose :where(pre)::-webkit-scrollbar,
+.vellum-table::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.vellum-prose :where(pre)::-webkit-scrollbar-track,
+.vellum-table::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.vellum-prose :where(pre)::-webkit-scrollbar-thumb,
+.vellum-table::-webkit-scrollbar-thumb {
+  background-color: color-mix(in oklch, var(--foreground) 20%, transparent);
+  border-radius: 9999px;
+}
+
+.vellum-prose :where(pre)::-webkit-scrollbar-thumb:hover,
+.vellum-table::-webkit-scrollbar-thumb:hover {
+  background-color: color-mix(in oklch, var(--foreground) 34%, transparent);
+}
+
 .vellum-prose :where(pre) {
   margin: 0;
   overflow-x: auto;
