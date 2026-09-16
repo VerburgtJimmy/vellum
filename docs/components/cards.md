@@ -5,14 +5,14 @@ description: Link cards in a two-up grid.
 
 ```md
 :::cards
-::card[Installation](/docs/getting-started/installation){icon=book}
-::card[Laravel](https://laravel.com){icon=link}
+::card[Installation](/docs/getting-started/installation)
+::card[Laravel](https://laravel.com)
 :::
 ```
 
 :::cards
-::card[Installation](/docs/getting-started/installation){icon=book}
-::card[Laravel](https://laravel.com){icon=link}
+::card[Installation](/docs/getting-started/installation)
+::card[Laravel](https://laravel.com)
 :::
 
-`icon` is optional. External hrefs get the same new-tab treatment as other external links.
+Every card needs an href: a bare `::card[Title]` with no link is left as literal text. External hrefs get the same new-tab treatment as other external links.

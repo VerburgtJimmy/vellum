@@ -20,4 +20,4 @@ The export always uses MiniSearch, even when `search.driver` is `scout`. Gated p
 
 Value tags are baked in at export time, so the snapshot matches the app config you exported with.
 
-This package's own docs are not exported: the public site is a Laravel app that serves `docs/` live, which is the point.
+Export when the docs have to sit on a host that cannot run PHP. If the app is already deployed, serving the docs from it is simpler and keeps value tags, gating and search resolving against the live application.

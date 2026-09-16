@@ -23,8 +23,10 @@ Visit `/docs` and edit `resources/docs/`.
 :::
 
 :::cards
-::card[Why Vellum](/docs/why){icon=book}
-::card[Installation](/docs/getting-started/installation){icon=book}
-::card[Components](/docs/components){icon=box}
-::card[Extending](/docs/extending){icon=puzzle}
+::card[Why Vellum](/docs/why)
+::card[Installation](/docs/getting-started/installation)
+::card[Writing Markdown](/docs/writing/markdown)
+::card[Components](/docs/components)
+::card[Navigation](/docs/writing/navigation)
+::card[Extending](/docs/extending)
 :::

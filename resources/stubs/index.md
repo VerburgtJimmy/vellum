@@ -41,8 +41,8 @@ Run `php artisan vellum:install`.
 :::
 
 :::cards
-::card[Installation](/docs/getting-started/installation){icon=book}
-::card[Laravel](https://laravel.com){icon=link}
+::card[Installation](/docs/getting-started/installation)
+::card[Laravel](https://laravel.com)
 :::
 
 ![Placeholder](assets/600x200.svg "Local images include width and height")

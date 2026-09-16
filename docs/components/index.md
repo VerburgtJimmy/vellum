@@ -3,14 +3,15 @@ title: Components
 description: Built-in directives and value tags.
 ---
 
-Built-ins use `:::` as the stable authoring syntax. The Blade views under `resources/views/components/` are the single implementation: directives parse attributes and pass inner HTML into those views. `<x-vellum::callout>` and friends resolve to the same views.
+Callouts, tabs, steps and cards ship with Vellum. Write them with `:::` directives, which is the authoring syntax 0.5 freezes.
 
-`<x-…>` is how you add **your** components. See [Extending](/docs/extending).
+Each one is a Blade view under `resources/views/components/`, so `:::note` and `<x-vellum::callout type="note">` render exactly the same markup. Prefer `:::` for anything shipped; `<x-…>` is how you add **your** own components. See [Extending](/docs/extending).
 
 :::cards
-::card[Callouts](/docs/components/callouts){icon=book}
-::card[Tabs](/docs/components/tabs){icon=book}
-::card[Steps](/docs/components/steps){icon=book}
-::card[Cards](/docs/components/cards){icon=book}
-::card[Value tags](/docs/value-tags){icon=book}
+::card[Callouts](/docs/components/callouts)
+::card[Tabs](/docs/components/tabs)
+::card[Steps](/docs/components/steps)
+::card[Cards](/docs/components/cards)
+::card[Value tags](/docs/value-tags)
+::card[Code blocks](/docs/writing/code-blocks)
 :::

@@ -16,7 +16,7 @@ Published as `config/vellum.php`. **0.5 freezes these names.** Add values, do no
 | `route.domain` | `null` | Optional domain |
 | `repo` | `null` | Base URL for "Edit on GitHub" |
 | `logo` | `null` | SVG path or Blade view in the header |
-| `links` | `[]` | Extra header links (`label`, `href`, optional `icon`) |
+| `links` | `[]` | Extra links in the sidebar footer (`label`, `href`, optional `icon: github`) |
 | `layout.search` | `sidebar` | `sidebar` or `header` |
 | `fonts` | `null` | HTML injected into the layout head |
 | `cache.path` | `storage_path('framework/vellum')` | Compile cache |
@@ -100,11 +100,10 @@ Frozen page keys:
 | `title` | Page title (falls back to the first heading or the file name) |
 | `description` | Meta description and prev/next cards |
 | `slug` | Override the URL slug |
-| `icon` | Sidebar icon name |
 | `order` | Sort among siblings when `meta.json` does not list pages |
 | `full` | Hide the table of contents column |
 | `access` | `guest`, `auth`, or a gate name. See [Gating](/docs/gating). |
 
-Folder `meta.json`: `title`, `icon`, `defaultOpen`, `pages`, `access`. `_meta.md` can set `access` (and the usual matter) for the folder.
+Folder `meta.json`: `title`, `defaultOpen`, `pages`, `access`. See [Navigation](/docs/writing/navigation). `_meta.md` can set `access` (and the usual matter) for the folder.
 
 Unknown keys are stored and ignored. Do not rely on that as an API.

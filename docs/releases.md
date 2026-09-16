@@ -20,4 +20,4 @@ Headings may be `## [1.2.0] - 2026-09-13` or `## 1.2.0`.
 
 The changelog is not versioned. It stays at `/docs/changelog` even when version folders are on.
 
-The package's own history is that page on this demo: [Changelog](/docs/changelog).
+Vellum's own release notes are rendered this way: [Changelog](/docs/changelog).

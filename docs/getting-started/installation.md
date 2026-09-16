@@ -38,12 +38,13 @@ Compile Markdown once per deploy:
 php artisan vellum:build
 ```
 
-`vellum:clear` drops that cache. It also runs from `optimize:clear`.
-
-`vellum:index` rebuilds the MiniSearch compile cache. When `vellum.search.driver` is `scout`, it also syncs Laravel Scout.
+In `local`, pages recompile on request as you edit, so this is a deploy step rather than
+something to run while writing. See [Commands](/docs/commands).
 
 ## Next
 
+- [Markdown](/docs/writing/markdown) for the flavour Vellum renders
+- [Navigation](/docs/writing/navigation) to shape the sidebar
 - [Configuration](/docs/getting-started/configuration) for the frozen config schema
+- [Commands](/docs/commands) for what to run in a deploy
 - [Upgrade](/docs/getting-started/upgrade) if you are coming from 0.2
-- [Export](/docs/export) for a static host
