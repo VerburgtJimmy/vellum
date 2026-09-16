@@ -14,4 +14,5 @@ Each one is a Blade view under `resources/views/components/`, so `:::note` and `
 ::card[Cards](/docs/components/cards)
 ::card[Value tags](/docs/value-tags)
 ::card[Code blocks](/docs/writing/code-blocks)
+::card[Troubleshooting](/docs/troubleshooting)
 :::

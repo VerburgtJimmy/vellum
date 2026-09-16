@@ -48,3 +48,4 @@ something to run while writing. See [Commands](/docs/commands).
 - [Configuration](/docs/getting-started/configuration) for the frozen config schema
 - [Commands](/docs/commands) for what to run in a deploy
 - [Upgrade](/docs/getting-started/upgrade) if you are coming from 0.2
+- [Troubleshooting](/docs/troubleshooting) when something does not render
