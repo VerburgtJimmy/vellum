@@ -5,9 +5,15 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.5.0] - 2026-09-16
 
 0.5 stability freeze. Config keys and frontmatter names do not change until 1.0.
+
+### Security
+
+- Path traversal in the docs slug. A request like `/docs/..%2FREADME` resolved outside the content root, so any `.md` on disk could be read through the page route and the raw Markdown route, and compiling it wrote a PHP file outside the cache directory. Slugs with empty, `.` or `..` segments are now refused, a resolved path is checked against the content root with `realpath`, and `CompiledStore` refuses to build a path for an unsafe slug
+- Blade execution through component attributes. Attribute values were interpolated into the template string, and `e()` escapes quotes but not braces, so `<x-vellum::callout title="{{ php_uname() }}">` ran. Values are now bound and passed as data, so docs attributes stay literal as documented
+- Gated content readable through the asset route. `/{prefix}/_vellum/files/` served anything under `vellum.path`, including gated pages, `meta.json`, `_meta.md` and dotfiles. It now serves an allowlist of asset extensions only. Assets themselves are still not gated, which is documented on the gating page
 
 ### Added
 
@@ -18,6 +24,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Contrast test over the real stylesheets: every shipped preset clears WCAG AA (4.5:1) for body text, secondary text, links and button labels, in both modes
 - `CONTRIBUTING.md`, `SECURITY.md`, GitHub issue and pull request templates
 - `versions.labels`: switcher display names (`1.x (LTS)`, `Next`) while folders and URLs stay the list slug
+- Docs for the features that shipped without any: Markdown, code blocks, images, navigation, an artisan command reference, page actions, troubleshooting, and credits
+- Canonical link, Open Graph and Twitter card tags on every page. Canonical is omitted rather than guessed when `app.url` is not an origin, and a static export prefers `export.base_url` when that names one
+- `vellum:export` writes a `404.html` at the export root, with root-relative asset paths so it works for a miss at any depth
+- A Vellum error page for content that cannot render, instead of the framework's generic 500. The reason and file appear only when `APP_DEBUG` is on
+- `UnknownDirectiveException`: a `:::` typo now names the directive and the file instead of raising `NoMatchingRendererException` for an internal class
+- `DuplicateSlugException`: `vellum:build` refuses to build when two files resolve to one URL, and names both
+- `.gitattributes` with `export-ignore`, taking the released archive from 1860 KB to 830 KB
 
 ### Changed
 
@@ -34,6 +47,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Neutral's `--muted` was 1.003:1 against the page in light mode, so table headers, tab strips and step markers had no visible surface
 - Markdown tabs and UI tabs share `vellumTabs()` for arrow keys, Home/End, and `aria-controls`
 - Search dialog labelled for assistive tech (`combobox` + `listbox`); version switcher menu has Home/End and `aria-controls`
+- The active code tab label uses `--foreground` and the accent carries the underline. With the accent the docs use as an example it measured 1.42:1 against a documented 4.5:1, and now measures 18.80:1 in light and 15.04:1 in dark
+- The asset route sends `max-age=86400, must-revalidate` instead of a year of `immutable`, since those URLs carry no content hash and a replaced image was stale for a year
+- `guest` and `auth` are matched without regard to case, so `access: Auth` works. Gate names are still passed to `Gate::allows()` exactly as written
+
+### Fixed
+
+- `access: Auth` hid a page from everyone. A capitalised value fell through to `Gate::allows('Auth')`, false for guests and signed-in readers alike, with no error anywhere
+- A UTF-8 BOM before the opening `---` made the whole frontmatter block parse as body text, and the title fall back to the filename
+- Images inside a version folder resolved against the global docs root and 404d. Each version now renders through its own pipeline and the emitted URL carries the version segment
+- A page whose title fell back to its first heading shipped two `h1`s, since the layout renders one of its own
+- `vellum:install --force` never republished the config; the flag was ignored
+- An impossible changelog date such as `2026-13-45` passed into the Atom feed, which readers reject. Dates are validated and fall back to the file mtime
+- An unquoted numeric frontmatter `title`, which YAML parses as an int, was discarded in favour of the filename
+- The checked-checkbox tick had its colour baked into a data URL, which had drifted from `--muted-foreground` in light mode and never matched the `ocean` or `laravel` presets at all
+- The last sidebar item sat against the footer bar with no clearance
+- The index page title rendered as "Vellum · Vellum" when the page title equalled the site name
+- `vellum:build` warns when a page is shadowed by the changelog route
 
 ### Removed
 
