@@ -22,7 +22,22 @@ git diff --exit-code -- resources/dist
 npm run check:size
 ```
 
-The public site is a separate Laravel app (`vellum-site`) that installs this package and serves `docs/` live. There is no static export to regenerate in this repo.
+The public site is a separate Laravel app (`vellum-site`) that installs this package and points `vellum.path` at `vendor/jimmyverburgt/vellum/docs`, so it serves `docs/` live. Docs changes ship by releasing the package and updating that app. There is no static export to regenerate in this repo.
+
+## Releasing
+
+Maintainers only.
+
+```bash
+git tag v0.5.0
+git push origin v0.5.0
+```
+
+Packagist reads the Git tag. Do not add a `version` field to `composer.json`. The repo is
+submitted once at [packagist.org/packages/submit](https://packagist.org/packages/submit).
+
+`.gitattributes` keeps tests, CI config and build tooling out of the released archive, so
+check anything new at the repo root against it before tagging.
 
 ## Style
 

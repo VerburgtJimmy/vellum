@@ -82,7 +82,8 @@ final class ScoutIndexer
     }
 
     /**
-     * @param  list<Document>  $documents
+     * One record for the page, then one per heading.
+     *
      * @return list<array<string, mixed>>
      */
     private function recordsFor(ContentRepository $repository, Document $document): array

@@ -346,3 +346,54 @@ it('does not warn about a changelog page when the changelog route is off', funct
         ->doesntExpectOutputToContain('shadowed by the changelog route')
         ->assertSuccessful();
 });
+
+it('exports a 404 page at the root with root-relative assets', function (): void {
+    $out = sys_get_temp_dir().'/vellum-tests/export-404-'.$this->fixtureId();
+
+    if (is_dir($out)) {
+        $this->deleteDirectory($out);
+    }
+
+    config()->set('vellum.export.out', $out);
+    config()->set('vellum.export.base_url', '/');
+
+    $this->writeDoc('index.md', "---\ntitle: Home\n---\nHello");
+
+    $this->artisan('vellum:export')->assertSuccessful();
+
+    $path = $out.'/404.html';
+
+    expect(is_file($path))->toBeTrue();
+
+    $html = (string) file_get_contents($path);
+
+    // Root-relative, because a host serves this file for URLs at any depth and
+    // "../vendor/..." would resolve differently for each one.
+    expect($html)->toContain('Page not found')
+        ->and($html)->toContain('<meta name="robots" content="noindex">')
+        ->and($html)->toContain('"/vendor/vellum/vellum.css')
+        ->and($html)->not->toContain('"./vendor/vellum/')
+        ->and($html)->not->toContain('"../vendor/vellum/');
+
+    $this->deleteDirectory($out);
+});
+
+it('points exported 404 assets at an absolute base url when one is set', function (): void {
+    $out = sys_get_temp_dir().'/vellum-tests/export-404-base-'.$this->fixtureId();
+
+    if (is_dir($out)) {
+        $this->deleteDirectory($out);
+    }
+
+    config()->set('vellum.export.out', $out);
+    config()->set('vellum.export.base_url', '/handbook/');
+
+    $this->writeDoc('index.md', "---\ntitle: Home\n---\nHello");
+
+    $this->artisan('vellum:export')->assertSuccessful();
+
+    expect((string) file_get_contents($out.'/404.html'))
+        ->toContain('"/handbook/vendor/vellum/vellum.css');
+
+    $this->deleteDirectory($out);
+});

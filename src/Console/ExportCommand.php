@@ -101,6 +101,7 @@ final class ExportCommand extends Command
         }
 
         $pages += $this->exportChangelog($repository, $prefixRoot, $out, $prefix, $baseUrl);
+        $this->export404($repository, $out, $prefix, $baseUrl);
 
         $this->copyDist($packageRoot, $out);
         $this->copyContentFiles((string) config('vellum.path'), $prefixRoot);
@@ -155,6 +156,37 @@ final class ExportCommand extends Command
         );
 
         return 1;
+    }
+
+    /**
+     * A 404 at the export root, which is where static hosts look for one.
+     * Without it they fall back to their own page and the reader leaves the site.
+     */
+    private function export404(ContentRepository $repository, string $out, string $prefix, string $baseUrl): void
+    {
+        $version = $repository->latestVersion();
+        $switcher = $repository->versionSwitcherData('', $version);
+
+        $html = $this->view->file(
+            dirname(__DIR__, 2).'/resources/views/pages/404.blade.php',
+            [
+                'name' => config('vellum.name'),
+                'description' => 'Page not found',
+                'pageTitle' => DocsView::pageTitle('Page not found'),
+                'noindex' => true,
+                'navigation' => $repository->navigation($version),
+                'searchHash' => $repository->searchHash($version),
+                'versions' => $switcher['versions'],
+                'currentVersion' => $switcher['currentVersion'],
+                'versionHrefs' => $switcher['versionHrefs'],
+                'searchPlacement' => config('vellum.layout.search', 'sidebar') === 'header' ? 'header' : 'sidebar',
+                'staticExport' => true,
+            ],
+        )->render();
+
+        $path = $out.DIRECTORY_SEPARATOR.'404.html';
+
+        $this->writeFile($path, $this->rewriteHtml($html, $out, $path, $prefix, $baseUrl, rootRelative: true));
     }
 
     private function writeRawMarkdown(string $prefixRoot, Document $document): void
@@ -331,7 +363,12 @@ HTML;
         }
     }
 
-    private function rewriteHtml(string $html, string $out, string $htmlPath, string $prefix, string $baseUrl): string
+    /**
+     * @param  bool  $rootRelative  Emit /-rooted asset paths instead of ../ ones.
+     *                              A 404 page is served for URLs at any depth,
+     *                              so relative paths in it resolve wrongly.
+     */
+    private function rewriteHtml(string $html, string $out, string $htmlPath, string $prefix, string $baseUrl, bool $rootRelative = false): string
     {
         $appUrl = rtrim((string) config('app.url', ''), '/');
 
@@ -339,7 +376,9 @@ HTML;
             $html = str_replace($appUrl, '', $html);
         }
 
-        $relativeRoot = $this->relativePrefix($htmlPath, $out);
+        $relativeRoot = $rootRelative
+            ? $this->normalizeBase($baseUrl)
+            : $this->relativePrefix($htmlPath, $out);
         $vendorPrefix = $relativeRoot.'vendor/vellum/';
         $docsPrefix = $relativeRoot.($prefix !== '' ? $prefix.'/' : '');
 
@@ -361,7 +400,7 @@ HTML;
         // Optional absolute base for hosts that cannot resolve relative URLs.
         $normalizedBase = $this->normalizeBase($baseUrl);
 
-        if ($normalizedBase !== '/') {
+        if (! $rootRelative && $normalizedBase !== '/') {
             $base = rtrim($normalizedBase, '/');
             $html = str_replace($vendorPrefix, $base.'/vendor/vellum/', $html);
 

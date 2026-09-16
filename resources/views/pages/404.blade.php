@@ -11,6 +11,7 @@
         :current-version="$currentVersion ?? null"
         :version-hrefs="$versionHrefs ?? []"
         :search-placement="$searchPlacement ?? 'sidebar'"
+        :static-export="$staticExport ?? false"
     >
         <main id="vellum-content" data-vellum-404 data-vellum-page-row class="flex min-w-0 flex-1 flex-col items-start justify-center px-4 py-16 md:px-6 xl:px-8">
             <p class="text-sm font-medium text-muted-foreground">404</p>

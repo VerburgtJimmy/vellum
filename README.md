@@ -47,10 +47,6 @@ Dark:
 
 ![Vellum docs dark theme](docs/screenshots/docs-dark.png)
 
-## Site
-
-The public site (marketing page at `/`, these docs at `/docs`) is a small Laravel app in the `vellum-site` repo that requires this package and points `vellum.path` at `vendor/jimmyverburgt/vellum/docs`. Docs changes ship by releasing the package and updating that app. Nothing is exported or committed here.
-
 ## Configuration
 
 `config/vellum.php` (published by `vellum:install`).
@@ -86,14 +82,20 @@ Optional `'fonts'` injects HTML into the layout head (for example a `<link>` tag
 | `php artisan vellum:clear` | Clear the compiled cache |
 | `php artisan vellum:export` | Export a static HTML site (`--out=` optional) |
 
-## Publishing
+## Documentation
 
-```bash
-git tag v0.5.0
-git push origin v0.5.0
-```
+Full docs live in [`docs/`](docs) and are what the package renders at `/docs` once
+installed. Start with [`docs/index.md`](docs/index.md).
 
-Submit the repo once at [https://packagist.org/packages/submit](https://packagist.org/packages/submit). Packagist reads the Git tag; do not add a `version` field to `composer.json`.
+## Credits
+
+Vellum leans on [Fumadocs](https://fumadocs.dev) for its shape, [Phosphor
+Icons](https://phosphoricons.com) for every icon, and a short list of PHP and JavaScript
+packages named in [`docs/credits.md`](docs/credits.md).
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 

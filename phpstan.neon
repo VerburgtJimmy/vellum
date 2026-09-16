@@ -6,6 +6,16 @@ parameters:
     paths:
         - src
     tmpDir: .phpstan.cache
+
+    # These two are the only code that touches laravel/scout, which is an
+    # optional dependency a host installs when it sets vellum.search.driver to
+    # scout. Without it here, SearchableDocument uses an unknown trait, and
+    # trait.notFound cannot be silenced with ignoreErrors.
+    #
+    # Adding laravel/scout to require-dev would let PHPStan see them, but it
+    # would also break the test that asserts the error a host gets when Scout is
+    # configured and not installed, which is the more useful guarantee. Revisit
+    # in 1.0, where that test could gate on class_exists instead.
     excludePaths:
         - src/Search/SearchableDocument.php
         - src/Search/ScoutIndexer.php
