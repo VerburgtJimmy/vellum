@@ -18,13 +18,17 @@ Optional titles go in brackets after the directive name.
 :::
 
 :::tabs
-::tab[npm]
+::tab[Composer]
 ```bash title="install.sh"
-npm install jimmyverburgt/vellum
-```
-::tab[composer]
-```bash showLineNumbers
 composer require jimmyverburgt/vellum
+```
+::tab[composer.json]
+```json showLineNumbers
+{
+    "require": {
+        "jimmyverburgt/vellum": "^0.5"
+    }
+}
 ```
 :::
 

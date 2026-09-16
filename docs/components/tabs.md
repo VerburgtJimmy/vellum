@@ -8,22 +8,26 @@ description: Switchable panels, including code tabs.
 When every panel is a single fenced block, Vellum treats the group as code tabs (shared chrome, embedded copy control).
 
 ```md
-:::tabs persist="pkg-manager"
-::tab[npm]
-npm install jimmyverburgt/vellum
-::tab[composer]
+:::tabs persist="install"
+::tab[Composer]
 composer require jimmyverburgt/vellum
+::tab[composer.json]
+"jimmyverburgt/vellum": "^0.5"
 :::
 ```
 
-:::tabs persist="pkg-manager"
-::tab[npm]
-```bash
-npm install jimmyverburgt/vellum
-```
-::tab[composer]
+:::tabs persist="install"
+::tab[Composer]
 ```bash
 composer require jimmyverburgt/vellum
+```
+::tab[composer.json]
+```json
+{
+    "require": {
+        "jimmyverburgt/vellum": "^0.5"
+    }
+}
 ```
 :::
 

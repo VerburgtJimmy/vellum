@@ -1,6 +1,6 @@
 @extends('vellum::layouts.docs')
 
-@section('title', 'Page not found · '.($name ?? config('vellum.name')))
+@section('title', $pageTitle ?? 'Page not found')
 
 @section('content')
     <x-vellum::docs.shell

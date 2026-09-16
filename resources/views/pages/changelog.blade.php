@@ -1,6 +1,6 @@
 @extends('vellum::layouts.docs')
 
-@section('title', $changelog->title.' · '.($name ?? config('vellum.name')))
+@section('title', $pageTitle ?? $changelog->title)
 
 @section('head')
     <link rel="alternate" type="application/atom+xml" title="{{ $changelog->title }}" href="{{ $feedUrl }}">

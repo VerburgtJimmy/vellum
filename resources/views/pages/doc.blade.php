@@ -1,6 +1,6 @@
 @extends('vellum::layouts.docs')
 
-@section('title', $document->title.' · '.($name ?? config('vellum.name')))
+@section('title', $pageTitle ?? $document->title)
 
 @section('content')
     @php

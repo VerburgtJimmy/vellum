@@ -3,7 +3,11 @@ title: Extending with your own components
 description: Register Blade components for use in Markdown.
 ---
 
-Authoring is markdown plus components. Vellum does not compile `{{ }}`, `@if`, or `@php` in docs files. Fence and inline code that contain those strings stay as text.
+Authoring is markdown plus components. Vellum does not compile `{{ }}`, `@if`, or `@php` in docs files. Fence and inline code that contain those strings stay as text. Component attributes are quoted strings and reach the component as data, so a `{{ … }}` written inside one renders as literal text rather than running.
+
+:::note[Raw HTML is stripped]
+Vellum parses Markdown with `html_input: strip`, so a `<details>`, `<img>` or `<div>` written straight into a page is removed without a warning. Use a component for anything Markdown cannot express: a Blade component is the supported escape hatch, and it is one you control.
+:::
 
 ## Namespaces
 

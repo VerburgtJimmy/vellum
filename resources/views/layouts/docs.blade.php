@@ -48,6 +48,26 @@
     @if (! empty($description ?? null))
         <meta name="description" content="{{ $description }}">
     @endif
+    @if (! empty($canonical ?? null))
+        <link rel="canonical" href="{{ $canonical }}">
+    @endif
+    @if ($noindex ?? false)
+        <meta name="robots" content="noindex">
+    @endif
+    <meta property="og:site_name" content="{{ config('vellum.name') }}">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="{{ $pageTitle ?? config('vellum.name') }}">
+    @if (! empty($description ?? null))
+        <meta property="og:description" content="{{ $description }}">
+    @endif
+    @if (! empty($canonical ?? null))
+        <meta property="og:url" content="{{ $canonical }}">
+    @endif
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="{{ $pageTitle ?? config('vellum.name') }}">
+    @if (! empty($description ?? null))
+        <meta name="twitter:description" content="{{ $description }}">
+    @endif
     @if (! empty(config('vellum.fonts')))
         {!! config('vellum.fonts') !!}
     @endif

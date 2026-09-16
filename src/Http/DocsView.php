@@ -54,6 +54,8 @@ final class DocsView
             'versions' => $switcher['versions'],
             'currentVersion' => $switcher['currentVersion'],
             'versionHrefs' => $switcher['versionHrefs'],
+            'pageTitle' => self::pageTitle($document->title),
+            'canonical' => self::canonical($repository->hrefFor($document->slug, $document->version), $staticExport),
             'markdownSource' => self::source($document),
             'rawUrl' => route('vellum.raw', ['slug' => self::rawSlug($document)]),
             'editUrl' => self::editUrl($document),
@@ -102,12 +104,63 @@ final class DocsView
             'versions' => $switcher['versions'],
             'currentVersion' => $switcher['currentVersion'],
             'versionHrefs' => $switcher['versionHrefs'],
+            'pageTitle' => self::pageTitle($changelog->title),
+            'canonical' => self::canonical($repository->hrefFor('changelog', $version), $staticExport),
             'feedUrl' => route('vellum.changelog.atom'),
             'updatedAt' => $changelog->mtime > 0
                 ? Carbon::createFromTimestamp($changelog->mtime)->toFormattedDateString()
                 : null,
             'searchPlacement' => $searchPlacement,
         ];
+    }
+
+    /**
+     * "<page> · <site>", collapsed to one when the page is the site index and
+     * the two would otherwise read "Vellum · Vellum".
+     */
+    public static function pageTitle(string $title): string
+    {
+        $name = trim((string) config('vellum.name'));
+        $title = trim($title);
+
+        if ($title === '' || $title === $name) {
+            return $name === '' ? $title : $name;
+        }
+
+        return $name === '' ? $title : $title.' · '.$name;
+    }
+
+    /**
+     * Absolute URL for the page, or null when app.url is not a real origin, in
+     * which case a canonical link would be worse than none.
+     */
+    public static function canonical(string $path, bool $staticExport = false): ?string
+    {
+        // An export can be served from somewhere other than the app, so its
+        // base_url wins when it names an origin. It defaults to "/", which
+        // does not, in which case fall back to the app.
+        $base = rtrim((string) config('app.url', ''), '/');
+
+        if ($staticExport) {
+            $exportBase = rtrim((string) config('vellum.export.base_url', ''), '/');
+
+            if (self::isOrigin($exportBase)) {
+                $base = $exportBase;
+            }
+        }
+
+        if (! self::isOrigin($base)) {
+            return null;
+        }
+
+        $path = ltrim($path, '/');
+
+        return $path === '' ? $base : $base.'/'.$path;
+    }
+
+    private static function isOrigin(string $value): bool
+    {
+        return str_starts_with($value, 'http://') || str_starts_with($value, 'https://');
     }
 
     public static function rawSlug(Document $document): string

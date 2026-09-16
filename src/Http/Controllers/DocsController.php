@@ -65,6 +65,8 @@ final class DocsController extends Controller
             [
                 'name' => config('vellum.name'),
                 'description' => 'Page not found',
+                'pageTitle' => DocsView::pageTitle('Page not found'),
+                'noindex' => true,
                 'navigation' => $repository->navigation($version),
                 'searchHash' => $repository->searchHash($version),
                 'versions' => $switcher['versions'],
