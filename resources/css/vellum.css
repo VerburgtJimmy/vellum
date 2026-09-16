@@ -364,6 +364,9 @@
   font-size: 0.8125em;
   padding: 0.15em 0.4em;
   border-radius: 0.35rem;
+  /* A long URL or identifier in backticks has no break opportunity, so without
+     this it pushes the whole page wider than the viewport on a phone. */
+  overflow-wrap: anywhere;
   background: color-mix(in oklch, var(--muted) 88%, var(--foreground) 4%);
   border: 1px solid color-mix(in oklch, var(--border) 80%, transparent);
   color: var(--foreground);

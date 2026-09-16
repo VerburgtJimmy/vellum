@@ -423,3 +423,12 @@ it('keeps the active code tab label readable whatever the accent is', function (
         // [;{] so this does not match border-bottom-color, which should be --primary.
         ->and($css)->not->toMatch('/\.vellum-tabs-code \.vellum-tabs-trigger\[aria-selected=["\']?true["\']?\]\{[^}]*[;{]color:var\(--primary\)/');
 });
+
+it('lets a long token in inline code wrap rather than widen the page', function (): void {
+    $css = file_get_contents(Assets::cssPath());
+
+    // A URL in backticks has no break opportunity; without this it pushes the
+    // document wider than a phone viewport.
+    expect($css)->not->toBeFalse()
+        ->and($css)->toMatch('/\[data-vellum-inline-code\]\{[^}]*overflow-wrap:anywhere/');
+});
