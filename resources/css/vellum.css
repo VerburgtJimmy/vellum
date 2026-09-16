@@ -285,16 +285,19 @@
   mask-size: 0.7rem 0.7rem;
 }
 
+/* --primary, which is what theme.accent overrides and what the contrast test
+   measures as the link colour against the page. On neutral this is all but
+   black, so links stay monochrome; on ocean and laravel they carry the preset. */
 .vellum-prose :where(a):not([data-vellum-button]):not(.vellum-card) {
-  color: var(--foreground);
+  color: var(--primary);
   font-weight: 600;
   text-decoration: underline;
   text-underline-offset: 3px;
-  text-decoration-color: color-mix(in oklch, var(--foreground) 35%, transparent);
+  text-decoration-color: color-mix(in oklch, var(--primary) 35%, transparent);
 }
 
 .vellum-prose :where(a):not([data-vellum-button]):not(.vellum-card):hover {
-  text-decoration-color: var(--foreground);
+  text-decoration-color: var(--primary);
 }
 
 .vellum-prose :where(blockquote) {
