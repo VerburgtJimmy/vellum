@@ -45,4 +45,4 @@ Match the surrounding PHP, Blade, and Markdown. Do not add agent instruction fil
 
 ## Conduct
 
-Be decent. [Contributor Covenant](https://www.contributor-covenant.org/version/2/1/code_of_conduct/) is the expected bar.
+Be decent. See [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md), which is Contributor Covenant 2.1.
