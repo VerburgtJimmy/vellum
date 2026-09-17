@@ -10,7 +10,6 @@
     $body = SchemaView::body($schema);
     $variants = SchemaView::variants($body);
     $properties = SchemaView::properties($body);
-    // Depth 0 and 1 are open; deeper nesting is a choice the reader makes.
     $openByDefault = $depth < 1;
 @endphp
 
@@ -28,34 +27,44 @@
         @endforeach
     </x-vellum::ui.tabs>
 @elseif ($properties !== [])
-    <ul class="vellum-api-fields" data-depth="{{ $depth }}">
+    <div class="vellum-api-fields" data-depth="{{ $depth }}">
         @foreach ($properties as $property)
             @php
                 $child = SchemaView::body($property['schema']);
                 $enum = SchemaView::enumValues($property['schema']);
-                $default = $property['schema']['default'] ?? null;
+                $chips = SchemaView::chips($property['schema']);
             @endphp
-            <li class="vellum-api-field">
+            <div class="vellum-api-field">
                 <div class="vellum-api-field-head">
-                    <code class="vellum-api-field-name">{{ $property['name'] }}</code>
+                    <code class="vellum-api-field-name">{{ $property['name'] }}<span
+                        class="vellum-api-marker"
+                        data-required="{{ $property['required'] ? 'true' : 'false' }}"
+                        title="{{ $property['required'] ? 'Required' : 'Optional' }}"
+                    >{{ $property['required'] ? '*' : '?' }}</span></code>
                     <span class="vellum-api-field-type">{{ $property['type'] }}</span>
-                    @if ($property['required'])
-                        <span class="vellum-api-required">required</span>
-                    @endif
                 </div>
 
                 @if ($property['description'] !== null)
                     <p class="vellum-api-field-description">{{ $property['description'] }}</p>
                 @endif
 
-                @if ($default !== null)
-                    <p class="vellum-api-field-meta">Default <code>{{ SchemaView::literal($default) }}</code></p>
+                @if ($chips !== [])
+                    <p class="vellum-api-chips">
+                        @foreach ($chips as $label => $value)
+                            <span class="vellum-api-chip"><span class="vellum-api-chip-label">{{ $label }}</span> <code>{{ $value }}</code></span>
+                        @endforeach
+                    </p>
                 @endif
 
                 @if ($enum !== [])
-                    <p class="vellum-api-field-meta">One of
-                        @foreach ($enum as $value)<code>{{ $value }}</code>@if (! $loop->last), @endif @endforeach
-                    </p>
+                    <div class="vellum-api-enum">
+                        <p class="vellum-api-enum-label">Value in</p>
+                        <ul>
+                            @foreach ($enum as $value)
+                                <li><code>"{{ $value }}"</code></li>
+                            @endforeach
+                        </ul>
+                    </div>
                 @endif
 
                 @if (SchemaView::isRecursive($property['schema']))
@@ -66,8 +75,7 @@
                         <x-slot:trigger>
                             <span class="vellum-api-expand">
                                 {!! \Vellum\Support\Icons::caretRight(['class' => 'h-3 w-3 shrink-0 transition-transform', ':class' => "open && 'rotate-90'"]) !!}
-                                <span x-text="open ? 'Hide' : 'Show'">Show</span>
-                                <span>{{ $property['name'] }}</span>
+                                <span x-text="open ? 'Hide properties' : 'Show properties'">Show properties</span>
                             </span>
                         </x-slot:trigger>
                         <x-slot:content>
@@ -75,9 +83,9 @@
                         </x-slot:content>
                     </x-vellum::ui.collapsible>
                 @endif
-            </li>
+            </div>
         @endforeach
-    </ul>
+    </div>
 @else
     <p class="vellum-api-field-meta">{{ SchemaView::type($schema) }}</p>
 @endif

@@ -80,20 +80,67 @@ final class SchemaView
 
         if ($base === 'array') {
             $items = is_array($schema['items'] ?? null) ? $schema['items'] : [];
-            $base = 'array of '.($items === [] ? 'any' : self::type($items));
+            $base = 'array<'.($items === [] ? 'any' : self::type($items)).'>';
         } elseif ($base === 'object' && ($name = self::name($schema)) !== null) {
             $base = $name;
         }
 
-        if (is_string($schema['format'] ?? null) && $schema['format'] !== '') {
-            $base .= ' · '.$schema['format'];
-        }
-
-        if (isset($schema['enum']) && is_array($schema['enum'])) {
-            $base .= ' · enum';
-        }
-
+        // Format, range and default are facts about the value rather than its
+        // type, and go in chips beside the row where they can be read one by
+        // one instead of crowding the type into a sentence.
         return $nullable ? $base.' | null' : $base;
+    }
+
+    /**
+     * Constraints worth showing, as short labelled chips.
+     *
+     * @param  array<string, mixed>  $schema
+     * @return array<string, string>
+     */
+    public static function chips(array $schema): array
+    {
+        $chips = [];
+
+        if (is_string($schema['format'] ?? null) && $schema['format'] !== '') {
+            $chips['Format'] = $schema['format'];
+        }
+
+        $range = self::range($schema);
+
+        if ($range !== null) {
+            $chips['Range'] = $range;
+        }
+
+        if (is_string($schema['pattern'] ?? null) && $schema['pattern'] !== '') {
+            $chips['Pattern'] = $schema['pattern'];
+        }
+
+        if (array_key_exists('default', $schema)) {
+            $chips['Default'] = self::literal($schema['default']);
+        }
+
+        return $chips;
+    }
+
+    /**
+     * @param  array<string, mixed>  $schema
+     */
+    private static function range(array $schema): ?string
+    {
+        $min = $schema['minimum'] ?? $schema['minLength'] ?? null;
+        $max = $schema['maximum'] ?? $schema['maxLength'] ?? null;
+
+        if ($min === null && $max === null) {
+            return null;
+        }
+
+        if ($min !== null && $max !== null) {
+            return self::literal($min).' ≤ value ≤ '.self::literal($max);
+        }
+
+        return $min !== null
+            ? 'value ≥ '.self::literal($min)
+            : 'value ≤ '.self::literal($max);
     }
 
     /**

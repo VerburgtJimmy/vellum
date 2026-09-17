@@ -31,16 +31,25 @@
     </ul>
 @endif
 
-<h2 id="groups" class="vellum-heading">{{ count($groups) === 1 ? 'Endpoints' : 'Endpoint groups' }}</h2>
+@foreach ($groups as $group)
+    <h2 id="group-{{ $group->slug }}" class="vellum-heading">{{ $group->name }}</h2>
 
-<div class="vellum-cards vellum-api-groups">
-    @foreach ($groups as $group)
-        <a class="vellum-card" href="{{ $href($group) }}">
-            <span class="vellum-card-title">{{ $group->name }}</span>
-            <span class="vellum-card-body">{{ $group->methodCount() }} {{ $group->methodCount() === 1 ? 'endpoint' : 'endpoints' }}</span>
-        </a>
-    @endforeach
-</div>
+    @if ($group->description !== null)
+        <div class="vellum-api-group-description">{!! $markdown($group->description) !!}</div>
+    @endif
+
+    <ul class="vellum-api-index">
+        @foreach ($group->operations as $operation)
+            <li>
+                <a href="{{ $href($group, $operation) }}">
+                    <span class="vellum-api-method" data-method="{{ strtolower($operation->method) }}">{{ $operation->method }}</span>
+                    <span class="vellum-api-index-title">{{ $operation->title() }}</span>
+                    <code class="vellum-api-index-path">{{ $operation->path }}</code>
+                </a>
+            </li>
+        @endforeach
+    </ul>
+@endforeach
 
 @if ($spec->webhookNames() !== [])
     {{-- 0.6 lists webhooks by name only; rendering them is out of scope. --}}

@@ -6,17 +6,20 @@ namespace Vellum\OpenApi;
 
 use Illuminate\Contracts\View\Factory as ViewFactory;
 use Vellum\Content\Document;
-use Vellum\Content\SearchIndexBuilder;
 use Vellum\Markdown\Islands\MarkdownPipeline;
+use Vellum\OpenApi\Samples\SampleBuilder;
 
 /**
  * Turns a spec into the same Document objects Markdown compiles to.
  *
- * Going through Document rather than a parallel page type is the whole point:
- * search, breadcrumbs, prev/next, the table of contents, raw Markdown and
- * static export are written against Document and need no cases for this.
+ * One page per operation, foldered by tag, which is how reference docs are
+ * read: someone arrives at "delete a pet" from a search result or a link in
+ * their own code, not by scrolling a page of every verb on /pets. It also
+ * means each endpoint has a URL worth sharing.
  *
- * @phpstan-import-type SearchDocument from SearchIndexBuilder
+ * Going through Document rather than a parallel page type is the point:
+ * search, breadcrumbs, prev/next, the compiled store and static export are
+ * written against Document and need no cases for this.
  */
 final class PageBuilder
 {
@@ -24,6 +27,7 @@ final class PageBuilder
         private readonly ViewFactory $view,
         private readonly Grouper $grouper = new Grouper,
         private readonly MarkdownPipeline $pipeline = new MarkdownPipeline,
+        private readonly SampleBuilder $samples = new SampleBuilder,
     ) {}
 
     /**
@@ -32,45 +36,17 @@ final class PageBuilder
     public function build(Spec $spec, ?string $version = null): array
     {
         $groups = $this->grouper->group($spec, $this->groupBy());
-        $prefix = $this->prefix();
+        $prefix = Mount::slugPrefix();
 
         $documents = [$this->overview($spec, $groups, $prefix, $version)];
 
         foreach ($groups as $group) {
-            $documents[] = $this->groupPage($group, $prefix, $spec, $version);
-        }
-
-        return $documents;
-    }
-
-    /**
-     * Search entries for individual operations, which are sections rather
-     * than pages and would otherwise only be findable by their group name.
-     *
-     * @return list<SearchDocument>
-     */
-    public function searchEntries(Spec $spec, string $routePrefix, ?string $version = null): array
-    {
-        $prefix = $this->prefix();
-        $entries = [];
-
-        foreach ($this->grouper->group($spec, $this->groupBy()) as $group) {
             foreach ($group->operations as $operation) {
-                $url = '/'.trim($routePrefix, '/').'/'.$prefix.'/'.$group->slug.'#'.$operation->headingId();
-
-                $entries[] = [
-                    'id' => $prefix.'/'.$group->slug.'#'.$operation->headingId(),
-                    'title' => $operation->method.' '.$operation->path,
-                    'description' => $operation->summary ?? '',
-                    'content' => $this->operationText($operation),
-                    'url' => $url,
-                    'headings' => [$operation->title()],
-                    'access' => 'guest',
-                ];
+                $documents[] = $this->operationPage($operation, $group, $prefix, $spec, $version);
             }
         }
 
-        return $entries;
+        return $documents;
     }
 
     /**
@@ -78,13 +54,14 @@ final class PageBuilder
      */
     private function overview(Spec $spec, array $groups, string $prefix, ?string $version): Document
     {
-        $routePrefix = trim((string) config('vellum.route.prefix', 'docs'), '/');
-
         $html = $this->view->make('vellum::openapi.overview', [
             'spec' => $spec,
             'groups' => $groups,
             'markdown' => $this->markdown(...),
-            'href' => fn (Group $group): string => '/'.$routePrefix.'/'.$prefix.'/'.$group->slug,
+            'href' => fn (Group $group, Operation $operation): string => Mount::href(
+                $prefix.'/'.$group->slug.'/'.$group->slugFor($operation),
+                $version,
+            ),
         ])->render();
 
         $headings = [];
@@ -97,11 +74,9 @@ final class PageBuilder
             $headings[] = ['id' => 'authentication', 'text' => 'Authentication', 'level' => 2];
         }
 
-        $headings[] = [
-            'id' => 'groups',
-            'text' => count($groups) === 1 ? 'Endpoints' : 'Endpoint groups',
-            'level' => 2,
-        ];
+        foreach ($groups as $group) {
+            $headings[] = ['id' => 'group-'.$group->slug, 'text' => $group->name, 'level' => 2];
+        }
 
         if ($spec->webhookNames() !== []) {
             $headings[] = ['id' => 'webhooks', 'text' => 'Webhooks', 'level' => 2];
@@ -115,43 +90,73 @@ final class PageBuilder
             description: $spec->description() === null ? null : $this->summarise($spec->description()),
             spec: $spec,
             version: $version,
+            // The overview is prose and a card grid, so it keeps its contents column.
+            full: false,
         );
     }
 
-    private function groupPage(Group $group, string $prefix, Spec $spec, ?string $version): Document
-    {
-        $html = $this->view->make('vellum::openapi.group', [
-            'group' => $group,
+    private function operationPage(
+        Operation $operation,
+        Group $group,
+        string $prefix,
+        Spec $spec,
+        ?string $version,
+    ): Document {
+        $security = $this->security($operation, $spec);
+
+        $html = $this->view->make('vellum::openapi.operation', [
+            'operation' => $operation,
             'markdown' => $this->markdown(...),
+            'code' => $this->code(...),
             'path' => $this->highlightPath(...),
-            'securityFor' => fn (Operation $operation): array => $this->security($operation, $spec),
+            'security' => $security,
+            'samples' => $this->samples->build($operation, $this->serverUrl($spec, $operation), $security),
+            'responseExamples' => $this->responseExamples($operation),
         ])->render();
 
-        $headings = array_map(
-            static fn (Operation $operation): array => [
-                'id' => $operation->headingId(),
-                'text' => $operation->title(),
+        $headings = [];
+
+        if ($security !== []) {
+            $headings[] = ['id' => 'authorization', 'text' => 'Authorization', 'level' => 2];
+        }
+
+        foreach (array_keys($operation->parametersByLocation()) as $location) {
+            $headings[] = [
+                'id' => $location.'-parameters',
+                'text' => ucfirst($location).' parameters',
                 'level' => 2,
-            ],
-            $group->operations,
-        );
+            ];
+        }
+
+        if (is_array($operation->requestBody['content'] ?? null)) {
+            $headings[] = ['id' => 'request-body', 'text' => 'Request body', 'level' => 2];
+        }
+
+        if ($operation->responses !== []) {
+            $headings[] = ['id' => 'responses', 'text' => 'Responses', 'level' => 2];
+        }
 
         return $this->document(
-            slug: $prefix.'/'.$group->slug,
-            title: $group->name,
+            slug: $prefix.'/'.$group->slug.'/'.$group->slugFor($operation),
+            title: $operation->title(),
             html: $html,
             headings: $headings,
-            description: $group->description === null
-                ? $group->methodCount().' endpoints'
-                : $this->summarise($group->description),
+            // Null rather than the request line: the layout prints that
+            // immediately below in the endpoint card, and twice is noise.
+            description: $operation->description !== null
+                ? $this->summarise($operation->description)
+                : null,
             spec: $spec,
             version: $version,
-            endpoints: $group->methodCount(),
+            // Two columns need the width the contents column would take.
+            full: true,
+            extra: ['openapi_method' => $operation->method, 'openapi_path' => $operation->path],
         );
     }
 
     /**
      * @param  list<array{id: string, text: string, level: int}>  $headings
+     * @param  array<string, mixed>  $extra
      */
     private function document(
         string $slug,
@@ -161,23 +166,20 @@ final class PageBuilder
         ?string $description,
         Spec $spec,
         ?string $version,
-        ?int $endpoints = null,
+        bool $full,
+        array $extra = [],
     ): Document {
         return new Document(
             slug: $slug,
             title: $title,
             html: $html,
             headings: $headings,
-            // Marks the page as generated, and carries the endpoint count so
-            // the sidebar badge does not have to infer it from the headings.
-            frontmatter: array_filter(
-                ['title' => $title, 'openapi' => true, 'endpoints' => $endpoints],
-                static fn (mixed $value): bool => $value !== null,
-            ),
+            frontmatter: ['title' => $title, 'openapi' => true, 'full' => $full, ...$extra],
             path: $spec->path,
             mtime: is_file($spec->path) ? (int) filemtime($spec->path) : 0,
             description: $description,
             version: $version,
+            full: $full,
         );
     }
 
@@ -191,6 +193,73 @@ final class PageBuilder
     private function markdown(string $text): string
     {
         return $this->pipeline->render($text);
+    }
+
+    /**
+     * A sample as a real Vellum code block, so it gets the same highlighting,
+     * frame and copy button as every other block in the docs.
+     */
+    private function code(string $source, string $language): string
+    {
+        $fence = str_repeat('`', max(3, $this->longestFence($source) + 1));
+
+        return $this->pipeline->render($fence.$language."\n".$source."\n".$fence);
+    }
+
+    private function longestFence(string $source): int
+    {
+        preg_match_all('/^`+/m', $source, $matches);
+
+        return max(0, ...array_map(strlen(...), $matches[0] ?: ['']));
+    }
+
+    /**
+     * One example body per status, for the panel beside the schema.
+     *
+     * @return array<string, string>
+     */
+    private function responseExamples(Operation $operation): array
+    {
+        $examples = [];
+
+        foreach ($operation->responses as $status => $response) {
+            $content = is_array($response['content'] ?? null) ? $response['content'] : [];
+
+            if ($content === []) {
+                continue;
+            }
+
+            $media = reset($content);
+            $example = is_array($media) ? ExampleGenerator::forMedia($media) : null;
+
+            if ($example === null) {
+                continue;
+            }
+
+            $examples[(string) $status] = (string) json_encode(
+                $example,
+                JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE,
+            );
+        }
+
+        return $examples;
+    }
+
+    private function serverUrl(Spec $spec, Operation $operation): ?string
+    {
+        $configured = config('vellum.openapi.base_url');
+
+        if (is_string($configured) && $configured !== '') {
+            return rtrim($configured, '/');
+        }
+
+        foreach ($operation->servers as $server) {
+            if (is_string($server['url'] ?? null) && $server['url'] !== '') {
+                return rtrim($server['url'], '/');
+            }
+        }
+
+        return $spec->serverUrl();
     }
 
     /**
@@ -211,7 +280,7 @@ final class PageBuilder
      * say about each. An operation's own security replaces the document's,
      * including an explicit empty array, which means "no auth here".
      *
-     * @return list<array{name: string, hint: string}>
+     * @return list<array{name: string, hint: string, detail: string}>
      */
     private function security(Operation $operation, Spec $spec): array
     {
@@ -227,7 +296,13 @@ final class PageBuilder
                 }
 
                 $seen[$name] = true;
-                $out[] = ['name' => $name, 'hint' => $this->securityHint($schemes[$name] ?? [])];
+                $scheme = $schemes[$name] ?? [];
+
+                $out[] = [
+                    'name' => $name,
+                    'hint' => $this->securityHint($scheme),
+                    'detail' => $this->securityDetail($scheme),
+                ];
             }
         }
 
@@ -257,6 +332,24 @@ final class PageBuilder
     }
 
     /**
+     * The literal header or parameter a reader has to send.
+     *
+     * @param  array<string, mixed>  $scheme
+     */
+    private function securityDetail(array $scheme): string
+    {
+        $type = is_string($scheme['type'] ?? null) ? $scheme['type'] : '';
+
+        if ($type === 'apiKey') {
+            return (string) ($scheme['name'] ?? 'X-Api-Key').': <key>';
+        }
+
+        $httpScheme = is_string($scheme['scheme'] ?? null) ? ucfirst($scheme['scheme']) : 'Bearer';
+
+        return 'Authorization: '.$httpScheme.' <token>';
+    }
+
+    /**
      * First sentence or so, for the meta description and prev/next cards.
      */
     private function summarise(string $markdown): string
@@ -264,26 +357,6 @@ final class PageBuilder
         $text = trim(preg_replace('/\s+/', ' ', strip_tags($this->markdown($markdown))) ?? '');
 
         return mb_strlen($text) > 160 ? mb_substr($text, 0, 157).'…' : $text;
-    }
-
-    private function operationText(Operation $operation): string
-    {
-        $parts = [$operation->summary ?? '', $operation->description ?? ''];
-
-        foreach ($operation->parameters as $parameter) {
-            if (is_string($parameter['name'] ?? null)) {
-                $parts[] = $parameter['name'];
-            }
-        }
-
-        return trim(preg_replace('/\s+/', ' ', implode(' ', array_filter($parts))) ?? '');
-    }
-
-    private function prefix(): string
-    {
-        $prefix = config('vellum.openapi.prefix', 'api');
-
-        return is_string($prefix) && trim($prefix, '/') !== '' ? trim($prefix, '/') : 'api';
     }
 
     private function groupBy(): string

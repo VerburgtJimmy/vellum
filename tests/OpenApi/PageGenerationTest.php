@@ -17,14 +17,14 @@ function apiSpec(array $overrides = []): array
         'components' => ['securitySchemes' => ['bearer' => ['type' => 'http', 'scheme' => 'bearer']]],
         'paths' => [
             '/pets' => [
-                'get' => ['tags' => ['Pets'], 'summary' => 'List pets', 'responses' => ['200' => ['description' => 'OK']]],
-                'post' => ['tags' => ['Pets'], 'summary' => 'Create a pet'],
+                'get' => ['tags' => ['Pets'], 'operationId' => 'listPets', 'summary' => 'List pets', 'responses' => ['200' => ['description' => 'OK']]],
+                'post' => ['tags' => ['Pets'], 'operationId' => 'createPet', 'summary' => 'Create a pet'],
             ],
             '/pets/{petId}' => [
                 'delete' => ['tags' => ['Pets'], 'summary' => 'Delete a pet', 'deprecated' => true],
             ],
             '/orders' => [
-                'get' => ['tags' => ['Orders'], 'summary' => 'List orders'],
+                'get' => ['tags' => ['Orders'], 'operationId' => 'listOrders', 'summary' => 'List orders'],
             ],
             '/status' => [
                 'get' => ['summary' => 'Service status'],
@@ -57,53 +57,55 @@ beforeEach(function (): void {
     $this->writeDoc('index.md', "---\ntitle: Home\n---\nHi");
 });
 
-it('writes one page per group plus an overview', function (): void {
+it('writes one page per operation, foldered by tag, plus an overview', function (): void {
     enableOpenApi($this->cachePath(), apiSpec());
 
-    $documents = ContentRepository::fromConfig()->buildAll();
-    $slugs = array_map(static fn ($document): string => $document->slug, $documents);
+    $slugs = array_map(static fn ($document): string => $document->slug, ContentRepository::fromConfig()->buildAll());
 
-    expect($slugs)->toContain('api', 'api/pets', 'api/orders', 'api/other')
-        // One page per group, never one per endpoint.
-        ->and(array_filter($slugs, static fn (string $slug): bool => str_starts_with($slug, 'api')))
-        ->toHaveCount(4);
+    expect($slugs)->toContain(
+        'api',
+        'api/pets/list-pets',
+        'api/pets/create-pet',
+        // No operationId in the spec, so the request line names the page.
+        'api/pets/delete-pets-petid',
+        'api/orders/list-orders',
+        'api/other/get-status',
+    )->and(array_filter($slugs, static fn (string $slug): bool => str_starts_with($slug, 'api')))->toHaveCount(6);
 });
 
-it('serves the generated pages', function (): void {
+it('serves the overview and every operation page', function (): void {
     enableOpenApi($this->cachePath(), apiSpec());
     ContentRepository::fromConfig()->buildAll();
 
-    $this->get('/docs/api')->assertOk()->assertSee('API reference');
+    $overview = (string) $this->get('/docs/api')->assertOk()->getContent();
 
-    $html = (string) $this->get('/docs/api/pets')->assertOk()->getContent();
-
-    expect($html)->toContain('id="get-pets"')
-        ->toContain('id="post-pets"')
-        ->toContain('id="delete-pets-petid"')
+    expect($overview)->toContain('API reference')
         ->toContain('Everything about pets.')
-        ->toContain('>GET<')
-        ->toContain('Deprecated');
+        ->toContain('/docs/api/pets/list-pets');
+
+    $this->get('/docs/api/pets/list-pets')->assertOk()->assertSee('List pets');
+    $this->get('/docs/api/pets/delete-pets-petid')->assertOk()->assertSee('Deprecated');
 });
 
-it('lists every operation in the page table of contents', function (): void {
+it('gives an operation page the sections it actually has', function (): void {
     enableOpenApi($this->cachePath(), apiSpec());
 
-    $pets = collect(ContentRepository::fromConfig()->buildAll())->firstWhere('slug', 'api/pets');
-    $ids = array_column($pets->headings, 'id');
+    $page = collect(ContentRepository::fromConfig()->buildAll())->firstWhere('slug', 'api/pets/list-pets');
 
-    expect($ids)->toBe(['get-pets', 'post-pets', 'delete-pets-petid'])
-        ->and(array_column($pets->headings, 'text'))->toBe(['List pets', 'Create a pet', 'Delete a pet']);
+    expect(array_column($page->headings, 'id'))->toBe(['responses'])
+        // No parameters and no body on this one, so no headings for them.
+        ->and($page->full)->toBeTrue();
 });
 
-it('keeps operation ids stable across rebuilds', function (): void {
+it('keeps operation urls stable across rebuilds', function (): void {
     enableOpenApi($this->cachePath(), apiSpec());
 
-    $first = collect(ContentRepository::fromConfig()->buildAll())->firstWhere('slug', 'api/pets');
+    $slugs = static fn (): array => array_map(
+        static fn ($document): string => $document->slug,
+        ContentRepository::fromConfig()->buildAll(),
+    );
 
-    // A second build of the same spec, through a fresh repository.
-    $second = collect(ContentRepository::fromConfig()->buildAll())->firstWhere('slug', 'api/pets');
-
-    expect(array_column($second->headings, 'id'))->toBe(array_column($first->headings, 'id'));
+    expect($slugs())->toBe($slugs());
 });
 
 it('groups by first path segment when asked', function (): void {
@@ -114,19 +116,22 @@ it('groups by first path segment when asked', function (): void {
         ContentRepository::fromConfig()->buildAll(),
     );
 
-    expect($slugs)->toContain('api/pets', 'api/orders', 'api/status')
-        ->and($slugs)->not->toContain('api/other');
+    expect($slugs)->toContain('api/pets/list-pets', 'api/orders/list-orders', 'api/status/get-status')
+        ->and($slugs)->not->toContain('api/other/get-status');
 });
 
 it('orders groups by the spec tag list and puts untagged last', function (): void {
     enableOpenApi($this->cachePath(), apiSpec());
 
-    $slugs = array_values(array_filter(
-        array_map(static fn ($document): string => $document->slug, ContentRepository::fromConfig()->buildAll()),
-        static fn (string $slug): bool => str_starts_with($slug, 'api/'),
-    ));
+    $folders = array_values(array_unique(array_map(
+        static fn (string $slug): string => implode('/', array_slice(explode('/', $slug), 0, 2)),
+        array_filter(
+            array_map(static fn ($document): string => $document->slug, ContentRepository::fromConfig()->buildAll()),
+            static fn (string $slug): bool => str_starts_with($slug, 'api/'),
+        ),
+    )));
 
-    expect($slugs)->toBe(['api/pets', 'api/orders', 'api/other']);
+    expect($folders)->toBe(['api/pets', 'api/orders', 'api/other']);
 });
 
 it('adds a sidebar group under the written docs', function (): void {
@@ -137,15 +142,23 @@ it('adds a sidebar group under the written docs', function (): void {
     $tree = $repository->navigation();
 
     $last = $tree[count($tree) - 1];
+    $children = $last['children'];
 
     expect($last['type'])->toBe('folder')
         ->and($last['title'])->toBe('API reference')
-        ->and(array_column($last['children'], 'title'))->toBe(['Overview', 'Pets', 'Orders', 'Other'])
-        ->and(array_column($last['children'], 'href'))->toBe([
-            '/docs/api', '/docs/api/pets', '/docs/api/orders', '/docs/api/other',
-        ])
-        // The badge is the endpoint count; the overview is not a group.
-        ->and(array_column($last['children'], 'badge'))->toBe([null, 3, 1, 1]);
+        ->and($children[0]['title'])->toBe('Overview')
+        ->and(array_column(array_slice($children, 1), 'title'))->toBe(['Pets', 'Orders', 'Other']);
+
+    $pets = $children[1];
+
+    expect(array_column($pets['children'], 'title'))->toBe(['List pets', 'Create a pet', 'Delete a pet'])
+        // The method is the badge, which is how a reference is scanned.
+        ->and(array_column($pets['children'], 'badge'))->toBe(['GET', 'POST', 'DELETE'])
+        ->and(array_column($pets['children'], 'href'))->toBe([
+            '/docs/api/pets/list-pets',
+            '/docs/api/pets/create-pet',
+            '/docs/api/pets/delete-pets-petid',
+        ]);
 });
 
 it('finds an individual endpoint in search', function (): void {
@@ -157,23 +170,23 @@ it('finds an individual endpoint in search', function (): void {
     $index = json_decode((string) $repository->store()->getSearchIndex(), true);
     $byTitle = collect($index['documents'])->keyBy('title');
 
-    expect($byTitle)->toHaveKey('DELETE /pets/{petId}')
-        ->and($byTitle['DELETE /pets/{petId}']['url'])->toBe('/docs/api/pets#delete-pets-petid')
-        ->and($byTitle['GET /orders']['url'])->toBe('/docs/api/orders#get-orders')
-        // And the group pages are still indexed in their own right.
-        ->and($byTitle)->toHaveKey('Pets');
+    // Each operation is a page now, so it is indexed like any other page
+    // rather than needing an entry synthesised for it.
+    expect($byTitle)->toHaveKey('Delete a pet')
+        ->and($byTitle['Delete a pet']['url'])->toBe('/docs/api/pets/delete-pets-petid')
+        ->and($byTitle['List orders']['url'])->toBe('/docs/api/orders/list-orders');
 });
 
 it('puts parameter names in the search body so a field name finds its endpoint', function (): void {
     enableOpenApi($this->cachePath(), apiSpec(['paths' => ['/pets' => ['get' => [
-        'parameters' => [['name' => 'breedFilter', 'in' => 'query']],
+        'parameters' => [['name' => 'breedFilter', 'in' => 'query', 'schema' => ['type' => 'string']]],
     ]]]]));
 
     $repository = ContentRepository::fromConfig();
     $repository->buildAll();
 
     $index = json_decode((string) $repository->store()->getSearchIndex(), true);
-    $entry = collect($index['documents'])->firstWhere('title', 'GET /pets');
+    $entry = collect($index['documents'])->firstWhere('title', 'List pets');
 
     expect($entry['content'])->toContain('breedFilter');
 });
@@ -205,7 +218,7 @@ it('gives colliding group names distinct slugs', function (): void {
         static fn (string $slug): bool => str_starts_with($slug, 'api/'),
     ));
 
-    expect($slugs)->toBe(['api/pet-store', 'api/pet-store-2']);
+    expect($slugs)->toBe(['api/pet-store/get-a', 'api/pet-store-2/get-b']);
 });
 
 it('renames the untagged group', function (): void {
@@ -215,8 +228,8 @@ it('renames the untagged group', function (): void {
     $documents = $repository->buildAll();
     $slugs = array_map(static fn ($document): string => $document->slug, $documents);
 
-    expect($slugs)->toContain('api/general')
-        ->and($slugs)->not->toContain('api/other');
+    expect($slugs)->toContain('api/general/get-status')
+        ->and($slugs)->not->toContain('api/other/get-status');
 
     $tree = $repository->navigation();
 
@@ -224,19 +237,14 @@ it('renames the untagged group', function (): void {
         ->toBe(['Overview', 'Pets', 'Orders', 'General']);
 });
 
-it('takes the sidebar badge from the endpoint count, not the heading count', function (): void {
+it('records the method and path on the page itself', function (): void {
     enableOpenApi($this->cachePath(), apiSpec());
 
-    $repository = ContentRepository::fromConfig();
-    $documents = $repository->buildAll();
-    $pets = collect($documents)->firstWhere('slug', 'api/pets');
+    $page = collect(ContentRepository::fromConfig()->buildAll())->firstWhere('slug', 'api/pets/delete-pets-petid');
 
-    expect($pets->frontmatter['endpoints'])->toBe(3);
-
-    $tree = $repository->navigation();
-    $children = $tree[count($tree) - 1]['children'];
-
-    expect(array_column($children, 'badge'))->toBe([null, 3, 1, 1]);
+    expect($page->frontmatter['openapi_method'])->toBe('DELETE')
+        ->and($page->frontmatter['openapi_path'])->toBe('/pets/{petId}')
+        ->and($page->frontmatter['openapi'])->toBeTrue();
 });
 
 it('serves API pages at the unversioned URL and redirects the latest prefix', function (): void {
@@ -255,11 +263,11 @@ it('serves API pages at the unversioned URL and redirects the latest prefix', fu
 
     // Latest is served without a version segment.
     $this->get('/docs/api')->assertOk();
-    $this->get('/docs/api/pets')->assertOk()->assertSee('get-pets', false);
+    $this->get('/docs/api/pets/list-pets')->assertOk();
 
     // The prefixed latest URL redirects to it, as any latest page does.
     $this->get('/docs/v2/api')->assertRedirect('/docs/api');
-    $this->get('/docs/v2/api/pets')->assertRedirect('/docs/api/pets');
+    $this->get('/docs/v2/api/pets/list-pets')->assertRedirect('/docs/api/pets/list-pets');
 
     // The spec is not versioned, so it does not appear under older versions.
     $this->get('/docs/v1/api')->assertNotFound();

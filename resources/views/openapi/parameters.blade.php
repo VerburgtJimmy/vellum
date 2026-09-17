@@ -1,39 +1,49 @@
 @php use Vellum\OpenApi\SchemaView; @endphp
 
-<ul class="vellum-api-fields" data-depth="0">
+<div class="vellum-api-fields" data-depth="0">
     @foreach ($parameters as $parameter)
         @php
             $schema = is_array($parameter['schema'] ?? null) ? $parameter['schema'] : [];
             $enum = SchemaView::enumValues($schema);
-            $default = $schema['default'] ?? null;
-            $example = $parameter['example'] ?? null;
+            $chips = SchemaView::chips($schema);
+            $required = ! empty($parameter['required']);
+
+            if (array_key_exists('example', $parameter)) {
+                $chips['Example'] = SchemaView::literal($parameter['example']);
+            }
         @endphp
-        <li class="vellum-api-field">
+        <div class="vellum-api-field">
             <div class="vellum-api-field-head">
-                <code class="vellum-api-field-name">{{ $parameter['name'] ?? '' }}</code>
+                <code class="vellum-api-field-name">{{ $parameter['name'] ?? '' }}<span
+                    class="vellum-api-marker"
+                    data-required="{{ $required ? 'true' : 'false' }}"
+                    title="{{ $required ? 'Required' : 'Optional' }}"
+                >{{ $required ? '*' : '?' }}</span></code>
                 <span class="vellum-api-field-type">{{ SchemaView::type($schema) }}</span>
-                @if (! empty($parameter['required']))
-                    <span class="vellum-api-required">required</span>
-                @endif
             </div>
 
             @if (! empty($parameter['description']))
                 <p class="vellum-api-field-description">{{ $parameter['description'] }}</p>
             @endif
 
-            @if ($default !== null)
-                <p class="vellum-api-field-meta">Default <code>{{ SchemaView::literal($default) }}</code></p>
-            @endif
-
-            @if ($enum !== [])
-                <p class="vellum-api-field-meta">One of
-                    @foreach ($enum as $value)<code>{{ $value }}</code>@if (! $loop->last), @endif @endforeach
+            @if ($chips !== [])
+                <p class="vellum-api-chips">
+                    @foreach ($chips as $label => $value)
+                        <span class="vellum-api-chip"><span class="vellum-api-chip-label">{{ $label }}</span> <code>{{ $value }}</code></span>
+                    @endforeach
                 </p>
             @endif
 
-            @if ($example !== null)
-                <p class="vellum-api-field-meta">Example <code>{{ SchemaView::literal($example) }}</code></p>
+            @if ($enum !== [])
+                <div class="vellum-api-enum">
+                    <p class="vellum-api-enum-label">Value in</p>
+                    <ul>
+                        @foreach ($enum as $value)
+                            <li><code>"{{ $value }}"</code></li>
+                        @endforeach
+                    </ul>
+                </div>
             @endif
-        </li>
+        </div>
     @endforeach
-</ul>
+</div>

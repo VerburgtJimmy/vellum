@@ -4,7 +4,7 @@
     $containsActive = $containsActive ?? static fn (array $node): bool => false;
     $activeSlug = $activeSlug ?? null;
     $depth = $depth ?? 0;
-    $itemClass = 'block rounded-md px-2 -mx-2 py-1.5 transition-colors';
+    $itemClass = 'flex items-center gap-2 rounded-md px-2 -mx-2 py-1.5 transition-colors';
 @endphp
 
 @foreach ($nodes as $node)
@@ -29,7 +29,12 @@
             x-on:pointerenter="onEnter()"
             class="{{ $itemClass }} {{ $isActive ? 'bg-accent font-medium text-accent-foreground' : 'text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground' }}"
             @if ($isActive) aria-current="page" @endif
-        >{{ $node['title'] ?? 'Untitled' }}</a>
+        >
+            <span class="truncate">{{ $node['title'] ?? 'Untitled' }}</span>
+            @if (! empty($node['badge']))
+                <span class="vellum-nav-badge" data-method="{{ strtolower((string) $node['badge']) }}">{{ $node['badge'] }}</span>
+            @endif
+        </a>
     @elseif ($type === 'folder')
         @php
             $open = (bool) ($node['defaultOpen'] ?? false) || $containsActive($node);

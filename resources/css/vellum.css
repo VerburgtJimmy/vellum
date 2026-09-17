@@ -1168,37 +1168,58 @@ html {
 
 /* OpenAPI reference pages
    ----------------------------------------------------------------------
-   Method and status colours are semantic rather than theme-derived, the
-   same trade the callout accents make: GET is green everywhere. They are
-   declared once here, per mode, so PresetContrastTest can read them. */
+   One operation per page. The left column is documentation, the right is
+   examples, and that split is the layout: a reader either wants to know
+   what a field means or wants something to paste.
 
-.vellum-api-operation {
+   Method and status colours are semantic rather than theme-derived, the
+   same trade the callout accents make. They are declared once per mode so
+   PresetContrastTest can read them. */
+
+:root,
+.vellum-api-operation,
+.vellum-api-index {
   --vellum-api-get: oklch(0.48 0.13 150);
   --vellum-api-post: oklch(0.48 0.15 255);
   --vellum-api-put: oklch(0.47 0.12 70);
   --vellum-api-delete: oklch(0.5 0.19 25);
-  padding-block: 2rem;
-  border-top: 1px solid var(--border);
 }
 
-.vellum-api-operation:first-of-type {
-  border-top: 0;
-  padding-top: 0.5rem;
-}
-
-.dark .vellum-api-operation {
+.dark,
+.dark .vellum-api-operation,
+.dark .vellum-api-index {
   --vellum-api-get: oklch(0.8 0.15 150);
   --vellum-api-post: oklch(0.79 0.13 255);
   --vellum-api-put: oklch(0.84 0.14 80);
   --vellum-api-delete: oklch(0.76 0.16 25);
 }
 
-.vellum-api-request {
+.vellum-api-operation {
+  display: grid;
+  gap: 2rem;
+  align-items: start;
+}
+
+@media (min-width: 1100px) {
+  .vellum-api-operation {
+    grid-template-columns: minmax(0, 1fr) minmax(20rem, 26rem);
+  }
+
+  .vellum-api-examples {
+    position: sticky;
+    top: var(--vellum-api-sticky-top, 5.5rem);
+  }
+}
+
+.vellum-api-endpoint {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 0.5rem;
-  margin: 0 0 0.5rem;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--card);
 }
 
 .vellum-api-method,
@@ -1206,15 +1227,18 @@ html {
   --vellum-api-tone: var(--muted-foreground);
   display: inline-flex;
   align-items: center;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--vellum-api-tone);
+}
+
+.vellum-api-method {
   border: 1px solid color-mix(in oklch, var(--vellum-api-tone) 28%, transparent);
   border-radius: calc(var(--radius) - 0.15rem);
   background: color-mix(in oklch, var(--vellum-api-tone) 12%, var(--background));
-  padding: 0.1rem 0.45rem;
-  font-family: var(--font-mono, ui-monospace, monospace);
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  color: var(--vellum-api-tone);
+  padding: 0.12rem 0.4rem;
 }
 
 .vellum-api-method[data-method='get'] { --vellum-api-tone: var(--vellum-api-get); }
@@ -1242,73 +1266,56 @@ html {
   border: 1px solid color-mix(in oklch, var(--vellum-api-delete) 35%, transparent);
   border-radius: calc(var(--radius) - 0.15rem);
   padding: 0.05rem 0.4rem;
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.04em;
   color: var(--vellum-api-delete);
 }
 
-.vellum-api-operation-title {
-  margin-top: 0;
+.vellum-api-description {
+  margin-top: 1rem;
 }
 
-/* Two columns once there is room for both. The sticky panel is inside the
-   right column, and a grid item is its own containing block, so it lets go
-   at the end of this operation rather than riding over the next one. */
-.vellum-api-columns {
-  display: grid;
-  gap: 1.5rem;
-  margin-top: 1.25rem;
+.vellum-api-section {
+  margin-top: 2.25rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid var(--border);
+  font-size: 1.15rem;
 }
 
-@media (min-width: 1024px) {
-  .vellum-api-columns {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    align-items: start;
-  }
-
-  .vellum-api-column-detail {
-    /* Without this the item stretches and there is nothing to stick within. */
-    align-self: start;
-    position: sticky;
-    top: var(--vellum-api-sticky-top, 5rem);
-  }
-}
-
-.vellum-api-subhead {
-  margin: 1.5rem 0 0.5rem;
-  font-size: 0.8rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+.vellum-api-lede {
+  margin: 0.6rem 0 0;
   color: var(--muted-foreground);
 }
 
-.vellum-api-column > .vellum-api-subhead:first-child {
-  margin-top: 0;
+.vellum-api-response-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin: 1.5rem 0 0;
+  font-size: 1rem;
 }
 
+.vellum-api-media {
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}
+
+/* Field rows are hairline-separated, not boxed: at three levels of nesting
+   a card inside a card inside a card is all frame and no content. */
 .vellum-api-fields {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: var(--card);
-}
-
-.vellum-api-fields[data-depth]:not([data-depth='0']) {
-  background: transparent;
+  margin-top: 0.75rem;
 }
 
 .vellum-api-field {
-  padding: 0.7rem 0.85rem;
+  padding: 0.85rem 0;
   border-top: 1px solid var(--border);
 }
 
-.vellum-api-field:first-child {
+.vellum-api-fields > .vellum-api-field:first-child {
   border-top: 0;
+  padding-top: 0.5rem;
 }
 
 .vellum-api-field-head {
@@ -1318,35 +1325,101 @@ html {
   gap: 0.5rem;
 }
 
-.vellum-api-field-name {
+/* Field names are code, but a pill per row turns a long schema into a
+   column of grey boxes. Keep the monospace, drop the frame.
+   Three classes deep to clear the inline-code rule, which carries
+   :not() arguments and is heavier than it looks. */
+.vellum-prose .vellum-api-field .vellum-api-field-name {
+  padding: 0;
+  border: 0;
+  background: none;
   font-size: 0.85rem;
   font-weight: 600;
   color: var(--foreground);
 }
 
-.vellum-api-field-type {
+.vellum-nav-badge {
+  --vellum-api-tone: var(--muted-foreground);
+  margin-left: auto;
   font-family: var(--font-mono, ui-monospace, monospace);
-  font-size: 0.75rem;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--vellum-api-tone);
+}
+
+.vellum-nav-badge[data-method='get'] { --vellum-api-tone: var(--vellum-api-get); }
+.vellum-nav-badge[data-method='post'] { --vellum-api-tone: var(--vellum-api-post); }
+.vellum-nav-badge[data-method='put'],
+.vellum-nav-badge[data-method='patch'] { --vellum-api-tone: var(--vellum-api-put); }
+.vellum-nav-badge[data-method='delete'] { --vellum-api-tone: var(--vellum-api-delete); }
+
+.vellum-api-marker[data-required='true'] {
+  color: var(--vellum-api-delete);
+}
+
+.vellum-api-marker[data-required='false'] {
   color: var(--muted-foreground);
 }
 
-.vellum-api-required {
-  font-size: 0.7rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--vellum-api-delete);
+.vellum-api-field-type {
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.78rem;
+  color: var(--muted-foreground);
 }
 
 .vellum-api-field-description,
 .vellum-api-field-meta {
   margin: 0.35rem 0 0;
-  font-size: 0.85rem;
+  font-size: 0.875rem;
   color: var(--muted-foreground);
 }
 
-.vellum-api-field-meta code {
-  font-size: 0.75rem;
+.vellum-api-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0.5rem 0 0;
+}
+
+.vellum-api-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) - 0.15rem);
+  background: var(--card);
+  padding: 0.1rem 0.45rem;
+  font-size: 0.72rem;
+}
+
+.vellum-api-chip-label {
+  color: var(--muted-foreground);
+}
+
+.vellum-api-chip code {
+  font-size: 0.72rem;
+  color: var(--foreground);
+}
+
+.vellum-api-enum {
+  margin-top: 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--card);
+  padding: 0.6rem 0.75rem;
+}
+
+.vellum-api-enum-label {
+  margin: 0 0 0.35rem;
+  font-size: 0.72rem;
+  color: var(--muted-foreground);
+}
+
+.vellum-api-enum ul {
+  margin: 0;
+  padding-left: 1.1rem;
+  font-size: 0.8rem;
 }
 
 .vellum-api-recursive {
@@ -1354,7 +1427,13 @@ html {
 }
 
 .vellum-api-nested {
-  margin-top: 0.5rem;
+  margin-top: 0.6rem;
+}
+
+.vellum-api-nested .vellum-api-fields {
+  margin-top: 0.4rem;
+  padding-left: 0.85rem;
+  border-left: 1px solid var(--border);
 }
 
 .vellum-api-expand {
@@ -1371,18 +1450,50 @@ html {
   color: var(--foreground);
 }
 
-.vellum-api-security {
+.vellum-api-examples .vellum-code {
   margin: 0;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
 }
 
-.vellum-api-scheme {
-  font-size: 0.8rem;
-  text-decoration: underline dotted;
-  text-underline-offset: 3px;
-  cursor: help;
+.vellum-api-response-examples {
+  margin-top: 1rem;
+}
+
+/* The panel is fixed height so the two tab groups do not jump as the
+   reader switches between a short error and a long success body. */
+.vellum-api-examples .vellum-code pre {
+  max-height: min(22rem, 40vh);
+  overflow-y: auto;
+}
+
+.vellum-api-index {
+  margin: 0.75rem 0 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--border);
+}
+
+.vellum-api-index a {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.6rem 0.25rem;
+  border-bottom: 1px solid var(--border);
+  text-decoration: none;
+}
+
+.vellum-api-index a:hover {
+  background: var(--accent);
+}
+
+.vellum-api-index-title {
+  font-weight: 500;
+  color: var(--foreground);
+}
+
+.vellum-api-index-path {
+  margin-left: auto;
+  font-size: 0.78rem;
+  color: var(--muted-foreground);
 }
 
 .vellum-api-servers,
@@ -1390,8 +1501,4 @@ html {
   margin: 0.5rem 0;
   padding-left: 1.1rem;
   font-size: 0.9rem;
-}
-
-.vellum-api-groups {
-  margin-top: 1rem;
 }

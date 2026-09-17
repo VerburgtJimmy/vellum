@@ -195,7 +195,9 @@ function apiTones(string $mode): array
 {
     $css = (string) file_get_contents(__DIR__.'/../../resources/css/vellum.css');
 
-    return cssBlock($css, $mode === 'dark' ? '.dark .vellum-api-operation {' : "\n.vellum-api-operation {");
+    // The grouped selector is unique in the file; ".vellum-api-operation {"
+    // on its own is not, and neither is ".vellum-prose {".
+    return cssBlock($css, $mode === 'dark' ? '.dark .vellum-api-operation,' : "\n.vellum-api-operation,");
 }
 
 it('keeps method and status badges readable on every canvas', function (string $preset, string $mode): void {

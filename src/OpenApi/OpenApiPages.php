@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace Vellum\OpenApi;
 
 use Vellum\Content\Document;
-use Vellum\Content\SearchIndexBuilder;
-use Vellum\Support\VersionUrl;
 
 /**
  * The OpenAPI half of the content set: resolve a spec, build its pages, and
@@ -15,8 +13,6 @@ use Vellum\Support\VersionUrl;
  * Work is done once per instance. A nav rebuild, a search rebuild and a full
  * build all ask for the same pages, and parsing a large spec three times for
  * one request would show.
- *
- * @phpstan-import-type SearchDocument from SearchIndexBuilder
  */
 final class OpenApiPages
 {
@@ -51,58 +47,95 @@ final class OpenApiPages
     }
 
     /**
-     * @return list<SearchDocument>
+     * The sidebar tree for the reference pages.
+     *
+     * A folder per tag, each holding its operations with the method as a
+     * badge, which is how a reader scans a reference: by verb and path, not
+     * by prose title alone.
+     *
+     * @return list<array<string, mixed>>
      */
-    public function searchEntries(string $routePrefix, ?string $version = null): array
+    public function navTree(?string $version = null): array
     {
         $spec = $this->spec();
 
-        return $spec === null ? [] : $this->builder()->searchEntries($spec, $routePrefix, $version);
-    }
-
-    /**
-     * The sidebar folder for the reference pages, or null when there is no spec.
-     *
-     * @return array<string, mixed>|null
-     */
-    public function navGroup(string $routePrefix, ?string $version, ?string $defaultVersion): ?array
-    {
-        $documents = $this->documents($version);
-
-        if ($documents === []) {
-            return null;
+        if ($spec === null) {
+            return [];
         }
 
-        // Vellum's folder index is a first child page: the sidebar renders a
-        // folder as a collapsible trigger, not a link, so there is nowhere
-        // else for the overview to go.
-        $overview = $documents[0];
-        $children = [];
+        $prefix = Mount::slugPrefix();
+        $groups = (new Grouper)->group($spec, config('vellum.openapi.group_by') === 'path' ? 'path' : 'tag');
+        $overview = $this->documents($version)[0] ?? null;
+        $tree = [];
 
-        foreach ($documents as $index => $document) {
-            $endpoints = $document->frontmatter['endpoints'] ?? null;
+        if ($overview !== null) {
+            $tree[] = $this->pageNode($overview->slug, 'Overview', $overview->description, $version, null);
+        }
 
-            $children[] = [
-                'type' => 'page',
-                'slug' => $document->slug,
-                // The overview is the folder's own page; the rest are groups.
-                'title' => $index === 0 ? 'Overview' : $document->title,
-                'description' => $document->description,
+        foreach ($groups as $group) {
+            $children = [];
+
+            foreach ($group->operations as $operation) {
+                $children[] = $this->pageNode(
+                    $prefix.'/'.$group->slug.'/'.$group->slugFor($operation),
+                    $operation->title(),
+                    $operation->summary,
+                    $version,
+                    $operation->method,
+                );
+            }
+
+            $tree[] = [
+                'type' => 'folder',
+                'title' => $group->name,
                 'icon' => null,
-                'href' => VersionUrl::href($routePrefix, $document->slug, $version, $defaultVersion),
-                'access' => 'guest',
-                'badge' => is_int($endpoints) ? $endpoints : null,
+                'defaultOpen' => false,
+                'children' => $children,
             ];
         }
 
+        return $tree;
+    }
+
+    /**
+     * The whole reference as one collapsible group, for the docs sidebar.
+     *
+     * @return array<string, mixed>|null
+     */
+    public function navGroup(?string $version = null): ?array
+    {
+        $tree = $this->navTree($version);
+
+        if ($tree === []) {
+            return null;
+        }
+
         $icon = config('vellum.openapi.icon');
+        $title = config('vellum.openapi.title');
 
         return [
             'type' => 'folder',
-            'title' => $overview->title,
+            'title' => is_string($title) && $title !== '' ? $title : 'API reference',
             'icon' => is_string($icon) && $icon !== '' ? $icon : null,
             'defaultOpen' => false,
-            'children' => $children,
+            'children' => $tree,
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function pageNode(string $slug, string $title, ?string $description, ?string $version, ?string $method): array
+    {
+        return [
+            'type' => 'page',
+            'slug' => $slug,
+            'title' => $title,
+            'description' => $description,
+            'icon' => null,
+            'href' => Mount::href($slug, $version),
+            'access' => 'guest',
+            'badge' => $method,
         ];
     }
 

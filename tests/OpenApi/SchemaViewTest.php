@@ -36,13 +36,50 @@ it('types a scalar, a format, an enum and a nullable', function (): void {
 
     $types = array_column(SchemaView::properties($schema), 'type', 'name');
 
+    // Format and enum are constraints on the value, not part of its type.
     expect($types)->toBe([
         'name' => 'string',
-        'id' => 'string · uuid',
-        'state' => 'string · enum',
+        'id' => 'string',
+        'state' => 'string',
         'nickname' => 'string | null',
         'legacy' => 'string | null',
     ]);
+
+    $chips = array_column(
+        array_map(
+            static fn (array $p): array => ['name' => $p['name'], 'chips' => SchemaView::chips($p['schema'])],
+            SchemaView::properties($schema),
+        ),
+        'chips',
+        'name',
+    );
+
+    expect($chips['id'])->toBe(['Format' => 'uuid'])
+        ->and($chips['name'])->toBe([])
+        ->and(SchemaView::enumValues(SchemaView::properties($schema)[2]['schema']))->not->toBeEmpty();
+});
+
+it('chips the constraints a reader has to honour', function (): void {
+    $schema = resolvedSchema([], ['type' => 'object', 'properties' => [
+        'score' => ['type' => 'number', 'format' => 'float', 'minimum' => 0, 'maximum' => 1],
+        'slug' => ['type' => 'string', 'pattern' => '^[a-z-]+$'],
+        'page' => ['type' => 'integer', 'default' => 1],
+        'live' => ['type' => 'boolean', 'default' => false],
+        'atLeast' => ['type' => 'integer', 'minimum' => 3],
+    ]]);
+
+    $chips = [];
+
+    foreach (SchemaView::properties($schema) as $property) {
+        $chips[$property['name']] = SchemaView::chips($property['schema']);
+    }
+
+    expect($chips['score'])->toBe(['Format' => 'float', 'Range' => '0 ≤ value ≤ 1'])
+        ->and($chips['slug'])->toBe(['Pattern' => '^[a-z-]+$'])
+        ->and($chips['page'])->toBe(['Default' => '1'])
+        // false has to read as "false", not as an empty chip.
+        ->and($chips['live'])->toBe(['Default' => 'false'])
+        ->and($chips['atLeast'])->toBe(['Range' => 'value ≥ 3']);
 });
 
 it('names an array of a referenced schema', function (): void {
@@ -57,8 +94,8 @@ it('names an array of a referenced schema', function (): void {
     $properties = SchemaView::properties($schema);
     $types = array_column($properties, 'type', 'name');
 
-    expect($types['pets'])->toBe('array of Pet')
-        ->and($types['tags'])->toBe('array of string')
+    expect($types['pets'])->toBe('array<Pet>')
+        ->and($types['tags'])->toBe('array<string>')
         // An array of objects opens to show the object's own fields.
         ->and(array_column($properties, 'expandable', 'name'))->toBe(['pets' => true, 'tags' => false]);
 });
@@ -111,7 +148,7 @@ it('marks a schema that contains itself, directly or through an array', function
 
     expect(array_column($properties, 'type', 'name'))->toBe([
         'parent' => 'Node',
-        'children' => 'array of Node',
+        'children' => 'array<Node>',
     ]);
 });
 

@@ -9,6 +9,7 @@ use Vellum\Exceptions\DuplicateSlugException;
 use Vellum\Exceptions\UnknownDirectiveException;
 use Vellum\Markdown\Islands\MarkdownPipeline;
 use Vellum\Markdown\MarkdownRenderer;
+use Vellum\OpenApi\Mount;
 use Vellum\OpenApi\OpenApiPages;
 use Vellum\OpenApi\SpecSource;
 use Vellum\Search\SearchVisibility;
@@ -18,8 +19,6 @@ use Vellum\Support\VersionUrl;
 
 /**
  * Discovers Markdown documents on disk and resolves them to compiled Documents.
- *
- * @phpstan-import-type SearchDocument from SearchIndexBuilder
  */
 final class ContentRepository
 {
@@ -220,13 +219,14 @@ final class ContentRepository
         $searchBuilder = $this->searchIndexBuilder();
 
         $tree = $navBuilder->build($documents, $version);
-        $search = $searchBuilder->build($documents, $version, $this->openApiSearchEntries($version));
+        $search = $searchBuilder->build($documents, $version);
 
-        $apiGroup = $this->openApi?->navGroup($this->routePrefix, $version, $this->urlDefaultVersion());
-
-        if ($apiGroup !== null && $this->openApiDocuments($version) !== []) {
-            // Reference pages sit under the hand-written docs, not among them.
-            $tree[] = $apiGroup;
+        if ($this->openApi !== null && $this->openApiDocuments($version) !== []) {
+            // Standalone replaces the tree; otherwise the reference sits under
+            // the hand-written docs as one more section.
+            $tree = Mount::standalone()
+                ? $this->openApi->navTree($version)
+                : [...$tree, ...array_filter([$this->openApi->navGroup($version)])];
         }
 
         $this->store->putNav($tree, $version);
@@ -254,18 +254,6 @@ final class ContentRepository
         }
 
         return [...$documents, ...$this->openApiDocuments($version)];
-    }
-
-    /**
-     * @return list<SearchDocument>
-     */
-    private function openApiSearchEntries(?string $version): array
-    {
-        if ($this->openApi === null || $this->openApiDocuments($version) === []) {
-            return [];
-        }
-
-        return $this->openApi->searchEntries($this->routePrefix, $version);
     }
 
     /**

@@ -29,12 +29,9 @@ final class SearchIndexBuilder
 
     /**
      * @param  list<Document>  $documents
-     * @param  list<SearchDocument>  $extra  Entries for sections that are not
-     *                                       pages of their own, such as one
-     *                                       OpenAPI operation among many.
      * @return array{documents: list<SearchDocument>, hash: string}
      */
-    public function build(array $documents, ?string $version = null, array $extra = []): array
+    public function build(array $documents, ?string $version = null): array
     {
         $entries = [];
 
@@ -54,8 +51,6 @@ final class SearchIndexBuilder
                 'access' => $access,
             ];
         }
-
-        $entries = [...$entries, ...$extra];
 
         $payload = ['documents' => $entries];
         $json = json_encode($payload, JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);

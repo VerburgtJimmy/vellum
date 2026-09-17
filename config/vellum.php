@@ -136,6 +136,9 @@ return [
     | a file, or leave it null and let Scramble export one when it is
     | installed. Pages mount at {route.prefix}/{openapi.prefix}.
     |
+    | mount: 'docs' puts the reference inside the docs site at
+    | {route.prefix}/{openapi.prefix}. 'standalone' mounts it at
+    | /{openapi.prefix} with a sidebar of its own, for API-first projects.
     | group_by: tag (default) or path, which groups by first path segment.
     | untagged_label: page name for operations with no tag (or no path segment).
     | samples: languages for the request examples, in tab order.
@@ -146,6 +149,7 @@ return [
         'enabled' => false,
         'spec' => null,
         'scramble' => true,
+        'mount' => 'docs',
         'prefix' => 'api',
         'title' => 'API reference',
         'icon' => null,
