@@ -432,3 +432,23 @@ it('lets a long token in inline code wrap rather than widen the page', function 
     expect($css)->not->toBeFalse()
         ->and($css)->toMatch('/\[data-vellum-inline-code\]\{[^}]*overflow-wrap:anywhere/');
 });
+
+it('lights every heading whose section is on screen, not only the last one passed', function (): void {
+    $this->writeDoc('index.md', "---\ntitle: Home\n---\n## One\n\nA\n\n## Two\n\nB");
+
+    $html = (string) $this->get('/docs')->assertOk()->getContent();
+
+    // A set rather than a single id: three short sections in view means three
+    // entries lit, which a single activeId cannot express.
+    expect($html)->toContain('activeIds.includes(')
+        ->and($html)->not->toContain('activeId === ');
+});
+
+it('ships a scroll spy that measures sections rather than heading elements', function (): void {
+    $js = (string) file_get_contents(dirname(__DIR__, 2).'/resources/dist/vellum.js');
+
+    // A heading scrolled off the top must keep its section lit, so the spy
+    // works from section ranges and no longer observes the headings alone.
+    expect($js)->toContain('visibleIds')
+        ->and($js)->not->toContain('IntersectionObserver');
+});

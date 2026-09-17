@@ -12,14 +12,18 @@ export function vellumScrollSpy(items = [], pageTitle = 'On this page') {
   return {
     pageTitle,
     activeId: normalized[0]?.id ?? '',
+    // Every heading whose section is on screen, not just the one last
+    // scrolled past. A reader looking at three short sections at once should
+    // see three entries lit, and the rail should cover all of them.
+    activeIds: normalized[0] ? [normalized[0].id] : [],
     activeTitle: normalized[0]?.text || pageTitle,
     ids: normalized.map((item) => item.id),
     titles: Object.fromEntries(normalized.map((item) => [item.id, item.text || item.id])),
     progress: 0,
     open: false,
-    observer: null,
     resizeObserver: null,
     _onScroll: null,
+    _frame: 0,
     init() {
       this.updateActiveTitle()
       this.updateProgress()
@@ -33,50 +37,100 @@ export function vellumScrollSpy(items = [], pageTitle = 'On this page') {
         }
       }
 
-      this._onScroll = () => this.updateProgress()
+      this._onScroll = () => this.schedule()
       window.addEventListener('scroll', this._onScroll, { passive: true })
-
-      if (this.ids.length === 0 || typeof IntersectionObserver === 'undefined') {
+      window.addEventListener('resize', this._onScroll, { passive: true })
+      this.schedule()
+    },
+    /**
+     * Measuring on every scroll event is wasteful; once a frame is both
+     * enough and the most often anything on screen can actually change.
+     */
+    schedule() {
+      if (this._frame) {
         return
       }
 
-      const ratios = new Map()
-
-      this.observer = new IntersectionObserver(
-        (entries) => {
-          for (const entry of entries) {
-            ratios.set(entry.target.id, entry.isIntersecting ? entry.intersectionRatio : 0)
-          }
-
-          let bestId = this.activeId
-          let bestRatio = -1
-
-          for (const id of this.ids) {
-            const ratio = ratios.get(id) ?? 0
-            if (ratio > bestRatio) {
-              bestRatio = ratio
-              bestId = id
-            }
-          }
-
-          if (bestRatio > 0) {
-            this.activeId = bestId
-            this.updateActiveTitle()
-            this.updateIndicator()
-          }
-        },
-        {
-          rootMargin: '0px 0px -65% 0px',
-          threshold: [0, 0.1, 0.25, 0.5, 1],
-        },
-      )
+      this._frame = requestAnimationFrame(() => {
+        this._frame = 0
+        this.updateProgress()
+        this.syncActive()
+      })
+    },
+    /**
+     * A heading counts as active while any part of the section it introduces
+     * is in view. Watching the heading element alone would leave a long
+     * section with nothing lit the moment its title scrolled off the top.
+     */
+    visibleIds() {
+      const positions = []
 
       for (const id of this.ids) {
         const el = document.getElementById(id)
         if (el) {
-          this.observer.observe(el)
+          positions.push({ id, top: el.getBoundingClientRect().top })
         }
       }
+
+      if (positions.length === 0) {
+        return []
+      }
+
+      const article = document.querySelector('[data-vellum-article]')
+      const end = article ? article.getBoundingClientRect().bottom : Number.MAX_SAFE_INTEGER
+      const top = this.viewportTop()
+      const bottom = window.innerHeight
+      const visible = []
+
+      for (let i = 0; i < positions.length; i++) {
+        const start = positions[i].top
+        const stop = i + 1 < positions.length ? positions[i + 1].top : end
+
+        if (start < bottom && stop > top) {
+          visible.push(positions[i].id)
+        }
+      }
+
+      if (visible.length > 0) {
+        return visible
+      }
+
+      // Above the first heading or past the end of the article: keep the
+      // nearest heading behind us lit rather than showing nothing at all.
+      const behind = positions.filter((item) => item.top <= top).pop()
+
+      return [behind?.id ?? positions[0].id]
+    },
+    /**
+     * The sticky header covers the top of the viewport, so a heading tucked
+     * underneath it is not really on screen.
+     */
+    viewportTop() {
+      const header = document.querySelector('[data-vellum-header]')
+
+      if (!header) {
+        return 0
+      }
+
+      const rect = header.getBoundingClientRect()
+
+      return rect.top <= 0 ? Math.max(0, rect.bottom) : 0
+    },
+    syncActive() {
+      const visible = this.visibleIds()
+      const changed = visible.length !== this.activeIds.length
+        || visible.some((id, index) => id !== this.activeIds[index])
+
+      if (!changed) {
+        return
+      }
+
+      this.activeIds = visible
+      this.activeId = visible[0] ?? ''
+      this.updateActiveTitle()
+      // After the bold lands: a heavier weight can rewrap a long entry and
+      // shift every link below it, and the rail is drawn from those offsets.
+      this.updateIndicator()
     },
     tocNav() {
       return this.$el.querySelector('[data-vellum-toc-nav]')
@@ -169,20 +223,25 @@ export function vellumScrollSpy(items = [], pageTitle = 'On this page') {
         dot.style.offsetPath = `path("${d}")`
       }
 
-      const active = positions.find((item) => item.id === this.activeId) ?? positions[0]
-      nav.style.setProperty('--track-top', `${active.top}px`)
-      nav.style.setProperty('--track-bottom', `${active.bottom}px`)
-      nav.style.setProperty('--offset-distance', `${(active.top + active.bottom) / 2}px`)
+      // The rail covers the whole run of active entries, first to last.
+      const lit = positions.filter((item) => this.activeIds.includes(item.id))
+      const first = lit[0] ?? positions.find((item) => item.id === this.activeId) ?? positions[0]
+      const last = lit[lit.length - 1] ?? first
+
+      nav.style.setProperty('--track-top', `${first.top}px`)
+      nav.style.setProperty('--track-bottom', `${last.bottom}px`)
+      nav.style.setProperty('--offset-distance', `${(first.top + first.bottom) / 2}px`)
       nav.style.setProperty('--toc-dot-opacity', '1')
     },
     updateIndicator() {
       this.$nextTick(() => this.updateRail())
     },
     destroy() {
-      this.observer?.disconnect()
       this.resizeObserver?.disconnect()
+
       if (this._onScroll) {
         window.removeEventListener('scroll', this._onScroll)
+        window.removeEventListener('resize', this._onScroll)
       }
     },
     scrollTo(id) {
@@ -192,6 +251,7 @@ export function vellumScrollSpy(items = [], pageTitle = 'On this page') {
       }
 
       this.activeId = id
+      this.activeIds = [id]
       this.updateActiveTitle()
       this.open = false
       this.updateIndicator()

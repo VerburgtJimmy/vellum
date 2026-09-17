@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- The table of contents now marks every heading whose section is on screen, not only the last one scrolled past. The rail covers the whole run rather than a single entry. It used to watch heading elements, so a long section went dark the moment its title scrolled off the top; it now measures each section from its heading to the next one
 - `docs/why.md` grew from a 235-word note into a comparison page. It leads with the two ways Vellum ships the same Markdown, served from the app or exported static, including the limits of the static snapshot, then names the alternatives directly (Fumadocs, Mintlify, VitePress, Docusaurus, a wiki) and says what each is better at. The gating and export claims in it are the ones `GatingTest` and `CommandsTest` already cover
 
 ## [0.5.2] - 2026-09-17
