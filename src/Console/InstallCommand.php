@@ -23,7 +23,6 @@ final class InstallCommand extends Command
 
         $this->publishConfig($packageRoot, $force);
         $this->copyStubs($packageRoot, $force);
-        $this->copyPreviews($packageRoot, $force);
         $this->copyDist($packageRoot);
 
         $this->newLine();
@@ -65,48 +64,6 @@ final class InstallCommand extends Command
         }
 
         $this->info('Published config: '.$target);
-    }
-
-    /**
-     * Publish the example preview views.
-     *
-     * They go to previews.path rather than the docs directory, because a
-     * preview is a view in the application and not a page. The stub docs
-     * reference both, so a fresh install has a preview that actually renders
-     * rather than a page describing one.
-     */
-    private function copyPreviews(string $packageRoot, bool $force): void
-    {
-        $source = $packageRoot.'/resources/previews';
-        $target = (string) config('vellum.previews.path', resource_path('views/vellum-previews'));
-
-        if (! is_dir($source)) {
-            return;
-        }
-
-        if (! is_dir($target) && ! mkdir($target, 0755, true) && ! is_dir($target)) {
-            $this->error('Unable to create previews directory: '.$target);
-
-            return;
-        }
-
-        $copied = 0;
-
-        foreach (glob($source.'/*.blade.php') ?: [] as $file) {
-            $destination = $target.DIRECTORY_SEPARATOR.basename($file);
-
-            if (is_file($destination) && ! $force) {
-                continue;
-            }
-
-            if (copy($file, $destination)) {
-                $copied++;
-            }
-        }
-
-        if ($copied > 0) {
-            $this->info(sprintf('Copied %d preview view%s to %s', $copied, $copied === 1 ? '' : 's', $target));
-        }
     }
 
     private function copyStubs(string $packageRoot, bool $force): void

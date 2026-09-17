@@ -1168,35 +1168,3 @@ html {
   }
 }
 
-
-/* Live previews
-   ----------------------------------------------------------------------
-   The frame carries the host application's stylesheets, so nothing here
-   may reach inside it. These rules are the box around it only. */
-
-.vellum-preview {
-  margin: 1.5rem 0;
-}
-
-.vellum-preview [data-vellum-preview-frame] {
-  display: block;
-  width: 100%;
-  min-height: 4rem;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: var(--card);
-  /* Until the frame reports its height, which it does on load. */
-  height: 12rem;
-  transition: height 160ms ease;
-  color-scheme: normal;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .vellum-preview [data-vellum-preview-frame] {
-    transition: none;
-  }
-}
-
-.vellum-preview .vellum-code {
-  margin: 0;
-}

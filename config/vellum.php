@@ -128,27 +128,6 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Live previews
-    |--------------------------------------------------------------------------
-    |
-    | :::preview[name] renders a Blade view from 'path' beside its own source.
-    | Views resolve only from there, never an arbitrary path.
-    |
-    | Each preview is shown in its own frame so the application's stylesheets
-    | can be loaded without restyling the docs around it. List them in
-    | 'stylesheets': the built CSS your components need, as URLs.
-    |
-    | Previews compile once at build time, so a view that reads the database
-    | fails the build rather than freezing one row into the page.
-    |
-    */
-    'previews' => [
-        'path' => resource_path('views/vellum-previews'),
-        'stylesheets' => [],
-    ],
-
-    /*
-    |--------------------------------------------------------------------------
     | Build checks
     |--------------------------------------------------------------------------
     |

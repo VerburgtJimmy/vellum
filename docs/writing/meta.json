@@ -1,11 +1,5 @@
 {
     "title": "Writing",
     "defaultOpen": true,
-    "pages": [
-        "markdown",
-        "code-blocks",
-        "images",
-        "previews",
-        "navigation"
-    ]
+    "pages": ["markdown", "code-blocks", "images", "navigation"]
 }

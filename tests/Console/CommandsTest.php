@@ -458,36 +458,3 @@ it('skips the export sitemap when no origin is configured', function (): void {
 
     $this->deleteDirectory($out);
 });
-
-it('carries previews into a static export with no extra files', function (): void {
-    $out = sys_get_temp_dir().'/vellum-tests/export-preview-'.$this->fixtureId();
-    $previews = sys_get_temp_dir().'/vellum-tests/previews-export-'.$this->fixtureId();
-
-    foreach ([$out, $previews] as $directory) {
-        if (is_dir($directory)) {
-            $this->deleteDirectory($directory);
-        }
-    }
-
-    mkdir($previews, 0755, true);
-    file_put_contents($previews.'/button.blade.php', '<button class="btn">Save</button>');
-
-    config()->set('vellum.previews.path', $previews);
-    config()->set('vellum.previews.stylesheets', ['/build/app.css']);
-    config()->set('vellum.export.out', $out);
-
-    $this->writeDoc('index.md', "---\ntitle: Home\n---\n:::preview[button]\n:::");
-
-    $this->artisan('vellum:export')->assertSuccessful();
-
-    $html = (string) file_get_contents($out.'/docs/index.html');
-
-    // The frame travels in the page as srcdoc, so a static host needs no
-    // route and no companion file for it.
-    expect($html)->toContain('data-vellum-preview-frame')
-        ->toContain('&lt;button class=&quot;btn&quot;&gt;Save&lt;/button&gt;')
-        ->toContain('/build/app.css');
-
-    $this->deleteDirectory($out);
-    $this->deleteDirectory($previews);
-});
