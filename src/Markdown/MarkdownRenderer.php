@@ -20,6 +20,7 @@ use Vellum\Markdown\Extensions\DirectiveExtension;
 use Vellum\Markdown\Extensions\ExternalLinkExtension;
 use Vellum\Markdown\Extensions\HeadingAnchorExtension;
 use Vellum\Markdown\Extensions\ImageExtension;
+use Vellum\Markdown\Extensions\PreviewExtension;
 use Vellum\Markdown\Extensions\StepsExtension;
 use Vellum\Markdown\Extensions\TableExtension;
 use Vellum\Markdown\Extensions\TabsExtension;
@@ -84,6 +85,7 @@ final class MarkdownRenderer
         $this->environment->addExtension(new StepsExtension);
         $this->environment->addExtension(new CardsExtension);
         $this->environment->addExtension(new ImageExtension($contentPath, $assetPrefix, $imageReport));
+        $this->environment->addExtension(new PreviewExtension);
         $this->environment->addExtension(new ExternalLinkExtension($appUrl));
 
         $this->parser = new MarkdownParser($this->environment);

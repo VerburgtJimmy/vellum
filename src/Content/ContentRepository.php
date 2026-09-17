@@ -7,6 +7,7 @@ namespace Vellum\Content;
 use Vellum\Cache\CompiledStore;
 use Vellum\Exceptions\DuplicateSlugException;
 use Vellum\Exceptions\UnknownDirectiveException;
+use Vellum\Markdown\Extensions\Preview\PreviewRenderer;
 use Vellum\Markdown\Islands\MarkdownPipeline;
 use Vellum\Markdown\MarkdownRenderer;
 use Vellum\Search\SearchVisibility;
@@ -485,6 +486,7 @@ final class ContentRepository
 
         // A renderer has no idea which document it is inside, so tell it.
         $this->imageReport->forPage($slug, $version);
+        PreviewRenderer::compiling($absolutePath);
 
         try {
             $rendered = $this->pipelineFor($version)->convert($body);

@@ -440,6 +440,47 @@ function vellumOpenMenu() {
 /**
  * Tabs root state: roving tabindex, arrow-key navigation, optional persist.
  */
+/**
+ * Keeps a preview frame the right height and in the right theme.
+ *
+ * The frame is its own document, so it cannot see the reader's theme choice
+ * and the page cannot see how tall its contents are. Two messages settle both.
+ */
+function vellumPreview(id) {
+  return {
+    height: 0,
+    _onMessage: null,
+    _observer: null,
+    init() {
+      this._onMessage = (event) => {
+        const data = event.data || {}
+        if (data.vellumPreview === 'height' && data.id === id) {
+          this.height = data.height
+        }
+      }
+      window.addEventListener('message', this._onMessage)
+
+      const send = () => this.sendTheme()
+      this._observer = new MutationObserver(send)
+      this._observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
+      this.$refs.frame?.addEventListener('load', send)
+      send()
+    },
+    sendTheme() {
+      this.$refs.frame?.contentWindow?.postMessage(
+        { vellumPreview: 'theme', dark: document.documentElement.classList.contains('dark') },
+        '*',
+      )
+    },
+    destroy() {
+      this._observer?.disconnect()
+      if (this._onMessage) {
+        window.removeEventListener('message', this._onMessage)
+      }
+    },
+  }
+}
+
 function vellumTabs(initial = '', persist = null) {
   return {
     active: initial,
@@ -503,6 +544,7 @@ function vellumTabs(initial = '', persist = null) {
 if (!window.Alpine) {
   Alpine.plugin(collapse)
   Alpine.data('vellumTabs', vellumTabs)
+  Alpine.data('vellumPreview', vellumPreview)
   Alpine.data('vellumPopover', vellumPopover)
   Alpine.data('vellumTooltip', vellumTooltip)
   Alpine.data('vellumDialog', vellumDialog)

@@ -19,6 +19,8 @@ Published as `config/vellum.php`. **0.5 freezes these names.** Add values, do no
 | `links` | `[]` | Extra links in the sidebar footer (`label`, `href`, optional `icon: github`) |
 | `layout.search` | `sidebar` | `sidebar` or `header` |
 | `fonts` | `null` | HTML injected into the layout head |
+| `previews.path` | `resource_path('views/vellum-previews')` | Where `:::preview` looks for views |
+| `previews.stylesheets` | `[]` | Stylesheet URLs loaded inside each preview frame |
 | `checks.references` | `true` | Warn at build time about links and images that point at nothing |
 | `checks.strict` | `false` | Turn those warnings into a failed build |
 | `cache.path` | `storage_path('framework/vellum')` | Compile cache |
