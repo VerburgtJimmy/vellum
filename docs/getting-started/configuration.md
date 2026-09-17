@@ -1,6 +1,6 @@
 ---
 title: Configuration
-description: Frozen config keys and frontmatter for Vellum 0.5.
+description: Config keys and frontmatter, frozen since 0.5.
 ---
 
 Published as `config/vellum.php`. **0.5 freezes these names.** Add values, do not rename keys.
@@ -90,6 +90,22 @@ See [Release notes](/docs/releases).
     'unreleased' => false,
 ],
 ```
+
+## OpenAPI
+
+Added in 0.6, off by default. Renders an OpenAPI 3.0 or 3.1 spec as reference pages under the docs site.
+
+| Key | Default | Purpose |
+| --- | --- | --- |
+| `openapi.enabled` | `false` | Turn the reference pages on |
+| `openapi.spec` | `null` | Absolute path to a `.json` or `.yaml` spec. Wins over Scramble |
+| `openapi.scramble` | `true` | Export a spec from `dedoc/scramble` when it is installed and `spec` is null |
+| `openapi.prefix` | `api` | Pages mount at `{route.prefix}/{openapi.prefix}` |
+| `openapi.title` | `API reference` | Sidebar group and overview heading |
+| `openapi.icon` | `null` | Icon for the sidebar group |
+| `openapi.group_by` | `tag` | `tag`, or `path` to group by first path segment |
+| `openapi.samples` | `['curl', 'php', 'javascript']` | Sample languages, in tab order |
+| `openapi.base_url` | `null` | Overrides `servers[0].url` in samples |
 
 ## Frontmatter
 

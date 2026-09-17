@@ -35,7 +35,7 @@ final class RefResolver
         $this->warnings = [];
 
         /** @var array<string, mixed> $resolved */
-        $resolved = $this->walk($document, $document, []);
+        $resolved = $this->walk($document, $document, [], '');
 
         return $resolved;
     }
@@ -52,23 +52,23 @@ final class RefResolver
      * @param  array<string, mixed>  $root
      * @param  list<string>  $stack
      */
-    private function walk(mixed $node, array $root, array $stack): mixed
+    private function walk(mixed $node, array $root, array $stack, string $pointer): mixed
     {
         if (! is_array($node)) {
             return $node;
         }
 
         if (isset($node['$ref']) && is_string($node['$ref'])) {
-            return $this->expand($node, $root, $stack);
+            return $this->expand($node, $root, $stack, $pointer);
         }
 
         $out = [];
 
         foreach ($node as $key => $value) {
-            $out[$key] = $this->walk($value, $root, $stack);
+            $out[$key] = $this->walk($value, $root, $stack, $pointer === '' ? (string) $key : $pointer.'.'.$key);
         }
 
-        return isset($out['allOf']) ? $this->mergeAllOf($out) : $out;
+        return isset($out['allOf']) ? $this->mergeAllOf($out, $pointer) : $out;
     }
 
     /**
@@ -77,7 +77,7 @@ final class RefResolver
      * @param  list<string>  $stack
      * @return array<string, mixed>
      */
-    private function expand(array $node, array $root, array $stack): array
+    private function expand(array $node, array $root, array $stack, string $pointer): array
     {
         /** @var string $ref */
         $ref = $node['$ref'];
@@ -103,10 +103,10 @@ final class RefResolver
         }
 
         /** @var array<string, mixed> $resolved */
-        $resolved = $this->walk($target, $root, [...$stack, $ref]);
+        $resolved = $this->walk($target, $root, [...$stack, $ref], $pointer);
 
         /** @var array<string, mixed> $walkedSiblings */
-        $walkedSiblings = $this->walk($siblings, $root, $stack);
+        $walkedSiblings = $this->walk($siblings, $root, $stack, $pointer);
 
         return $walkedSiblings + $resolved;
     }
@@ -135,10 +135,17 @@ final class RefResolver
     /**
      * Fold allOf members into the schema that declared them.
      *
+     * The rules, in the absence of anything decisive in the specification:
+     * properties accumulate, required is a union, and description and example
+     * take the last value given, so the most specific wrapper has the final
+     * word. Everything else keeps the first value, since the declaring schema
+     * is the one the author was looking at. A genuine type disagreement is not
+     * resolvable and warns rather than picking a winner quietly.
+     *
      * @param  array<string, mixed>  $schema
      * @return array<string, mixed>
      */
-    private function mergeAllOf(array $schema): array
+    private function mergeAllOf(array $schema, string $pointer): array
     {
         $members = $schema['allOf'];
         unset($schema['allOf']);
@@ -147,32 +154,93 @@ final class RefResolver
             return $schema;
         }
 
-        $merged = $schema;
+        // The declaring schema is simply the first source to be merged.
+        $sources = [$schema, ...array_values(array_filter($members, is_array(...)))];
 
-        foreach ($members as $member) {
-            if (! is_array($member)) {
-                continue;
+        $properties = [];
+        $required = [];
+        $types = [];
+
+        foreach ($sources as $source) {
+            if (is_array($source['properties'] ?? null)) {
+                // Accumulate, and let the earliest definition of a name stand.
+                $properties += $source['properties'];
             }
 
-            $memberProperties = is_array($member['properties'] ?? null) ? $member['properties'] : [];
-            $mergedProperties = is_array($merged['properties'] ?? null) ? $merged['properties'] : [];
-            $memberRequired = is_array($member['required'] ?? null) ? $member['required'] : [];
-            $mergedRequired = is_array($merged['required'] ?? null) ? $merged['required'] : [];
-
-            unset($member['properties'], $member['required']);
-
-            // The declaring schema wins on scalars; properties and required accumulate.
-            $merged = $merged + $member;
-
-            if ($memberProperties !== [] || $mergedProperties !== []) {
-                $merged['properties'] = $mergedProperties + $memberProperties;
+            if (is_array($source['required'] ?? null)) {
+                $required = [...$required, ...array_values($source['required'])];
             }
 
-            if ($memberRequired !== [] || $mergedRequired !== []) {
-                $merged['required'] = array_values(array_unique([...$mergedRequired, ...$memberRequired]));
+            if (isset($source['type'])) {
+                $types[] = $source['type'];
             }
         }
 
+        $merged = [];
+
+        foreach ($sources as $source) {
+            unset($source['properties'], $source['required']);
+
+            foreach (['description', 'example'] as $lastWins) {
+                if (array_key_exists($lastWins, $source)) {
+                    $merged[$lastWins] = $source[$lastWins];
+                    unset($source[$lastWins]);
+                }
+            }
+
+            // Everything else keeps the first value seen.
+            $merged += $source;
+        }
+
+        $this->warnConflictingTypes($types, $pointer);
+
+        if ($properties !== []) {
+            $merged['properties'] = $properties;
+        }
+
+        if ($required !== []) {
+            $merged['required'] = array_values(array_unique($required));
+        }
+
         return $merged;
+    }
+
+    /**
+     * @param  list<mixed>  $types
+     */
+    private function warnConflictingTypes(array $types, string $pointer): void
+    {
+        $seen = [];
+
+        foreach ($types as $type) {
+            // 3.1 allows a list of types; order within it is not meaningful.
+            $normalised = is_array($type)
+                ? implode('|', array_map(strval(...), $this->sorted($type)))
+                : (string) $type;
+
+            $seen[$normalised] = true;
+        }
+
+        if (count($seen) < 2) {
+            return;
+        }
+
+        $names = implode(', ', array_map(static fn (string $t): string => "[{$t}]", array_keys($seen)));
+        $where = $pointer === '' ? 'the root schema' : "[{$pointer}]";
+        $kept = array_key_first($seen);
+
+        $this->warnings[] = "allOf at {$where} merges conflicting types: {$names}. Kept [{$kept}].";
+    }
+
+    /**
+     * @param  array<array-key, mixed>  $values
+     * @return list<mixed>
+     */
+    private function sorted(array $values): array
+    {
+        $values = array_values($values);
+        sort($values);
+
+        return $values;
     }
 }

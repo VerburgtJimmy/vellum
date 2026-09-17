@@ -161,8 +161,96 @@ it('merges allOf into the schema that declared it', function (): void {
         ->and(array_keys($schema['properties']))->toBe(['id', 'name', 'email'])
         ->and($schema['required'])->toBe(['id', 'email'])
         ->and($schema['type'])->toBe('object')
-        // The declaring schema wins, so a wrapper can relabel what it extends.
-        ->and($schema['description'])->toBe('A named pet');
+        // Last wins for description: the declaring schema is merged first, so
+        // a member that carries one has the final word.
+        ->and($schema['description'])->toBe('The base');
+});
+
+it('gives the last allOf member the final word on description and example', function (): void {
+    $path = specFile('api.json', json_encode([
+        'openapi' => '3.0.0',
+        'paths' => ['/pets' => ['get' => ['responses' => ['200' => [
+            'description' => 'OK',
+            'content' => ['application/json' => ['schema' => [
+                'description' => 'Declared',
+                'example' => ['from' => 'declaring'],
+                'allOf' => [
+                    ['type' => 'object', 'description' => 'Middle', 'example' => ['from' => 'middle']],
+                    ['type' => 'object', 'description' => 'Last', 'example' => ['from' => 'last']],
+                ],
+            ]]],
+        ]]]]],
+    ], JSON_THROW_ON_ERROR));
+
+    $spec = (new SpecParser)->parseFile($path);
+    $schema = $spec->operations[0]->responses['200']['content']['application/json']['schema'];
+
+    expect($schema['description'])->toBe('Last')
+        ->and($schema['example'])->toBe(['from' => 'last'])
+        ->and($spec->warnings)->toBe([]);
+});
+
+it('keeps the first value for everything except description and example', function (): void {
+    $path = specFile('api.json', json_encode([
+        'openapi' => '3.0.0',
+        'paths' => ['/pets' => ['get' => ['responses' => ['200' => [
+            'description' => 'OK',
+            'content' => ['application/json' => ['schema' => [
+                'title' => 'Declared',
+                'allOf' => [['type' => 'object', 'title' => 'Member']],
+            ]]],
+        ]]]]],
+    ], JSON_THROW_ON_ERROR));
+
+    $spec = (new SpecParser)->parseFile($path);
+    $schema = $spec->operations[0]->responses['200']['content']['application/json']['schema'];
+
+    expect($schema['title'])->toBe('Declared');
+});
+
+it('warns when allOf members disagree about type', function (): void {
+    $path = specFile('api.json', json_encode([
+        'openapi' => '3.0.0',
+        'paths' => ['/pets' => ['get' => ['responses' => ['200' => [
+            'description' => 'OK',
+            'content' => ['application/json' => ['schema' => [
+                'allOf' => [['type' => 'object'], ['type' => 'string']],
+            ]]],
+        ]]]]],
+    ], JSON_THROW_ON_ERROR));
+
+    $spec = (new SpecParser)->parseFile($path);
+    $schema = $spec->operations[0]->responses['200']['content']['application/json']['schema'];
+
+    expect($spec->warnings)->toHaveCount(1)
+        ->and($spec->warnings[0])->toContain('[object], [string]')
+        ->and($spec->warnings[0])->toContain('Kept [object]')
+        // The warning names where, because a big spec has many allOf blocks.
+        ->and($spec->warnings[0])->toContain('paths./pets.get.responses.200')
+        ->and($schema['type'])->toBe('object');
+});
+
+it('does not call a repeated type a conflict', function (): void {
+    $path = specFile('api.json', json_encode([
+        'openapi' => '3.1.0',
+        'paths' => ['/pets' => ['get' => ['responses' => ['200' => [
+            'description' => 'OK',
+            'content' => ['application/json' => ['schema' => [
+                'type' => 'object',
+                'allOf' => [
+                    ['type' => 'object', 'properties' => ['a' => ['type' => 'string']]],
+                    // 3.1 type lists are unordered, so this is the same type.
+                    ['type' => ['object', 'null']],
+                    ['type' => ['null', 'object']],
+                ],
+            ]]],
+        ]]]]],
+    ], JSON_THROW_ON_ERROR));
+
+    $spec = (new SpecParser)->parseFile($path);
+
+    expect($spec->warnings)->toHaveCount(1)
+        ->and($spec->warnings[0])->toContain('[object], [null|object]');
 });
 
 it('stops a circular schema at its second appearance', function (): void {

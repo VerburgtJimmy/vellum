@@ -5,6 +5,12 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Internal
+
+- OpenAPI spec reading, the first step of reference-page rendering. Parses JSON and YAML for 3.0 and 3.1, inlines local `$ref`, and merges `allOf` by accumulating properties, taking the union of `required`, letting the last source set `description` and `example`, and warning when members disagree about `type`. A remote `$ref` degrades to an empty object with a warning; a schema that references itself stops with a marker rather than exhausting memory. Specs come from `openapi.spec`, or from `dedoc/scramble` through its Artisan command. Nothing renders yet, so there is nothing here for readers
+
 ## [0.6.0]
 
 ### Added
