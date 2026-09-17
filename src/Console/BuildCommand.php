@@ -115,6 +115,9 @@ final class BuildCommand extends Command
      * @param  list<Document>  $documents
      */
     /**
+     * Returns the count that --strict acts on, which is errors only: a
+     * heading that skips a level is worth saying and not worth failing on.
+     *
      * @param  list<Document>  $documents
      */
     private function reportBrokenReferences(array $documents, ContentRepository $repository): int
@@ -124,18 +127,24 @@ final class BuildCommand extends Command
         }
 
         $findings = (new LinkChecker)->check($documents, $repository);
+        $errors = 0;
 
         foreach ($findings as $finding) {
+            $notice = $finding['severity'] === 'notice';
+
             $this->warn(sprintf(
-                'Broken %s on %s: %s (%s)',
+                '%s %s on %s: %s (%s)',
+                $notice ? 'Check' : 'Broken',
                 $finding['kind'],
                 $finding['page'] === '' ? '/' : $finding['page'],
                 $finding['target'],
                 $finding['message'],
             ));
+
+            $errors += $notice ? 0 : 1;
         }
 
-        return count($findings);
+        return $errors;
     }
 
     /**

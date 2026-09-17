@@ -12,6 +12,7 @@ use League\CommonMark\Node\Block\Document;
 use League\CommonMark\Parser\MarkdownParser;
 use League\CommonMark\Renderer\HtmlRenderer;
 use Vellum\Content\HeadingExtractor;
+use Vellum\Content\ImageReport;
 use Vellum\Markdown\Extensions\CalloutExtension;
 use Vellum\Markdown\Extensions\CardsExtension;
 use Vellum\Markdown\Extensions\CodeBlockExtension;
@@ -44,6 +45,7 @@ final class MarkdownRenderer
         ?string $contentPath = null,
         ?string $appUrl = null,
         ?string $assetPrefix = null,
+        ?ImageReport $imageReport = null,
     ) {
         $this->environment = new Environment([
             'html_input' => 'strip',
@@ -81,7 +83,7 @@ final class MarkdownRenderer
         $this->environment->addExtension(new TabsExtension);
         $this->environment->addExtension(new StepsExtension);
         $this->environment->addExtension(new CardsExtension);
-        $this->environment->addExtension(new ImageExtension($contentPath, $assetPrefix));
+        $this->environment->addExtension(new ImageExtension($contentPath, $assetPrefix, $imageReport));
         $this->environment->addExtension(new ExternalLinkExtension($appUrl));
 
         $this->parser = new MarkdownParser($this->environment);

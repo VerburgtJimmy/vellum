@@ -146,3 +146,79 @@ it('can be switched off entirely', function (): void {
 
     $this->artisan('vellum:build', ['--strict' => true])->assertSuccessful();
 });
+
+it('hears about a missing image from the renderer, not from the shape of the url', function (): void {
+    $this->writeDoc('start.md', "---\ntitle: Start\n---\n![Missing](assets/nope.png)");
+
+    $repository = ContentRepository::fromConfig();
+    $repository->buildAll();
+    $reported = $repository->imageReport()->all();
+
+    expect($reported)->toHaveCount(1)
+        ->and($reported[0]['page'])->toBe('start')
+        ->and($reported[0]['url'])->toBe('assets/nope.png')
+        ->and($reported[0]['path'])->toEndWith('assets/nope.png');
+});
+
+it('keeps quiet in the report when an image resolves', function (): void {
+    $this->writeDoc('assets/there.svg', '<svg xmlns="http://www.w3.org/2000/svg"></svg>');
+    $this->writeDoc('start.md', "---\ntitle: Start\n---\n![There](assets/there.svg)");
+
+    $repository = ContentRepository::fromConfig();
+    $repository->buildAll();
+
+    expect($repository->imageReport()->all())->toBe([]);
+});
+
+it('does not carry a missing image from one build into the next', function (): void {
+    $this->writeDoc('start.md', "---\ntitle: Start\n---\n![Missing](assets/nope.png)");
+
+    $repository = ContentRepository::fromConfig();
+    $repository->buildAll();
+    $repository->buildAll();
+
+    expect($repository->imageReport()->all())->toHaveCount(1);
+});
+
+it('names the page a missing image is on, even across versions', function (): void {
+    config()->set('vellum.versions', ['enabled' => true, 'latest' => 'v2', 'list' => ['v2', 'v1'], 'labels' => []]);
+    $this->writeDoc('v2/index.md', "---\ntitle: Home\n---\nHi");
+    $this->writeDoc('v1/old.md', "---\ntitle: Old\n---\n![Missing](assets/nope.png)");
+
+    $repository = ContentRepository::fromConfig();
+    $findings = (new LinkChecker)->check($repository->buildAll(), $repository);
+
+    expect($findings)->toHaveCount(1)
+        ->and($findings[0]['kind'])->toBe('image')
+        ->and($findings[0]['page'])->toBe('/docs/v1/old');
+});
+
+it('reports a heading that skips a level, without failing the build', function (): void {
+    $this->writeDoc('start.md', "---\ntitle: Start\n---\n## Two\n\n#### Four\n\nBody");
+
+    $found = findings($this);
+
+    expect($found)->toHaveCount(1)
+        ->and($found[0]['kind'])->toBe('heading')
+        ->and($found[0]['severity'])->toBe('notice')
+        ->and($found[0]['message'])->toContain('h4 follows h2');
+
+    // Said out loud, but not a reason to stop a deploy.
+    $this->artisan('vellum:build', ['--strict' => true])
+        ->expectsOutputToContain('Check heading on /docs/start')
+        ->assertSuccessful();
+});
+
+it('accepts an outline that only ever goes one level deeper', function (): void {
+    $this->writeDoc('start.md', "---\ntitle: Start\n---\n## Two\n\n### Three\n\n#### Four\n\n## Back to two\n\n### Three again");
+
+    expect(findings($this))->toBe([]);
+});
+
+it('marks broken links as errors and heading skips as notices', function (): void {
+    $this->writeDoc('start.md', "---\ntitle: Start\n---\n## Two\n\n#### Four\n\n[Gone](/docs/moved-away)");
+
+    $severities = array_column(findings($this), 'severity', 'kind');
+
+    expect($severities)->toEqualCanonicalizing(['link' => 'error', 'heading' => 'notice']);
+});

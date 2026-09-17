@@ -16,6 +16,7 @@ use League\CommonMark\Util\HtmlElement;
 use League\CommonMark\Util\RegexHelper;
 use League\Config\ConfigurationAwareInterface;
 use League\Config\ConfigurationInterface;
+use Vellum\Content\ImageReport;
 
 /**
  * Adds lazy loading, local dimensions, and figure/caption wrapping for images.
@@ -31,6 +32,7 @@ final class ImageRenderer implements ConfigurationAwareInterface, NodeRendererIn
     public function __construct(
         private readonly ?string $contentPath = null,
         private readonly ?string $assetPrefix = null,
+        private readonly ?ImageReport $report = null,
     ) {}
 
     public function setConfiguration(ConfigurationInterface $configuration): void
@@ -91,6 +93,10 @@ final class ImageRenderer implements ConfigurationAwareInterface, NodeRendererIn
         $path = rtrim($this->contentPath, '/\\').DIRECTORY_SEPARATOR.str_replace('/', DIRECTORY_SEPARATOR, $relative);
 
         if (! is_file($path)) {
+            // Say so rather than leaving the caller to notice that the URL
+            // came back unchanged. See Vellum\Content\ImageReport.
+            $this->report?->missing($url, $path);
+
             return $url;
         }
 

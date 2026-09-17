@@ -32,6 +32,7 @@ final class ContentRepository
         private readonly string $routePrefix = 'docs',
         private readonly Access $access = new Access,
         private readonly SearchVisibility $visibility = new SearchVisibility,
+        private readonly ImageReport $imageReport = new ImageReport,
     ) {}
 
     /**
@@ -49,6 +50,7 @@ final class ContentRepository
     {
         /** @var array{enabled?: bool, latest?: string, list?: list<string>} $versions */
         $versions = config('vellum.versions', []);
+        $imageReport = new ImageReport;
 
         return new self(
             contentPath: (string) config('vellum.path'),
@@ -56,18 +58,28 @@ final class ContentRepository
             pipeline: new MarkdownPipeline(new MarkdownRenderer(
                 contentPath: (string) config('vellum.path'),
                 appUrl: (string) config('app.url', ''),
+                imageReport: $imageReport,
             )),
             versionsEnabled: (bool) ($versions['enabled'] ?? false),
             latestVersion: $versions['latest'] ?? null,
             versions: $versions['list'] ?? [],
             isLocal: app()->environment('local'),
             routePrefix: (string) config('vellum.route.prefix', 'docs'),
+            imageReport: $imageReport,
         );
     }
 
     public function store(): CompiledStore
     {
         return $this->store;
+    }
+
+    /**
+     * What the image renderer could not resolve during this process.
+     */
+    public function imageReport(): ImageReport
+    {
+        return $this->imageReport;
     }
 
     public function navigationBuilder(): NavigationBuilder
@@ -105,6 +117,9 @@ final class ContentRepository
 
         $documents = [];
         $seen = [];
+
+        // One build, one report: a rebuild must not inherit the last one.
+        $this->imageReport->reset();
 
         foreach ($this->discoverSourceFiles($version) as $source) {
             $slug = $source['slug'];
@@ -468,6 +483,9 @@ final class ContentRepository
             $body = Str::withoutLeadingHeading($body);
         }
 
+        // A renderer has no idea which document it is inside, so tell it.
+        $this->imageReport->forPage($slug, $version);
+
         try {
             $rendered = $this->pipelineFor($version)->convert($body);
         } catch (UnknownDirectiveException $exception) {
@@ -526,6 +544,7 @@ final class ContentRepository
             contentPath: $this->contentPath.DIRECTORY_SEPARATOR.$version,
             appUrl: (string) config('app.url', ''),
             assetPrefix: $version,
+            imageReport: $this->imageReport,
         ));
     }
 

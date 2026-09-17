@@ -9,14 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- `{prefix}/sitemap.xml`, built from the same navigation that renders the sidebar. Gated pages are excluded — including for a signed-in reader, since a sitemap is a single public file — and every version is listed when versions are enabled. It returns a 404 rather than publishing relative URLs when `app.url` is not an origin, the same rule the canonical link already followed
+- `{prefix}/sitemap.xml`, built from the same navigation that renders the sidebar. Gated pages are excluded, including for a signed-in reader, since a sitemap is a single public file, and every version is listed when versions are enabled. It returns a 404 rather than publishing relative URLs when `app.url` is not an origin, the same rule the canonical link already followed
 - `vellum:export` writes `sitemap.xml` at the export root, using `export.base_url` when it names an origin and falling back to `app.url`. A static host cannot generate one for itself. Skipped with a warning when neither is an origin
-- Build-time checking of internal links and images. `vellum:build` warns about a link to a page that is not there, a `#fragment` with no matching heading, and an image with no file behind it. Both failures are silent at runtime: a stale link still renders as a link, and the image renderer falls back to whatever URL it was given, so the page compiles and the only symptom is a broken image nobody reloaded. `--strict` or `checks.strict` turns the warnings into a failed build, for CI
-- `docs/seo.md`, covering the metadata every page emits, the sitemap, and the `robots.txt` worth adding — including disallowing `_vellum/`, since the page actions link to a raw Markdown copy of every page and it would otherwise be crawled and indexed as a near-duplicate
+- Build-time checking of internal links, images and heading levels. `vellum:build` warns about a link to a page that is not there, a `#fragment` with no matching heading, an image the renderer could not resolve, and a heading that skips a level. Missing images are reported by the renderer itself rather than inferred from the URL it emitted, so the check cannot go quiet if that fallback ever changes. Heading skips are notices and do not fail a strict build. Both failures are silent at runtime: a stale link still renders as a link, and a missing image compiles into a page whose only symptom is a broken image nobody reloaded. `--strict` or `checks.strict` turns the warnings into a failed build, for CI
+- `docs/seo.md`, covering the metadata every page emits, the sitemap, and the `robots.txt` worth adding, including disallowing `_vellum/`, since the page actions link to a raw Markdown copy of every page and it would otherwise be crawled and indexed as a near-duplicate
 
 ### Changed
 
-- `docs/why.md` grew from a 235-word note into a comparison page. It leads with the two ways Vellum ships the same Markdown — served from the app, or exported static — including the limits of the static snapshot, then names the alternatives directly (Fumadocs, Mintlify, VitePress, Docusaurus, a wiki) and says what each is better at. The gating and export claims in it are the ones `GatingTest` and `CommandsTest` already cover
+- `docs/why.md` grew from a 235-word note into a comparison page. It leads with the two ways Vellum ships the same Markdown, served from the app or exported static, including the limits of the static snapshot, then names the alternatives directly (Fumadocs, Mintlify, VitePress, Docusaurus, a wiki) and says what each is better at. The gating and export claims in it are the ones `GatingTest` and `CommandsTest` already cover
 
 ## [0.5.2] - 2026-09-17
 

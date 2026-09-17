@@ -1,6 +1,6 @@
 ---
 title: Why Vellum
-description: Laravel documentation that lives in your repo and ships either way — served from the app or exported static. How Vellum compares with Fumadocs, Mintlify and VitePress.
+description: Laravel documentation that lives in your repo and ships either way, served from the app or exported static. How Vellum compares with Fumadocs, Mintlify and VitePress.
 ---
 
 Vellum's premise is a small one: your documentation is Markdown in the Laravel repo, next to the code it describes. It is reviewed in the same pull request, versioned in the same history, and shipped in the same release.
@@ -13,7 +13,7 @@ Where it goes from there is your choice. Serve it from the app at `/docs`, or ex
 
 **Exported to a static site.** `php artisan vellum:export` writes HTML, assets and a MiniSearch index to a directory you can drop on GitHub Pages, Cloudflare Workers, S3 or any host that cannot run PHP. The theme, search, sidebar and components all come along.
 
-The static snapshot has honest limits, and they follow from what it is. Value tags are baked in at export time, so the page shows the config you exported with rather than the config running now. Gated pages are omitted entirely — each one is logged as it drops — because there is no session on a static host to gate against.
+The static snapshot has honest limits, and they follow from what it is. Value tags are baked in at export time, so the page shows the config you exported with rather than the config running now. Gated pages are omitted entirely, and each one is logged as it drops, because there is no session on a static host to gate against.
 
 Plenty of projects use both: the app serves internal docs behind a gate, and an export publishes the public subset. Neither is a fallback for the other, and neither needs a second copy of the Markdown.
 
@@ -27,11 +27,11 @@ If you do serve the docs from Laravel, you get things a separate docs build cann
 
 **One deploy.** Markdown lives in `resources/docs` and compiles in the same release step as your migrations. There is no second pipeline and no window where the app and its docs disagree.
 
-**No Node in your build.** Vellum ships its compiled CSS and JavaScript. `composer require` then `php artisan vellum:install` is the whole install — no bundler to configure, no `node_modules` on your production host.
+**No Node in your build.** Vellum ships its compiled CSS and JavaScript. `composer require` then `php artisan vellum:install` is the whole install. There is no bundler to configure and no `node_modules` on your production host.
 
 ## Compared with the usual choices
 
-**Fumadocs** is excellent, and Vellum's layout owes it a direct debt — the sidebar, the page structure and the general restraint are cues taken from it, which the [credits](/docs/credits) say plainly. If your product is already a Next.js app, Fumadocs is very likely the right answer. The difference is the runtime, not the philosophy: Fumadocs documents a React app from inside React, and Vellum documents a Laravel app from inside Laravel.
+**Fumadocs** is excellent, and Vellum's layout owes it a direct debt. The sidebar, the page structure and the general restraint are cues taken from it, which the [credits](/docs/credits) say plainly. If your product is already a Next.js app, Fumadocs is very likely the right answer. The difference is the runtime, not the philosophy: Fumadocs documents a React app from inside React, and Vellum documents a Laravel app from inside Laravel.
 
 **Mintlify** and other hosted platforms give you a polished site with almost no setup, plus a web editor, analytics and AI search that Vellum does not have. In exchange the content lives on their infrastructure and cannot see your application. For purely public marketing documentation that is often a good trade.
 
@@ -49,6 +49,6 @@ Vellum is the wrong shape for some projects, and it is worth saying which:
 
 ## What 0.5 commits to
 
-Config keys and frontmatter names are frozen. The authoring syntax — `:::` directives, `<x-…>` components and allowlisted value tags — is frozen. Layout chrome can still get bug fixes and visual changes. Breaking changes wait for 1.0. See [Upgrade](/docs/getting-started/upgrade) for the 0.2 to 0.5 path.
+Config keys and frontmatter names are frozen. The authoring syntax is frozen too: `:::` directives, `<x-…>` components and allowlisted value tags. Layout chrome can still get bug fixes and visual changes. Breaking changes wait for 1.0. See [Upgrade](/docs/getting-started/upgrade) for the 0.2 to 0.5 path.
 
 Ready to try it? [Installation](/docs/getting-started/installation) takes about five minutes, and [Export](/docs/export) covers the static path.

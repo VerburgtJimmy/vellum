@@ -15,7 +15,11 @@ use Vellum\Changelog\Changelog;
  * to the URL it was given, so the page compiles, the build passes, and the
  * only symptom is a broken image on a page nobody reloaded.
  *
- * @phpstan-type Finding array{page: string, kind: string, target: string, message: string}
+ * Findings carry a severity. A broken link is an error: something a reader
+ * will hit. A heading that skips a level is a notice: worth fixing, not worth
+ * failing a deploy over, so --strict leaves it alone.
+ *
+ * @phpstan-type Finding array{page: string, kind: string, target: string, message: string, severity: string}
  */
 final class LinkChecker
 {
@@ -31,7 +35,6 @@ final class LinkChecker
     public function check(array $documents, ContentRepository $repository): array
     {
         $known = $this->knownPages($documents, $repository);
-        $contentPath = (string) config('vellum.path');
         $prefix = trim((string) config('vellum.route.prefix', 'docs'), '/');
         $findings = [];
 
@@ -47,13 +50,48 @@ final class LinkChecker
                 }
             }
 
-            foreach ($this->sources($document->html) as $src) {
-                $finding = $this->checkImage($src, $contentPath, $prefix);
-
-                if ($finding !== null) {
-                    $findings[] = ['page' => $here] + $finding;
-                }
+            foreach ($this->headingSkips($document) as $finding) {
+                $findings[] = ['page' => $here] + $finding;
             }
+        }
+
+        foreach ($repository->imageReport()->all() as $missing) {
+            $findings[] = [
+                'page' => $repository->hrefFor($missing['page'], $missing['version']),
+                'kind' => 'image',
+                'target' => $missing['url'],
+                'message' => 'the renderer found no file at '.$missing['path'],
+                'severity' => 'error',
+            ];
+        }
+
+        return $findings;
+    }
+
+    /**
+     * Headings that jump a level, which leaves a gap in the outline a screen
+     * reader navigates by. The page title is the h1, so the body starts at 2.
+     *
+     * @return list<array{kind: string, target: string, message: string, severity: string}>
+     */
+    private function headingSkips(Document $document): array
+    {
+        $previous = 1;
+        $findings = [];
+
+        foreach ($document->headings as $heading) {
+            $level = $heading['level'];
+
+            if ($level > $previous + 1) {
+                $findings[] = [
+                    'kind' => 'heading',
+                    'target' => '#'.$heading['id'],
+                    'message' => sprintf('h%d follows h%d, so the outline skips a level', $level, $previous),
+                    'severity' => 'notice',
+                ];
+            }
+
+            $previous = $level;
         }
 
         return $findings;
@@ -91,7 +129,7 @@ final class LinkChecker
     /**
      * @param  list<string>  $anchors
      * @param  array<string, list<string>>  $known
-     * @return array{kind: string, target: string, message: string}|null
+     * @return array{kind: string, target: string, message: string, severity: string}|null
      */
     private function checkHref(string $href, string $here, array $anchors, array $known, string $prefix): ?array
     {
@@ -106,7 +144,7 @@ final class LinkChecker
 
             return $fragment === '' || in_array($fragment, $anchors, true)
                 ? null
-                : ['kind' => 'anchor', 'target' => $href, 'message' => 'no heading with this id on the page'];
+                : ['kind' => 'anchor', 'target' => $href, 'message' => 'no heading with this id on the page', 'severity' => 'error'];
         }
 
         [$path, $fragment] = $this->split($href);
@@ -121,42 +159,14 @@ final class LinkChecker
         }
 
         if (! array_key_exists($path, $known)) {
-            return ['kind' => 'link', 'target' => $href, 'message' => 'no page at this path'];
+            return ['kind' => 'link', 'target' => $href, 'message' => 'no page at this path', 'severity' => 'error'];
         }
 
         if ($fragment !== null && $fragment !== '' && ! in_array($fragment, $known[$path], true)) {
-            return ['kind' => 'anchor', 'target' => $href, 'message' => 'the page exists, but has no heading with this id'];
+            return ['kind' => 'anchor', 'target' => $href, 'message' => 'the page exists, but has no heading with this id', 'severity' => 'error'];
         }
 
         return null;
-    }
-
-    /**
-     * @return array{kind: string, target: string, message: string}|null
-     */
-    private function checkImage(string $src, string $contentPath, string $prefix): ?array
-    {
-        $src = trim($src);
-
-        if ($src === '' || $this->isExternal($src)) {
-            return null;
-        }
-
-        $route = '/'.$prefix.'/_vellum/files/';
-
-        if (! str_starts_with($src, $route)) {
-            // The renderer rewrites an image it can find and leaves one it
-            // cannot exactly as written, so anything else is a miss.
-            return ['kind' => 'image', 'target' => $src, 'message' => 'no file at this path under the content root'];
-        }
-
-        $relative = substr($src, strlen($route));
-        $relative = rawurldecode((string) parse_url($relative, PHP_URL_PATH) ?: $relative);
-        $path = rtrim($contentPath, '/\\').DIRECTORY_SEPARATOR.str_replace('/', DIRECTORY_SEPARATOR, $relative);
-
-        return is_file($path)
-            ? null
-            : ['kind' => 'image', 'target' => $src, 'message' => 'the asset route points at a file that is not there'];
     }
 
     private function isExternal(string $url): bool
@@ -205,16 +215,6 @@ final class LinkChecker
     private function hrefs(string $html): array
     {
         preg_match_all('~<a\s[^>]*href="([^"]*)"~i', $html, $matches);
-
-        return array_map(html_entity_decode(...), $matches[1]);
-    }
-
-    /**
-     * @return list<string>
-     */
-    private function sources(string $html): array
-    {
-        preg_match_all('~<img\s[^>]*src="([^"]*)"~i', $html, $matches);
 
         return array_map(html_entity_decode(...), $matches[1]);
     }
