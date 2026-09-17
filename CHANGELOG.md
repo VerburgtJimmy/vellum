@@ -5,11 +5,19 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.5.2] - 2026-09-17
+## [0.6.0]
+
+### Added
+
+- `{prefix}/sitemap.xml`, built from the same navigation that renders the sidebar. Gated pages are excluded — including for a signed-in reader, since a sitemap is a single public file — and every version is listed when versions are enabled. It returns a 404 rather than publishing relative URLs when `app.url` is not an origin, the same rule the canonical link already followed
+- `vellum:export` writes `sitemap.xml` at the export root, using `export.base_url` when it names an origin and falling back to `app.url`. A static host cannot generate one for itself. Skipped with a warning when neither is an origin
+- `docs/seo.md`, covering the metadata every page emits, the sitemap, and the `robots.txt` worth adding — including disallowing `_vellum/`, since the page actions link to a raw Markdown copy of every page and it would otherwise be crawled and indexed as a near-duplicate
 
 ### Changed
 
 - `docs/why.md` grew from a 235-word note into a comparison page. It leads with the two ways Vellum ships the same Markdown — served from the app, or exported static — including the limits of the static snapshot, then names the alternatives directly (Fumadocs, Mintlify, VitePress, Docusaurus, a wiki) and says what each is better at. The gating and export claims in it are the ones `GatingTest` and `CommandsTest` already cover
+
+## [0.5.2] - 2026-09-17
 
 ### Fixed
 

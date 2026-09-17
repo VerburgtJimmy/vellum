@@ -8,6 +8,9 @@ use Vellum\Http\Controllers\ContentFileController;
 use Vellum\Http\Controllers\DocsController;
 use Vellum\Http\Controllers\RawMarkdownController;
 use Vellum\Http\Controllers\SearchIndexController;
+use Vellum\Http\Controllers\SitemapController;
+
+Route::get('/sitemap.xml', SitemapController::class)->name('vellum.sitemap');
 
 Route::get('/_vellum/search.json', SearchIndexController::class)->name('vellum.search');
 Route::get('/_vellum/search-{hash}.json', SearchIndexController::class)

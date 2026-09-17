@@ -14,6 +14,7 @@ use Vellum\Content\Document;
 use Vellum\Content\HeadingExtractor;
 use Vellum\Http\DocsView;
 use Vellum\Search\SearchIndexQuery;
+use Vellum\Support\Sitemap;
 
 /**
  * Renders the docs site to a static HTML folder for any static host.
@@ -103,6 +104,7 @@ final class ExportCommand extends Command
         $pages += $this->exportChangelog($repository, $prefixRoot, $out, $prefix, $baseUrl);
         $this->export404($repository, $out, $prefix, $baseUrl);
 
+        $this->writeSitemap($repository, $out);
         $this->copyDist($packageRoot, $out);
         $this->copyContentFiles((string) config('vellum.path'), $prefixRoot);
         $this->writeSearchIndexes($repository, $prefixRoot);
@@ -483,6 +485,25 @@ HTML;
         }
 
         return '/'.trim($baseUrl, '/').'/';
+    }
+
+    /**
+     * A static host cannot generate a sitemap, so write one next to the pages.
+     *
+     * It goes at the export root rather than under the docs prefix, because
+     * that root is the site root once the export is deployed.
+     */
+    private function writeSitemap(ContentRepository $repository, string $out): void
+    {
+        $urls = Sitemap::urls($repository, staticExport: true);
+
+        if ($urls === []) {
+            $this->warn('Skipped sitemap.xml: set app.url or vellum.export.base_url to an origin.');
+
+            return;
+        }
+
+        $this->writeFile($out.DIRECTORY_SEPARATOR.'sitemap.xml', Sitemap::render($urls));
     }
 
     private function writeFile(string $path, string $contents): void

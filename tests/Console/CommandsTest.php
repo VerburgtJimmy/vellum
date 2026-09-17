@@ -403,3 +403,58 @@ it('points exported 404 assets at an absolute base url when one is set', functio
 
     $this->deleteDirectory($out);
 });
+
+it('writes a sitemap at the export root using the export base url', function (): void {
+    $out = sys_get_temp_dir().'/vellum-tests/export-sitemap-'.$this->fixtureId();
+
+    if (is_dir($out)) {
+        $this->deleteDirectory($out);
+    }
+
+    config()->set('app.url', 'https://app.example.com');
+    config()->set('vellum.export.out', $out);
+    // The export is served from somewhere else, so its base url wins.
+    config()->set('vellum.export.base_url', 'https://static.example.com');
+
+    $this->writeDoc('index.md', "---\ntitle: Home\n---\nHi");
+    $this->writeDoc('guides/one.md', "---\ntitle: One\n---\nBody");
+    $this->writeDoc('secret.md', "---\ntitle: Secret\naccess: auth\n---\nPrivate");
+
+    $this->artisan('vellum:export')->assertSuccessful();
+
+    $sitemap = $out.'/sitemap.xml';
+
+    expect(is_file($sitemap))->toBeTrue();
+
+    $xml = (string) file_get_contents($sitemap);
+
+    expect($xml)
+        ->toContain('<loc>https://static.example.com/docs</loc>')
+        ->toContain('<loc>https://static.example.com/docs/guides/one</loc>')
+        ->not->toContain('app.example.com')
+        ->not->toContain('secret');
+
+    $this->deleteDirectory($out);
+});
+
+it('skips the export sitemap when no origin is configured', function (): void {
+    $out = sys_get_temp_dir().'/vellum-tests/export-nositemap-'.$this->fixtureId();
+
+    if (is_dir($out)) {
+        $this->deleteDirectory($out);
+    }
+
+    config()->set('app.url', '');
+    config()->set('vellum.export.out', $out);
+    config()->set('vellum.export.base_url', '/');
+
+    $this->writeDoc('index.md', "---\ntitle: Home\n---\nHi");
+
+    $this->artisan('vellum:export')
+        ->expectsOutputToContain('Skipped sitemap.xml')
+        ->assertSuccessful();
+
+    expect(is_file($out.'/sitemap.xml'))->toBeFalse();
+
+    $this->deleteDirectory($out);
+});
