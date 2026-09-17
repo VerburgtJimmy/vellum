@@ -123,6 +123,8 @@ final class PageBuilder
         $html = $this->view->make('vellum::openapi.group', [
             'group' => $group,
             'markdown' => $this->markdown(...),
+            'path' => $this->highlightPath(...),
+            'securityFor' => fn (Operation $operation): array => $this->security($operation, $spec),
         ])->render();
 
         $headings = array_map(
@@ -144,6 +146,7 @@ final class PageBuilder
                 : $this->summarise($group->description),
             spec: $spec,
             version: $version,
+            endpoints: $group->methodCount(),
         );
     }
 
@@ -158,14 +161,19 @@ final class PageBuilder
         ?string $description,
         Spec $spec,
         ?string $version,
+        ?int $endpoints = null,
     ): Document {
         return new Document(
             slug: $slug,
             title: $title,
             html: $html,
             headings: $headings,
-            // Marks the page as generated, for anything that needs to tell.
-            frontmatter: ['title' => $title, 'openapi' => true],
+            // Marks the page as generated, and carries the endpoint count so
+            // the sidebar badge does not have to infer it from the headings.
+            frontmatter: array_filter(
+                ['title' => $title, 'openapi' => true, 'endpoints' => $endpoints],
+                static fn (mixed $value): bool => $value !== null,
+            ),
             path: $spec->path,
             mtime: is_file($spec->path) ? (int) filemtime($spec->path) : 0,
             description: $description,
@@ -183,6 +191,69 @@ final class PageBuilder
     private function markdown(string $text): string
     {
         return $this->pipeline->render($text);
+    }
+
+    /**
+     * The request path with its parameters marked, so {petId} reads as a slot
+     * to fill rather than as part of the literal URL.
+     */
+    private function highlightPath(string $path): string
+    {
+        return (string) preg_replace(
+            '/\{([^}]+)\}/',
+            '<span class="vellum-api-param">{$1}</span>',
+            e($path),
+        );
+    }
+
+    /**
+     * Security schemes that apply to an operation, with something useful to
+     * say about each. An operation's own security replaces the document's,
+     * including an explicit empty array, which means "no auth here".
+     *
+     * @return list<array{name: string, hint: string}>
+     */
+    private function security(Operation $operation, Spec $spec): array
+    {
+        $requirements = $operation->security ?? $spec->defaultSecurity();
+        $schemes = $spec->securitySchemes();
+        $out = [];
+        $seen = [];
+
+        foreach ($requirements as $requirement) {
+            foreach (array_keys($requirement) as $name) {
+                if (! is_string($name) || isset($seen[$name])) {
+                    continue;
+                }
+
+                $seen[$name] = true;
+                $out[] = ['name' => $name, 'hint' => $this->securityHint($schemes[$name] ?? [])];
+            }
+        }
+
+        return $out;
+    }
+
+    /**
+     * @param  array<string, mixed>  $scheme
+     */
+    private function securityHint(array $scheme): string
+    {
+        if (is_string($scheme['description'] ?? null) && trim($scheme['description']) !== '') {
+            return $scheme['description'];
+        }
+
+        $type = is_string($scheme['type'] ?? null) ? $scheme['type'] : 'unknown';
+
+        return match ($type) {
+            'http' => is_string($scheme['scheme'] ?? null) && strtolower($scheme['scheme']) === 'bearer'
+                ? 'Send a bearer token in the Authorization header.'
+                : 'HTTP '.($scheme['scheme'] ?? 'authentication').' in the Authorization header.',
+            'apiKey' => 'Send an API key in the '.($scheme['in'] ?? 'header').' '.($scheme['name'] ?? '').'.',
+            'oauth2' => 'OAuth 2 access token.',
+            'openIdConnect' => 'OpenID Connect token.',
+            default => 'This endpoint requires authentication.',
+        };
     }
 
     /**

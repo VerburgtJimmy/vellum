@@ -207,3 +207,60 @@ it('gives colliding group names distinct slugs', function (): void {
 
     expect($slugs)->toBe(['api/pet-store', 'api/pet-store-2']);
 });
+
+it('renames the untagged group', function (): void {
+    enableOpenApi($this->cachePath(), apiSpec(), ['untagged_label' => 'General']);
+
+    $repository = ContentRepository::fromConfig();
+    $documents = $repository->buildAll();
+    $slugs = array_map(static fn ($document): string => $document->slug, $documents);
+
+    expect($slugs)->toContain('api/general')
+        ->and($slugs)->not->toContain('api/other');
+
+    $tree = $repository->navigation();
+
+    expect(array_column($tree[count($tree) - 1]['children'], 'title'))
+        ->toBe(['Overview', 'Pets', 'Orders', 'General']);
+});
+
+it('takes the sidebar badge from the endpoint count, not the heading count', function (): void {
+    enableOpenApi($this->cachePath(), apiSpec());
+
+    $repository = ContentRepository::fromConfig();
+    $documents = $repository->buildAll();
+    $pets = collect($documents)->firstWhere('slug', 'api/pets');
+
+    expect($pets->frontmatter['endpoints'])->toBe(3);
+
+    $tree = $repository->navigation();
+    $children = $tree[count($tree) - 1]['children'];
+
+    expect(array_column($children, 'badge'))->toBe([null, 3, 1, 1]);
+});
+
+it('serves API pages at the unversioned URL and redirects the latest prefix', function (): void {
+    config()->set('vellum.versions', [
+        'enabled' => true,
+        'latest' => 'v2',
+        'list' => ['v2', 'v1'],
+        'labels' => [],
+    ]);
+    enableOpenApi($this->cachePath(), apiSpec());
+
+    $this->writeDoc('v2/index.md', "---\ntitle: Home\n---\nTwo");
+    $this->writeDoc('v1/index.md', "---\ntitle: Home\n---\nOne");
+
+    ContentRepository::fromConfig()->buildAll();
+
+    // Latest is served without a version segment.
+    $this->get('/docs/api')->assertOk();
+    $this->get('/docs/api/pets')->assertOk()->assertSee('get-pets', false);
+
+    // The prefixed latest URL redirects to it, as any latest page does.
+    $this->get('/docs/v2/api')->assertRedirect('/docs/api');
+    $this->get('/docs/v2/api/pets')->assertRedirect('/docs/api/pets');
+
+    // The spec is not versioned, so it does not appear under older versions.
+    $this->get('/docs/v1/api')->assertNotFound();
+});

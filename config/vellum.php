@@ -137,6 +137,7 @@ return [
     | installed. Pages mount at {route.prefix}/{openapi.prefix}.
     |
     | group_by: tag (default) or path, which groups by first path segment.
+    | untagged_label: page name for operations with no tag (or no path segment).
     | samples: languages for the request examples, in tab order.
     | base_url: overrides servers[0].url in those samples.
     |
@@ -149,6 +150,7 @@ return [
         'title' => 'API reference',
         'icon' => null,
         'group_by' => 'tag',
+        'untagged_label' => 'Other',
         'samples' => ['curl', 'php', 'javascript'],
         'base_url' => null,
     ],

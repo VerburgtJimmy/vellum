@@ -18,7 +18,9 @@ final readonly class Operation
      * @param  Parameters  $parameters
      * @param  array<string, mixed>|null  $requestBody
      * @param  array<string, mixed>  $responses
-     * @param  list<array<string, mixed>>|null  $security
+     * @param  list<array<array-key, mixed>>|null  $security  Keys are scheme names in a
+     *                                                        valid spec, but the document is
+     *                                                        JSON and may say otherwise.
      * @param  list<array<string, mixed>>  $servers
      */
     public function __construct(

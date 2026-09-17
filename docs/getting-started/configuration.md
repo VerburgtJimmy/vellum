@@ -104,6 +104,7 @@ Added in 0.6, off by default. Renders an OpenAPI 3.0 or 3.1 spec as reference pa
 | `openapi.title` | `API reference` | Sidebar group and overview heading |
 | `openapi.icon` | `null` | Icon for the sidebar group |
 | `openapi.group_by` | `tag` | `tag`, or `path` to group by first path segment |
+| `openapi.untagged_label` | `Other` | Page name for operations with no tag |
 | `openapi.samples` | `['curl', 'php', 'javascript']` | Sample languages, in tab order |
 | `openapi.base_url` | `null` | Overrides `servers[0].url` in samples |
 

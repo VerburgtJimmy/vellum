@@ -73,10 +73,15 @@ final class OpenApiPages
             return null;
         }
 
+        // Vellum's folder index is a first child page: the sidebar renders a
+        // folder as a collapsible trigger, not a link, so there is nowhere
+        // else for the overview to go.
         $overview = $documents[0];
         $children = [];
 
         foreach ($documents as $index => $document) {
+            $endpoints = $document->frontmatter['endpoints'] ?? null;
+
             $children[] = [
                 'type' => 'page',
                 'slug' => $document->slug,
@@ -86,7 +91,7 @@ final class OpenApiPages
                 'icon' => null,
                 'href' => VersionUrl::href($routePrefix, $document->slug, $version, $defaultVersion),
                 'access' => 'guest',
-                'badge' => $index === 0 ? null : count($document->headings),
+                'badge' => is_int($endpoints) ? $endpoints : null,
             ];
         }
 

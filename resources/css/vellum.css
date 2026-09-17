@@ -1165,3 +1165,233 @@ html {
   }
 }
 
+
+/* OpenAPI reference pages
+   ----------------------------------------------------------------------
+   Method and status colours are semantic rather than theme-derived, the
+   same trade the callout accents make: GET is green everywhere. They are
+   declared once here, per mode, so PresetContrastTest can read them. */
+
+.vellum-api-operation {
+  --vellum-api-get: oklch(0.48 0.13 150);
+  --vellum-api-post: oklch(0.48 0.15 255);
+  --vellum-api-put: oklch(0.47 0.12 70);
+  --vellum-api-delete: oklch(0.5 0.19 25);
+  padding-block: 2rem;
+  border-top: 1px solid var(--border);
+}
+
+.vellum-api-operation:first-of-type {
+  border-top: 0;
+  padding-top: 0.5rem;
+}
+
+.dark .vellum-api-operation {
+  --vellum-api-get: oklch(0.8 0.15 150);
+  --vellum-api-post: oklch(0.79 0.13 255);
+  --vellum-api-put: oklch(0.84 0.14 80);
+  --vellum-api-delete: oklch(0.76 0.16 25);
+}
+
+.vellum-api-request {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 0 0.5rem;
+}
+
+.vellum-api-method,
+.vellum-api-status {
+  --vellum-api-tone: var(--muted-foreground);
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid color-mix(in oklch, var(--vellum-api-tone) 28%, transparent);
+  border-radius: calc(var(--radius) - 0.15rem);
+  background: color-mix(in oklch, var(--vellum-api-tone) 12%, var(--background));
+  padding: 0.1rem 0.45rem;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--vellum-api-tone);
+}
+
+.vellum-api-method[data-method='get'] { --vellum-api-tone: var(--vellum-api-get); }
+.vellum-api-method[data-method='post'] { --vellum-api-tone: var(--vellum-api-post); }
+.vellum-api-method[data-method='put'],
+.vellum-api-method[data-method='patch'] { --vellum-api-tone: var(--vellum-api-put); }
+.vellum-api-method[data-method='delete'] { --vellum-api-tone: var(--vellum-api-delete); }
+
+.vellum-api-status[data-status='2xx'] { --vellum-api-tone: var(--vellum-api-get); }
+.vellum-api-status[data-status='3xx'] { --vellum-api-tone: var(--vellum-api-post); }
+.vellum-api-status[data-status='4xx'] { --vellum-api-tone: var(--vellum-api-put); }
+.vellum-api-status[data-status='5xx'] { --vellum-api-tone: var(--vellum-api-delete); }
+
+.vellum-api-path {
+  font-size: 0.875rem;
+  color: var(--foreground);
+  overflow-wrap: anywhere;
+}
+
+.vellum-api-param {
+  color: var(--muted-foreground);
+}
+
+.vellum-api-deprecated {
+  border: 1px solid color-mix(in oklch, var(--vellum-api-delete) 35%, transparent);
+  border-radius: calc(var(--radius) - 0.15rem);
+  padding: 0.05rem 0.4rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--vellum-api-delete);
+}
+
+.vellum-api-operation-title {
+  margin-top: 0;
+}
+
+/* Two columns once there is room for both. The sticky panel is inside the
+   right column, and a grid item is its own containing block, so it lets go
+   at the end of this operation rather than riding over the next one. */
+.vellum-api-columns {
+  display: grid;
+  gap: 1.5rem;
+  margin-top: 1.25rem;
+}
+
+@media (min-width: 1024px) {
+  .vellum-api-columns {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: start;
+  }
+
+  .vellum-api-column-detail {
+    /* Without this the item stretches and there is nothing to stick within. */
+    align-self: start;
+    position: sticky;
+    top: var(--vellum-api-sticky-top, 5rem);
+  }
+}
+
+.vellum-api-subhead {
+  margin: 1.5rem 0 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted-foreground);
+}
+
+.vellum-api-column > .vellum-api-subhead:first-child {
+  margin-top: 0;
+}
+
+.vellum-api-fields {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--card);
+}
+
+.vellum-api-fields[data-depth]:not([data-depth='0']) {
+  background: transparent;
+}
+
+.vellum-api-field {
+  padding: 0.7rem 0.85rem;
+  border-top: 1px solid var(--border);
+}
+
+.vellum-api-field:first-child {
+  border-top: 0;
+}
+
+.vellum-api-field-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.vellum-api-field-name {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+.vellum-api-field-type {
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}
+
+.vellum-api-required {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--vellum-api-delete);
+}
+
+.vellum-api-field-description,
+.vellum-api-field-meta {
+  margin: 0.35rem 0 0;
+  font-size: 0.85rem;
+  color: var(--muted-foreground);
+}
+
+.vellum-api-field-meta code {
+  font-size: 0.75rem;
+}
+
+.vellum-api-recursive {
+  font-style: italic;
+}
+
+.vellum-api-nested {
+  margin-top: 0.5rem;
+}
+
+.vellum-api-expand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--muted-foreground);
+  cursor: pointer;
+}
+
+.vellum-api-expand:hover {
+  color: var(--foreground);
+}
+
+.vellum-api-security {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.vellum-api-scheme {
+  font-size: 0.8rem;
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
+  cursor: help;
+}
+
+.vellum-api-servers,
+.vellum-api-schemes {
+  margin: 0.5rem 0;
+  padding-left: 1.1rem;
+  font-size: 0.9rem;
+}
+
+.vellum-api-groups {
+  margin-top: 1rem;
+}

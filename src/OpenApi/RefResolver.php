@@ -21,6 +21,12 @@ final class RefResolver
 {
     public const RECURSIVE = 'x-vellum-recursive';
 
+    /**
+     * The name a schema was referenced by. Inlining a $ref loses "Pet", and
+     * "array of object" is a much worse thing to read than "array of Pet".
+     */
+    public const NAME = 'x-vellum-name';
+
     /** @var list<string> */
     private array $warnings = [];
 
@@ -93,7 +99,11 @@ final class RefResolver
         }
 
         if (in_array($ref, $stack, true)) {
-            return $siblings + [self::RECURSIVE => $ref, 'type' => 'object'];
+            return $siblings + [
+                self::RECURSIVE => $ref,
+                self::NAME => $this->nameOf($ref),
+                'type' => 'object',
+            ];
         }
 
         $target = $this->pointer($ref, $root);
@@ -108,7 +118,19 @@ final class RefResolver
         /** @var array<string, mixed> $walkedSiblings */
         $walkedSiblings = $this->walk($siblings, $root, $stack, $pointer);
 
-        return $walkedSiblings + $resolved;
+        $named = $resolved + [self::NAME => $this->nameOf($ref)];
+
+        return $walkedSiblings + $named;
+    }
+
+    /**
+     * The last segment of a pointer, which is the schema's name.
+     */
+    private function nameOf(string $ref): string
+    {
+        $segments = explode('/', $ref);
+
+        return str_replace(['~1', '~0'], ['/', '~'], (string) end($segments));
     }
 
     /**

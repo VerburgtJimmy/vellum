@@ -3,5 +3,10 @@
 @endif
 
 @foreach ($group->operations as $operation)
-    @include('vellum::openapi.operation', ['operation' => $operation, 'markdown' => $markdown])
+    @include('vellum::openapi.operation', [
+        'operation' => $operation,
+        'markdown' => $markdown,
+        'path' => $path,
+        'security' => $securityFor($operation),
+    ])
 @endforeach

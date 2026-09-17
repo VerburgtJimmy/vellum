@@ -15,21 +15,20 @@ use Vellum\Support\Slug;
  */
 final class Grouper
 {
-    private const UNGROUPED = 'Other';
-
     /**
      * @return list<Group>
      */
     public function group(Spec $spec, string $by = 'tag'): array
     {
+        $ungrouped = $this->ungroupedLabel();
         $buckets = [];
 
         foreach ($spec->operations as $operation) {
-            $name = $by === 'path' ? $this->pathSegment($operation) : $this->tag($operation);
+            $name = $by === 'path' ? $this->pathSegment($operation, $ungrouped) : $this->tag($operation, $ungrouped);
             $buckets[$name][] = $operation;
         }
 
-        $buckets = $this->ordered($buckets, $by === 'path' ? [] : array_keys($spec->tags()));
+        $buckets = $this->ordered($buckets, $by === 'path' ? [] : array_keys($spec->tags()), $ungrouped);
         $tags = $spec->tags();
         $slugs = [];
         $groups = [];
@@ -48,14 +47,21 @@ final class Grouper
         return $groups;
     }
 
-    private function tag(Operation $operation): string
+    private function ungroupedLabel(): string
+    {
+        $label = config('vellum.openapi.untagged_label', 'Other');
+
+        return is_string($label) && trim($label) !== '' ? $label : 'Other';
+    }
+
+    private function tag(Operation $operation, string $ungrouped): string
     {
         $tag = $operation->tags[0] ?? null;
 
-        return is_string($tag) && trim($tag) !== '' ? $tag : self::UNGROUPED;
+        return is_string($tag) && trim($tag) !== '' ? $tag : $ungrouped;
     }
 
-    private function pathSegment(Operation $operation): string
+    private function pathSegment(Operation $operation, string $ungrouped): string
     {
         foreach (explode('/', trim($operation->path, '/')) as $segment) {
             // A path that starts with a parameter has no useful name in it.
@@ -64,7 +70,7 @@ final class Grouper
             }
         }
 
-        return self::UNGROUPED;
+        return $ungrouped;
     }
 
     /**
@@ -72,7 +78,7 @@ final class Grouper
      * @param  list<string>  $preferred
      * @return array<string, list<Operation>>
      */
-    private function ordered(array $buckets, array $preferred): array
+    private function ordered(array $buckets, array $preferred, string $ungrouped): array
     {
         $ordered = [];
 
@@ -84,13 +90,13 @@ final class Grouper
         }
 
         // Ungrouped operations go last wherever they came from.
-        $ungrouped = $buckets[self::UNGROUPED] ?? null;
-        unset($buckets[self::UNGROUPED]);
+        $trailing = $buckets[$ungrouped] ?? null;
+        unset($buckets[$ungrouped]);
 
         $ordered += $buckets;
 
-        if ($ungrouped !== null) {
-            $ordered[self::UNGROUPED] = $ungrouped;
+        if ($trailing !== null) {
+            $ordered[$ungrouped] = $trailing;
         }
 
         return $ordered;

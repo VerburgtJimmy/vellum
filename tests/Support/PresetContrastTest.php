@@ -183,3 +183,43 @@ it('keeps syntax highlighting readable on every code surface', function (string 
         );
     }
 })->with('preset modes');
+
+/**
+ * Method and status tones. They are not preset-scoped: GET is the same green
+ * on every palette, the trade the callout accents already make. The canvas
+ * underneath them is not, which is why this runs over every preset.
+ *
+ * @return array<string, string>
+ */
+function apiTones(string $mode): array
+{
+    $css = (string) file_get_contents(__DIR__.'/../../resources/css/vellum.css');
+
+    return cssBlock($css, $mode === 'dark' ? '.dark .vellum-api-operation {' : "\n.vellum-api-operation {");
+}
+
+it('keeps method and status badges readable on every canvas', function (string $preset, string $mode): void {
+    $tokens = presetTokens($preset, $mode);
+    $background = Color::parse($tokens['--background'] ?? '');
+    $tones = apiTones($mode);
+
+    expect($background)->not->toBeNull()
+        ->and($tones)->toHaveKeys(['--vellum-api-get', '--vellum-api-post', '--vellum-api-put', '--vellum-api-delete']);
+
+    foreach ($tones as $name => $value) {
+        $tone = Color::parse($value);
+
+        expect($tone)->not->toBeNull("{$preset} {$mode}: cannot read {$name}");
+
+        // The badge sits on 12% of its own tone over the canvas. Compositing
+        // in sRGB rather than oklch is a close approximation of the CSS
+        // color-mix, and errs by a hair either way at this strength.
+        $fill = Color::over([$tone[0], $tone[1], $tone[2], 0.12], $background);
+        $ratio = Color::contrast($tone, $fill);
+
+        expect($ratio)->toBeGreaterThanOrEqual(
+            4.5,
+            sprintf('%s %s: %s is %.2f:1 on its badge, needs 4.5:1', $preset, $mode, $name, $ratio),
+        );
+    }
+})->with('preset modes');

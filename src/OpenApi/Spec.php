@@ -116,7 +116,7 @@ final readonly class Spec
     /**
      * Security applied to every operation that does not override it.
      *
-     * @return list<array<string, mixed>>
+     * @return list<array<array-key, mixed>>
      */
     public function defaultSecurity(): array
     {
