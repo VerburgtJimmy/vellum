@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.5.2] - 2026-09-17
 
+### Changed
+
+- `docs/why.md` grew from a 235-word note into a comparison page. It leads with the two ways Vellum ships the same Markdown — served from the app, or exported static — including the limits of the static snapshot, then names the alternatives directly (Fumadocs, Mintlify, VitePress, Docusaurus, a wiki) and says what each is better at. The gating and export claims in it are the ones `GatingTest` and `CommandsTest` already cover
+
 ### Fixed
 
 - A `versions.latest` left in config while `versions.enabled` is `false` no longer reaches URL building. The changelog page declared a canonical of `/docs/v2/changelog`, a URL the router does not match, so search engines were pointed at a 404 and the page would not have been indexed. The 404 page written by `vellum:export` built its version switcher the same way. `latestVersion()` now returns `null` when versioning is off, which is what every other caller already checked for itself
