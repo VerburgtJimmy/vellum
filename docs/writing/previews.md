@@ -10,7 +10,17 @@ description: Render a Blade view in the docs, beside its own source.
 :::
 ```
 
-That renders `resources/views/vellum-previews/button-variants.blade.php`.
+That renders `resources/views/vellum-previews/button-variants.blade.php`. Here is one, rendered by this page:
+
+:::preview[button]
+:::
+
+A preview is an ordinary Blade view, so loops and conditionals work:
+
+:::preview[badge]{padding="sm"}
+:::
+
+Those two come with the package, which is how this page can show them in any installation. `vellum:install` copies them into your previews directory as a starting point, and a view of your own with the same name takes precedence.
 
 ## Where views live
 
@@ -24,6 +34,8 @@ Views resolve from `previews.path` and nowhere else, so a docs page cannot name 
 ```
 
 Use a dot for a subfolder: `:::preview[forms.text-input]` renders `forms/text-input.blade.php`.
+
+If the name is not there, Vellum falls back to the examples it ships, which is how the two previews above render here. Anything else fails the build.
 
 ## Styling
 

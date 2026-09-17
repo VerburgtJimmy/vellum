@@ -175,3 +175,31 @@ it('still renders a preview that only reads config', function (): void {
 
     expect($html)->toContain('&lt;b&gt;Acme&lt;/b&gt;');
 });
+
+it('falls back to the examples the package ships', function (): void {
+    // No view of this name in the host application: Vellum's own docs rely on
+    // this, since their pages are rendered by whoever installed the package.
+    $this->writeDoc('index.md', "---\ntitle: Home\n---\n:::preview[button]\n:::");
+
+    $html = (string) $this->get('/docs')->assertOk()->getContent();
+
+    expect($html)->toContain('data-vellum-preview-frame')
+        ->toContain('Primary');
+});
+
+it('lets a view of your own win over the shipped example', function (): void {
+    ($this->preview)('button', '<button>Mine</button>');
+    $this->writeDoc('index.md', "---\ntitle: Home\n---\n:::preview[button]\n:::");
+
+    $html = (string) $this->get('/docs')->assertOk()->getContent();
+
+    expect($html)->toContain('&lt;button&gt;Mine&lt;/button&gt;')
+        ->and($html)->not->toContain('Secondary');
+});
+
+it('still fails for a name neither side has', function (): void {
+    $this->writeDoc('index.md', "---\ntitle: Home\n---\n:::preview[nothing-like-this]\n:::");
+
+    expect(fn () => ContentRepository::fromConfig()->buildAll())
+        ->toThrow(InvalidPreviewException::class, 'nothing-like-this');
+});

@@ -54,10 +54,10 @@ final class PreviewRenderer implements NodeRendererInterface
             throw InvalidPreviewException::unsafeName($name, self::$docsFile);
         }
 
-        $path = $this->pathFor($name);
+        $path = $this->resolve($name);
 
-        if (! is_file($path)) {
-            throw InvalidPreviewException::notFound($name, $path, self::$docsFile);
+        if ($path === null) {
+            throw InvalidPreviewException::notFound($name, $this->pathFor($name), self::$docsFile);
         }
 
         $id = 'vellum-preview-'.(++self::$sequence);
@@ -133,11 +133,37 @@ final class PreviewRenderer implements NodeRendererInterface
         }
     }
 
+    /**
+     * Your previews directory first, then the examples Vellum ships.
+     *
+     * The fallback is what lets Vellum's own documentation show a working
+     * preview: its pages are rendered by whoever installed the package, and
+     * a view that only existed in one application would fail every other
+     * build. A view of your own with the same name takes precedence, so the
+     * fallback can only ever resolve names the package itself provides.
+     */
+    private function resolve(string $name): ?string
+    {
+        foreach ([$this->pathFor($name), $this->packagePathFor($name)] as $candidate) {
+            if (is_file($candidate)) {
+                return $candidate;
+            }
+        }
+
+        return null;
+    }
+
     private function pathFor(string $name): string
     {
         $root = rtrim((string) config('vellum.previews.path'), '/\\');
 
         return $root.DIRECTORY_SEPARATOR.str_replace('.', DIRECTORY_SEPARATOR, $name).'.blade.php';
+    }
+
+    private function packagePathFor(string $name): string
+    {
+        return dirname(__DIR__, 4).'/resources/previews/'
+            .str_replace('.', DIRECTORY_SEPARATOR, $name).'.blade.php';
     }
 
     /**
