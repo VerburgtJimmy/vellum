@@ -128,6 +128,24 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Build checks
+    |--------------------------------------------------------------------------
+    |
+    | references: warn during vellum:build about links and images that point
+    | at nothing. Both fail silently at runtime, so the build is the only
+    | place they are cheap to catch.
+    |
+    | strict: turn those warnings into a failed build. Worth switching on in
+    | CI, which cannot pass --strict to whatever the deploy script runs.
+    |
+    */
+    'checks' => [
+        'references' => true,
+        'strict' => false,
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Fonts
     |--------------------------------------------------------------------------
     |

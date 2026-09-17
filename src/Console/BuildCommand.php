@@ -7,6 +7,7 @@ namespace Vellum\Console;
 use Illuminate\Console\Command;
 use Vellum\Content\ContentRepository;
 use Vellum\Content\Document;
+use Vellum\Content\LinkChecker;
 use Vellum\Search\ScoutIndexer;
 use Vellum\Search\SearchDriver;
 use Vellum\Support\Theme;
@@ -16,7 +17,9 @@ use Vellum\Support\Theme;
  */
 final class BuildCommand extends Command
 {
-    protected $signature = 'vellum:build {--docs-version= : Compile a single version folder}';
+    protected $signature = 'vellum:build
+        {--docs-version= : Compile a single version folder}
+        {--strict : Fail the build when a link or image points at nothing}';
 
     protected $description = 'Compile Markdown docs into the Vellum cache';
 
@@ -38,6 +41,8 @@ final class BuildCommand extends Command
         $documents = $repository->buildAll($version);
 
         $this->warnAboutShadowedSlugs($documents);
+
+        $broken = $this->reportBrokenReferences($documents, $repository);
 
         if (SearchDriver::isScout()) {
             SearchDriver::assertScoutInstalled();
@@ -80,7 +85,26 @@ final class BuildCommand extends Command
             }
         }
 
+        if ($broken > 0 && $this->strict()) {
+            $this->error(sprintf(
+                '%d broken reference%s. Fix them, or drop --strict to let the build pass.',
+                $broken,
+                $broken === 1 ? '' : 's',
+            ));
+
+            return self::FAILURE;
+        }
+
         return self::SUCCESS;
+    }
+
+    /**
+     * Strict is a flag for a one-off run and a config key for CI, which does
+     * not get to pass flags to whatever the deploy script calls.
+     */
+    private function strict(): bool
+    {
+        return (bool) $this->option('strict') || (bool) config('vellum.checks.strict', false);
     }
 
     /**
@@ -88,6 +112,33 @@ final class BuildCommand extends Command
      * page of the same name never gets served. Say so rather than let the
      * author wonder why their edits do nothing.
      *
+     * @param  list<Document>  $documents
+     */
+    /**
+     * @param  list<Document>  $documents
+     */
+    private function reportBrokenReferences(array $documents, ContentRepository $repository): int
+    {
+        if (! (bool) config('vellum.checks.references', true)) {
+            return 0;
+        }
+
+        $findings = (new LinkChecker)->check($documents, $repository);
+
+        foreach ($findings as $finding) {
+            $this->warn(sprintf(
+                'Broken %s on %s: %s (%s)',
+                $finding['kind'],
+                $finding['page'] === '' ? '/' : $finding['page'],
+                $finding['target'],
+                $finding['message'],
+            ));
+        }
+
+        return count($findings);
+    }
+
+    /**
      * @param  list<Document>  $documents
      */
     private function warnAboutShadowedSlugs(array $documents): void
