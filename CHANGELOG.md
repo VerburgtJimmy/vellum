@@ -5,13 +5,20 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.8.0] - Parked
+
+OpenAPI rendering, moved out of 0.6 on 2026-09-17 to finish the docs element first.
+This branch is not merged and not released; the version heading is a placeholder
+so the notes have somewhere to live.
+
+### Added
+
+- OpenAPI reference rendering. One page per operation, foldered by tag, at `{prefix}/{tag}/{operationId}` with the request line as a fallback when a spec has no operationId. Each page is full width and split in two: documentation on the left (authorization, parameters, request body, responses), examples on the right (a code sample per configured language, then a response body per status), sticky beside the page it belongs to. Schemas render as hairline-separated rows with `*` and `?` on the name, `array<Pet>` types read for 3.0 and 3.1 alike, constraints as chips, enums in a list, and a marker where a schema contains itself. Sidebar entries carry their method. Samples are generated at build time for curl, the Laravel HTTP client and fetch, and a project can register a language of its own through `SampleGenerator`
+- `openapi.mount` chooses where the reference lives: `docs` nests it in the docs site, `standalone` gives it its own root and a sidebar containing nothing else, for projects where the API is the product
 
 ### Internal
 
 - OpenAPI spec reading, the first step of reference-page rendering. Parses JSON and YAML for 3.0 and 3.1, inlines local `$ref`, and merges `allOf` by accumulating properties, taking the union of `required`, letting the last source set `description` and `example`, and warning when members disagree about `type`. A remote `$ref` degrades to an empty object with a warning; a schema that references itself stops with a marker rather than exhausting memory. Specs come from `openapi.spec`, or from `dedoc/scramble` through its Artisan command
-- OpenAPI reference rendering. One page per operation, foldered by tag, at `{prefix}/{tag}/{operationId}` with the request line as a fallback when a spec has no operationId. Each page is full width and split in two: documentation on the left (authorization, parameters, request body, responses), examples on the right (a code sample per configured language, then a response body per status), sticky beside the page it belongs to. Schemas render as hairline-separated rows with `*` and `?` on the name, `array<Pet>` types read for 3.0 and 3.1 alike, constraints as chips, enums in a list, and a marker where a schema contains itself. Sidebar entries carry their method. Samples are generated at build time for curl, the Laravel HTTP client and fetch, and a project can register a language of its own through `SampleGenerator`
-- `openapi.mount` chooses where the reference lives: `docs` nests it in the docs site, `standalone` gives it its own root and a sidebar containing nothing else, for projects where the API is the product
 
 ## [0.6.0]
 
