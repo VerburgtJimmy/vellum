@@ -128,6 +128,33 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | OpenAPI
+    |--------------------------------------------------------------------------
+    |
+    | Renders an OpenAPI 3.0 or 3.1 spec as reference pages under the docs
+    | site. Vellum presents a spec; it does not generate one. Point 'spec' at
+    | a file, or leave it null and let Scramble export one when it is
+    | installed. Pages mount at {route.prefix}/{openapi.prefix}.
+    |
+    | group_by: tag (default) or path, which groups by first path segment.
+    | samples: languages for the request examples, in tab order.
+    | base_url: overrides servers[0].url in those samples.
+    |
+    */
+    'openapi' => [
+        'enabled' => false,
+        'spec' => null,
+        'scramble' => true,
+        'prefix' => 'api',
+        'title' => 'API reference',
+        'icon' => null,
+        'group_by' => 'tag',
+        'samples' => ['curl', 'php', 'javascript'],
+        'base_url' => null,
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Fonts
     |--------------------------------------------------------------------------
     |
