@@ -9,7 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Internal
 
-- OpenAPI spec reading, the first step of reference-page rendering. Parses JSON and YAML for 3.0 and 3.1, inlines local `$ref`, and merges `allOf` by accumulating properties, taking the union of `required`, letting the last source set `description` and `example`, and warning when members disagree about `type`. A remote `$ref` degrades to an empty object with a warning; a schema that references itself stops with a marker rather than exhausting memory. Specs come from `openapi.spec`, or from `dedoc/scramble` through its Artisan command. Nothing renders yet, so there is nothing here for readers
+- OpenAPI spec reading, the first step of reference-page rendering. Parses JSON and YAML for 3.0 and 3.1, inlines local `$ref`, and merges `allOf` by accumulating properties, taking the union of `required`, letting the last source set `description` and `example`, and warning when members disagree about `type`. A remote `$ref` degrades to an empty object with a warning; a schema that references itself stops with a marker rather than exhausting memory. Specs come from `openapi.spec`, or from `dedoc/scramble` through its Artisan command
+- OpenAPI page generation. A spec now compiles into the same `Document` objects Markdown produces, so search, breadcrumbs, prev/next, the table of contents and the compiled store need no special cases. One overview page plus one page per group, grouped by tag or by first path segment, ordered by the spec's own tag list with untagged operations last. Operation anchors derive from method and path, so editing a summary does not break shared links. The sidebar gains a group below the written docs, and each operation is its own search entry pointing at its anchor. Pages are structurally complete but unstyled until the layout step
 
 ## [0.6.0]
 

@@ -9,6 +9,8 @@ use Vellum\Exceptions\DuplicateSlugException;
 use Vellum\Exceptions\UnknownDirectiveException;
 use Vellum\Markdown\Islands\MarkdownPipeline;
 use Vellum\Markdown\MarkdownRenderer;
+use Vellum\OpenApi\OpenApiPages;
+use Vellum\OpenApi\SpecSource;
 use Vellum\Search\SearchVisibility;
 use Vellum\Support\Slug;
 use Vellum\Support\Str;
@@ -16,6 +18,8 @@ use Vellum\Support\VersionUrl;
 
 /**
  * Discovers Markdown documents on disk and resolves them to compiled Documents.
+ *
+ * @phpstan-import-type SearchDocument from SearchIndexBuilder
  */
 final class ContentRepository
 {
@@ -32,6 +36,7 @@ final class ContentRepository
         private readonly string $routePrefix = 'docs',
         private readonly Access $access = new Access,
         private readonly SearchVisibility $visibility = new SearchVisibility,
+        private readonly ?OpenApiPages $openApi = null,
     ) {}
 
     /**
@@ -62,6 +67,7 @@ final class ContentRepository
             versions: $versions['list'] ?? [],
             isLocal: app()->environment('local'),
             routePrefix: (string) config('vellum.route.prefix', 'docs'),
+            openApi: SpecSource::enabled() ? new OpenApiPages : null,
         );
     }
 
@@ -115,6 +121,17 @@ final class ContentRepository
 
             $seen[$slug] = $source['path'];
             $documents[] = $this->compileFile($source['path'], $source['slug'], $source['version']);
+        }
+
+        foreach ($this->openApiDocuments($version) as $document) {
+            if (isset($seen[$document->slug])) {
+                throw DuplicateSlugException::forPaths($document->slug, $seen[$document->slug], $document->path);
+            }
+
+            // Generated pages have no source file, so nothing else will write
+            // them: find() reads them straight back out of the store.
+            $this->store->put($document);
+            $documents[] = $document;
         }
 
         $this->rebuildNavAndSearch($documents, $version);
@@ -203,7 +220,14 @@ final class ContentRepository
         $searchBuilder = $this->searchIndexBuilder();
 
         $tree = $navBuilder->build($documents, $version);
-        $search = $searchBuilder->build($documents, $version);
+        $search = $searchBuilder->build($documents, $version, $this->openApiSearchEntries($version));
+
+        $apiGroup = $this->openApi?->navGroup($this->routePrefix, $version, $this->urlDefaultVersion());
+
+        if ($apiGroup !== null && $this->openApiDocuments($version) !== []) {
+            // Reference pages sit under the hand-written docs, not among them.
+            $tree[] = $apiGroup;
+        }
 
         $this->store->putNav($tree, $version);
         $this->store->putSearchIndex(['documents' => $search['documents']], $search['hash'], $version);
@@ -229,7 +253,40 @@ final class ContentRepository
             }
         }
 
-        return $documents;
+        return [...$documents, ...$this->openApiDocuments($version)];
+    }
+
+    /**
+     * @return list<SearchDocument>
+     */
+    private function openApiSearchEntries(?string $version): array
+    {
+        if ($this->openApi === null || $this->openApiDocuments($version) === []) {
+            return [];
+        }
+
+        return $this->openApi->searchEntries($this->routePrefix, $version);
+    }
+
+    /**
+     * Pages generated from an OpenAPI spec.
+     *
+     * The spec is not versioned, so its pages attach to the default version
+     * only rather than being copied into every version tree.
+     *
+     * @return list<Document>
+     */
+    private function openApiDocuments(?string $version): array
+    {
+        if ($this->openApi === null) {
+            return [];
+        }
+
+        if ($this->versionsEnabled && $version !== null && $version !== $this->latestVersion) {
+            return [];
+        }
+
+        return $this->openApi->documents($version);
     }
 
     /**
