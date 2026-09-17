@@ -24,6 +24,8 @@ export function vellumScrollSpy(items = [], pageTitle = 'On this page') {
     resizeObserver: null,
     _onScroll: null,
     _frame: 0,
+    /** Rail anchor points keyed by heading id, refreshed when layout moves. */
+    _anchors: {},
     init() {
       this.updateActiveTitle()
       this.updateProgress()
@@ -55,6 +57,9 @@ export function vellumScrollSpy(items = [], pageTitle = 'On this page') {
         this._frame = 0
         this.updateProgress()
         this.syncActive()
+        // Every frame, not only when the lit set changes: the dot marks where
+        // the reader is, which moves continuously while the set does not.
+        this.updateDot()
       })
     },
     /**
@@ -115,6 +120,71 @@ export function vellumScrollSpy(items = [], pageTitle = 'On this page') {
       const rect = header.getBoundingClientRect()
 
       return rect.top <= 0 ? Math.max(0, rect.bottom) : 0
+    },
+    /**
+     * Slide the dot along the rail to match reading position.
+     *
+     * The rail says which sections are on screen. The dot says where in them
+     * you are, which is the thing the rail cannot show: it interpolates
+     * between two headings' rail anchors by how far you have read between
+     * them in the article.
+     */
+    updateDot() {
+      const nav = this.tocNav()
+      const dot = nav?.querySelector('[data-vellum-toc-dot]')
+
+      if (!nav || !dot) {
+        return
+      }
+
+      const anchors = this.ids.map((id) => this._anchors[id]).filter((value) => value !== undefined)
+
+      if (anchors.length === 0) {
+        return
+      }
+
+      const tops = []
+
+      for (const id of this.ids) {
+        const el = document.getElementById(id)
+
+        if (el && this._anchors[id] !== undefined) {
+          tops.push({ top: el.getBoundingClientRect().top, anchor: this._anchors[id] })
+        }
+      }
+
+      if (tops.length === 0) {
+        return
+      }
+
+      const here = this.viewportTop()
+      let distance = tops[0].anchor
+
+      for (let i = 0; i < tops.length; i++) {
+        if (tops[i].top > here) {
+          break
+        }
+
+        const next = tops[i + 1]
+
+        if (!next) {
+          const article = document.querySelector('[data-vellum-article]')
+          const end = article ? article.getBoundingClientRect().bottom : tops[i].top + window.innerHeight
+          const span = Math.max(1, end - tops[i].top)
+          const ratio = Math.min(1, Math.max(0, (here - tops[i].top) / span))
+
+          distance = tops[i].anchor + (this._railEnd - tops[i].anchor) * ratio
+          break
+        }
+
+        const span = Math.max(1, next.top - tops[i].top)
+        const ratio = Math.min(1, Math.max(0, (here - tops[i].top) / span))
+
+        distance = tops[i].anchor + (next.anchor - tops[i].anchor) * ratio
+      }
+
+      nav.style.setProperty('--offset-distance', `${distance}px`)
+      nav.style.setProperty('--toc-dot-opacity', '1')
     },
     syncActive() {
       const visible = this.visibleIds()
@@ -230,8 +300,13 @@ export function vellumScrollSpy(items = [], pageTitle = 'On this page') {
 
       nav.style.setProperty('--track-top', `${first.top}px`)
       nav.style.setProperty('--track-bottom', `${last.bottom}px`)
-      nav.style.setProperty('--offset-distance', `${(first.top + first.bottom) / 2}px`)
-      nav.style.setProperty('--toc-dot-opacity', '1')
+
+      this._anchors = Object.fromEntries(
+        positions.filter((item) => item.id).map((item) => [item.id, (item.top + item.bottom) / 2]),
+      )
+      this._railEnd = positions[positions.length - 1].bottom
+
+      this.updateDot()
     },
     updateIndicator() {
       this.$nextTick(() => this.updateRail())

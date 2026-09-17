@@ -944,7 +944,10 @@
   offset-distance: var(--offset-distance);
   offset-anchor: center;
   opacity: var(--toc-dot-opacity, 0);
-  transition: offset-distance 420ms cubic-bezier(0.16, 1, 0.3, 1), opacity 200ms ease;
+  /* No transition on the position. The dot is driven by scroll now, so the
+     scrolling is the animation; easing it as well makes it lag behind the
+     reader and then catch up. */
+  transition: opacity 200ms ease;
 }
 
 @media (prefers-reduced-motion: reduce) {
