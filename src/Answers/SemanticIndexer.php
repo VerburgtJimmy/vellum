@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace Vellum\Answers;
 
 use RuntimeException;
-use Vellum\Answers\Questions\QuestionGenerators;
-use Vellum\Content\Document;
 use Vellum\Semantic\FileVectorCache;
 use Vellum\Semantic\ModelDownloader;
 use Vellum\Semantic\Pruner;
@@ -17,7 +15,7 @@ use Vellum\Semantic\SemanticSet;
 use Vellum\Semantic\WordPieceTokenizer;
 
 /**
- * Builds the semantic set for one docs version from compiled documents, with
+ * Builds the semantic set for one docs version from its answer index, with
  * every section tagged by the access level that may see it.
  */
 final class SemanticIndexer
@@ -51,21 +49,19 @@ final class SemanticIndexer
     }
 
     /**
-     * @param  list<Document>  $documents
      * @return array{set: SemanticSet, sections: int, encoded: int}
      */
-    public function build(array $documents): array
+    public function build(AnswerIndex $index): array
     {
         if (! $this->hasModel()) {
             throw new RuntimeException("No model in {$this->modelDirectory}. Run php artisan vellum:model.");
         }
 
-        $sections = Sections::from($documents);
-        $inputs = array_map(static fn (array $section): array => [
-            'id' => $section['page'].'#'.$section['anchor'],
-            'text' => self::text($section),
-            'group' => $section['access'],
-        ], $sections);
+        $inputs = array_map(static fn (array $record): array => [
+            'id' => $record['id'],
+            'text' => AnswerIndex::text($record),
+            'group' => $record['access'],
+        ], $index->sections);
 
         $builder = new SemanticBuilder(
             WordPieceTokenizer::fromTokenizerJson($this->modelDirectory.'/tokenizer.json'),
@@ -82,22 +78,6 @@ final class SemanticIndexer
         $set->save($this->cacheDirectory);
 
         return ['set' => $set, 'sections' => count($inputs), 'encoded' => $builder->encoded];
-    }
-
-    /**
-     * The text a section is embedded from: its words, then the questions it
-     * answers, so a reader's question lands near the section that answers it.
-     *
-     * @param  array{title: string, own: string, heading: string, text: string, html: string, questions: list<string>}  $section
-     */
-    public static function text(array $section): string
-    {
-        return trim(implode(' ', [
-            $section['title'],
-            $section['heading'],
-            $section['text'],
-            ...QuestionGenerators::default()->for($section),
-        ]));
     }
 
     private function attribution(): string

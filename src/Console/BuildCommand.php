@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Vellum\Console;
 
 use Illuminate\Console\Command;
+use Vellum\Answers\AnswerIndex;
 use Vellum\Answers\SemanticIndexer;
 use Vellum\Content\ContentRepository;
 use Vellum\Content\Document;
@@ -52,7 +53,7 @@ final class BuildCommand extends Command
             (new ScoutIndexer)->sync($repository, $documents);
         }
 
-        $this->buildSemantic($repository, $documents);
+        $this->buildAnswers($repository, $documents);
 
         $elapsed = round((microtime(true) - $started) * 1000);
 
@@ -104,14 +105,15 @@ final class BuildCommand extends Command
     }
 
     /**
-     * The semantic set is built per version, from the documents just compiled.
-     * A missing model is a warning: search keeps working, lexically.
+     * The answer index, and the semantic set when the model is present, are
+     * built per version from the documents just compiled. A missing model is a
+     * warning: search keeps working, lexically.
      *
      * @param  list<Document>  $documents
      */
-    private function buildSemantic(ContentRepository $repository, array $documents): void
+    private function buildAnswers(ContentRepository $repository, array $documents): void
     {
-        if (! (bool) config('vellum.answers.enabled', true) || ! (bool) config('vellum.answers.semantic', true)) {
+        if (! (bool) config('vellum.answers.enabled', true)) {
             return;
         }
 
@@ -121,22 +123,44 @@ final class BuildCommand extends Command
             $byVersion[$document->version ?? ''][] = $document;
         }
 
+        $semantic = (bool) config('vellum.answers.semantic', true);
+        $warned = false;
+
         foreach ($byVersion as $version => $group) {
-            $indexer = SemanticIndexer::fromConfig($repository->store()->versionPath($version === '' ? null : $version).'/semantic');
+            $root = $repository->store()->versionPath($version === '' ? null : $version);
+            $index = AnswerIndex::build($group, $repository);
+            $index->save($root.'/answers');
+            $suffix = $version === '' ? '' : " {$version}";
+
+            $this->line(sprintf(
+                '  answers%s: %d sections, %d questions',
+                $suffix,
+                count($index->sections),
+                array_sum(array_map(static fn (array $record): int => count($record['questions']), $index->sections)),
+            ));
+
+            if (! $semantic) {
+                continue;
+            }
+
+            $indexer = SemanticIndexer::fromConfig($root.'/semantic');
 
             if (! $indexer->hasModel()) {
-                $this->warn('No embedding model in '.$indexer->modelDirectory().'; search stays lexical. Run php artisan vellum:model.');
+                if (! $warned) {
+                    $this->warn('No embedding model in '.$indexer->modelDirectory().'; search stays lexical. Run php artisan vellum:model.');
+                    $warned = true;
+                }
 
-                return;
+                continue;
             }
 
             $started = microtime(true);
-            $result = $indexer->build($group);
+            $result = $indexer->build($index);
             $guest = strlen((string) gzencode($result['set']->forGroups(['guest']), 9));
 
             $this->line(sprintf(
                 '  semantic%s: %d sections (%d encoded), %d tokens, %d KB gzipped for guests, %d ms',
-                $version === '' ? '' : " {$version}",
+                $suffix,
                 $result['sections'],
                 $result['encoded'],
                 count($result['set']->tokens),

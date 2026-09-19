@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Vellum\Answers\AnswerIndex;
 use Vellum\Answers\SemanticIndexer;
 use Vellum\Cache\CompiledStore;
 use Vellum\Content\ContentRepository;
@@ -17,7 +18,7 @@ it('stays within the size and time budget on Vellum\'s own docs', function (): v
     $indexer = new SemanticIndexer(rtrim((string) getenv('VELLUM_MODELS'), '/').'/potion-base-8M', $this->cachePath().'/semantic');
 
     $started = microtime(true);
-    $result = $indexer->build($documents);
+    $result = $indexer->build(AnswerIndex::build($documents, $repository));
     $seconds = microtime(true) - $started;
     $gzipped = strlen((string) gzencode($result['set']->forGroups(['guest']), 9));
 
