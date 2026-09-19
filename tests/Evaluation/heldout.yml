@@ -1,0 +1,255 @@
+# Held-out questions for the second evaluation. Never tuned against, never
+# merged into docs/questions.yml. Paraphrase entries carry a note describing
+# what the target says; the question itself is written by someone else.
+
+# Literal
+
+- q: 'How do I give inline code a language with the {:language} suffix?'
+  page: writing/code-blocks
+  section: inline-code-with-a-language
+  kind: literal
+- q: 'What happens when a fence has no language in the info string?'
+  page: writing/code-blocks
+  section: a-fence
+  kind: literal
+- q: 'Can every fenced block in a tabs group become code tabs?'
+  page: writing/code-blocks
+  section: grouping-blocks-as-tabs
+  also:
+    - page: components/tabs
+      section: code-tabs
+  kind: literal
+- q: 'How do I add an external href entry to meta.json pages?'
+  page: writing/navigation
+  section: external-and-custom-entries
+  kind: literal
+- q: 'Is _meta.md rendered as a page?'
+  page: writing/navigation
+  section: metamd
+  kind: literal
+- q: 'What happens when billing.md and billing/index.md both exist?'
+  page: writing/navigation
+  section: two-files-one-url
+  also:
+    - page: troubleshooting
+      section: two-docs-files-resolve-to-slug
+  kind: literal
+- q: 'Are gated pages greyed out in the sidebar?'
+  page: writing/navigation
+  section: gating-and-the-sidebar
+  kind: literal
+- q: 'Does a BOM before the frontmatter break it?'
+  page: writing/markdown
+  section: frontmatter
+  kind: literal
+- q: 'Are footnotes and task lists supported?'
+  page: writing/markdown
+  section: what-you-get
+  kind: literal
+- q: 'Which route serves image files found on disk?'
+  page: writing/images
+  section: how-they-are-served
+  kind: literal
+- q: 'What are the default versions config keys?'
+  page: getting-started/configuration
+  section: versions
+  also:
+    - page: versions
+  kind: literal
+- q: 'How do I disable the changelog by setting path to null?'
+  page: getting-started/configuration
+  section: changelog
+  also:
+    - page: releases
+  kind: literal
+- q: 'Which config keys were added after 0.2?'
+  page: getting-started/upgrade
+  section: keys-added-after-02
+  kind: literal
+- q: 'Why does an unclosed docs component raise an error?'
+  page: troubleshooting
+  section: unclosed-docs-component-x-name
+  kind: literal
+- q: 'Why is my component prefix not in vellum.components.namespaces?'
+  page: troubleshooting
+  section: component-x-name-is-not-in-vellumcomponentsnamespaces
+  also:
+    - page: extending
+      section: namespaces
+  kind: literal
+- q: 'Why must docs component attributes be quoted strings?'
+  page: troubleshooting
+  section: docs-component-x-name-attributes-must-be-quoted-strings
+  kind: literal
+- q: 'The search driver is scout but laravel/scout is not installed'
+  page: troubleshooting
+  section: vellumsearchdriver-is-scout-but-laravelscout-is-not-installed
+  also:
+    - page: search
+      section: scout
+  kind: literal
+- q: 'What should an issue include when I am still stuck?'
+  page: troubleshooting
+  section: still-stuck
+  kind: literal
+- q: 'Which package renders CommonMark and GitHub Flavored Markdown?'
+  page: credits
+  section: rendering
+  kind: literal
+- q: 'Can the same docs be served from the app and exported as a static site?'
+  page: why
+  section: one-source-two-ways-to-ship-it
+  kind: literal
+
+# Paraphrase
+
+- q: ''
+  page: commands
+  section: vellumexport
+  note: 'vellum:export writes a full static site: HTML, assets, raw Markdown, search index, feed, 404.html'
+  kind: paraphrase
+- q: ''
+  page: commands
+  section: vellumbuild
+  note: 'vellum:build compiles everything, belongs in the deploy, and fails on duplicate URLs or unknown directives'
+  kind: paraphrase
+- q: ''
+  page: components/cards
+  section: only-cards-belong-inside
+  note: 'prose written between cards becomes its own grid cell; put it above the block'
+  kind: paraphrase
+- q: ''
+  page: components/callouts
+  section: the-five-types
+  note: 'which callout type to use when (note, tip, info, warning, danger)'
+  kind: paraphrase
+- q: ''
+  page: components/steps
+  section: rules-worth-knowing
+  note: 'only ## opens a step, and numbers are generated so you must not type them'
+  kind: paraphrase
+- q: ''
+  page: components/tabs
+  section: rules-worth-knowing
+  note: 'headings inside a tab panel still go in the table of contents; every panel is in the page and indexed'
+  kind: paraphrase
+- q: ''
+  page: credits
+  section: licences
+  note: 'Vellum is MIT and every dependency is MIT or BSD'
+  kind: paraphrase
+- q: ''
+  page: extending
+  section: slots
+  note: 'the body of a paired component tag is Markdown and can nest other components'
+  kind: paraphrase
+- q: ''
+  page: extending
+  section: missing-components
+  note: 'unknown or disallowed components throw locally and at build; in production the page fails and it is logged'
+  kind: paraphrase
+- q: ''
+  page: getting-started/configuration
+  section: frontmatter
+  note: 'which frontmatter keys a page accepts (title, description, slug, order, full, access)'
+  kind: paraphrase
+- q: ''
+  page: getting-started/upgrade
+  section: colour-presets
+  note: 'nine old presets were removed in 0.5 and fall back to neutral'
+  kind: paraphrase
+- q: ''
+  page: getting-started/upgrade
+  section: version-urls
+  note: 'since 0.5 the latest version has no version segment in its URL and the old one 301s'
+  kind: paraphrase
+- q: ''
+  page: page-actions
+  section: copy-markdown
+  note: 'the Copy Markdown button puts the page source on the clipboard'
+  kind: paraphrase
+- q: ''
+  page: page-actions
+  section: changing-them
+  note: 'override or remove the page action row by overriding its Blade view'
+  kind: paraphrase
+- q: ''
+  page: search
+  section: export
+  note: 'the static export always uses the in-browser index and drops gated pages'
+  kind: paraphrase
+- q: ''
+  page: seo
+  section: per-page
+  note: 'each page gets a title, meta description, canonical and social card tags; canonical needs app.url'
+  kind: paraphrase
+- q: ''
+  page: theming
+  section: presets
+  note: 'the three shipped colour presets (neutral, ocean, laravel)'
+  kind: paraphrase
+- q: ''
+  page: theming
+  section: surfaces
+  note: 'the three background layers and why they only get darker in light mode'
+  kind: paraphrase
+- q: ''
+  page: troubleshooting
+  section: invalid-frontmatter-in-file-
+  note: 'YAML frontmatter did not parse, usually an unquoted colon or bad indentation'
+  kind: paraphrase
+- q: ''
+  page: troubleshooting
+  section: unknown-docs-directive-name-in-file
+  note: 'a ::: block with a misspelled name'
+  kind: paraphrase
+- q: ''
+  page: troubleshooting
+  section: where-errors-appear
+  note: 'in production a reader sees a generic error page and the reason goes to the log'
+  kind: paraphrase
+- q: ''
+  page: troubleshooting
+  section: search-returns-nothing
+  note: 'search is empty: check it is enabled and rebuild the index'
+  kind: paraphrase
+- q: ''
+  page: troubleshooting
+  section: failures-that-are-quiet
+  note: 'problems that raise no error, such as frontmatter showing as body text'
+  kind: paraphrase
+- q: ''
+  page: why
+  section: what-living-in-the-app-adds
+  note: 'what serving docs from the app gives you: gates, sessions, live config values'
+  kind: paraphrase
+- q: ''
+  page: why
+  section: what-05-commits-to
+  note: 'the stability promise: config keys, frontmatter and syntax frozen until 1.0'
+  kind: paraphrase
+- q: ''
+  page: writing/code-blocks
+  section: line-numbers
+  note: 'showLineNumbers adds a gutter that is not copied with the code'
+  kind: paraphrase
+- q: ''
+  page: writing/code-blocks
+  section: showing-directive-syntax
+  note: 'show ::: or a fence literally by wrapping it in a longer fence'
+  kind: paraphrase
+- q: ''
+  page: writing/markdown
+  section: headings-and-anchors
+  note: 'every heading gets an id and copy-link control; # is reserved for the page title'
+  kind: paraphrase
+- q: ''
+  page: writing/navigation
+  section: keep-the-rest
+  note: '"..." in meta.json places every unlisted page at that spot'
+  kind: paraphrase
+- q: ''
+  page: writing/images
+  section: formats-the-route-will-serve
+  note: 'which file types the asset route serves (images, fonts, video, pdf, zip) and what it refuses'
+  kind: paraphrase
