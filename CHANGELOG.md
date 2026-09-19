@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Every docs page points at its raw Markdown twice: a `<link rel="alternate" type="text/markdown">` in the head, and the same URL in a `Link` response header for a client that reads headers without parsing the HTML. The changelog page has no raw route and gets neither
 - Content negotiation on docs pages. A request whose `Accept` header ranks `text/markdown` above `text/html` gets the page's raw Markdown as `text/markdown`, the same body the raw route returns, and a page the reader cannot see is a 404 either way. `text/markdown` has to be named outright, so a browser's default `Accept` and a bare `*/*` keep getting HTML. Page responses send `Vary: Accept` alongside the existing `Vary: Accept-Encoding`, so a cache cannot hand the HTML to an agent or the Markdown to a browser. `agents.content_negotiation` turns it off
 - Raw Markdown responses carry an `X-Vellum-Docs-Version` header naming the version slug when versions are enabled. The body is untouched, so the raw route and Copy Markdown still return the file exactly as written
+- A "For agents" section in `docs/page-actions.md`, covering `llms.txt`, `llms-full.txt` and its separator, the alternate link and content negotiation, and noting that a `robots.txt` disallowing `/docs/_vellum/` also keeps crawlers that honour it away from the raw files `llms.txt` links to
 
 ## [0.6.0] - 2026-09-17
 
