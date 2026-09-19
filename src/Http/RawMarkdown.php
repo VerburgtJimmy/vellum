@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Vellum\Http;
 
+use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Symfony\Component\HttpFoundation\AcceptHeader;
 use Vellum\Content\ContentRepository;
 use Vellum\Content\Document;
 
@@ -14,6 +16,43 @@ use Vellum\Content\Document;
  */
 final class RawMarkdown
 {
+    /**
+     * Whether the Accept header ranks text/markdown above text/html.
+     *
+     * text/markdown has to be named outright with a quality above zero; a
+     * wildcard never counts as asking for Markdown. text/html takes its
+     * quality from its most specific match: text/html, then text/*, then the
+     * any-type wildcard. On a tie, Markdown wins when HTML only matched a wildcard or when
+     * Markdown was listed first. A browser's default Accept never names
+     * text/markdown, so it keeps getting HTML.
+     */
+    public static function preferredBy(Request $request): bool
+    {
+        $items = [];
+
+        foreach (AcceptHeader::fromString(strtolower((string) $request->headers->get('Accept', '')))->all() as $item) {
+            $items[$item->getValue()] ??= $item;
+        }
+
+        $markdown = $items['text/markdown'] ?? null;
+
+        if ($markdown === null || $markdown->getQuality() <= 0) {
+            return false;
+        }
+
+        $html = $items['text/html'] ?? $items['text/*'] ?? $items['*/*'] ?? null;
+
+        if ($html === null || $markdown->getQuality() > $html->getQuality()) {
+            return true;
+        }
+
+        if ($markdown->getQuality() < $html->getQuality()) {
+            return false;
+        }
+
+        return $html->getValue() !== 'text/html' || $markdown->getIndex() < $html->getIndex();
+    }
+
     /**
      * Whether the source may be served to the current reader. Gating is the
      * same as for the HTML page.

@@ -153,9 +153,14 @@ return [
     | to its raw Markdown, and {prefix}/llms-full.txt, all of that Markdown in
     | one file. vellum:export writes both at the export root.
     |
+    | content_negotiation: answer a docs page request whose Accept header
+    | prefers text/markdown with the page's raw Markdown instead of HTML.
+    | Page responses then send Vary: Accept so caches keep the two apart.
+    |
     */
     'agents' => [
         'llms_txt' => true,
+        'content_negotiation' => true,
     ],
 
     /*

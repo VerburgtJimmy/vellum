@@ -22,6 +22,7 @@ Published as `config/vellum.php`. **0.5 freezes these names.** Add values, do no
 | `checks.references` | `true` | Warn at build time about links and images that point at nothing |
 | `checks.strict` | `false` | Turn those warnings into a failed build |
 | `agents.llms_txt` | `true` | Serve `llms.txt` and `llms-full.txt` under the docs prefix. See [Page actions](/docs/page-actions) |
+| `agents.content_negotiation` | `true` | Serve a page's raw Markdown when the request's `Accept` header prefers `text/markdown` |
 | `cache.path` | `storage_path('framework/vellum')` | Compile cache |
 | `export.out` | `public_path('docs-static')` | Static export directory |
 | `export.base_url` | `/` | Prefix inside the export |

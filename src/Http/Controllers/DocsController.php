@@ -12,6 +12,7 @@ use Vellum\Content\ContentRepository;
 use Vellum\Content\Document;
 use Vellum\Content\HeadingExtractor;
 use Vellum\Http\DocsView;
+use Vellum\Http\RawMarkdown;
 
 /**
  * Serves compiled documentation pages.
@@ -48,12 +49,25 @@ final class DocsController extends Controller
         $documentSlug = $parsed['slug'];
 
         $document = $repository->find($documentSlug, $version);
+        $negotiates = (bool) config('vellum.agents.content_negotiation', true);
 
-        if ($document === null || ! $repository->allows($document)) {
-            return $this->notFound($repository, $version);
+        if ($negotiates && RawMarkdown::preferredBy(request())) {
+            $response = RawMarkdown::visible($repository, $document)
+                ? RawMarkdown::response($repository, $document)
+                : response('Not found.', 404)->header('Content-Type', 'text/plain; charset=UTF-8');
+        } elseif ($document === null || ! $repository->allows($document)) {
+            $response = $this->notFound($repository, $version);
+        } else {
+            $response = $this->render($repository, $document);
         }
 
-        return $this->render($repository, $document);
+        // One URL, two bodies depending on Accept. Without this a cache could
+        // hand the HTML to an agent, or the Markdown to a browser.
+        if ($negotiates) {
+            $response->setVary('Accept', false);
+        }
+
+        return $response;
     }
 
     private function notFound(ContentRepository $repository, ?string $version): Response
