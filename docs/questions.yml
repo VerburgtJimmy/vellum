@@ -122,6 +122,14 @@
   page: writing/markdown
   section: raw-html-is-removed
   kind: literal
+- q: 'which php and laravel do i need'
+  page: getting-started/installation
+  section: requirements
+  kind: literal
+- q: 'why not fumadocs or starlight'
+  page: why
+  section: compared-with-the-usual-choices
+  kind: literal
 
 # Paraphrase
 
@@ -147,14 +155,14 @@
 - q: 'v1 and v2 of my product side by side, both browsable'
   page: versions
   kind: paraphrase
-- q: 'host on github pages, no php on the server'
+- q: 'static output only, nothing dynamic on the host'
   page: export
   kind: paraphrase
 - q: 'brand colour instead of the default blue'
   page: theming
   section: accent
   kind: paraphrase
-- q: 'default to the dark look for everyone'
+- q: 'everyone gets the night look by default'
   page: theming
   section: the-rest
   kind: paraphrase
@@ -169,16 +177,16 @@
 - q: 'show the current app version number inside the text'
   page: value-tags
   kind: paraphrase
-- q: 'warning box like a note or tip with an icon'
+- q: 'coloured box to draw attention to a gotcha'
   page: components/callouts
   kind: paraphrase
-- q: 'numbered guide, step 1 step 2 step 3'
+- q: 'ordered walkthrough with big numbers down the side'
   page: components/steps
   kind: paraphrase
 - q: 'switch between package managers in the same snippet'
   page: components/tabs
   kind: paraphrase
-- q: 'put a png in my page'
+- q: 'drop a screenshot into the doc'
   page: writing/images
   kind: paraphrase
 - q: 'img src works from the top folder but breaks in nested pages'
@@ -196,18 +204,18 @@
   page: extending
   section: namespaces
   kind: paraphrase
-- q: 'my div and span tags vanish after build'
+- q: 'my raw markup disappears'
   page: writing/markdown
   section: raw-html-is-removed
   kind: paraphrase
-- q: 'can i use [if](if) inside the content'
+- q: 'can i use @if inside the content'
   page: writing/markdown
   section: no-blade
   kind: paraphrase
-- q: 'changelog page with an rss feed'
+- q: 'where do i list what shipped each release, with a feed'
   page: releases
   kind: paraphrase
-- q: 'which php and laravel do i need'
+- q: 'does my old server version still work with it'
   page: getting-started/installation
   section: requirements
   kind: paraphrase
@@ -215,7 +223,7 @@
   page: commands
   section: vellumclear
   kind: paraphrase
-- q: 'why not fumadocs or starlight'
+- q: 'what makes this worth picking over the react and astro ones'
   page: why
   section: compared-with-the-usual-choices
   kind: paraphrase
@@ -223,14 +231,14 @@
   page: why
   section: when-another-tool-is-the-better-fit
   kind: paraphrase
-- q: 'updated from 0.5, what breaks'
+- q: 'moving up one minor release, anything that will bite me'
   page: getting-started/upgrade
   section: 05-to-06
   kind: paraphrase
 - q: 'only users that pass a policy check can open a doc'
   page: gating
   kind: paraphrase
-- q: 'links to other sites should open in a new tab'
+- q: 'external urls should not replace the current window'
   page: writing/markdown
   section: links
   also:
