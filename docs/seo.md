@@ -23,6 +23,8 @@ Pages without a `description` in frontmatter get no meta description. It is the 
 
 Built from the same navigation that renders the sidebar, so it stays correct as pages are added. Gated pages are left out, including for a signed-in reader, since a sitemap is one public file. Every version is listed when versions are enabled.
 
+A page gets a `<lastmod>` when it has a last-updated date: its `updated` frontmatter, or its last git commit when the docs are in a full git clone. Pages without one get no `<lastmod>`. File modification times are never used, because a deploy resets them and a crawler told every page changed today learns to ignore the field.
+
 It sits under the docs prefix rather than at the site root, which the package does not own. A sitemap may list any URL at or below its own path, so this one covers the whole docs tree.
 
 Like the canonical, it needs `app.url` to be an origin. Without one it returns a 404 rather than publishing relative URLs, which are not valid in a sitemap.

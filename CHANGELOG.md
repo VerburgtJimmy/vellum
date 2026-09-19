@@ -22,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Raw Markdown responses, from the raw route or negotiated, send `Link: <page>; rel="canonical"` naming the HTML page they are the source of, so a search engine credits the page instead of indexing the Markdown as a near-duplicate. It is absolute when `app.url` is an origin and root-relative otherwise, which a client resolves against the URL it requested
 - A last-updated date for every page, resolved when the page compiles and kept in the compile cache. It comes from a new `updated` frontmatter key (`2026-09-17` or ISO 8601) when set, then from the file's last git commit when the docs sit in a full git clone, and otherwise the page has none. File modification times are never used, since a composer install or a deploy checkout resets them. A shallow clone counts as no git, because every file in it carries the date of the one commit fetched. Git is asked once per build for every file, runs with an argument list rather than a shell, and times out after 10 seconds; a missing binary or a directory outside a repository just means no date. `vellum:build` warns about an `updated` value it cannot read
 - Raw Markdown responses send `Last-Modified` from that date, and each page's header block in `llms-full.txt` gains an `Updated:` line. Both are left out for a page without a date rather than guessed
+- `<lastmod>` in the sitemap, from the route and from `vellum:export`, for pages with a last-updated date. Pages without one still have no `<lastmod>`
 
 ### Changed
 

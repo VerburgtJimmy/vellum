@@ -417,7 +417,7 @@ it('writes a sitemap at the export root using the export base url', function ():
     config()->set('vellum.export.base_url', 'https://static.example.com');
 
     $this->writeDoc('index.md', "---\ntitle: Home\n---\nHi");
-    $this->writeDoc('guides/one.md', "---\ntitle: One\n---\nBody");
+    $this->writeDoc('guides/one.md', "---\ntitle: One\nupdated: 2026-09-17\n---\nBody");
     $this->writeDoc('secret.md', "---\ntitle: Secret\naccess: auth\n---\nPrivate");
 
     $this->artisan('vellum:export')->assertSuccessful();
@@ -430,7 +430,7 @@ it('writes a sitemap at the export root using the export base url', function ():
 
     expect($xml)
         ->toContain('<loc>https://static.example.com/docs</loc>')
-        ->toContain('<loc>https://static.example.com/docs/guides/one</loc>')
+        ->toContain("<loc>https://static.example.com/docs/guides/one</loc>\n        <lastmod>2026-09-17</lastmod>")
         ->not->toContain('app.example.com')
         ->not->toContain('secret');
 

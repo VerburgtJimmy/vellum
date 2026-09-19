@@ -497,15 +497,15 @@ HTML;
      */
     private function writeSitemap(ContentRepository $repository, string $out): void
     {
-        $urls = Sitemap::urls($repository, staticExport: true);
+        $entries = Sitemap::entries($repository, staticExport: true);
 
-        if ($urls === []) {
+        if ($entries === []) {
             $this->warn('Skipped sitemap.xml: set app.url or vellum.export.base_url to an origin.');
 
             return;
         }
 
-        $this->writeFile($out.DIRECTORY_SEPARATOR.'sitemap.xml', Sitemap::render($urls));
+        $this->writeFile($out.DIRECTORY_SEPARATOR.'sitemap.xml', Sitemap::render($entries));
     }
 
     /**

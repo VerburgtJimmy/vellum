@@ -101,6 +101,23 @@ it('404s rather than publish relative urls when app.url is not an origin', funct
     expect(Sitemap::urls(ContentRepository::fromConfig()))->toBe([]);
 })->with(['', 'localhost', '/docs']);
 
+it('adds lastmod only for pages with a date', function (): void {
+    $this->writeDoc('index.md', "---\ntitle: Home\nupdated: 2026-09-17\n---\nHi");
+    $this->writeDoc('stamped.md', "---\ntitle: Stamped\nupdated: '2026-09-17T10:15:00+02:00'\n---\nBody");
+    $this->writeDoc('undated.md', "---\ntitle: Undated\n---\nBody");
+    file_put_contents($this->docsPath().'/meta.json', json_encode([
+        'pages' => ['index', 'stamped', 'undated', ['title' => 'GitHub', 'href' => 'https://github.com/acme']],
+    ]));
+
+    $xml = (string) $this->get('/docs/sitemap.xml')->assertOk()->getContent();
+
+    expect($xml)
+        ->toContain("<loc>https://docs.example.com/docs</loc>\n        <lastmod>2026-09-17</lastmod>")
+        ->toContain("<loc>https://docs.example.com/docs/stamped</loc>\n        <lastmod>2026-09-17T10:15:00+02:00</lastmod>")
+        ->toContain("<loc>https://docs.example.com/docs/undated</loc>\n    </url>")
+        ->and(substr_count($xml, '<lastmod>'))->toBe(2);
+});
+
 it('escapes urls it writes', function (): void {
     expect(Sitemap::render(['https://e.com/a?b=1&c=2']))
         ->toContain('<loc>https://e.com/a?b=1&amp;c=2</loc>');
