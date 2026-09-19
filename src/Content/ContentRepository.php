@@ -43,6 +43,8 @@ final class ContentRepository
      */
     private array $versionPipelines = [];
 
+    private ?LastUpdated $lastUpdated = null;
+
     /**
      * Build a repository from Laravel config values.
      */
@@ -120,6 +122,9 @@ final class ContentRepository
 
         // One build, one report: a rebuild must not inherit the last one.
         $this->imageReport->reset();
+
+        // A build compiles every page, so ask git for every date at once.
+        $this->lastUpdated()->prime();
 
         foreach ($this->discoverSourceFiles($version) as $source) {
             $slug = $source['slug'];
@@ -521,11 +526,20 @@ final class ContentRepository
             full: $full,
             icon: $icon,
             islands: $islands,
+            updated: $this->lastUpdated()->resolve($absolutePath, $matter),
         );
 
         $this->store->put($document);
 
         return $document;
+    }
+
+    /**
+     * One resolver per repository, so git is looked for once per build.
+     */
+    private function lastUpdated(): LastUpdated
+    {
+        return $this->lastUpdated ??= new LastUpdated($this->contentPath);
     }
 
     /**

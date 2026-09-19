@@ -132,6 +132,7 @@ Frozen page keys:
 | `order` | Sort among siblings when `meta.json` does not list pages |
 | `full` | Hide the table of contents column |
 | `access` | `guest`, `auth`, or a gate name. See [Gating](/docs/gating). |
+| `updated` | Last-updated date, `2026-09-17` or ISO 8601 (`2026-09-17T10:00:00+02:00`). Without it, the file's last git commit date is used, when the docs are in a full git clone. File modification times are never used |
 
 Folder `meta.json`: `title`, `defaultOpen`, `pages`, `access`. See [Navigation](/docs/writing/navigation). `_meta.md` can set `access` (and the usual matter) for the folder.
 
