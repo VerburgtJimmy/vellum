@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Vellum;
 
+use Illuminate\Contracts\Foundation\CachesRoutes;
+use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Vellum\Console\BuildCommand;
@@ -14,6 +16,7 @@ use Vellum\Console\InstallCommand;
 use Vellum\Console\ModelCommand;
 use Vellum\Http\Controllers\AssetController;
 use Vellum\Http\Middleware\CompressHtmlResponse;
+use Vellum\Http\RootLlmsTxtRoutes;
 
 /**
  * Registers Vellum config, views, routes, and Artisan commands.
@@ -81,6 +84,17 @@ final class VellumServiceProvider extends ServiceProvider
 
         $router->group(function (): void {
             $this->loadRoutesFrom(__DIR__.'/../routes/web.php');
+        });
+
+        // After boot, so the app's own routes are loaded and can be checked.
+        // With cached routes, whatever was registered at cache time is what
+        // the cache holds, so there is nothing to add.
+        $this->app->booted(function (): void {
+            if ($this->app instanceof CachesRoutes && $this->app->routesAreCached()) {
+                return;
+            }
+
+            RootLlmsTxtRoutes::register($this->app->make(Router::class));
         });
     }
 }

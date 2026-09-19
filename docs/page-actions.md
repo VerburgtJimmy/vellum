@@ -85,6 +85,12 @@ Links are absolute when `app.url` is an origin and root-relative otherwise.
 `vellum:export` writes both at the export root. Set `agents.llms_txt` to `false` to turn
 them off.
 
+Agents look for `llms.txt` at the site root, so both files are also served at `/llms.txt`
+and `/llms-full.txt`, on `route.domain` when that is set. The root is your app's, so
+Vellum only adds those routes when the app does not already have one for the path, and a
+route the app defines for it wins. Set `agents.llms_txt_root` to `false` to keep them
+under the docs prefix only.
+
 The links in `llms.txt` point under `/docs/_vellum/raw/`, so keep that path open in
 `robots.txt`. [Search engines](/docs/seo#robotstxt) has the rules to use.
 

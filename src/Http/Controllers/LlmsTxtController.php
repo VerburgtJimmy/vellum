@@ -10,10 +10,8 @@ use Vellum\Content\ContentRepository;
 use Vellum\Support\LlmsTxt;
 
 /**
- * Serves {prefix}/llms.txt and {prefix}/llms-full.txt.
- *
- * Both sit under the docs prefix for the same reason the sitemap does: the
- * site root belongs to the host app, not the package.
+ * Serves {prefix}/llms.txt and {prefix}/llms-full.txt, and the same files at
+ * the site root when the host app has not taken those paths.
  */
 final class LlmsTxtController extends Controller
 {
@@ -25,6 +23,31 @@ final class LlmsTxtController extends Controller
     public function full(): Response
     {
         return $this->respond(static fn (ContentRepository $repository): string => LlmsTxt::full($repository));
+    }
+
+    public function rootIndex(): Response
+    {
+        $this->abortUnlessRoot();
+
+        return $this->index();
+    }
+
+    public function rootFull(): Response
+    {
+        $this->abortUnlessRoot();
+
+        return $this->full();
+    }
+
+    /**
+     * The root routes are registered at boot, so the key is checked again
+     * here for a config changed after that.
+     */
+    private function abortUnlessRoot(): void
+    {
+        if (! (bool) config('vellum.agents.llms_txt_root', true)) {
+            abort(404);
+        }
     }
 
     /**
