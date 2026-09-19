@@ -146,6 +146,20 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Agents
+    |--------------------------------------------------------------------------
+    |
+    | llms_txt: serve {prefix}/llms.txt, an index of every public page linking
+    | to its raw Markdown, and {prefix}/llms-full.txt, all of that Markdown in
+    | one file. vellum:export writes both at the export root.
+    |
+    */
+    'agents' => [
+        'llms_txt' => true,
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Fonts
     |--------------------------------------------------------------------------
     |
