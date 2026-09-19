@@ -14,6 +14,7 @@ use Vellum\Content\Document;
 use Vellum\Content\HeadingExtractor;
 use Vellum\Http\DocsView;
 use Vellum\Search\SearchIndexQuery;
+use Vellum\Support\LlmsTxt;
 use Vellum\Support\Sitemap;
 
 /**
@@ -105,6 +106,7 @@ final class ExportCommand extends Command
         $this->export404($repository, $out, $prefix, $baseUrl);
 
         $this->writeSitemap($repository, $out);
+        $this->writeLlmsTxt($repository, $out);
         $this->copyDist($packageRoot, $out);
         $this->copyContentFiles((string) config('vellum.path'), $prefixRoot);
         $this->writeSearchIndexes($repository, $prefixRoot);
@@ -504,6 +506,20 @@ HTML;
         }
 
         $this->writeFile($out.DIRECTORY_SEPARATOR.'sitemap.xml', Sitemap::render($urls));
+    }
+
+    /**
+     * llms.txt and llms-full.txt at the export root, next to the sitemap.
+     * Without an origin the links stay root-relative, which Markdown allows.
+     */
+    private function writeLlmsTxt(ContentRepository $repository, string $out): void
+    {
+        if (! LlmsTxt::enabled()) {
+            return;
+        }
+
+        $this->writeFile($out.DIRECTORY_SEPARATOR.'llms.txt', LlmsTxt::index($repository, staticExport: true));
+        $this->writeFile($out.DIRECTORY_SEPARATOR.'llms-full.txt', LlmsTxt::full($repository, staticExport: true));
     }
 
     private function writeFile(string $path, string $contents): void
