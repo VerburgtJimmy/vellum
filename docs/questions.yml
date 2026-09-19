@@ -1,0 +1,232 @@
+# Golden questions for search. Each entry names the page (slug) and, where the
+# answer sits under a heading, the section (heading id). kind: literal means the
+# question reuses words from the target; paraphrase means it avoids them.
+
+# Literal
+
+- q: What does vellum:install publish?
+  page: commands
+  section: velluminstall
+  kind: literal
+- q: Does vellum:install --force overwrite the published config?
+  page: commands
+  section: velluminstall
+  kind: literal
+- q: What should a deploy run?
+  page: commands
+  section: a-deploy
+  kind: literal
+- q: How do I rebuild the search index without recompiling pages?
+  page: commands
+  section: vellumindex
+  kind: literal
+- q: What does vellum:clear remove?
+  page: commands
+  section: vellumclear
+  kind: literal
+- q: Why does /docs/{latest}/ redirect with a 301?
+  page: versions
+  kind: literal
+- q: Can access be a Laravel gate name?
+  page: gating
+  kind: literal
+- q: Why do gated pages return a 404 instead of a 403?
+  page: gating
+  kind: literal
+- q: How do I set an explicit order with pages in meta.json?
+  page: writing/navigation
+  section: metajson
+  kind: literal
+- q: How do I add section headings with triple dashes?
+  page: writing/navigation
+  section: section-headings
+  kind: literal
+- q: Where does a callout title go?
+  page: components/callouts
+  section: titles
+  kind: literal
+- q: When does a tabs group render as code tabs?
+  page: components/tabs
+  section: code-tabs
+  kind: literal
+- q: How does persist store the active tab in localStorage?
+  page: components/tabs
+  section: remembering-the-choice
+  kind: literal
+- q: How do I highlight lines in a code block?
+  page: writing/code-blocks
+  section: highlighted-lines
+  kind: literal
+- q: Can a title replace the language label in the header?
+  page: writing/code-blocks
+  section: title
+  kind: literal
+- q: Does Vellum set width, height and aspect-ratio on images?
+  page: writing/images
+  section: what-vellum-adds
+  kind: literal
+- q: How do I add a caption to an image?
+  page: writing/images
+  section: captions
+  kind: literal
+- q: Does the raw Markdown route honour gating?
+  page: page-actions
+  section: raw-markdown
+  kind: literal
+- q: How do I set repo for Edit on GitHub?
+  page: page-actions
+  section: edit-on-github
+  kind: literal
+- q: Where is the sitemap served?
+  page: seo
+  section: sitemap
+  kind: literal
+- q: What should robots.txt disallow?
+  page: seo
+  section: robotstxt
+  kind: literal
+- q: Can the accent be one colour per mode?
+  page: theming
+  section: accent
+  kind: literal
+- q: Which contrast target do the presets meet?
+  page: theming
+  section: contrast
+  kind: literal
+- q: Which keys can value tags read without the allowlist?
+  page: value-tags
+  kind: literal
+- q: How do I allow unprefixed host components in namespaces?
+  page: extending
+  section: namespaces
+  kind: literal
+- q: How do I use Scout with Meilisearch or Typesense?
+  page: search
+  section: scout
+  kind: literal
+- q: Which base_url does the export sitemap use?
+  page: export
+  kind: literal
+- q: Does the changelog feed include Unreleased?
+  page: releases
+  kind: literal
+- q: Which config key turns reference warnings into a failed build?
+  page: getting-started/configuration
+  section: site-and-routing
+  kind: literal
+- q: Why is raw HTML removed from Markdown?
+  page: writing/markdown
+  section: raw-html-is-removed
+  kind: literal
+
+# Paraphrase
+
+- q: How do I get this into my Laravel project?
+  page: getting-started/installation
+  section: require-the-package
+  kind: paraphrase
+- q: My edits are not showing up on production
+  page: troubleshooting
+  section: editing-changes-nothing
+  kind: paraphrase
+- q: The stylesheet is not loading and everything looks broken
+  page: troubleshooting
+  section: the-site-has-no-styling
+  kind: paraphrase
+- q: Stop anonymous visitors from reading an article
+  page: gating
+  kind: paraphrase
+- q: Change which item appears on top in the left menu
+  page: writing/navigation
+  section: ordering
+  kind: paraphrase
+- q: Keep manuals for an older release of my product alongside the current one
+  page: versions
+  kind: paraphrase
+- q: Deploy to Netlify as flat files with no server
+  page: export
+  kind: paraphrase
+- q: Use my company's purple instead of the default color
+  page: theming
+  section: accent
+  kind: paraphrase
+- q: Start in night mode
+  page: theming
+  section: the-rest
+  kind: paraphrase
+- q: Which key combo brings up the finder?
+  page: search
+  section: minisearch
+  kind: paraphrase
+- q: Let a chatbot read this article
+  page: page-actions
+  section: open-in-chatgpt--open-in-claude
+  kind: paraphrase
+- q: Print a setting from my application inside the text
+  page: value-tags
+  kind: paraphrase
+- q: Highlight an important caveat in a coloured box
+  page: components/callouts
+  kind: paraphrase
+- q: A walkthrough with ordered stages
+  page: components/steps
+  kind: paraphrase
+- q: Let readers toggle between npm and yarn instructions
+  page: components/tabs
+  kind: paraphrase
+- q: Add a diagram to a doc
+  page: writing/images
+  kind: paraphrase
+- q: Picture does not show when I reference it from a subfolder
+  page: writing/images
+  section: paths-resolve-from-the-docs-root
+  kind: paraphrase
+- q: Get my documentation found by Google
+  page: seo
+  kind: paraphrase
+- q: Keep bots away from the plain text versions
+  page: seo
+  section: robotstxt
+  kind: paraphrase
+- q: Embed a custom widget I built
+  page: extending
+  section: namespaces
+  kind: paraphrase
+- q: My handwritten elements got deleted
+  page: writing/markdown
+  section: raw-html-is-removed
+  kind: paraphrase
+- q: Templating syntax like conditionals in articles
+  page: writing/markdown
+  section: no-blade
+  kind: paraphrase
+- q: List of recent changes with RSS
+  page: releases
+  kind: paraphrase
+- q: Minimum framework version needed
+  page: getting-started/installation
+  section: requirements
+  kind: paraphrase
+- q: Wipe the precompiled output
+  page: commands
+  section: vellumclear
+  kind: paraphrase
+- q: Reasons to choose this over alternatives
+  page: why
+  section: compared-with-the-usual-choices
+  kind: paraphrase
+- q: Downsides, cases where something else suits a project more
+  page: why
+  section: when-another-tool-is-the-better-fit
+  kind: paraphrase
+- q: Moving from the previous minor, what must I change?
+  page: getting-started/upgrade
+  section: 05-to-06
+  kind: paraphrase
+- q: Restrict a doc to admins with a policy
+  page: gating
+  kind: paraphrase
+- q: Outbound URLs open in another browser tab
+  page: writing/markdown
+  section: links
+  kind: paraphrase
