@@ -35,14 +35,19 @@ Laravel does not ship a `robots.txt` with a sitemap reference, so add one:
 User-agent: *
 Allow: /
 
-# Raw Markdown is the same content as the HTML pages, and the page
-# actions link to it. Crawl the pages, not both copies.
+# Package internals: the search index and embedded files.
 Disallow: /docs/_vellum/
+# Raw Markdown declares its HTML page canonical, and llms.txt links to it.
+Allow: /docs/_vellum/raw/
 
 Sitemap: https://example.com/docs/sitemap.xml
 ```
 
-The `Disallow` matters more than it looks. [Page actions](/docs/page-actions) link to a raw `.md` copy of every page, so without it each page is crawled twice and indexed as a near-duplicate.
+Every raw Markdown response sends `Link: <page URL>; rel="canonical"` naming the HTML page it is a copy of. A crawler that fetches the `.md` credits the page instead of indexing a near-duplicate, so there is no reason to hide the raw files. They are also what [`llms.txt`](/docs/page-actions#for-agents) links to, and a disallow would keep any agent that honours `robots.txt` from following those links.
+
+The rest of `/docs/_vellum/` is the search index and the files pages embed, none of which needs crawling on its own. The longer `Allow` rule wins over the shorter `Disallow`, so only the raw files get through.
+
+Like the canonical `<link>`, the header is absolute when `app.url` is an origin. Without one it is root-relative, which a client resolves against the URL it requested.
 
 ## Static export
 

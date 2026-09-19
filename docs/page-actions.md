@@ -29,7 +29,9 @@ cannot see returns 404 here too, with no separate configuration.
 `vellum:export` writes the same files into `_vellum/raw/`, so the static build keeps
 working.
 
-When versions are enabled, raw responses carry an `X-Vellum-Docs-Version` header naming
+Each raw response names its HTML page in a `Link: <...>; rel="canonical"` header, so a
+search engine credits the page rather than indexing the source as a copy of it. When
+versions are enabled, raw responses also carry an `X-Vellum-Docs-Version` header naming
 the version. The body stays the file as written.
 
 ## For agents
@@ -83,9 +85,8 @@ Links are absolute when `app.url` is an origin and root-relative otherwise.
 `vellum:export` writes both at the export root. Set `agents.llms_txt` to `false` to turn
 them off.
 
-The links in `llms.txt` point under `/docs/_vellum/raw/`. If your `robots.txt` disallows
-`/docs/_vellum/`, as [Search engines](/docs/seo#robotstxt) suggests, a crawler that
-honours it will not follow them.
+The links in `llms.txt` point under `/docs/_vellum/raw/`, so keep that path open in
+`robots.txt`. [Search engines](/docs/seo#robotstxt) has the rules to use.
 
 **An alternate link.** Every page's head has
 `<link rel="alternate" type="text/markdown">` pointing at its raw Markdown, and the

@@ -77,6 +77,22 @@ final class RawMarkdown
             $response->header('X-Vellum-Docs-Version', $document->version);
         }
 
+        LinkHeader::add($response, self::canonical($repository->hrefFor($document->slug, $document->version)), 'canonical');
+
         return $response;
+    }
+
+    /**
+     * The HTML page this Markdown is a copy of, so a crawler credits the page
+     * rather than indexing the source as a duplicate of it.
+     *
+     * Absolute when app.url is an origin, like the canonical <link>. Without
+     * one it stays root-relative rather than being dropped: a relative Link
+     * target resolves against the URL that was requested, so it still names
+     * the right page on whatever host served it.
+     */
+    public static function canonical(string $path): string
+    {
+        return DocsView::canonical($path) ?? '/'.ltrim($path, '/');
     }
 }

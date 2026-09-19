@@ -12,6 +12,7 @@ use Vellum\Content\ContentRepository;
 use Vellum\Content\Document;
 use Vellum\Content\HeadingExtractor;
 use Vellum\Http\DocsView;
+use Vellum\Http\LinkHeader;
 use Vellum\Http\RawMarkdown;
 
 /**
@@ -103,8 +104,9 @@ final class DocsController extends Controller
 
         // The same pointer as the <link rel="alternate"> in the head, for a
         // client that reads headers and never parses the HTML.
-        return response($html, 200)
-            ->header('Content-Type', 'text/html; charset=UTF-8')
-            ->header('Link', '<'.DocsView::rawUrl($document).'>; rel="alternate"; type="text/markdown"');
+        $response = response($html, 200)->header('Content-Type', 'text/html; charset=UTF-8');
+        LinkHeader::add($response, DocsView::rawUrl($document), 'alternate', 'text/markdown');
+
+        return $response;
     }
 }
