@@ -11,6 +11,7 @@ use Vellum\Console\ClearCommand;
 use Vellum\Console\ExportCommand;
 use Vellum\Console\IndexCommand;
 use Vellum\Console\InstallCommand;
+use Vellum\Console\ModelCommand;
 use Vellum\Http\Controllers\AssetController;
 use Vellum\Http\Middleware\CompressHtmlResponse;
 
@@ -35,6 +36,7 @@ final class VellumServiceProvider extends ServiceProvider
                 InstallCommand::class,
                 IndexCommand::class,
                 ExportCommand::class,
+                ModelCommand::class,
             ]);
 
             $this->publishes([

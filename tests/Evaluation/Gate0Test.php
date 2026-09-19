@@ -5,8 +5,8 @@ declare(strict_types=1);
 use Symfony\Component\Yaml\Yaml;
 use Vellum\Cache\CompiledStore;
 use Vellum\Content\ContentRepository;
+use Vellum\Semantic\SafetensorsTable;
 use Vellum\Tests\Evaluation\Bm25;
-use Vellum\Tests\Evaluation\Embeddings;
 use Vellum\Tests\Evaluation\Sections;
 use Vellum\Tests\Evaluation\Vectors;
 use Vellum\Tests\Evaluation\WordPiece;
@@ -74,7 +74,7 @@ it('reports recall and size for each retrieval variant', function (): void {
 
     foreach (['potion-retrieval-32M', 'potion-base-8M'] as $model) {
         $full = WordPiece::fromTokenizerJson("{$models}/{$model}/tokenizer.json");
-        $table = new Embeddings("{$models}/{$model}/model.safetensors");
+        $table = new SafetensorsTable("{$models}/{$model}/model.safetensors");
         $vocab = $full->vocab();
         $unknown = $vocab['[UNK]'];
         $texts = gate0Texts($sections);
