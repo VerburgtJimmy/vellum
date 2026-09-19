@@ -47,6 +47,19 @@ it('follows the order meta.json gives the sidebar', function (): void {
     ]);
 });
 
+it('leaves external meta.json links out', function (): void {
+    $this->writeDoc('index.md', "---\ntitle: Home\n---\nHi");
+    file_put_contents($this->docsPath().'/meta.json', json_encode(['pages' => [
+        'index',
+        ['title' => 'GitHub', 'href' => 'https://github.com/acme/app'],
+        ['title' => 'CDN', 'href' => '//cdn.example.com/guide'],
+    ]]));
+
+    expect(locations((string) $this->get('/docs/sitemap.xml')->getContent()))->toBe([
+        'https://docs.example.com/docs',
+    ]);
+});
+
 it('agrees with the canonical each page declares', function (): void {
     $this->writeDoc('index.md', "---\ntitle: Home\n---\nHi");
     $this->writeDoc('guides/deploy.md', "---\ntitle: Deploy\n---\nShip it");

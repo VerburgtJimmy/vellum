@@ -54,6 +54,11 @@ final class Sitemap
                     continue;
                 }
 
+                // An external meta.json entry is a link out, not a page of these docs.
+                if (preg_match('#^([a-z][a-z0-9+.-]*:|//)#i', $page['href']) === 1) {
+                    continue;
+                }
+
                 $url = DocsView::canonical($page['href'], $staticExport);
 
                 if ($url === null) {

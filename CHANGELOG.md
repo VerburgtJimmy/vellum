@@ -30,6 +30,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - The `robots.txt` advice in `docs/seo.md` keeps `Disallow: /docs/_vellum/` but adds `Allow: /docs/_vellum/raw/`. Raw pages now declare their HTML page canonical, so letting crawlers in no longer creates duplicate content, and `llms.txt` links to them
 
+### Fixed
+
+- An external link in `meta.json` no longer lands in the sitemap as a docs URL (`https://docs.example.com/https://github.com/...`). The sitemap lists pages of these docs only
+
 ## [0.6.1] - 2026-09-19
 
 ### Changed
