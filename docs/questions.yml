@@ -1,6 +1,7 @@
 # Golden questions for search. Each entry names the page (slug) and, where the
 # answer sits under a heading, the section (heading id). kind: literal means the
-# question reuses words from the target; paraphrase means it avoids them.
+# question reuses words from the target; paraphrase means it avoids them. also
+# lists further targets that answer the question equally well; a hit on any counts.
 
 # Literal
 
@@ -15,6 +16,9 @@
 - q: What should a deploy run?
   page: commands
   section: a-deploy
+  also:
+    - page: getting-started/installation
+      section: production
   kind: literal
 - q: How do I rebuild the search index without recompiling pages?
   page: commands
@@ -121,112 +125,115 @@
 
 # Paraphrase
 
-- q: How do I get this into my Laravel project?
+- q: 'composer thing to add it to an existing app'
   page: getting-started/installation
   section: require-the-package
   kind: paraphrase
-- q: My edits are not showing up on production
+- q: 'i edited a md file, pushed, prod still shows the old text'
   page: troubleshooting
   section: editing-changes-nothing
   kind: paraphrase
-- q: The stylesheet is not loading and everything looks broken
+- q: 'everything is unstyled plain html, css 404'
   page: troubleshooting
   section: the-site-has-no-styling
   kind: paraphrase
-- q: Stop anonymous visitors from reading an article
+- q: 'logged out people should not be able to see certain pages'
   page: gating
   kind: paraphrase
-- q: Change which item appears on top in the left menu
+- q: 'put a specific page first in the sidebar'
   page: writing/navigation
   section: ordering
   kind: paraphrase
-- q: Keep manuals for an older release of my product alongside the current one
+- q: 'v1 and v2 of my product side by side, both browsable'
   page: versions
   kind: paraphrase
-- q: Deploy to Netlify as flat files with no server
+- q: 'host on github pages, no php on the server'
   page: export
   kind: paraphrase
-- q: Use my company's purple instead of the default color
+- q: 'brand colour instead of the default blue'
   page: theming
   section: accent
   kind: paraphrase
-- q: Start in night mode
+- q: 'default to the dark look for everyone'
   page: theming
   section: the-rest
   kind: paraphrase
-- q: Which key combo brings up the finder?
+- q: 'shortcut to open the search popup'
   page: search
   section: minisearch
   kind: paraphrase
-- q: Let a chatbot read this article
+- q: 'send this page to claude or gpt with one click'
   page: page-actions
   section: open-in-chatgpt--open-in-claude
   kind: paraphrase
-- q: Print a setting from my application inside the text
+- q: 'show the current app version number inside the text'
   page: value-tags
   kind: paraphrase
-- q: Highlight an important caveat in a coloured box
+- q: 'warning box like a note or tip with an icon'
   page: components/callouts
   kind: paraphrase
-- q: A walkthrough with ordered stages
+- q: 'numbered guide, step 1 step 2 step 3'
   page: components/steps
   kind: paraphrase
-- q: Let readers toggle between npm and yarn instructions
+- q: 'switch between package managers in the same snippet'
   page: components/tabs
   kind: paraphrase
-- q: Add a diagram to a doc
+- q: 'put a png in my page'
   page: writing/images
   kind: paraphrase
-- q: Picture does not show when I reference it from a subfolder
+- q: 'img src works from the top folder but breaks in nested pages'
   page: writing/images
   section: paths-resolve-from-the-docs-root
   kind: paraphrase
-- q: Get my documentation found by Google
+- q: 'how to rank on google'
   page: seo
   kind: paraphrase
-- q: Keep bots away from the plain text versions
+- q: 'crawlers should skip the markdown urls'
   page: seo
   section: robotstxt
   kind: paraphrase
-- q: Embed a custom widget I built
+- q: 'use my own blade component inside a page'
   page: extending
   section: namespaces
   kind: paraphrase
-- q: My handwritten elements got deleted
+- q: 'my div and span tags vanish after build'
   page: writing/markdown
   section: raw-html-is-removed
   kind: paraphrase
-- q: Templating syntax like conditionals in articles
+- q: 'can i use [if](if) inside the content'
   page: writing/markdown
   section: no-blade
   kind: paraphrase
-- q: List of recent changes with RSS
+- q: 'changelog page with an rss feed'
   page: releases
   kind: paraphrase
-- q: Minimum framework version needed
+- q: 'which php and laravel do i need'
   page: getting-started/installation
   section: requirements
   kind: paraphrase
-- q: Wipe the precompiled output
+- q: 'delete the cached build so it starts fresh'
   page: commands
   section: vellumclear
   kind: paraphrase
-- q: Reasons to choose this over alternatives
+- q: 'why not fumadocs or starlight'
   page: why
   section: compared-with-the-usual-choices
   kind: paraphrase
-- q: Downsides, cases where something else suits a project more
+- q: 'when should i not use this'
   page: why
   section: when-another-tool-is-the-better-fit
   kind: paraphrase
-- q: Moving from the previous minor, what must I change?
+- q: 'updated from 0.5, what breaks'
   page: getting-started/upgrade
   section: 05-to-06
   kind: paraphrase
-- q: Restrict a doc to admins with a policy
+- q: 'only users that pass a policy check can open a doc'
   page: gating
   kind: paraphrase
-- q: Outbound URLs open in another browser tab
+- q: 'links to other sites should open in a new tab'
   page: writing/markdown
   section: links
+  also:
+    - page: components/cards
+      section: syntax
   kind: paraphrase
