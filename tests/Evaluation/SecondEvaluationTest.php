@@ -7,12 +7,12 @@ use Vellum\Cache\CompiledStore;
 use Vellum\Content\ContentRepository;
 use Vellum\Content\Document;
 use Vellum\Semantic\SafetensorsTable;
+use Vellum\Semantic\WordPieceTokenizer as WordPiece;
 use Vellum\Tests\Evaluation\Bm25;
 use Vellum\Tests\Evaluation\Metrics;
 use Vellum\Tests\Evaluation\Questions;
 use Vellum\Tests\Evaluation\Sections;
 use Vellum\Tests\Evaluation\Vectors;
-use Vellum\Tests\Evaluation\WordPiece;
 
 /*
  * Second evaluation, on the held-out set. Run with:

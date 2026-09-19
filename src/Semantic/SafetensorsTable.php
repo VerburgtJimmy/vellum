@@ -10,7 +10,7 @@ use RuntimeException;
  * A float32 embedding table in a safetensors file, read row by row with seeks
  * so a large model is never loaded into memory whole.
  */
-final class SafetensorsTable
+final class SafetensorsTable implements EmbeddingTable
 {
     /** @var resource */
     private $handle;
@@ -63,15 +63,16 @@ final class SafetensorsTable
         $this->offset = 8 + $length + (int) $table['data_offsets'][0];
     }
 
+    public function dims(): int
+    {
+        return $this->dims;
+    }
+
     public function __destruct()
     {
         fclose($this->handle);
     }
 
-    /**
-     * @param  iterable<int>  $ids
-     * @return array<int, list<float>>
-     */
     public function rows(iterable $ids): array
     {
         $rows = [];

@@ -2,15 +2,17 @@
 
 declare(strict_types=1);
 
-namespace Vellum\Tests\Evaluation;
+namespace Vellum\Semantic;
 
 use Normalizer;
+use RuntimeException;
 
 /**
  * BERT uncased WordPiece, matching Hugging Face tokenizers for BertNormalizer
  * (clean text, CJK padding, accent stripping, lowercase) and BertPreTokenizer.
+ * The browser tokenizer mirrors this one; the parity fixtures hold them together.
  */
-final class WordPiece
+final class WordPieceTokenizer implements Tokenizer
 {
     private const MAX_CHARS = 100;
 
@@ -24,10 +26,35 @@ final class WordPiece
 
     public static function fromTokenizerJson(string $path): self
     {
-        /** @var array{model: array{vocab: array<string, int>}} $json */
-        $json = json_decode((string) file_get_contents($path), true, flags: JSON_THROW_ON_ERROR);
+        $json = is_file($path) ? json_decode((string) file_get_contents($path), true) : null;
+        $model = is_array($json) ? ($json['model'] ?? null) : null;
 
-        return new self($json['model']['vocab']);
+        if (! is_array($model) || ($model['type'] ?? null) !== 'WordPiece' || ! is_array($model['vocab'] ?? null)) {
+            throw new RuntimeException("{$path} is not a WordPiece tokenizer");
+        }
+
+        $vocab = [];
+
+        foreach ($model['vocab'] as $token => $id) {
+            $vocab[(string) $token] = (int) $id;
+        }
+
+        return new self($vocab, (string) ($model['unk_token'] ?? '[UNK]'));
+    }
+
+    public function restrictedTo(array $ids): self
+    {
+        $unknown = $this->unknownId();
+
+        return new self(
+            array_filter($this->vocab, static fn (int $id): bool => isset($ids[$id]) || $id === $unknown),
+            $this->unknown,
+        );
+    }
+
+    public function unknownId(): int
+    {
+        return $this->vocab[$this->unknown] ?? throw new RuntimeException("The vocabulary has no {$this->unknown} token");
     }
 
     /**
@@ -46,7 +73,7 @@ final class WordPiece
         $ids = [];
 
         foreach ($this->tokens($text) as $token) {
-            $ids[] = $this->vocab[$token];
+            $ids[] = $this->vocab[$token] ?? $this->unknownId();
         }
 
         return $ids;

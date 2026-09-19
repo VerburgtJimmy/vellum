@@ -6,10 +6,10 @@ use Symfony\Component\Yaml\Yaml;
 use Vellum\Cache\CompiledStore;
 use Vellum\Content\ContentRepository;
 use Vellum\Semantic\SafetensorsTable;
+use Vellum\Semantic\WordPieceTokenizer as WordPiece;
 use Vellum\Tests\Evaluation\Bm25;
 use Vellum\Tests\Evaluation\Sections;
 use Vellum\Tests\Evaluation\Vectors;
-use Vellum\Tests\Evaluation\WordPiece;
 
 /*
  * Gate 0: does a pruned, projected, int8 static embedding keep its recall on
