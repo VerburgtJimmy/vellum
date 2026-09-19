@@ -12,6 +12,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `vellum:model` fetches the static embedding model search answers are built from (`potion-base-8M` by default) into `answers.model_path`, streaming it to disk and printing its licence and size. A manifest makes a second run a no-op; a damaged file is fetched again. Models live in `storage/vellum/models`, outside `cache.path`, because `vellum:clear` empties that directory
 - `vellum:build` builds a semantic set for each version when the model is present: every section's vector, and the vocabulary rows those sections use plus the 1,000 most common words, as int4 rows with int8 section vectors. No step fits anything to the content, so Vellum's own docs build in about a quarter of a second, and an unchanged section is not encoded again. Each vector is tagged with the access level that may see it, and a reader is only ever given the rows their access allows, so a word that appears only on a gated page never reaches a guest. Without the model the build warns and search stays lexical
 - `answers.enabled`, `answers.semantic`, `answers.model`, `answers.model_path` and `answers.common_tokens` in `config/vellum.php`
+## [0.6.1] - 2026-09-19
+
+### Changed
+
+- `docs/why.md` is now What is Vellum: what the package is, how it works, and what it does not do, without the case against other tools. The URL stays `/docs/why`
+- New `docs/comparisons.md` sets Vellum against LaRecipe, the other package that serves Markdown docs from inside a Laravel app, as a table of facts with where each fits better
+- The docs no longer describe 0.5 as the current release. Config keys, frontmatter and syntax are still frozen, as they have been since 0.5
 
 ## [0.6.0] - 2026-09-17
 

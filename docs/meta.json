@@ -3,6 +3,7 @@
     "pages": [
         "index",
         "why",
+        "comparisons",
         "getting-started",
         "writing",
         "components",

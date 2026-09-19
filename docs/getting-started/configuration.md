@@ -1,9 +1,9 @@
 ---
 title: Configuration
-description: Frozen config keys and frontmatter for Vellum 0.5.
+description: Every config key and frontmatter field. The names have been frozen since 0.5.
 ---
 
-Published as `config/vellum.php`. **0.5 freezes these names.** Add values, do not rename keys.
+Published as `config/vellum.php`. **These names have been frozen since 0.5.** Later releases add keys; none is renamed before 1.0.
 
 ## Site and routing
 

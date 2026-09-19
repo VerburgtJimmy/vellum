@@ -10,8 +10,8 @@ Vellum turns a folder of Markdown into a documentation site inside the app you a
 deploy: sidebar, search, light and dark themes, and an optional static export. No second
 codebase, no separate host, no copy of your config to keep in sync.
 
-**[Read the docs](https://vellum.jimmyverburgt.com)** · 0.5 freezes `config/vellum.php`
-keys and page frontmatter. Breaking changes wait for 1.0.
+**[Read the docs](https://vellum.jimmyverburgt.com)** · Config keys and page frontmatter have
+been frozen since 0.5. Breaking changes wait for 1.0.
 
 ## Requirements
 
@@ -52,7 +52,7 @@ it is also the thing it documents.
 - [Writing](https://vellum.jimmyverburgt.com/docs/writing/markdown): Markdown, code blocks, images, navigation
 - [Components](https://vellum.jimmyverburgt.com/docs/components) and [extending with your own](https://vellum.jimmyverburgt.com/docs/extending)
 - [Commands](https://vellum.jimmyverburgt.com/docs/commands) and [troubleshooting](https://vellum.jimmyverburgt.com/docs/troubleshooting)
-- [Upgrading from 0.2](https://vellum.jimmyverburgt.com/docs/getting-started/upgrade)
+- [Upgrading](https://vellum.jimmyverburgt.com/docs/getting-started/upgrade)
 
 The same pages ship as Markdown in [`docs/`](docs), which is what the package renders at
 `/docs` once installed.

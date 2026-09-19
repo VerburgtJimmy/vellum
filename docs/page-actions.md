@@ -62,7 +62,7 @@ symlinked page cannot leak a path from elsewhere on disk.
 
 ## Changing them
 
-There is no config flag for the row in 0.5. Override the view instead: Vellum registers
+There is no config flag for the row. Override the view instead: Vellum registers
 its views under the `vellum` namespace, so a file at the matching path in your app wins.
 
 ```
