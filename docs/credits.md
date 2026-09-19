@@ -48,7 +48,15 @@ Testing and quality tooling: [Pest](https://pestphp.com),
 [PHPStan](https://phpstan.org) with [Larastan](https://github.com/larastan/larastan), and
 [Laravel Pint](https://laravel.com/docs/pint).
 
+## Search model
+
+The semantic part of search is built from a static embedding model. `vellum:build` ships a pruned, quantised part of its vocabulary vectors, and names it in the header of the file it writes.
+
+| Model | Licence | Source |
+| --- | --- | --- |
+| potion-base-8M by Minish Lab | MIT | [huggingface.co/minishlab/potion-base-8M](https://huggingface.co/minishlab/potion-base-8M) |
+
 ## Licences
 
-Vellum is MIT licensed. Every package above is MIT or BSD licensed; running
+Vellum is MIT licensed. Every package and the model above are MIT or BSD licensed; running
 `composer licenses` in your app lists the exact terms for the versions you have installed.
