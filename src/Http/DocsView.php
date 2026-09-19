@@ -57,7 +57,7 @@ final class DocsView
             'pageTitle' => self::pageTitle($document->title),
             'canonical' => self::canonical($repository->hrefFor($document->slug, $document->version), $staticExport),
             'markdownSource' => self::source($document),
-            'rawUrl' => route('vellum.raw', ['slug' => self::rawSlug($document)]),
+            'rawUrl' => self::rawUrl($document),
             'editUrl' => self::editUrl($document),
             'updatedAt' => self::updatedAt($document),
             'searchPlacement' => $searchPlacement,
@@ -161,6 +161,11 @@ final class DocsView
     private static function isOrigin(string $value): bool
     {
         return str_starts_with($value, 'http://') || str_starts_with($value, 'https://');
+    }
+
+    public static function rawUrl(Document $document): string
+    {
+        return route('vellum.raw', ['slug' => self::rawSlug($document)]);
     }
 
     public static function rawSlug(Document $document): string

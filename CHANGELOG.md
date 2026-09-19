@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `answers.enabled`, `answers.semantic`, `answers.model`, `answers.model_path` and `answers.common_tokens` in `config/vellum.php`
 - `{prefix}/llms.txt` and `{prefix}/llms-full.txt`, built from the same navigation that renders the sidebar. `llms.txt` lists every page under a `##` section per sidebar folder or titled separator, linking to its raw Markdown with the page description after it. `llms-full.txt` is every page's Markdown source in sidebar order, each behind a header naming its title, URL and version. Like the sitemap, both leave gated pages out even for a signed-in reader and cover the latest version only. Links are absolute when `app.url` is an origin and root-relative otherwise. `agents.llms_txt` turns both off
 - `vellum:export` writes `llms.txt` and `llms-full.txt` at the export root, next to the sitemap, using `export.base_url` when it names an origin and falling back to `app.url`. Unlike the sitemap they are still written without an origin, with root-relative links, since a relative link in Markdown is still a link
+- Every docs page points at its raw Markdown twice: a `<link rel="alternate" type="text/markdown">` in the head, and the same URL in a `Link` response header for a client that reads headers without parsing the HTML. The changelog page has no raw route and gets neither
 
 ## [0.6.0] - 2026-09-17
 

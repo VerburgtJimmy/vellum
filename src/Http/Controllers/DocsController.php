@@ -87,7 +87,10 @@ final class DocsController extends Controller
             DocsView::document($repository, $document, $this->headingExtractor),
         )->render();
 
+        // The same pointer as the <link rel="alternate"> in the head, for a
+        // client that reads headers and never parses the HTML.
         return response($html, 200)
-            ->header('Content-Type', 'text/html; charset=UTF-8');
+            ->header('Content-Type', 'text/html; charset=UTF-8')
+            ->header('Link', '<'.DocsView::rawUrl($document).'>; rel="alternate"; type="text/markdown"');
     }
 }
