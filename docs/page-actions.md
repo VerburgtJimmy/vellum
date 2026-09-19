@@ -32,7 +32,9 @@ working.
 Each raw response names its HTML page in a `Link: <...>; rel="canonical"` header, so a
 search engine credits the page rather than indexing the source as a copy of it. When
 versions are enabled, raw responses also carry an `X-Vellum-Docs-Version` header naming
-the version. The body stays the file as written.
+the version. A page with a last-updated date, from its `updated` frontmatter or its last
+git commit, gets a `Last-Modified` header; a page without one gets none. The body stays
+the file as written.
 
 ## For agents
 
@@ -73,10 +75,12 @@ characters:
 Title: Installation
 URL: https://example.com/docs/getting-started/installation
 Version: v2
+Updated: 2026-09-17
 ================================================================================
 ```
 
-`Version` only appears when versions are enabled.
+`Version` only appears when versions are enabled, and `Updated` only when the page has a
+last-updated date.
 
 Both files are built from the same navigation as the sidebar and the
 [sitemap](/docs/seo#sitemap), with the same rules: gated pages are left out even for a

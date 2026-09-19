@@ -96,6 +96,21 @@ it('keeps the raw canonical root-relative when app.url is not an origin', functi
         ->assertHeader('Link', '</docs/deploy>; rel="canonical"');
 });
 
+it('sends Last-Modified from the page date', function (): void {
+    $this->writeDoc('dated.md', "---\ntitle: Dated\nupdated: '2026-09-17T10:15:00+02:00'\n---\nBody");
+    $this->writeDoc('day.md', "---\ntitle: Day\nupdated: 2026-09-17\n---\nBody");
+
+    $this->get('/docs/_vellum/raw/dated.md')->assertHeader('Last-Modified', 'Thu, 17 Sep 2026 08:15:00 GMT');
+    $this->get('/docs/_vellum/raw/day.md')->assertHeader('Last-Modified', 'Thu, 17 Sep 2026 00:00:00 GMT');
+    $this->get('/docs/dated', ['Accept' => 'text/markdown'])->assertHeader('Last-Modified', 'Thu, 17 Sep 2026 08:15:00 GMT');
+});
+
+it('sends no Last-Modified for a page without a date', function (): void {
+    $this->writeDoc('undated.md', "---\ntitle: Undated\n---\nBody");
+
+    $this->get('/docs/_vellum/raw/undated.md')->assertOk()->assertHeaderMissing('Last-Modified');
+});
+
 it('sends each Link value on its own line', function (): void {
     $response = new Response('');
 

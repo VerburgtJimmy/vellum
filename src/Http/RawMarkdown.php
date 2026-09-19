@@ -78,8 +78,20 @@ final class RawMarkdown
         }
 
         LinkHeader::add($response, self::canonical($repository->hrefFor($document->slug, $document->version)), 'canonical');
+        self::lastModified($response, $document->updated);
 
         return $response;
+    }
+
+    /**
+     * Only from the resolved last-updated date. With none, no header: the
+     * file mtime would claim a change that is really a deploy.
+     */
+    public static function lastModified(Response $response, ?string $updated): void
+    {
+        if ($updated !== null) {
+            $response->setLastModified(new \DateTimeImmutable($updated));
+        }
     }
 
     /**

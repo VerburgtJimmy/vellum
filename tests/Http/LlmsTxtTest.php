@@ -154,6 +154,18 @@ it('concatenates every source in sidebar order behind a separator', function ():
         ]));
 });
 
+it('adds an Updated line only for pages with a date', function (): void {
+    $this->writeDoc('index.md', "---\ntitle: Home\nupdated: 2026-09-17\n---\nHi");
+    $this->writeDoc('undated.md', "---\ntitle: Undated\n---\nBody");
+    file_put_contents($this->docsPath().'/meta.json', json_encode(['pages' => ['index', 'undated']]));
+
+    $separator = LlmsTxt::SEPARATOR;
+
+    expect((string) $this->get('/docs/llms-full.txt')->getContent())
+        ->toContain("Title: Home\nURL: https://docs.example.com/docs\nUpdated: 2026-09-17\n".$separator)
+        ->toContain("Title: Undated\nURL: https://docs.example.com/docs/undated\n".$separator);
+});
+
 it('404s both files when agents.llms_txt is off', function (): void {
     config()->set('vellum.agents.llms_txt', false);
     $this->writeDoc('index.md', "---\ntitle: Home\n---\nHi");

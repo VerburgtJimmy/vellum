@@ -63,7 +63,8 @@ final class LlmsTxt
 
     /**
      * Every page's Markdown source in sidebar order, each behind a header
-     * naming its title, its URL and, when versions are on, its version.
+     * naming its title, its URL and, when known, its version and the date it
+     * was last updated.
      */
     public static function full(ContentRepository $repository, bool $staticExport = false): string
     {
@@ -78,6 +79,10 @@ final class LlmsTxt
 
                 if ($version !== null) {
                     $lines[] = 'Version: '.$version;
+                }
+
+                if ($entry['document']->updated !== null) {
+                    $lines[] = 'Updated: '.$entry['document']->updated;
                 }
 
                 $lines[] = self::SEPARATOR;
