@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use Vellum\Support\LlmsTxt;
+
 const CHANGELOG_SOURCE = <<<'MD'
 # Changelog
 
@@ -95,16 +97,68 @@ it('has no changelog markdown when the changelog is off', function (): void {
     config()->set('vellum.changelog', null);
 
     $this->get('/docs/_vellum/raw/changelog.md')->assertNotFound();
+    expect((string) $this->get('/docs/llms.txt')->getContent())->not->toContain('changelog');
+});
+
+it('lists the changelog where the sidebar has it', function (): void {
+    $this->writeDoc('guide.md', "---\ntitle: Guide\n---\nBody");
+    file_put_contents($this->docsPath().'/meta.json', json_encode([
+        'pages' => ['index', ['title' => 'Changelog', 'slug' => 'changelog'], 'guide'],
+    ]));
+
+    $index = (string) $this->get('/docs/llms.txt')->getContent();
+
+    expect($index)->toContain(implode("\n", [
+        '- [Home](https://docs.example.com/docs/_vellum/raw/index.md)',
+        '- [Changelog](https://docs.example.com/docs/_vellum/raw/changelog.md): Release notes',
+        '- [Guide](https://docs.example.com/docs/_vellum/raw/guide.md)',
+    ]))->not->toContain('## Optional');
+});
+
+it('puts a changelog the sidebar does not list last, under Optional', function (): void {
+    $index = (string) $this->get('/docs/llms.txt')->getContent();
+    $full = (string) $this->get('/docs/llms-full.txt')->getContent();
+
+    expect($index)->toEndWith("## Optional\n\n- [Changelog](https://docs.example.com/docs/_vellum/raw/changelog.md): Release notes\n")
+        ->and($full)->toEndWith(implode("\n", [
+            LlmsTxt::SEPARATOR,
+            'Title: Changelog',
+            'URL: https://docs.example.com/docs/changelog',
+            LlmsTxt::SEPARATOR,
+            '',
+            CHANGELOG_PUBLISHED,
+            '',
+        ]))
+        ->not->toContain('Not shipped yet');
+});
+
+it('names no version on the changelog in llms-full.txt', function (): void {
+    config()->set('vellum.versions', ['enabled' => true, 'latest' => 'v2', 'list' => ['v2'], 'labels' => []]);
+    $this->writeDoc('v2/index.md', "---\ntitle: Home\n---\nHi");
+
+    $full = (string) $this->get('/docs/llms-full.txt')->getContent();
+
+    expect($full)->toContain("Title: Home\nURL: https://docs.example.com/docs\nVersion: v2\n")
+        ->toContain("Title: Changelog\nURL: https://docs.example.com/docs/changelog\n".LlmsTxt::SEPARATOR);
 });
 
 it('dates the changelog from its last commit', function (): void {
     $this->skipWithoutGit();
 
+    file_put_contents($this->docsPath().'/meta.json', json_encode([
+        'pages' => ['index', ['title' => 'Changelog', 'slug' => 'changelog']],
+    ]));
     $this->git($this->changelogDir, ['init', '-q']);
     $this->commitAll($this->changelogDir, 'Release.', '2026-09-13T12:00:00+00:00');
 
     $this->get('/docs/_vellum/raw/changelog.md')->assertHeader('Last-Modified', 'Sun, 13 Sep 2026 12:00:00 GMT');
     $this->get('/docs/changelog', ['Accept' => 'text/markdown'])->assertHeader('Last-Modified', 'Sun, 13 Sep 2026 12:00:00 GMT');
+
+    expect((string) $this->get('/docs/llms-full.txt')->getContent())
+        ->toContain("URL: https://docs.example.com/docs/changelog\nUpdated: 2026-09-13T12:00:00+00:00\n");
+
+    expect((string) $this->get('/docs/sitemap.xml')->getContent())
+        ->toContain("<loc>https://docs.example.com/docs/changelog</loc>\n        <lastmod>2026-09-13T12:00:00+00:00</lastmod>");
 });
 
 it('exports the changelog markdown', function (): void {
@@ -118,7 +172,8 @@ it('exports the changelog markdown', function (): void {
 
     $this->artisan('vellum:export')->assertSuccessful();
 
-    expect(file_get_contents($out.'/docs/_vellum/raw/changelog.md'))->toBe(CHANGELOG_PUBLISHED);
+    expect(file_get_contents($out.'/docs/_vellum/raw/changelog.md'))->toBe(CHANGELOG_PUBLISHED)
+        ->and((string) file_get_contents($out.'/llms.txt'))->toContain('/docs/_vellum/raw/changelog.md');
 
     $this->deleteDirectory($out);
 });

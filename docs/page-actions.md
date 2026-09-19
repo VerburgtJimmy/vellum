@@ -70,6 +70,10 @@ top-level pages is a section too, headed by the titled separator above it, or by
 after a folder, its heading repeats with "(continued)", so no two sections share a name.
 The page description follows the link when the page has one.
 
+The changelog is listed too, linking to its raw Markdown. It sits where the sidebar puts
+it, or, when the sidebar does not list it, last under `## Optional`, the heading llms.txt
+reserves for links an agent can skip when it is short on room.
+
 **llms-full.txt.** `/docs/llms-full.txt` is every page's Markdown source in one file, in
 sidebar order. Each page starts with a header block between two lines of 80 `=`
 characters:
@@ -84,7 +88,8 @@ Updated: 2026-09-17
 ```
 
 `Version` only appears when versions are enabled, and `Updated` only when the page has a
-last-updated date.
+last-updated date. The changelog belongs to no one version, so its block has no `Version`,
+and its source leaves out `[Unreleased]` whenever the HTML page does.
 
 Both files are built from the same navigation as the sidebar and the
 [sitemap](/docs/seo#sitemap), with the same rules: gated pages are left out even for a

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Vellum\Support;
 
+use Vellum\Changelog\Changelog;
 use Vellum\Content\Access;
 use Vellum\Content\ContentRepository;
 use Vellum\Content\Document;
@@ -16,7 +17,7 @@ use Vellum\Http\DocsView;
  * sidebar, list guest pages only, and cover the latest version only: an agent
  * wants the current docs, not every version of them.
  *
- * @phpstan-type Entry array{title: string, description: string|null, href: string, document: Document}
+ * @phpstan-type Entry array{title: string, description: string|null, href: string, raw: string, source: \Closure(): string, updated: string|null, versioned: bool}
  * @phpstan-type Section array{title: string, entries: list<Entry>}
  */
 final class LlmsTxt
@@ -31,6 +32,13 @@ final class LlmsTxt
      * Opens and closes the header in front of each page in llms-full.txt.
      */
     public const SEPARATOR = '================================================================================';
+
+    /**
+     * Where the changelog goes when the sidebar does not list it. The
+     * llms.txt format reserves this heading for links an agent may skip
+     * when it is short on context, which is what release notes are.
+     */
+    public const OPTIONAL_SECTION = 'Optional';
 
     public static function enabled(): bool
     {
@@ -49,7 +57,7 @@ final class LlmsTxt
             $lines[] = '';
 
             foreach ($section['entries'] as $entry) {
-                $line = '- ['.self::linkText($entry['title']).']('.self::url(self::rawPath($entry['document']), $staticExport).')';
+                $line = '- ['.self::linkText($entry['title']).']('.self::url($entry['raw'], $staticExport).')';
                 $description = self::oneLine($entry['description'] ?? '');
 
                 $lines[] = $description === '' ? $line : $line.': '.$description;
@@ -77,17 +85,17 @@ final class LlmsTxt
                 $lines[] = 'Title: '.self::oneLine($entry['title']);
                 $lines[] = 'URL: '.self::url($entry['href'], $staticExport);
 
-                if ($version !== null) {
+                if ($version !== null && $entry['versioned']) {
                     $lines[] = 'Version: '.$version;
                 }
 
-                if ($entry['document']->updated !== null) {
-                    $lines[] = 'Updated: '.$entry['document']->updated;
+                if ($entry['updated'] !== null) {
+                    $lines[] = 'Updated: '.$entry['updated'];
                 }
 
                 $lines[] = self::SEPARATOR;
                 $lines[] = '';
-                $lines[] = rtrim(DocsView::source($entry['document']));
+                $lines[] = rtrim(($entry['source'])());
                 $lines[] = '';
             }
         }
@@ -189,7 +197,17 @@ final class LlmsTxt
             }
         }
 
-        return self::uniqueTitles(self::close($sections, $heading, $run));
+        $sections = self::close($sections, $heading, $run);
+        $changelog = Changelog::load();
+
+        if ($changelog !== null && ! isset($seen['changelog'])) {
+            $sections[] = [
+                'title' => self::OPTIONAL_SECTION,
+                'entries' => [self::changelogEntry($repository, $changelog, null)],
+            ];
+        }
+
+        return self::uniqueTitles($sections);
     }
 
     /**
@@ -254,7 +272,8 @@ final class LlmsTxt
     /**
      * A nav page that is a real document a guest may read, or null.
      *
-     * Links added in meta.json have no Markdown source, so they are skipped.
+     * Links added in meta.json have no Markdown source, so they are skipped,
+     * except the changelog, which is served from its own file.
      *
      * @param  array{slug: string, title: string, description: string|null, icon: string|null, href: string, access: string}  $page
      * @param  array<string, true>  $seen
@@ -266,6 +285,18 @@ final class LlmsTxt
         // same for everyone, so list guest pages only.
         if (Access::normalize($page['access']) !== 'guest' || isset($seen[$page['slug']])) {
             return null;
+        }
+
+        // A link's href can point anywhere. Only a node that goes to its own
+        // slug's page stands for that page.
+        if ($page['href'] !== $repository->hrefFor($page['slug'], $version)) {
+            return null;
+        }
+
+        if ($page['slug'] === 'changelog' && ($changelog = Changelog::load()) !== null) {
+            $seen['changelog'] = true;
+
+            return self::changelogEntry($repository, $changelog, $page['description']);
         }
 
         $document = $repository->find($page['slug'], $version);
@@ -280,7 +311,30 @@ final class LlmsTxt
             'title' => $page['title'],
             'description' => $page['description'],
             'href' => $page['href'],
-            'document' => $document,
+            'raw' => self::rawPath($document),
+            'source' => static fn (): string => DocsView::source($document),
+            'updated' => $document->updated,
+            'versioned' => true,
+        ];
+    }
+
+    /**
+     * The changelog is one file for every version, so its header names no
+     * version. Its source is what the raw route serves, which leaves out
+     * [Unreleased] whenever the HTML page does.
+     *
+     * @return Entry
+     */
+    private static function changelogEntry(ContentRepository $repository, Changelog $changelog, ?string $description): array
+    {
+        return [
+            'title' => $changelog->title,
+            'description' => $description ?? 'Release notes',
+            'href' => $repository->hrefFor('changelog', $repository->latestVersion()),
+            'raw' => route('vellum.raw', ['slug' => 'changelog'], false),
+            'source' => static fn (): string => $changelog->rawMarkdown(),
+            'updated' => $changelog->updated(),
+            'versioned' => false,
         ];
     }
 

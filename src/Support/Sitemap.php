@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Vellum\Support;
 
+use Vellum\Changelog\Changelog;
 use Vellum\Content\Access;
 use Vellum\Content\ContentRepository;
 use Vellum\Http\DocsView;
@@ -61,11 +62,16 @@ final class Sitemap
 
                 // A meta.json link can carry any href, so only a node that
                 // points at its own slug's page is looked up for a date.
-                $document = $page['href'] === $repository->hrefFor($page['slug'], $version)
-                    ? $repository->find($page['slug'], $version)
-                    : null;
+                $lastmod = null;
 
-                $entries[$url] ??= ['loc' => $url, 'lastmod' => $document?->updated];
+                if ($page['href'] === $repository->hrefFor($page['slug'], $version)) {
+                    $changelog = $page['slug'] === 'changelog' ? Changelog::load() : null;
+                    $lastmod = $changelog !== null
+                        ? $changelog->updated()
+                        : $repository->find($page['slug'], $version)?->updated;
+                }
+
+                $entries[$url] ??= ['loc' => $url, 'lastmod' => $lastmod];
             }
         }
 
