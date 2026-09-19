@@ -8,7 +8,7 @@ Vellum turns a folder of Markdown into docs inside the app you already deploy: s
 Authoring is **markdown plus components**. Built-in callouts, tabs, steps, and cards stay as `:::` directives. `<x-…>` is how you add your own Blade components, plus allowlisted `env`, `config`, and `route` tags. There is no `{{ }}`, no Blade directives, and no `@php` in Markdown.
 
 :::note
-0.5 freezes `config/vellum.php` keys and page frontmatter. Breaking changes wait for 1.0.
+`config/vellum.php` keys and page frontmatter have been frozen since 0.5. Breaking changes wait for 1.0.
 :::
 
 :::steps
@@ -23,7 +23,7 @@ Visit `/docs` and edit `resources/docs/`.
 :::
 
 :::cards
-::card[Why Vellum](/docs/why)
+::card[What is Vellum](/docs/why)
 ::card[Installation](/docs/getting-started/installation)
 ::card[Writing Markdown](/docs/writing/markdown)
 ::card[Components](/docs/components)
