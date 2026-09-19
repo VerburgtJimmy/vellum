@@ -68,7 +68,7 @@ Without a title the callout shows its icon and body only.
 
 :::warning[title= is not the bracket form]
 `:::note title="Custom"` parses without complaint and the title is ignored. Only the
-bracket form sets a title. This is a known rough edge in 0.5.
+bracket form sets a title. This is a known rough edge.
 :::
 
 ## Contents
