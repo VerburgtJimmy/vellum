@@ -5,6 +5,14 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.1] - 2026-09-19
+
+### Changed
+
+- `docs/why.md` is now What is Vellum: what the package is, how it works, and what it does not do, without the case against other tools. The URL stays `/docs/why`
+- New `docs/comparisons.md` sets Vellum against LaRecipe, the other package that serves Markdown docs from inside a Laravel app, as a table of facts with where each fits better
+- The docs no longer describe 0.5 as the current release. Config keys, frontmatter and syntax are still frozen, as they have been since 0.5
+
 ## [0.6.0] - 2026-09-17
 
 ### Added
