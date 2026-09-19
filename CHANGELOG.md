@@ -29,6 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - The `robots.txt` advice in `docs/seo.md` keeps `Disallow: /docs/_vellum/` but adds `Allow: /docs/_vellum/raw/`. Raw pages now declare their HTML page canonical, so letting crawlers in no longer creates duplicate content, and `llms.txt` links to them
+- The last-updated date under a page title comes from frontmatter `updated` or git, like the raw Markdown and the sitemap, and is left out when neither has one. It used to show the file's modification time, which a checkout or `composer install` resets to the deploy
 
 ### Fixed
 

@@ -275,13 +275,20 @@ it('places search in the sidebar by default', function (): void {
 });
 
 it('moves last updated above the title and omits bottom page meta', function (): void {
-    $this->writeDoc('index.md', "---\ntitle: Home\n---\nHi");
+    $this->writeDoc('index.md', "---\ntitle: Home\nupdated: 2026-09-17\n---\nHi");
 
     $html = $this->get('/docs')->assertOk()->getContent();
 
     expect($html)
         ->toContain('data-vellum-updated')
+        ->toContain('Sep 17, 2026')
         ->not->toContain('data-vellum-page-meta');
+});
+
+it('shows no last updated date rather than the file mtime', function (): void {
+    $this->writeDoc('index.md', "---\ntitle: Home\n---\nHi");
+
+    expect($this->get('/docs')->assertOk()->getContent())->not->toContain('data-vellum-updated');
 });
 
 it('exposes a keyboard-complete open menu on page actions', function (): void {

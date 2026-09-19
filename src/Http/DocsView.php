@@ -217,12 +217,20 @@ final class DocsView
         return rtrim($repo, '/').'/'.$relative;
     }
 
+    /**
+     * The date shown under a page: frontmatter updated, else git, else none.
+     * Never the file mtime, which a checkout or composer install resets.
+     */
     public static function updatedAt(Document $document): ?string
     {
-        if ($document->mtime <= 0) {
+        if ($document->updated === null || $document->updated === '') {
             return null;
         }
 
-        return Carbon::createFromTimestamp($document->mtime)->toFormattedDateString();
+        try {
+            return Carbon::parse($document->updated)->toFormattedDateString();
+        } catch (\Throwable) {
+            return null;
+        }
     }
 }
