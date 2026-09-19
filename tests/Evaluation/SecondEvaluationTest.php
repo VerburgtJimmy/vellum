@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Symfony\Component\Yaml\Yaml;
+use Vellum\Answers\Questions\QuestionGenerators;
 use Vellum\Answers\Sections;
 use Vellum\Cache\CompiledStore;
 use Vellum\Content\ContentRepository;
@@ -11,7 +12,6 @@ use Vellum\Semantic\SafetensorsTable;
 use Vellum\Semantic\WordPieceTokenizer as WordPiece;
 use Vellum\Tests\Evaluation\Bm25;
 use Vellum\Tests\Evaluation\Metrics;
-use Vellum\Tests\Evaluation\Questions;
 use Vellum\Tests\Evaluation\Vectors;
 
 /*
@@ -142,7 +142,7 @@ function eval2Build(array $documents, string $model, int $bits, string $out): ar
     $sections = Sections::from($documents);
 
     foreach ($sections as $id => $section) {
-        $sections[$id]['generated'] = Questions::for($section);
+        $sections[$id]['generated'] = QuestionGenerators::default()->for($section);
     }
 
     $full = WordPiece::fromTokenizerJson($model.'/tokenizer.json');

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Vellum\Answers;
 
 use RuntimeException;
+use Vellum\Answers\Questions\QuestionGenerators;
 use Vellum\Content\Document;
 use Vellum\Semantic\FileVectorCache;
 use Vellum\Semantic\ModelDownloader;
@@ -84,13 +85,19 @@ final class SemanticIndexer
     }
 
     /**
-     * The text a section is embedded from.
+     * The text a section is embedded from: its words, then the questions it
+     * answers, so a reader's question lands near the section that answers it.
      *
-     * @param  array{title: string, heading: string, text: string, questions: list<string>}  $section
+     * @param  array{title: string, own: string, heading: string, text: string, html: string, questions: list<string>}  $section
      */
     public static function text(array $section): string
     {
-        return trim(implode(' ', [$section['title'], $section['heading'], $section['text'], ...$section['questions']]));
+        return trim(implode(' ', [
+            $section['title'],
+            $section['heading'],
+            $section['text'],
+            ...QuestionGenerators::default()->for($section),
+        ]));
     }
 
     private function attribution(): string
