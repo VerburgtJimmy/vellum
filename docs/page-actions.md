@@ -36,6 +36,10 @@ the version. A page with a last-updated date, from its `updated` frontmatter or 
 git commit, gets a `Last-Modified` header; a page without one gets none. The body stays
 the file as written.
 
+The changelog has a raw copy too, at `/docs/_vellum/raw/changelog.md`, served from
+`changelog.path`. It leaves out `[Unreleased]` whenever the HTML page does. See
+[Release notes](/docs/releases).
+
 ## For agents
 
 The raw files are there for readers, but also for tools that fetch docs on their own.

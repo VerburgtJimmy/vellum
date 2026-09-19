@@ -12,6 +12,8 @@ use Vellum\Changelog\Changelog;
 use Vellum\Changelog\ChangelogFeed;
 use Vellum\Content\ContentRepository;
 use Vellum\Http\DocsView;
+use Vellum\Http\LinkHeader;
+use Vellum\Http\RawMarkdown;
 
 /**
  * Serves the changelog HTML page and Atom feed.
@@ -31,13 +33,25 @@ final class ChangelogController extends Controller
             return app(DocsController::class)->show('changelog');
         }
 
-        $html = $this->view->file(
-            dirname(__DIR__, 3).'/resources/views/pages/changelog.blade.php',
-            DocsView::changelog(ContentRepository::fromConfig(), $changelog),
-        )->render();
+        $repository = ContentRepository::fromConfig();
+        $negotiates = (bool) config('vellum.agents.content_negotiation', true);
 
-        return response($html, 200)
-            ->header('Content-Type', 'text/html; charset=UTF-8');
+        if ($negotiates && RawMarkdown::preferredBy(request())) {
+            $response = RawMarkdown::changelog($repository, $changelog);
+        } else {
+            $data = DocsView::changelog($repository, $changelog);
+            $html = $this->view->file(dirname(__DIR__, 3).'/resources/views/pages/changelog.blade.php', $data)->render();
+
+            $response = response($html, 200)->header('Content-Type', 'text/html; charset=UTF-8');
+            LinkHeader::add($response, route('vellum.raw', ['slug' => 'changelog']), 'alternate', 'text/markdown');
+        }
+
+        // The same reason as docs pages: one URL, two bodies.
+        if ($negotiates) {
+            $response->setVary('Accept', false);
+        }
+
+        return $response;
     }
 
     public function feed(): Response

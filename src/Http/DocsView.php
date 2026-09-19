@@ -107,6 +107,7 @@ final class DocsView
             'pageTitle' => self::pageTitle($changelog->title),
             'canonical' => self::canonical($repository->hrefFor('changelog', $version), $staticExport),
             'feedUrl' => route('vellum.changelog.atom'),
+            'rawUrl' => route('vellum.raw', ['slug' => 'changelog']),
             'updatedAt' => $changelog->mtime > 0
                 ? Carbon::createFromTimestamp($changelog->mtime)->toFormattedDateString()
                 : null,

@@ -158,6 +158,10 @@ final class ExportCommand extends Command
             $prefixRoot.DIRECTORY_SEPARATOR.'changelog.atom',
             (new ChangelogFeed)->render($changelog),
         );
+        $this->writeFile(
+            $prefixRoot.DIRECTORY_SEPARATOR.'_vellum'.DIRECTORY_SEPARATOR.'raw'.DIRECTORY_SEPARATOR.'changelog.md',
+            $changelog->rawMarkdown(),
+        );
 
         return 1;
     }

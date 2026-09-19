@@ -7,6 +7,7 @@ namespace Vellum\Http;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Symfony\Component\HttpFoundation\AcceptHeader;
+use Vellum\Changelog\Changelog;
 use Vellum\Content\ContentRepository;
 use Vellum\Content\Document;
 
@@ -79,6 +80,21 @@ final class RawMarkdown
 
         LinkHeader::add($response, self::canonical($repository->hrefFor($document->slug, $document->version)), 'canonical');
         self::lastModified($response, $document->updated);
+
+        return $response;
+    }
+
+    /**
+     * The changelog as Markdown, with the same headers as a page apart from
+     * the version: the changelog belongs to no one version.
+     */
+    public static function changelog(ContentRepository $repository, Changelog $changelog): Response
+    {
+        $response = response($changelog->rawMarkdown(), 200)
+            ->header('Content-Type', 'text/markdown; charset=UTF-8');
+
+        LinkHeader::add($response, self::canonical($repository->hrefFor('changelog', $repository->latestVersion())), 'canonical');
+        self::lastModified($response, $changelog->updated());
 
         return $response;
     }

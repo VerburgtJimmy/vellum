@@ -6,6 +6,7 @@ namespace Vellum\Http\Controllers;
 
 use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
+use Vellum\Changelog\Changelog;
 use Vellum\Content\ContentRepository;
 use Vellum\Http\RawMarkdown;
 
@@ -18,6 +19,13 @@ final class RawMarkdownController extends Controller
     {
         $repository = ContentRepository::fromConfig();
         $slug = trim($slug, '/');
+
+        // /changelog renders the changelog file, not a docs page of that
+        // name, so its source is that file too.
+        if ($slug === 'changelog' && ($changelog = Changelog::load()) !== null) {
+            return RawMarkdown::changelog($repository, $changelog);
+        }
+
         $parsed = $repository->parseRequestSlug($slug);
         $version = $parsed['version'];
         $documentSlug = $parsed['slug'];

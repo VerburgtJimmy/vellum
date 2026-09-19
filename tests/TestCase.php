@@ -7,6 +7,8 @@ namespace Vellum\Tests;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Blade;
 use Orchestra\Testbench\TestCase as Orchestra;
+use Symfony\Component\Process\ExecutableFinder;
+use Symfony\Component\Process\Process;
 use Vellum\VellumServiceProvider;
 
 abstract class TestCase extends Orchestra
@@ -112,6 +114,40 @@ abstract class TestCase extends Orchestra
         file_put_contents($path, $contents);
 
         return $path;
+    }
+
+    /**
+     * Run git in a fixture repository with a fixed identity and date, and
+     * without any GIT_DIR the test run itself inherited.
+     *
+     * @param  list<string>  $arguments
+     */
+    protected function git(string $cwd, array $arguments, string $date = '2020-01-02T03:04:05+00:00'): void
+    {
+        (new Process(['git', ...$arguments], $cwd, [
+            'GIT_DIR' => false,
+            'GIT_WORK_TREE' => false,
+            'GIT_INDEX_FILE' => false,
+            'GIT_AUTHOR_NAME' => 'Docs',
+            'GIT_AUTHOR_EMAIL' => 'docs@example.com',
+            'GIT_COMMITTER_NAME' => 'Docs',
+            'GIT_COMMITTER_EMAIL' => 'docs@example.com',
+            'GIT_AUTHOR_DATE' => $date,
+            'GIT_COMMITTER_DATE' => $date,
+        ]))->mustRun();
+    }
+
+    protected function commitAll(string $cwd, string $message, string $date): void
+    {
+        $this->git($cwd, ['add', '-A']);
+        $this->git($cwd, ['-c', 'commit.gpgsign=false', 'commit', '-q', '-m', $message], $date);
+    }
+
+    protected function skipWithoutGit(): void
+    {
+        if ((new ExecutableFinder)->find('git') === null) {
+            $this->markTestSkipped('git is not installed.');
+        }
     }
 
     protected function deleteDirectory(string $directory): void
