@@ -26,6 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The changelog in `llms.txt`, `llms-full.txt` and the sitemap's `<lastmod>`. It is listed where the sidebar has it, or last under `## Optional`, the llms.txt heading for links an agent may skip. Its `llms-full.txt` block names no version, since one changelog covers them all. A `meta.json` link whose href is not its own slug's page is no longer taken for that page when looking up a document or a date
 - `<lastmod>` in the sitemap, from the route and from `vellum:export`, for pages with a last-updated date. Pages without one still have no `<lastmod>`
 - Every search section carries the questions it answers, derived at build time: "how do i" and "what is" from its heading, one per Artisan or Composer command in its shell blocks, three per config key it documents, and "why does ... fail" for each warning or danger callout. Authors can add their own with a `questions:` list in frontmatter. They are appended to the text a section is embedded from, so a question lands near the section that answers it
+- Search understands the words readers use for things the docs call something else. A built-in list of about 200 docs synonyms (licence and commercial use, card and tile, table of contents and outline, dark mode and night mode, and so on) expands a query phrase by phrase, and a page can add its own with `aliases:` in frontmatter. A section can also be found by its heading and by the terms written in inline code in its prose
 
 ### Changed
 

@@ -16,7 +16,7 @@ final class Sections
 {
     /**
      * @param  list<Document>  $documents
-     * @return list<array{page: string, version: string|null, access: string, anchor: string, parent: string, title: string, heading: string, own: string, text: string, html: string, description: string, questions: list<string>}>
+     * @return list<array{page: string, version: string|null, access: string, anchor: string, parent: string, title: string, heading: string, own: string, text: string, html: string, description: string, questions: list<string>, aliases: list<string>}>
      */
     public static function from(array $documents): array
     {
@@ -50,6 +50,7 @@ final class Sections
                         'html' => $part,
                         'description' => $document->description ?? '',
                         'questions' => array_values(array_filter((array) ($document->frontmatter['questions'] ?? []), 'is_string')),
+                        'aliases' => array_values(array_filter((array) ($document->frontmatter['aliases'] ?? []), 'is_string')),
                     ];
 
                     continue;
@@ -89,6 +90,7 @@ final class Sections
                     'html' => substr($part, strlen($match[0])),
                     'description' => '',
                     'questions' => [],
+                    'aliases' => [],
                 ];
             }
         }
