@@ -15,7 +15,7 @@ final class Sections
 {
     /**
      * @param  list<Document>  $documents
-     * @return list<array{page: string, anchor: string, parent: string, title: string, heading: string, text: string}>
+     * @return list<array{page: string, anchor: string, parent: string, title: string, heading: string, own: string, text: string, html: string, questions: list<string>}>
      */
     public static function from(array $documents): array
     {
@@ -42,7 +42,10 @@ final class Sections
                         'parent' => '',
                         'title' => $document->title,
                         'heading' => '',
+                        'own' => '',
                         'text' => trim(($document->description ?? '').' '.self::text($part)),
+                        'html' => $part,
+                        'questions' => array_values(array_filter((array) ($document->frontmatter['questions'] ?? []), 'is_string')),
                     ];
 
                     continue;
@@ -64,7 +67,10 @@ final class Sections
                     'parent' => $level === 2 ? $anchor : $parent,
                     'title' => $document->title,
                     'heading' => $level === 2 ? $text : trim($h2.' '.$text),
+                    'own' => $text,
                     'text' => self::text(substr($part, strlen($match[0]))),
+                    'html' => substr($part, strlen($match[0])),
+                    'questions' => [],
                 ];
             }
         }
@@ -72,7 +78,7 @@ final class Sections
         return $sections;
     }
 
-    private static function text(string $html): string
+    public static function text(string $html): string
     {
         $text = html_entity_decode(strip_tags($html), ENT_QUOTES | ENT_HTML5, 'UTF-8');
 
