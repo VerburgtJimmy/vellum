@@ -6,11 +6,14 @@ use Illuminate\Support\Facades\Route;
 use Vellum\Http\Controllers\ChangelogController;
 use Vellum\Http\Controllers\ContentFileController;
 use Vellum\Http\Controllers\DocsController;
+use Vellum\Http\Controllers\LlmsTxtController;
 use Vellum\Http\Controllers\RawMarkdownController;
 use Vellum\Http\Controllers\SearchIndexController;
 use Vellum\Http\Controllers\SitemapController;
 
 Route::get('/sitemap.xml', SitemapController::class)->name('vellum.sitemap');
+Route::get('/llms.txt', [LlmsTxtController::class, 'index'])->name('vellum.llms');
+Route::get('/llms-full.txt', [LlmsTxtController::class, 'full'])->name('vellum.llms.full');
 
 Route::get('/_vellum/search.json', SearchIndexController::class)->name('vellum.search');
 Route::get('/_vellum/search-{hash}.json', SearchIndexController::class)

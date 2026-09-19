@@ -116,6 +116,7 @@ final class CompiledStore
             full: isset($data['full']) && is_bool($data['full']) ? $data['full'] : false,
             icon: isset($data['icon']) && is_string($data['icon']) ? $data['icon'] : null,
             islands: Island::listFromArray($data['islands'] ?? []),
+            updated: isset($data['updated']) && is_string($data['updated']) ? $data['updated'] : null,
         );
     }
 

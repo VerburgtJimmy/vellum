@@ -21,6 +21,9 @@ Published as `config/vellum.php`. **These names have been frozen since 0.5.** La
 | `fonts` | `null` | HTML injected into the layout head |
 | `checks.references` | `true` | Warn at build time about links and images that point at nothing |
 | `checks.strict` | `false` | Turn those warnings into a failed build |
+| `agents.llms_txt` | `true` | Serve `llms.txt` and `llms-full.txt` under the docs prefix. See [Page actions](/docs/page-actions#for-agents) |
+| `agents.llms_txt_root` | `true` | Also serve both at `/llms.txt` and `/llms-full.txt`, unless the app routes those paths itself |
+| `agents.content_negotiation` | `true` | Serve a page's raw Markdown when the request's `Accept` header prefers `text/markdown` |
 | `cache.path` | `storage_path('framework/vellum')` | Compile cache |
 | `export.out` | `public_path('docs-static')` | Static export directory |
 | `export.base_url` | `/` | Prefix inside the export |
@@ -129,6 +132,7 @@ Frozen page keys:
 | `order` | Sort among siblings when `meta.json` does not list pages |
 | `full` | Hide the table of contents column |
 | `access` | `guest`, `auth`, or a gate name. See [Gating](/docs/gating). |
+| `updated` | Last-updated date, `2026-09-17` or ISO 8601 (`2026-09-17T10:00:00+02:00`). Without it, the file's last git commit date is used, when the docs are in a full git clone. File modification times are never used |
 
 Folder `meta.json`: `title`, `defaultOpen`, `pages`, `access`. See [Navigation](/docs/writing/navigation). `_meta.md` can set `access` (and the usual matter) for the folder.
 

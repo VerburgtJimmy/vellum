@@ -51,6 +51,9 @@
     @if (! empty($canonical ?? null))
         <link rel="canonical" href="{{ $canonical }}">
     @endif
+    @if (! empty($rawUrl ?? null))
+        <link rel="alternate" type="text/markdown" href="{{ $rawUrl }}">
+    @endif
     @if ($noindex ?? false)
         <meta name="robots" content="noindex">
     @endif

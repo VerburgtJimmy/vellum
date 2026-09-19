@@ -18,6 +18,7 @@ final readonly class Document
      * @param  list<Heading>  $headings
      * @param  FrontMatter  $frontmatter
      * @param  list<Island>  $islands
+     * @param  string|null  $updated  YYYY-MM-DD or ISO 8601, from frontmatter or git. Never the file mtime.
      */
     public function __construct(
         public string $slug,
@@ -32,6 +33,7 @@ final readonly class Document
         public bool $full = false,
         public ?string $icon = null,
         public array $islands = [],
+        public ?string $updated = null,
     ) {}
 
     /**
@@ -47,7 +49,8 @@ final readonly class Document
      *     version: string|null,
      *     full: bool,
      *     icon: string|null,
-     *     islands: list<array<string, mixed>>
+     *     islands: list<array<string, mixed>>,
+     *     updated: string|null
      * }
      */
     public function toArray(): array
@@ -65,6 +68,7 @@ final readonly class Document
             'full' => $this->full,
             'icon' => $this->icon,
             'islands' => array_map(static fn (Island $island): array => $island->toArray(), $this->islands),
+            'updated' => $this->updated,
         ];
     }
 
@@ -81,7 +85,8 @@ final readonly class Document
      *     version?: string|null,
      *     full?: bool,
      *     icon?: string|null,
-     *     islands?: list<array<string, mixed>>
+     *     islands?: list<array<string, mixed>>,
+     *     updated?: string|null
      * }  $data
      */
     public static function fromArray(array $data): self
@@ -99,6 +104,7 @@ final readonly class Document
             full: $data['full'] ?? false,
             icon: $data['icon'] ?? null,
             islands: Island::listFromArray($data['islands'] ?? []),
+            updated: $data['updated'] ?? null,
         );
     }
 

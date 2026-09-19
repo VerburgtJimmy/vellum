@@ -6,7 +6,9 @@ namespace Vellum\Http\Controllers;
 
 use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
+use Vellum\Changelog\Changelog;
 use Vellum\Content\ContentRepository;
+use Vellum\Http\RawMarkdown;
 
 /**
  * Serves the raw Markdown source of a documentation page.
@@ -17,6 +19,13 @@ final class RawMarkdownController extends Controller
     {
         $repository = ContentRepository::fromConfig();
         $slug = trim($slug, '/');
+
+        // /changelog renders the changelog file, not a docs page of that
+        // name, so its source is that file too.
+        if ($slug === 'changelog' && ($changelog = Changelog::load()) !== null) {
+            return RawMarkdown::changelog($repository, $changelog);
+        }
+
         $parsed = $repository->parseRequestSlug($slug);
         $version = $parsed['version'];
         $documentSlug = $parsed['slug'];
@@ -27,13 +36,10 @@ final class RawMarkdownController extends Controller
 
         $document = $repository->find($documentSlug, $version);
 
-        if ($document === null || ! is_file($document->path) || ! $repository->allows($document)) {
+        if (! RawMarkdown::visible($repository, $document)) {
             abort(404);
         }
 
-        $contents = file_get_contents($document->path);
-
-        return response($contents === false ? '' : $contents, 200)
-            ->header('Content-Type', 'text/markdown; charset=UTF-8');
+        return RawMarkdown::response($repository, $document);
     }
 }

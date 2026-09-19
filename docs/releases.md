@@ -16,6 +16,8 @@ Set `path` to `null` to disable the page and feed.
 
 `[Unreleased]` stays in the source file for authors. The feed never includes it. The HTML page shows it only when `unreleased` is `true`.
 
+The changelog also has a raw Markdown copy at `/docs/_vellum/raw/changelog.md`, like every page (see [Page actions](/docs/page-actions#raw-markdown)). It follows the same rule: with `unreleased` off, the `[Unreleased]` section is cut from it, so notes the page hides are not one URL away. With `unreleased` on, it is the file as written.
+
 Headings may be `## [1.2.0] - 2026-09-13` or `## 1.2.0`.
 
 The changelog is not versioned. It stays at `/docs/changelog` even when version folders are on.

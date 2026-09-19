@@ -20,13 +20,13 @@ final class SitemapController extends Controller
 {
     public function __invoke(): Response
     {
-        $urls = Sitemap::urls(ContentRepository::fromConfig());
+        $entries = Sitemap::entries(ContentRepository::fromConfig());
 
-        if ($urls === []) {
+        if ($entries === []) {
             abort(404);
         }
 
-        return response(Sitemap::render($urls), 200, [
+        return response(Sitemap::render($entries), 200, [
             'Content-Type' => 'application/xml; charset=UTF-8',
         ]);
     }

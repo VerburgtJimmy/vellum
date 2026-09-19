@@ -23,6 +23,8 @@ Pages without a `description` in frontmatter get no meta description. It is the 
 
 Built from the same navigation that renders the sidebar, so it stays correct as pages are added. Gated pages are left out, including for a signed-in reader, since a sitemap is one public file. Every version is listed when versions are enabled.
 
+A page gets a `<lastmod>` when it has a last-updated date: its `updated` frontmatter, or its last git commit when the docs are in a full git clone. Pages without one get no `<lastmod>`. File modification times are never used, because a deploy resets them and a crawler told every page changed today learns to ignore the field.
+
 It sits under the docs prefix rather than at the site root, which the package does not own. A sitemap may list any URL at or below its own path, so this one covers the whole docs tree.
 
 Like the canonical, it needs `app.url` to be an origin. Without one it returns a 404 rather than publishing relative URLs, which are not valid in a sitemap.
@@ -35,14 +37,19 @@ Laravel does not ship a `robots.txt` with a sitemap reference, so add one:
 User-agent: *
 Allow: /
 
-# Raw Markdown is the same content as the HTML pages, and the page
-# actions link to it. Crawl the pages, not both copies.
+# Package internals: the search index and embedded files.
 Disallow: /docs/_vellum/
+# Raw Markdown declares its HTML page canonical, and llms.txt links to it.
+Allow: /docs/_vellum/raw/
 
 Sitemap: https://example.com/docs/sitemap.xml
 ```
 
-The `Disallow` matters more than it looks. [Page actions](/docs/page-actions) link to a raw `.md` copy of every page, so without it each page is crawled twice and indexed as a near-duplicate.
+Every raw Markdown response sends `Link: <page URL>; rel="canonical"` naming the HTML page it is a copy of. A crawler that fetches the `.md` credits the page instead of indexing a near-duplicate, so there is no reason to hide the raw files. They are also what [`llms.txt`](/docs/page-actions#for-agents) links to, and a disallow would keep any agent that honours `robots.txt` from following those links.
+
+The rest of `/docs/_vellum/` is the search index and the files pages embed, none of which needs crawling on its own. The longer `Allow` rule wins over the shorter `Disallow`, so only the raw files get through.
+
+Like the canonical `<link>`, the header is absolute when `app.url` is an origin. Without one it is root-relative, which a client resolves against the URL it requested.
 
 ## Static export
 

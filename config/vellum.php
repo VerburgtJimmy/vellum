@@ -146,6 +146,29 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Agents
+    |--------------------------------------------------------------------------
+    |
+    | llms_txt: serve {prefix}/llms.txt, an index of every public page linking
+    | to its raw Markdown, and {prefix}/llms-full.txt, all of that Markdown in
+    | one file. vellum:export writes both at the export root.
+    |
+    | llms_txt_root: also serve both at /llms.txt and /llms-full.txt, where
+    | agents look first. Skipped for a path the app already routes itself.
+    |
+    | content_negotiation: answer a docs page request whose Accept header
+    | prefers text/markdown with the page's raw Markdown instead of HTML.
+    | Page responses then send Vary: Accept so caches keep the two apart.
+    |
+    */
+    'agents' => [
+        'llms_txt' => true,
+        'llms_txt_root' => true,
+        'content_negotiation' => true,
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Fonts
     |--------------------------------------------------------------------------
     |

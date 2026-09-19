@@ -8,6 +8,7 @@ use Illuminate\Console\Command;
 use Vellum\Answers\SemanticIndexer;
 use Vellum\Content\ContentRepository;
 use Vellum\Content\Document;
+use Vellum\Content\LastUpdated;
 use Vellum\Content\LinkChecker;
 use Vellum\Search\ScoutIndexer;
 use Vellum\Search\SearchDriver;
@@ -42,6 +43,7 @@ final class BuildCommand extends Command
         $documents = $repository->buildAll($version);
 
         $this->warnAboutShadowedSlugs($documents);
+        $this->warnAboutInvalidDates($documents);
 
         $broken = $this->reportBrokenReferences($documents, $repository);
 
@@ -191,6 +193,31 @@ final class BuildCommand extends Command
         }
 
         return $errors;
+    }
+
+    /**
+     * An `updated` that is not a date is ignored, and the page falls back to
+     * git or to no date. The page still renders, so say so here rather than
+     * let the date go missing without a word.
+     *
+     * @param  list<Document>  $documents
+     */
+    private function warnAboutInvalidDates(array $documents): void
+    {
+        foreach ($documents as $document) {
+            if (! array_key_exists('updated', $document->frontmatter) || LastUpdated::fromMatter($document->frontmatter['updated']) !== null) {
+                continue;
+            }
+
+            $value = $document->frontmatter['updated'];
+
+            $this->warn(sprintf(
+                'Invalid updated date in %s: %s',
+                $document->path,
+                is_scalar($value) ? (string) $value : get_debug_type($value),
+            ));
+            $this->line('  Use YYYY-MM-DD or an ISO 8601 date and time. Ignored for now.');
+        }
     }
 
     /**

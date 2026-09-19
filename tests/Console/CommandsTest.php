@@ -417,7 +417,7 @@ it('writes a sitemap at the export root using the export base url', function ():
     config()->set('vellum.export.base_url', 'https://static.example.com');
 
     $this->writeDoc('index.md', "---\ntitle: Home\n---\nHi");
-    $this->writeDoc('guides/one.md', "---\ntitle: One\n---\nBody");
+    $this->writeDoc('guides/one.md', "---\ntitle: One\nupdated: 2026-09-17\n---\nBody");
     $this->writeDoc('secret.md', "---\ntitle: Secret\naccess: auth\n---\nPrivate");
 
     $this->artisan('vellum:export')->assertSuccessful();
@@ -430,7 +430,7 @@ it('writes a sitemap at the export root using the export base url', function ():
 
     expect($xml)
         ->toContain('<loc>https://static.example.com/docs</loc>')
-        ->toContain('<loc>https://static.example.com/docs/guides/one</loc>')
+        ->toContain("<loc>https://static.example.com/docs/guides/one</loc>\n        <lastmod>2026-09-17</lastmod>")
         ->not->toContain('app.example.com')
         ->not->toContain('secret');
 
@@ -455,6 +455,80 @@ it('skips the export sitemap when no origin is configured', function (): void {
         ->assertSuccessful();
 
     expect(is_file($out.'/sitemap.xml'))->toBeFalse();
+
+    $this->deleteDirectory($out);
+});
+
+it('writes llms.txt and llms-full.txt at the export root', function (): void {
+    $out = sys_get_temp_dir().'/vellum-tests/export-llms-'.$this->fixtureId();
+
+    if (is_dir($out)) {
+        $this->deleteDirectory($out);
+    }
+
+    config()->set('app.url', 'https://app.example.com');
+    config()->set('vellum.export.out', $out);
+    config()->set('vellum.export.base_url', 'https://static.example.com');
+
+    $this->writeDoc('index.md', "---\ntitle: Home\n---\nHello export");
+    $this->writeDoc('guides/one.md', "---\ntitle: One\n---\nFirst guide");
+    $this->writeDoc('secret.md', "---\ntitle: Secret\naccess: auth\n---\nPrivate");
+
+    $this->artisan('vellum:export')->assertSuccessful();
+
+    $index = (string) file_get_contents($out.'/llms.txt');
+    $full = (string) file_get_contents($out.'/llms-full.txt');
+
+    expect($index)
+        ->toContain('- [One](https://static.example.com/docs/_vellum/raw/guides/one.md)')
+        ->not->toContain('app.example.com')
+        ->not->toContain('Secret')
+        ->and($full)->toContain('URL: https://static.example.com/docs/guides/one')
+        ->toContain('First guide')
+        ->not->toContain('Private')
+        // The link points at a file the export wrote.
+        ->and(is_file($out.'/docs/_vellum/raw/guides/one.md'))->toBeTrue();
+
+    $this->deleteDirectory($out);
+});
+
+it('keeps export llms.txt links root-relative without an origin', function (): void {
+    $out = sys_get_temp_dir().'/vellum-tests/export-llms-relative-'.$this->fixtureId();
+
+    if (is_dir($out)) {
+        $this->deleteDirectory($out);
+    }
+
+    config()->set('app.url', '');
+    config()->set('vellum.export.out', $out);
+    config()->set('vellum.export.base_url', '/handbook/');
+
+    $this->writeDoc('index.md', "---\ntitle: Home\n---\nHi");
+
+    $this->artisan('vellum:export')->assertSuccessful();
+
+    expect((string) file_get_contents($out.'/llms.txt'))
+        ->toContain('- [Home](/handbook/docs/_vellum/raw/index.md)');
+
+    $this->deleteDirectory($out);
+});
+
+it('skips llms.txt in the export when agents.llms_txt is off', function (): void {
+    $out = sys_get_temp_dir().'/vellum-tests/export-nollms-'.$this->fixtureId();
+
+    if (is_dir($out)) {
+        $this->deleteDirectory($out);
+    }
+
+    config()->set('vellum.agents.llms_txt', false);
+    config()->set('vellum.export.out', $out);
+
+    $this->writeDoc('index.md', "---\ntitle: Home\n---\nHi");
+
+    $this->artisan('vellum:export')->assertSuccessful();
+
+    expect(is_file($out.'/llms.txt'))->toBeFalse()
+        ->and(is_file($out.'/llms-full.txt'))->toBeFalse();
 
     $this->deleteDirectory($out);
 });
