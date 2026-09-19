@@ -1,0 +1,101 @@
+# Third set: decides boosted ranking versus weighted RRF. Paraphrase only;
+# literal R@5 is measured on the literal questions of docs/questions.yml and
+# heldout.yml combined. RRF wins if paraphrase R@1 improves by 5 points or
+# more with literal R@5 unchanged. Notes describe the target; the questions
+# are written by someone else.
+
+- q: ''
+  page: components/cards
+  section: a-section-index
+  note: 'an overview page that ends with a grid of cards handing the reader on'
+  kind: paraphrase
+- q: ''
+  page: components/callouts
+  section: contents
+  note: 'a callout body can hold lists, code blocks, tables, even another directive'
+  kind: paraphrase
+- q: ''
+  page: components/callouts
+  section: island-form
+  note: 'the Blade component form of a callout; an unrecognised type falls back to note'
+  kind: paraphrase
+- q: ''
+  page: components/steps
+  section: blocks-inside-a-step
+  note: 'a step can hold code, callouts, tables and nested lists'
+  kind: paraphrase
+- q: ''
+  page: components/tabs
+  section: other-directives-inside-a-panel
+  note: 'a callout or other directive can sit inside a tab panel'
+  kind: paraphrase
+- q: ''
+  page: components/tabs
+  section: island-form
+  note: 'the Blade component form of tabs; code="true" forces the code-tab look'
+  kind: paraphrase
+- q: ''
+  page: credits
+  section: inspiration
+  note: 'Fumadocs is the reference the layout and ::: syntax are measured against'
+  kind: paraphrase
+- q: ''
+  page: credits
+  section: interface
+  note: 'the icon set and interface libraries the chrome is built from'
+  kind: paraphrase
+- q: ''
+  page: credits
+  section: foundations
+  note: 'Laravel, Alpine and Tailwind as the base everything sits on'
+  kind: paraphrase
+- q: ''
+  page: extending
+  section: built-ins-share-blade-views
+  note: ':::note and the x-vellum callout component render the same Blade view'
+  kind: paraphrase
+- q: ''
+  page: getting-started/upgrade
+  section: frontmatter
+  note: 'access became a frontmatter key in 0.5; folder settings inherit downward'
+  kind: paraphrase
+- q: ''
+  page: getting-started/upgrade
+  section: markdown-plus-components
+  note: 'components, ::: directives and value tags arrived in 0.3'
+  kind: paraphrase
+- q: ''
+  page: troubleshooting
+  section: unknown-docs-component-x-name
+  note: 'an <x-...> tag with no matching Blade view file'
+  kind: paraphrase
+- q: ''
+  page: troubleshooting
+  section: value-tag-x-vellumenv-key-appkey-is-not-in-vellumcomponentsallowlist
+  note: 'a value tag refused a key because it is not in the allowlist'
+  kind: paraphrase
+- q: ''
+  page: writing/code-blocks
+  note: 'code is highlighted on the server, nothing ships to the browser, GitHub light and dark palette'
+  kind: paraphrase
+- q: ''
+  page: writing/navigation
+  note: 'the sidebar is the folder structure; no separate navigation file or route list'
+  kind: paraphrase
+- q: ''
+  page: why
+  note: 'the premise: docs are Markdown in the app repo, reviewed in the same pull request'
+  kind: paraphrase
+- q: ''
+  page: writing/markdown
+  note: 'CommonMark plus GitHub Flavored Markdown; if it works in a README it works here'
+  kind: paraphrase
+- q: ''
+  page: ''
+  note: 'what Vellum is: a folder of Markdown becomes docs inside the app you already deploy'
+  kind: paraphrase
+- q: ''
+  page: seo
+  section: static-export
+  note: 'the export writes its own sitemap using export.base_url or app.url'
+  kind: paraphrase
