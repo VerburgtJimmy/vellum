@@ -33,7 +33,7 @@ it('serves llms.txt with a heading, a summary and one line per page', function (
         ]));
 });
 
-it('gives each folder and titled separator its own section, loose pages first', function (): void {
+it('follows the sidebar order, one section per folder, separator and run of pages', function (): void {
     $this->writeDoc('index.md', "---\ntitle: Home\n---\nHi");
     $this->writeDoc('guides/deploy.md', "---\ntitle: Deploy\n---\nShip");
     $this->writeDoc('guides/nested/deeper.md', "---\ntitle: Deeper\n---\nDown");
@@ -46,14 +46,33 @@ it('gives each folder and titled separator its own section, loose pages first', 
 
     $body = (string) $this->get('/docs/llms.txt')->assertOk()->getContent();
 
-    expect(preg_match_all('/^## .*$/m', $body, $headings))->toBe(3)
-        ->and($headings[0])->toBe(['## Docs', '## Guides', '## Reference'])
-        ->and($body)->toContain("## Docs\n\n- [Home](https://docs.example.com/docs/_vellum/raw/index.md)\n- [FAQ](https://docs.example.com/docs/_vellum/raw/faq.md)\n")
-        ->and($body)->toContain('- [Deploy](https://docs.example.com/docs/_vellum/raw/guides/deploy.md)')
-        ->and($body)->toContain('- [Deeper](https://docs.example.com/docs/_vellum/raw/guides/nested/deeper.md)')
+    expect(preg_match_all('/^## .*$/m', $body, $headings))->toBe(4)
+        ->and($headings[0])->toBe(['## Docs', '## Guides', '## Docs (continued)', '## Reference'])
+        ->and($body)->toContain("## Docs\n\n- [Home](https://docs.example.com/docs/_vellum/raw/index.md)\n\n## Guides")
+        ->and($body)->toContain("## Guides\n\n- [Deploy](https://docs.example.com/docs/_vellum/raw/guides/deploy.md)\n- [Deeper](https://docs.example.com/docs/_vellum/raw/guides/nested/deeper.md)\n")
+        ->and($body)->toContain("## Docs (continued)\n\n- [FAQ](https://docs.example.com/docs/_vellum/raw/faq.md)\n")
         ->and($body)->toContain("## Reference\n\n- [API](https://docs.example.com/docs/_vellum/raw/api.md)")
         // A link in meta.json has no Markdown source to point at.
         ->and($body)->not->toContain('GitHub');
+});
+
+it('heads the first run with the root title and continues a separator after a folder', function (): void {
+    $this->writeDoc('index.md', "---\ntitle: Home\n---\nHi");
+    $this->writeDoc('api.md', "---\ntitle: API\n---\nBody");
+    $this->writeDoc('sdk/php.md', "---\ntitle: PHP\n---\nBody");
+    $this->writeDoc('limits.md', "---\ntitle: Limits\n---\nBody");
+    $this->writeDoc('errors.md', "---\ntitle: Errors\n---\nBody");
+    $this->writeDoc('secret/hidden.md', "---\ntitle: Hidden\naccess: auth\n---\nBody");
+    file_put_contents($this->docsPath().'/meta.json', json_encode([
+        'title' => 'Acme',
+        'pages' => ['index', '---Reference---', 'api', 'sdk', 'limits', 'secret', 'errors'],
+    ]));
+    file_put_contents($this->docsPath().'/sdk/meta.json', json_encode(['title' => 'SDKs']));
+
+    preg_match_all('/^## .*$/m', (string) $this->get('/docs/llms.txt')->getContent(), $headings);
+
+    // The gated folder lists nothing, so it does not split Limits from Errors.
+    expect($headings[0])->toBe(['## Acme', '## Reference', '## SDKs', '## Reference (continued)']);
 });
 
 it('uses root-relative links when app.url is not an origin', function (): void {

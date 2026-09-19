@@ -22,7 +22,8 @@ use Vellum\Http\DocsView;
 final class LlmsTxt
 {
     /**
-     * Heading for top-level pages that sit outside any folder or separator.
+     * Heading for the first run of top-level pages when the content root's
+     * meta.json has no title.
      */
     public const DEFAULT_SECTION = 'Docs';
 
@@ -109,12 +110,17 @@ final class LlmsTxt
     }
 
     /**
-     * Group the sidebar into sections.
+     * Group the sidebar into sections, in sidebar order.
      *
-     * Each top-level folder is a section, and so is the run of top-level pages
-     * under each titled separator. Top-level pages before any separator go
-     * first, under DEFAULT_SECTION. Anything nested inside a folder belongs to
-     * that folder's section, since llms.txt has no deeper level than ##.
+     * Each top-level folder is a section, with anything nested inside it
+     * flattened into it, since llms.txt has no level below ##. A run of
+     * consecutive top-level pages is a section too, headed by the titled
+     * separator above it, or by the root title before any separator.
+     *
+     * A run that resumes after a folder gets the same heading again, marked
+     * "(continued)". Headings stay unique because llms.txt tools commonly read
+     * the sections into a map keyed by heading, where a repeat would replace
+     * the earlier section rather than add to it.
      *
      * @return list<Section>
      */
@@ -122,52 +128,119 @@ final class LlmsTxt
     {
         $version = $repository->latestVersion();
         $builder = $repository->navigationBuilder();
-        $titles = ['default' => self::DEFAULT_SECTION];
-        /** @var array<string, list<Entry>> $entries */
-        $entries = [];
-        $current = 'default';
+        $heading = self::rootTitle($repository, $version);
+        /** @var list<Section> $sections */
+        $sections = [];
+        /** @var list<Entry> $run */
+        $run = [];
         $seen = [];
 
-        foreach ($repository->navigation($version) as $i => $node) {
+        foreach ($repository->navigation($version) as $node) {
             $type = $node['type'] ?? null;
             $title = is_string($node['title'] ?? null) ? trim($node['title']) : '';
 
             if ($type === 'separator') {
                 // An untitled separator is a divider line, not a new group.
                 if ($title !== '') {
-                    $current = 'separator-'.$i;
-                    $titles[$current] = $title;
+                    $sections = self::close($sections, $heading, $run);
+                    $run = [];
+                    $heading = $title;
                 }
 
                 continue;
             }
 
-            $key = $current;
-            $pages = [];
-
             if ($type === 'folder' && is_array($node['children'] ?? null)) {
-                $key = 'folder-'.$i;
-                $titles[$key] = $title === '' ? self::DEFAULT_SECTION : $title;
-                $pages = $builder->flattenPages(array_values($node['children']));
-            } elseif ($type === 'page') {
-                $pages = $builder->flattenPages([$node]);
+                $entries = [];
+
+                foreach ($builder->flattenPages(array_values($node['children'])) as $page) {
+                    $entry = self::entry($repository, $page, $version, $seen);
+
+                    if ($entry !== null) {
+                        $entries[] = $entry;
+                    }
+                }
+
+                // A folder with nothing public in it does not split the run.
+                if ($entries !== []) {
+                    $sections = self::close($sections, $heading, $run);
+                    $run = [];
+                    $sections[] = ['title' => $title === '' ? $heading : $title, 'entries' => $entries];
+                }
+
+                continue;
             }
 
-            foreach ($pages as $page) {
+            if ($type !== 'page') {
+                continue;
+            }
+
+            foreach ($builder->flattenPages([$node]) as $page) {
                 $entry = self::entry($repository, $page, $version, $seen);
 
                 if ($entry !== null) {
-                    $entries[$key][] = $entry;
+                    $run[] = $entry;
                 }
             }
         }
 
-        $sections = [];
+        return self::uniqueTitles(self::close($sections, $heading, $run));
+    }
 
-        foreach ($titles as $key => $title) {
-            if (($entries[$key] ?? []) !== []) {
-                $sections[] = ['title' => $title, 'entries' => $entries[$key]];
+    /**
+     * @param  list<Section>  $sections
+     * @param  list<Entry>  $run
+     * @return list<Section>
+     */
+    private static function close(array $sections, string $heading, array $run): array
+    {
+        if ($run !== []) {
+            $sections[] = ['title' => $heading, 'entries' => $run];
+        }
+
+        return $sections;
+    }
+
+    /**
+     * The content root's meta.json title, which is what the sidebar is a
+     * tree of, or DEFAULT_SECTION when it has none.
+     */
+    private static function rootTitle(ContentRepository $repository, ?string $version): string
+    {
+        $root = rtrim((string) config('vellum.path'), DIRECTORY_SEPARATOR);
+
+        if ($repository->versionsEnabled() && $version !== null && $version !== '') {
+            $root .= DIRECTORY_SEPARATOR.$version;
+        }
+
+        $path = $root.DIRECTORY_SEPARATOR.'meta.json';
+        $json = is_file($path) ? file_get_contents($path) : false;
+        $meta = is_string($json) ? json_decode($json, true) : null;
+        $title = is_array($meta) && is_string($meta['title'] ?? null) ? self::oneLine($meta['title']) : '';
+
+        return $title === '' ? self::DEFAULT_SECTION : $title;
+    }
+
+    /**
+     * @param  list<Section>  $sections
+     * @return list<Section>
+     */
+    private static function uniqueTitles(array $sections): array
+    {
+        $used = [];
+
+        foreach ($sections as $i => $section) {
+            $title = $section['title'];
+            $candidate = $title;
+            $n = 1;
+
+            while (isset($used[strtolower($candidate)])) {
+                $candidate = $n === 1 ? $title.' (continued)' : $title.' (continued '.$n.')';
+                $n++;
             }
+
+            $used[strtolower($candidate)] = true;
+            $sections[$i]['title'] = $candidate;
         }
 
         return $sections;

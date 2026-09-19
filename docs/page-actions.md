@@ -39,8 +39,8 @@ Vellum points them at the Markdown in four ways.
 
 **llms.txt.** `/docs/llms.txt` is an index of the docs in the
 [llms.txt](https://llmstxt.org) format: the site name, the index page's description, then
-one `##` section per sidebar folder or titled separator, with a line per page linking to
-its raw Markdown.
+the sidebar as `##` sections in sidebar order, with a line per page linking to its raw
+Markdown.
 
 ```
 # Acme
@@ -56,8 +56,11 @@ its raw Markdown.
 - [Installation](https://example.com/docs/_vellum/raw/getting-started/installation.md)
 ```
 
-Top-level pages outside any folder or separator go first, under `## Docs`. The page
-description follows the link when the page has one.
+Each top-level folder is a section, with anything nested in it flattened in. A run of
+top-level pages is a section too, headed by the titled separator above it, or by the root
+`meta.json` title (`Docs` without one) before any separator. When a run picks up again
+after a folder, its heading repeats with "(continued)", so no two sections share a name.
+The page description follows the link when the page has one.
 
 **llms-full.txt.** `/docs/llms-full.txt` is every page's Markdown source in one file, in
 sidebar order. Each page starts with a header block between two lines of 80 `=`
