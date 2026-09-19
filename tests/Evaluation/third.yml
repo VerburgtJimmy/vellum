@@ -4,97 +4,97 @@
 # more with literal R@5 unchanged. Notes describe the target; the questions
 # are written by someone else.
 
-- q: ''
+- q: 'landing page for a folder that links out to its children'
   page: components/cards
   section: a-section-index
   note: 'an overview page that ends with a grid of cards handing the reader on'
   kind: paraphrase
-- q: ''
+- q: 'can i put a code snippet or a bulleted list inside the coloured box'
   page: components/callouts
   section: contents
   note: 'a callout body can hold lists, code blocks, tables, even another directive'
   kind: paraphrase
-- q: ''
+- q: 'using the info box from blade instead of markdown, and what if i mistype the kind'
   page: components/callouts
   section: island-form
   note: 'the Blade component form of a callout; an unrecognised type falls back to note'
   kind: paraphrase
-- q: ''
+- q: 'one stage of my tutorial needs a table and a warning inside it'
   page: components/steps
   section: blocks-inside-a-step
   note: 'a step can hold code, callouts, tables and nested lists'
   kind: paraphrase
-- q: ''
+- q: 'put a tip box inside one of the switchable panels'
   page: components/tabs
   section: other-directives-inside-a-panel
   note: 'a callout or other directive can sit inside a tab panel'
   kind: paraphrase
-- q: ''
+- q: 'tabs from a blade tag, and make them look like the code switcher'
   page: components/tabs
   section: island-form
   note: 'the Blade component form of tabs; code="true" forces the code-tab look'
   kind: paraphrase
-- q: ''
+- q: 'which project was the design copied from'
   page: credits
   section: inspiration
   note: 'Fumadocs is the reference the layout and ::: syntax are measured against'
   kind: paraphrase
-- q: ''
+- q: 'what icon pack is the ui using'
   page: credits
   section: interface
   note: 'the icon set and interface libraries the chrome is built from'
   kind: paraphrase
-- q: ''
+- q: 'what stack is this built on'
   page: credits
   section: foundations
   note: 'Laravel, Alpine and Tailwind as the base everything sits on'
   kind: paraphrase
-- q: ''
+- q: 'does the markdown shorthand and the blade version produce identical html'
   page: extending
   section: built-ins-share-blade-views
   note: ':::note and the x-vellum callout component render the same Blade view'
   kind: paraphrase
-- q: ''
+- q: 'since 0.5 where do i set who can see a page, and does a folder setting apply to its children'
   page: getting-started/upgrade
   section: frontmatter
   note: 'access became a frontmatter key in 0.5; folder settings inherit downward'
   kind: paraphrase
-- q: ''
+- q: 'when did the extra syntax beyond plain markdown arrive'
   page: getting-started/upgrade
   section: markdown-plus-components
   note: 'components, ::: directives and value tags arrived in 0.3'
   kind: paraphrase
-- q: ''
+- q: 'my custom tag errors saying no view'
   page: troubleshooting
   section: unknown-docs-component-x-name
   note: 'an <x-...> tag with no matching Blade view file'
   kind: paraphrase
-- q: ''
+- q: 'the setting i tried to print is being refused'
   page: troubleshooting
   section: value-tag-x-vellumenv-key-appkey-is-not-in-vellumcomponentsallowlist
   note: 'a value tag refused a key because it is not in the allowlist'
   kind: paraphrase
-- q: ''
+- q: 'is code colouring done by javascript in the browser'
   page: writing/code-blocks
   note: 'code is highlighted on the server, nothing ships to the browser, GitHub light and dark palette'
   kind: paraphrase
-- q: ''
+- q: 'do i need a file that defines the menu tree'
   page: writing/navigation
   note: 'the sidebar is the folder structure; no separate navigation file or route list'
   kind: paraphrase
-- q: ''
+- q: 'why keep the manuals in the same repo as the code'
   page: why
   note: 'the premise: docs are Markdown in the app repo, reviewed in the same pull request'
   kind: paraphrase
-- q: ''
+- q: 'will my existing readme style text just work'
   page: writing/markdown
   note: 'CommonMark plus GitHub Flavored Markdown; if it works in a README it works here'
   kind: paraphrase
-- q: ''
+- q: 'what is this package in one sentence'
   page: ''
   note: 'what Vellum is: a folder of Markdown becomes docs inside the app you already deploy'
   kind: paraphrase
-- q: ''
+- q: 'does the flat file output include a sitemap and which domain does it use'
   page: seo
   section: static-export
   note: 'the export writes its own sitemap using export.base_url or app.url'

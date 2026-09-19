@@ -20,6 +20,9 @@ use Vellum\Tests\Evaluation\Vectors;
  *   VELLUM_EVAL=1 VELLUM_EVAL_MODELS=storage/vellum/models vendor/bin/pest tests/Evaluation
  *
  * VELLUM_EVAL_SET=golden runs the first set instead, for reference only.
+ * VELLUM_EVAL_SET=third runs the third set, which decides boosted against
+ * weighted RRF: RRF wins if paraphrase R@1 improves by 5 points or more with
+ * literal R@5 unchanged, both on the int4 vocab.
  *
  * Fixed before any run, and not to be tuned against results:
  * - potion-base-8M, no PCA; vocab = docs tokens + first 1000 alphabetic words
@@ -44,9 +47,17 @@ const EVAL2_RRF_WEIGHTS = ['semantic' => 2.0, 'bm25' => 1.0];
 
 it('reports the second evaluation', function (): void {
     $models = rtrim((string) getenv('VELLUM_EVAL_MODELS'), '/');
-    $set = getenv('VELLUM_EVAL_SET') === 'golden' ? 'golden' : 'heldout';
+    $set = in_array(getenv('VELLUM_EVAL_SET'), ['golden', 'third'], true) ? (string) getenv('VELLUM_EVAL_SET') : 'heldout';
     $docs = (string) realpath(__DIR__.'/../../docs');
-    $golden = Yaml::parseFile($set === 'golden' ? $docs.'/questions.yml' : __DIR__.'/heldout.yml');
+    $golden = match ($set) {
+        'golden' => Yaml::parseFile($docs.'/questions.yml'),
+        'heldout' => Yaml::parseFile(__DIR__.'/heldout.yml'),
+        // The third set's own paraphrases, with every literal question so far.
+        'third' => [
+            ...array_values(array_filter([...Yaml::parseFile($docs.'/questions.yml'), ...Yaml::parseFile(__DIR__.'/heldout.yml')], static fn (array $e): bool => $e['kind'] === 'literal')),
+            ...Yaml::parseFile(__DIR__.'/third.yml'),
+        ],
+    };
     $blank = array_filter($golden, static fn (array $entry): bool => trim((string) $entry['q']) === '');
 
     if ($blank !== []) {
@@ -289,6 +300,19 @@ function eval2Report(string $set, array $rankings, array $golden, array $section
                 $timings[$scheme], $timings[$scheme] < 5 ? 'pass' : 'FAIL',
             );
         }
+    }
+
+    if ($set === 'third') {
+        $boosted = $recalls['Semantic + BM25 boost, int4 vocab'];
+        $rrf = $recalls['Weighted RRF, int4 vocab'];
+        $gain = (($rrf['paraphrase'][1] ?? 0.0) - ($boosted['paraphrase'][1] ?? 0.0)) * 100;
+        $same = abs(($rrf['literal'][5] ?? 0.0) - ($boosted['literal'][5] ?? 0.0)) < 1e-9;
+        $out .= sprintf(
+            "\n## Third-set decision\n\nParaphrase R@1: boosted %s, weighted RRF %s (%+.0f points, need +5). Literal R@5: boosted %s, weighted RRF %s (%s). Winner: %s.\n",
+            $pct($boosted['paraphrase'][1] ?? 0.0), $pct($rrf['paraphrase'][1] ?? 0.0), $gain,
+            $pct($boosted['literal'][5] ?? 0.0), $pct($rrf['literal'][5] ?? 0.0), $same ? 'unchanged' : 'changed',
+            $gain >= 5 - 1e-9 && $same ? 'weighted RRF' : 'boosted',
+        );
     }
 
     $primary = $rankings['Semantic + BM25 boost, int8 vocab'];
