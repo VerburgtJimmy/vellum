@@ -5,6 +5,14 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- `vellum:model` fetches the static embedding model search answers are built from (`potion-base-8M` by default) into `answers.model_path`, streaming it to disk and printing its licence and size. A manifest makes a second run a no-op; a damaged file is fetched again. Models live in `storage/vellum/models`, outside `cache.path`, because `vellum:clear` empties that directory
+- `vellum:build` builds a semantic set for each version when the model is present: every section's vector, and the vocabulary rows those sections use plus the 1,000 most common words, as int4 rows with int8 section vectors. No step fits anything to the content, so Vellum's own docs build in about a quarter of a second, and an unchanged section is not encoded again. Each vector is tagged with the access level that may see it, and a reader is only ever given the rows their access allows, so a word that appears only on a gated page never reaches a guest. Without the model the build warns and search stays lexical
+- `answers.enabled`, `answers.semantic`, `answers.model`, `answers.model_path` and `answers.common_tokens` in `config/vellum.php`
+
 ## [0.6.0] - 2026-09-17
 
 ### Added

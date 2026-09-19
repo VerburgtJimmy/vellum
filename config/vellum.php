@@ -179,6 +179,32 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Answers
+    |--------------------------------------------------------------------------
+    |
+    | Search that understands a question phrased in the reader's words, built
+    | once in vellum:build from a small static embedding model. Nothing runs a
+    | model at request time. Fetch the model with php artisan vellum:model;
+    | without it the build warns and search stays lexical.
+    |
+    | semantic: false keeps the answers features without the embedding model.
+    | model: the Model2Vec model on the Hugging Face hub.
+    | model_path: where vellum:model stores it. Keep it out of cache.path,
+    | which vellum:clear empties.
+    | common_tokens: everyday words kept in the shipped vocabulary beyond the
+    | ones your docs use, so a reader's own words still carry meaning.
+    |
+    */
+    'answers' => [
+        'enabled' => true,
+        'semantic' => true,
+        'model' => 'potion-base-8M',
+        'model_path' => storage_path('vellum/models'),
+        'common_tokens' => 1000,
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Components
     |--------------------------------------------------------------------------
     |

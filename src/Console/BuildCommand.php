@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Vellum\Console;
 
 use Illuminate\Console\Command;
+use Vellum\Answers\SemanticIndexer;
 use Vellum\Content\ContentRepository;
 use Vellum\Content\Document;
 use Vellum\Content\LinkChecker;
@@ -48,6 +49,8 @@ final class BuildCommand extends Command
             SearchDriver::assertScoutInstalled();
             (new ScoutIndexer)->sync($repository, $documents);
         }
+
+        $this->buildSemantic($repository, $documents);
 
         $elapsed = round((microtime(true) - $started) * 1000);
 
@@ -96,6 +99,49 @@ final class BuildCommand extends Command
         }
 
         return self::SUCCESS;
+    }
+
+    /**
+     * The semantic set is built per version, from the documents just compiled.
+     * A missing model is a warning: search keeps working, lexically.
+     *
+     * @param  list<Document>  $documents
+     */
+    private function buildSemantic(ContentRepository $repository, array $documents): void
+    {
+        if (! (bool) config('vellum.answers.enabled', true) || ! (bool) config('vellum.answers.semantic', true)) {
+            return;
+        }
+
+        $byVersion = [];
+
+        foreach ($documents as $document) {
+            $byVersion[$document->version ?? ''][] = $document;
+        }
+
+        foreach ($byVersion as $version => $group) {
+            $indexer = SemanticIndexer::fromConfig($repository->store()->versionPath($version === '' ? null : $version).'/semantic');
+
+            if (! $indexer->hasModel()) {
+                $this->warn('No embedding model in '.$indexer->modelDirectory().'; search stays lexical. Run php artisan vellum:model.');
+
+                return;
+            }
+
+            $started = microtime(true);
+            $result = $indexer->build($group);
+            $guest = strlen((string) gzencode($result['set']->forGroups(['guest']), 9));
+
+            $this->line(sprintf(
+                '  semantic%s: %d sections (%d encoded), %d tokens, %d KB gzipped for guests, %d ms',
+                $version === '' ? '' : " {$version}",
+                $result['sections'],
+                $result['encoded'],
+                count($result['set']->tokens),
+                (int) round($guest / 1024),
+                (int) round((microtime(true) - $started) * 1000),
+            ));
+        }
     }
 
     /**

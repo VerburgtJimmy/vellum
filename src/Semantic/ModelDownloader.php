@@ -31,7 +31,7 @@ final class ModelDownloader
             return [...$existing, 'directory' => $directory, 'fetched' => false];
         }
 
-        if (! is_dir($directory) && ! mkdir($directory, 0755, true) && ! is_dir($directory)) {
+        if (! is_dir($directory) && ! @mkdir($directory, 0755, true) && ! is_dir($directory)) {
             throw new RuntimeException("Cannot create {$directory}");
         }
 

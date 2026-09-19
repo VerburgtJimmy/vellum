@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Vellum\Tests\Evaluation;
 
+use Vellum\Answers\Sections;
+
 /**
  * Deterministic question generators from section 4 of the 0.7 plan: headings,
  * shell commands, config keys, warning callouts, and frontmatter questions.

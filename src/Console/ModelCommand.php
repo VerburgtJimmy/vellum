@@ -14,16 +14,16 @@ use Vellum\Semantic\ModelDownloader;
 final class ModelCommand extends Command
 {
     protected $signature = 'vellum:model
-        {--model=potion-base-8M : Hugging Face model, owner/name or a minishlab name}
-        {--path= : Directory models are stored under (default storage/vellum/models)}
+        {--model= : Hugging Face model, owner/name or a minishlab name (default answers.model)}
+        {--path= : Directory models are stored under (default answers.model_path)}
         {--force : Download again even when the files are already present}';
 
     protected $description = 'Download the static embedding model Vellum builds search answers from';
 
     public function handle(ModelDownloader $downloader): int
     {
-        $model = (string) $this->option('model');
-        $root = (string) ($this->option('path') ?: storage_path('vellum/models'));
+        $model = (string) ($this->option('model') ?: config('vellum.answers.model', 'potion-base-8M'));
+        $root = (string) ($this->option('path') ?: config('vellum.answers.model_path', storage_path('vellum/models')));
         $directory = rtrim($root, '/').'/'.basename($model);
 
         try {

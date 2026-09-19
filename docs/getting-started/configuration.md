@@ -67,6 +67,30 @@ See [Search](/docs/search).
 ],
 ```
 
+## Answers
+
+Search that finds a section from a question in the reader's own words. Everything is built in `vellum:build`; no model runs when someone searches.
+
+```php
+'answers' => [
+    'enabled' => true,
+    'semantic' => true,
+    'model' => 'potion-base-8M',
+    'model_path' => storage_path('vellum/models'),
+    'common_tokens' => 1000,
+],
+```
+
+| Key | Default | Purpose |
+| --- | --- | --- |
+| `answers.enabled` | `true` | Build the answers data at all |
+| `answers.semantic` | `true` | Use the embedding model. `false` keeps search lexical |
+| `answers.model` | `potion-base-8M` | Model2Vec model on the Hugging Face hub, fetched with `php artisan vellum:model` |
+| `answers.model_path` | `storage_path('vellum/models')` | Where the model is stored. Keep it outside `cache.path`, which `vellum:clear` empties |
+| `answers.common_tokens` | `1000` | Everyday words shipped beyond the ones your docs use |
+
+Without the model on disk, `vellum:build` warns and carries on without the semantic signal.
+
 ## Components
 
 See [Value tags](/docs/value-tags) and [Extending](/docs/extending).
