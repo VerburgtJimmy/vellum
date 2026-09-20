@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Symfony\Component\Yaml\Yaml;
+use Vellum\Answers\Bm25;
 use Vellum\Answers\Llm\LlmQuestions;
 use Vellum\Answers\Questions\QuestionGenerators;
 use Vellum\Answers\Sections;
@@ -11,7 +12,6 @@ use Vellum\Content\ContentRepository;
 use Vellum\Content\Document;
 use Vellum\Semantic\SafetensorsTable;
 use Vellum\Semantic\WordPieceTokenizer as WordPiece;
-use Vellum\Tests\Evaluation\Bm25;
 use Vellum\Tests\Evaluation\Metrics;
 use Vellum\Tests\Evaluation\Vectors;
 

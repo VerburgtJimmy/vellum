@@ -81,6 +81,7 @@ Search that finds a section from a question in the reader's own words. Everythin
     'model' => 'potion-base-8M',
     'model_path' => storage_path('vellum/models'),
     'common_tokens' => 1000,
+    'card_threshold' => 0.65,
 ],
 ```
 
@@ -91,6 +92,7 @@ Search that finds a section from a question in the reader's own words. Everythin
 | `answers.model` | `potion-base-8M` | Model2Vec model on the Hugging Face hub, fetched with `php artisan vellum:model` |
 | `answers.model_path` | `env('VELLUM_MODEL_PATH', storage_path('vellum/models'))` | Where the model is stored. Keep it outside `cache.path`, which `vellum:clear` empties |
 | `answers.common_tokens` | `1000` | Everyday words shipped beyond the ones your docs use |
+| `answers.card_threshold` | `0.65` | How sure search must be of its top result before it shows an answer card |
 | `answers.llm.provider` | `null` | `anthropic`, `openai`, or `null`. With a provider set, `vellum:build` asks the model for five more questions per section |
 | `answers.llm.model` | `null` | Defaults to `claude-haiku-4-5` for `anthropic`. The `openai` provider has no default; name one |
 | `answers.llm.key` | `VELLUM_LLM_KEY`, else `ANTHROPIC_API_KEY` or `OPENAI_API_KEY` | API key, read only when a provider is set. Without one the build uses the cached questions and says how many are missing |

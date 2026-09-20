@@ -226,6 +226,14 @@ return [
         'common_tokens' => 1000,
 
         /*
+        | How sure search has to be of its top result before it shows it as an
+        | answer card above the results, from 0 to 1. At the default, about a
+        | third of questions get a card and 19 in 20 of those cards are right;
+        | lower it for more cards and more of them wrong.
+        */
+        'card_threshold' => 0.65,
+
+        /*
         | Optional: have a language model write extra questions for each
         | section at build time. It runs in vellum:build only, never when a
         | page is served. Answers are cached under docs/.vellum/questions and

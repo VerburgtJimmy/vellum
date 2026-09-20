@@ -2,11 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Vellum\Tests\Evaluation;
+namespace Vellum\Answers;
 
 /**
- * BM25+ over weighted fields with prefix matching, using MiniSearch's defaults
- * (k1 1.2, b 0.7, delta 0.5, prefix weight 0.375) so the baseline is today's search.
+ * BM25+ over weighted fields with prefix matching. The constants are
+ * MiniSearch's defaults (k1 1.2, b 0.7, delta 0.5, prefix weight 0.375), which
+ * is what Vellum's search used before this. The browser runs the same
+ * algorithm on the same numbers, so a result ranks the same in both.
  */
 final class Bm25
 {
@@ -69,20 +71,25 @@ final class Bm25
     /**
      * @return array<int, float> doc => score, best first
      */
-    public function search(string $query): array
+    /**
+     * @param  array<string, float>  $weights  term => weight, an expanded term weighing less
+     * @return array<int, float> doc => score, best first
+     */
+    public function searchTerms(array $weights): array
     {
         $scores = [];
 
-        foreach (array_unique(self::terms($query)) as $query) {
+        foreach ($weights as $query => $weight) {
+            $query = (string) $query;
             foreach ($this->boosts as $field => $boost) {
                 foreach ($this->postings[$field] as $term => $docs) {
                     $term = (string) $term;
 
                     if ($term === $query) {
-                        $weight = 1.0;
+                        $match = 1.0;
                     } elseif (str_starts_with($term, $query)) {
                         $length = mb_strlen($query);
-                        $weight = self::PREFIX_WEIGHT * $length / ($length + 0.3 * (mb_strlen($term) - $length));
+                        $match = self::PREFIX_WEIGHT * $length / ($length + 0.3 * (mb_strlen($term) - $length));
                     } else {
                         continue;
                     }
@@ -93,7 +100,7 @@ final class Bm25
                     foreach ($docs as $id => $tf) {
                         $norm = 1 - self::B + self::B * $this->lengths[$field][$id] / $this->average[$field];
                         $scores[$id] = ($scores[$id] ?? 0.0)
-                            + $boost * $weight * $idf * (self::DELTA + $tf * (self::K1 + 1) / ($tf + self::K1 * $norm));
+                            + $weight * $boost * $match * $idf * (self::DELTA + $tf * (self::K1 + 1) / ($tf + self::K1 * $norm));
                     }
                 }
             }
@@ -102,5 +109,13 @@ final class Bm25
         arsort($scores);
 
         return $scores;
+    }
+
+    /**
+     * @return array<int, float> doc => score, best first
+     */
+    public function search(string $query): array
+    {
+        return $this->searchTerms(array_fill_keys(array_unique(self::terms($query)), 1.0));
     }
 }

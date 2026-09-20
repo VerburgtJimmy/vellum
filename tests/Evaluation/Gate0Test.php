@@ -3,12 +3,12 @@
 declare(strict_types=1);
 
 use Symfony\Component\Yaml\Yaml;
+use Vellum\Answers\Bm25;
 use Vellum\Answers\Sections;
 use Vellum\Cache\CompiledStore;
 use Vellum\Content\ContentRepository;
 use Vellum\Semantic\SafetensorsTable;
 use Vellum\Semantic\WordPieceTokenizer as WordPiece;
-use Vellum\Tests\Evaluation\Bm25;
 use Vellum\Tests\Evaluation\Vectors;
 
 /*
