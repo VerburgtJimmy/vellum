@@ -183,6 +183,37 @@ it('exports documents assets and search index for a static host', function (): v
     $this->deleteDirectory($out);
 });
 
+it('exports only the files the asset route would serve', function (): void {
+    $out = sys_get_temp_dir().'/vellum-tests/export-files-'.$this->fixtureId();
+
+    if (is_dir($out)) {
+        $this->deleteDirectory($out);
+    }
+
+    config()->set('vellum.export.out', $out);
+
+    $this->writeDoc('index.md', "---\ntitle: Home\n---\nHi");
+    $this->writeDoc('assets/diagram.svg', '<svg xmlns="http://www.w3.org/2000/svg"></svg>');
+    $this->writeDoc('guide.pdf', '%PDF-1.4');
+    $this->writeDoc('.env', 'APP_KEY=secret');
+    $this->writeDoc('.vellum/questions/abc.json', '{"questions": []}');
+    $this->writeDoc('questions.yml', '- q: test');
+    $this->writeDoc('notes.docx', 'draft');
+
+    $this->artisan('vellum:export')->assertSuccessful();
+
+    $files = $out.'/docs/_vellum/files';
+
+    expect(is_file($files.'/assets/diagram.svg'))->toBeTrue()
+        ->and(is_file($files.'/guide.pdf'))->toBeTrue()
+        ->and(file_exists($files.'/.env'))->toBeFalse()
+        ->and(file_exists($files.'/.vellum'))->toBeFalse()
+        ->and(file_exists($files.'/questions.yml'))->toBeFalse()
+        ->and(file_exists($files.'/notes.docx'))->toBeFalse();
+
+    $this->deleteDirectory($out);
+});
+
 it('exports the latest version unprefixed and older versions under /docs/{version}', function (): void {
     $out = sys_get_temp_dir().'/vellum-tests/export-versions-'.$this->fixtureId();
 

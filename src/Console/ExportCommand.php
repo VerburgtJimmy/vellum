@@ -9,6 +9,7 @@ use Illuminate\Contracts\View\Factory as ViewFactory;
 use Illuminate\Support\Facades\File;
 use Vellum\Changelog\Changelog;
 use Vellum\Changelog\ChangelogFeed;
+use Vellum\Content\ContentFiles;
 use Vellum\Content\ContentRepository;
 use Vellum\Content\Document;
 use Vellum\Content\HeadingExtractor;
@@ -307,17 +308,12 @@ HTML;
                 continue;
             }
 
-            $name = $file->getFilename();
-            $extension = strtolower($file->getExtension());
-
-            if ($extension === 'md' || $name === 'meta.json') {
-                continue;
-            }
-
             $absolute = str_replace('\\', '/', $file->getPathname());
             $relative = ltrim(substr($absolute, strlen($contentPath)), '/');
 
-            if ($relative === '' || str_contains($relative, '..')) {
+            // The same rule as the asset route: never a source, a dotfile or
+            // anything under a dot-directory such as .vellum.
+            if (! ContentFiles::isPublic($relative)) {
                 continue;
             }
 

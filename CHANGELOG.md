@@ -36,6 +36,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- `vellum:export` copied every file in the docs directory that was not Markdown or a `meta.json`, including dotfiles and anything under a dot-directory. It now copies only what the asset route will serve, so a stray `.env`, a `questions.yml` or a `.docx` draft sitting in the docs folder no longer lands in a published static site. Both now share one rule
 - An external link in `meta.json` no longer lands in the sitemap as a docs URL (`https://docs.example.com/https://github.com/...`). The sitemap lists pages of these docs only
 
 ## [0.6.1] - 2026-09-19
