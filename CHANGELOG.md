@@ -5,6 +5,18 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.2] - 2026-09-20
+
+If you publish a static export, check what is in it before deploying the next one. Anything that sat in your docs directory and was not Markdown or a `meta.json` was copied into the export, including dotfiles. Look for `.env`, editor drafts, notes and anything under a dot-directory, delete them from the published site, and rotate any secret that was exposed.
+
+### Security
+
+- `vellum:export` copied every file in the docs directory that was not Markdown or a `meta.json`, dotfiles and dot-directories included, into `_vellum/files/`. The asset route has always refused those, so a file unreachable on the served site could still be published by an export of the same docs. The export now copies only what that route serves: the listed image, font, media and document extensions, never a dotfile and never anything under a dot-directory. Both share one rule
+
+### Fixed
+
+- An external link in `meta.json` no longer lands in the sitemap as a docs URL (`https://docs.example.com/https://github.com/...`). The sitemap lists pages of these docs only
+
 ## [0.6.1] - 2026-09-19
 
 ### Changed
