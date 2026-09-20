@@ -14,7 +14,6 @@
     "@alpinejs/focus": "^3.14.9",
     "@tailwindcss/vite": "^4.1.4",
     "alpinejs": "^3.14.9",
-    "minisearch": "^7.1.2",
     "tailwindcss": "^4.1.4",
     "vite": "^6.3.2",
     "vitest": "^3.2.7"

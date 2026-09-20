@@ -167,6 +167,20 @@ final class AnswerIndex
         ));
     }
 
+    /**
+     * The built-in synonym groups and this index's page groups, as plain lists
+     * of terms.
+     *
+     * @return list<list<string>>
+     */
+    public function synonymGroups(): array
+    {
+        /** @var list<list<string>> $builtIn */
+        $builtIn = require dirname(__DIR__, 2).'/resources/synonyms.php';
+
+        return [...$builtIn, ...array_map(static fn (array $group): array => $group['terms'], $this->synonyms)];
+    }
+
     public function save(string $directory): void
     {
         if (! is_dir($directory)) {

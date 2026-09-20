@@ -62,6 +62,8 @@ final class VellumServiceProvider extends ServiceProvider
             ->name('vellum.assets.js');
         Route::get('/vendor/vellum/vellum-search.js', [AssetController::class, 'search'])
             ->name('vellum.assets.search');
+        Route::get('/vendor/vellum/vellum-semantic.js', [AssetController::class, 'semantic'])
+            ->name('vellum.assets.semantic');
         Route::get('/vendor/vellum/vellum-anchor.js', [AssetController::class, 'anchor'])
             ->name('vellum.assets.anchor');
         Route::get('/vendor/vellum/vellum-focus.js', [AssetController::class, 'focus'])

@@ -24,6 +24,11 @@ final class Assets
         return dirname(__DIR__, 2).'/resources/dist/vellum-search.js';
     }
 
+    public static function semanticJsPath(): string
+    {
+        return dirname(__DIR__, 2).'/resources/dist/vellum-semantic.js';
+    }
+
     public static function anchorJsPath(): string
     {
         return dirname(__DIR__, 2).'/resources/dist/vellum-anchor.js';
@@ -47,6 +52,11 @@ final class Assets
     public static function searchJsUrl(): string
     {
         return route('vellum.assets.search', ['v' => self::hash(self::searchJsPath())]);
+    }
+
+    public static function semanticJsUrl(): string
+    {
+        return route('vellum.assets.semantic', ['v' => self::hash(self::semanticJsPath())]);
     }
 
     public static function anchorJsUrl(): string

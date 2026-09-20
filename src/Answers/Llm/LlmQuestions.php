@@ -54,14 +54,17 @@ final class LlmQuestions
     ) {}
 
     /**
-     * Null when no provider is configured, which is the default.
+     * Cached questions are used whenever the cache is there, with or without a
+     * provider: that is what committing it is for. A provider only adds the
+     * ability to write the ones that are missing. Null when there is neither.
      */
     public static function fromConfig(): ?self
     {
-        $provider = (string) config('vellum.answers.llm.provider', '');
+        $provider = trim((string) config('vellum.answers.llm.provider', ''));
+        $directory = rtrim((string) config('vellum.path'), '/').'/'.self::DIRECTORY;
 
-        if (trim($provider) === '') {
-            return null;
+        if ($provider === '') {
+            return is_dir($directory) ? new self($directory, null, (string) config('vellum.name', 'the documentation')) : null;
         }
 
         $key = (string) config('vellum.answers.llm.key', '');
@@ -72,11 +75,7 @@ final class LlmQuestions
             default => throw new RuntimeException("answers.llm.provider is {$provider}; it is anthropic, openai, or null."),
         };
 
-        return new self(
-            rtrim((string) config('vellum.path'), '/').'/'.self::DIRECTORY,
-            $writer,
-            (string) config('vellum.name', 'the documentation'),
-        );
+        return new self($directory, $writer, (string) config('vellum.name', 'the documentation'));
     }
 
     public function hasWriter(): bool

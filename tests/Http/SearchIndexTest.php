@@ -78,7 +78,7 @@ it('resolves hashed search indexes across versions', function (): void {
         ->and($latestUrls)->not->toContain('/docs/v2');
 });
 
-it('points live pages at the filtered search route, not a hashed static file', function (): void {
+it('points live pages at the filtered answer index, not a hashed static file', function (): void {
     $this->writeDoc('index.md', "---\ntitle: Home\n---\nHi");
     $this->artisan('vellum:build')->assertSuccessful();
 
@@ -88,8 +88,8 @@ it('points live pages at the filtered search route, not a hashed static file', f
     $html = $this->get('/docs')->assertOk()->getContent();
 
     expect($html)
-        ->toContain('_vellum/search.json')
-        ->toContain('data-vellum-search-driver="minisearch"')
+        ->toContain('_vellum/answers.json')
+        ->toContain('data-vellum-search-driver="answers"')
         ->toContain('data-vellum-search-url="')
         ->not->toContain('search-'.$manifest['search_hash'].'.json');
 });

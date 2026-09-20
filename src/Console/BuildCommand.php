@@ -140,7 +140,7 @@ final class BuildCommand extends Command
                 $index = $index->withQuestions($written['questions']);
 
                 $this->line(sprintf(
-                    '  llm questions%s: %d from the cache, %d written%s',
+                    '  written questions%s: %d from the cache, %d written%s',
                     $suffix,
                     $written['cached'],
                     $written['written'],

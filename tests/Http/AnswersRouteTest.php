@@ -26,7 +26,8 @@ it('serves a guest only what a guest may read', function (): void {
     $body = (string) $response->getContent();
 
     expect(array_column($payload['sections'], 'id'))->toBe(['#'])
-        ->and($payload['synonyms'])->toBe([])
+        ->and($payload['threshold'])->toBe(0.65)
+        ->and($payload['synonyms'])->toContain(['dark mode', 'dark theme', 'night mode', 'dark look'])
         ->and($body)->not->toContain('Refunds')
         ->and($body)->not->toContain('Supercalifragilistic')
         ->and($response->headers->get('content-type'))->toContain('application/json')
@@ -37,7 +38,7 @@ it('serves a signed-in reader the gated section as well', function (): void {
     $payload = $this->actingAs(new User)->get('/docs/_vellum/answers.json')->assertOk()->json();
 
     expect(array_column($payload['sections'], 'id'))->toContain('billing#')
-        ->and($payload['synonyms'][0]['terms'])->toBe(['Billing', 'Supercalifragilistic invoices']);
+        ->and($payload['synonyms'])->toContain(['Billing', 'Supercalifragilistic invoices']);
 });
 
 it('serves vectors a guest may have, and no token only a gated page uses', function (): void {

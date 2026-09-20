@@ -7,6 +7,7 @@ namespace Vellum\Console;
 use Illuminate\Console\Command;
 use Illuminate\Contracts\View\Factory as ViewFactory;
 use Illuminate\Support\Facades\File;
+use Vellum\Answers\AnswerIndex;
 use Vellum\Changelog\Changelog;
 use Vellum\Changelog\ChangelogFeed;
 use Vellum\Content\ContentFiles;
@@ -15,6 +16,7 @@ use Vellum\Content\Document;
 use Vellum\Content\HeadingExtractor;
 use Vellum\Http\DocsView;
 use Vellum\Search\SearchIndexQuery;
+use Vellum\Semantic\SemanticSet;
 use Vellum\Support\LlmsTxt;
 use Vellum\Support\Sitemap;
 
@@ -111,6 +113,7 @@ final class ExportCommand extends Command
         $this->copyDist($packageRoot, $out);
         $this->copyContentFiles((string) config('vellum.path'), $prefixRoot);
         $this->writeSearchIndexes($repository, $prefixRoot);
+        $this->writeAnswers($repository, $documents, $prefixRoot);
 
         $elapsed = round((microtime(true) - $started) * 1000);
 
@@ -364,6 +367,46 @@ HTML;
 
         if ($latestJson !== null) {
             $this->writeFile($searchDir.DIRECTORY_SEPARATOR.'search.json', $latestJson);
+        }
+    }
+
+    /**
+     * The answer index and the vectors search reads in the browser. A static
+     * host has no session, so these are what a guest may see, the same rule
+     * the exported pages follow.
+     *
+     * @param  list<Document>  $documents
+     */
+    private function writeAnswers(ContentRepository $repository, array $documents, string $prefixRoot): void
+    {
+        if (! (bool) config('vellum.answers.enabled', true)) {
+            return;
+        }
+
+        $version = $repository->versionsEnabled() ? $repository->latestVersion() : null;
+        $directory = $repository->store()->versionPath($version);
+
+        // The built index carries the questions a model wrote; without one,
+        // export what these documents say on their own.
+        $index = AnswerIndex::load($directory.'/answers') ?? AnswerIndex::build(
+            array_values(array_filter($documents, static fn (Document $document): bool => $document->version === $version)),
+            $repository,
+        );
+
+        $guest = $index->forAccess(['guest']);
+        $this->writeFile($prefixRoot.DIRECTORY_SEPARATOR.'_vellum'.DIRECTORY_SEPARATOR.AnswerIndex::FILE, (string) json_encode(
+            [
+                'sections' => $guest->sections,
+                'synonyms' => $guest->synonymGroups(),
+                'threshold' => (float) config('vellum.answers.card_threshold', 0.65),
+            ],
+            JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE,
+        ));
+
+        $set = (bool) config('vellum.answers.semantic', true) ? SemanticSet::load($directory.'/semantic') : null;
+
+        if ($set !== null) {
+            $this->writeFile($prefixRoot.DIRECTORY_SEPARATOR.'_vellum'.DIRECTORY_SEPARATOR.'semantic.bin', $set->forGroups(['guest']));
         }
     }
 

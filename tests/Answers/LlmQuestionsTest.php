@@ -246,8 +246,17 @@ it('drops cached questions for sections that no longer exist', function (): void
         ->and(glob(($this->cacheDirectory)().'/*.json'))->toHaveCount(1);
 });
 
-it('reads the provider from config, and refuses one it does not know', function (): void {
+it('uses a committed cache with no provider set, and refuses a provider it does not know', function (): void {
     expect(LlmQuestions::fromConfig())->toBeNull();
+
+    // A cache in the docs directory is used on its own: that is what
+    // committing it is for, and why CI needs no key.
+    mkdir(($this->cacheDirectory)(), 0755, true);
+    file_put_contents(($this->cacheDirectory)().'/x.json', '{"section": "#", "questions": ["From the cache?"]}');
+    $cacheOnly = LlmQuestions::fromConfig();
+
+    expect($cacheOnly)->not->toBeNull()
+        ->and($cacheOnly->hasWriter())->toBeFalse();
 
     config(['vellum.answers.llm.provider' => 'anthropic', 'vellum.answers.llm.key' => '']);
 

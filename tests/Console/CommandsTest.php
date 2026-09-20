@@ -292,9 +292,18 @@ it('drops auth-only pages from the exported MiniSearch index', function (): void
 
     expect($payload['driver'])->toBe('minisearch')
         ->and(collect($payload['documents'])->pluck('title')->all())->toContain('Home')
-        ->and(collect($payload['documents'])->pluck('title')->all())->not->toContain('Secret')
-        ->and($html)->toContain('data-vellum-search-driver="minisearch"')
-        ->and($html)->toContain('_vellum/search-');
+        ->and(collect($payload['documents'])->pluck('title')->all())->not->toContain('Secret');
+
+    // The exported pages search the exported answer index, which a static host
+    // serves as a file: an export has no session, so it holds guest pages only.
+    $answers = json_decode((string) file_get_contents($out.'/docs/_vellum/answers.json'), true, 512, JSON_THROW_ON_ERROR);
+
+    expect($html)->toContain('data-vellum-search-driver="answers"')
+        ->and($html)->toContain('_vellum/answers.json')
+        ->and(collect($answers['sections'])->pluck('title')->all())->toContain('Home')
+        ->and(collect($answers['sections'])->pluck('title')->all())->not->toContain('Secret')
+        ->and($answers['threshold'])->toBe(0.65)
+        ->and(is_file($out.'/docs/_vellum/semantic.bin'))->toBeFalse();
 
     $this->deleteDirectory($out);
 });
