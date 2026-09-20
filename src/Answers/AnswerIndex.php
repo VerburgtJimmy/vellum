@@ -116,6 +116,31 @@ final class AnswerIndex
     }
 
     /**
+     * The same index with more questions on the sections named, keeping the
+     * generated ones and dropping repeats.
+     *
+     * @param  array<string, list<string>>  $extra  section id => questions
+     */
+    public function withQuestions(array $extra): self
+    {
+        $sections = [];
+
+        foreach ($this->sections as $record) {
+            foreach ($extra[$record['id']] ?? [] as $question) {
+                $question = mb_strtolower(trim($question));
+
+                if ($question !== '' && ! in_array($question, $record['questions'], true)) {
+                    $record['questions'][] = $question;
+                }
+            }
+
+            $sections[] = $record;
+        }
+
+        return new self($sections, $this->synonyms);
+    }
+
+    /**
      * What a reader holding these access levels may see.
      *
      * @param  list<string>  $access

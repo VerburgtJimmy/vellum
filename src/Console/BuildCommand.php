@@ -6,6 +6,7 @@ namespace Vellum\Console;
 
 use Illuminate\Console\Command;
 use Vellum\Answers\AnswerIndex;
+use Vellum\Answers\Llm\LlmQuestions;
 use Vellum\Answers\SemanticIndexer;
 use Vellum\Content\ContentRepository;
 use Vellum\Content\Document;
@@ -124,13 +125,36 @@ final class BuildCommand extends Command
         }
 
         $semantic = (bool) config('vellum.answers.semantic', true);
+        $llm = LlmQuestions::fromConfig();
         $warned = false;
 
         foreach ($byVersion as $version => $group) {
             $root = $repository->store()->versionPath($version === '' ? null : $version);
             $index = AnswerIndex::build($group, $repository);
-            $index->save($root.'/answers');
             $suffix = $version === '' ? '' : " {$version}";
+
+            if ($llm !== null) {
+                $written = $llm->for($index);
+                $index = $index->withQuestions($written['questions']);
+
+                $this->line(sprintf(
+                    '  llm questions%s: %d from the cache, %d written%s',
+                    $suffix,
+                    $written['cached'],
+                    $written['written'],
+                    $written['missing'] > 0 ? sprintf(', %d sections have none (no key set)', $written['missing']) : '',
+                ));
+
+                foreach (array_slice($written['failures'], 0, 3) as $failure) {
+                    $this->warn('  '.$failure);
+                }
+
+                if (count($written['failures']) > 3) {
+                    $this->warn(sprintf('  and %d more sections the model did not answer for', count($written['failures']) - 3));
+                }
+            }
+
+            $index->save($root.'/answers');
 
             $this->line(sprintf(
                 '  answers%s: %d sections, %d questions',
@@ -167,6 +191,10 @@ final class BuildCommand extends Command
                 (int) round($guest / 1024),
                 (int) round((microtime(true) - $started) * 1000),
             ));
+        }
+
+        if ($llm !== null && $this->option('docs-version') === null) {
+            $llm->prune();
         }
     }
 

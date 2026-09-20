@@ -224,6 +224,21 @@ return [
         'model' => 'potion-base-8M',
         'model_path' => storage_path('vellum/models'),
         'common_tokens' => 1000,
+
+        /*
+        | Optional: have a language model write extra questions for each
+        | section at build time. It runs in vellum:build only, never when a
+        | page is served. Answers are cached under docs/.vellum/questions and
+        | are meant to be committed, so a deploy or CI needs no key.
+        |
+        | provider: anthropic, openai, or null (the default: no model).
+        | model: defaults to claude-opus-5 for anthropic; name one for openai.
+        */
+        'llm' => [
+            'provider' => env('VELLUM_LLM_PROVIDER'),
+            'model' => env('VELLUM_LLM_MODEL'),
+            'key' => env('VELLUM_LLM_KEY'),
+        ],
     ],
 
     /*
