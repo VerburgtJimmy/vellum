@@ -145,7 +145,7 @@ final class BuildCommand extends Command
                     match (true) {
                         $written['missing'] === 0 => '',
                         $written['stopped'] => sprintf(', %d sections not asked for', $written['missing']),
-                        default => sprintf(', %d sections have none (no key set)', $written['missing']),
+                        default => sprintf(', %d sections have none (no key in VELLUM_LLM_KEY, ANTHROPIC_API_KEY or OPENAI_API_KEY)', $written['missing']),
                     },
                 ));
 
