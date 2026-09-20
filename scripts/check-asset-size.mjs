@@ -8,10 +8,12 @@ const root = join(dirname(fileURLToPath(import.meta.url)), '..')
 const limits = {
   'resources/dist/vellum.css': 25 * 1024,
   'resources/dist/vellum.js': 28 * 1024,
+  // Lazy chunks, loaded only when someone searches.
+  'resources/dist/vellum-search.js': 10 * 1024,
+  'resources/dist/vellum-semantic.js': 6 * 1024,
 }
 
 const reported = [
-  'resources/dist/vellum-search.js',
   'resources/dist/vellum-anchor.js',
   'resources/dist/vellum-focus.js',
 ]

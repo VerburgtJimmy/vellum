@@ -1,0 +1,27 @@
+{
+    "note": "Written by tests\/Semantic\/QueryParityTest.php with VELLUM_FIXTURES=1. The browser reads the .bin and must get these cosines.",
+    "queries": {
+        "how do i install the package": {
+            "gating#": 0.20324,
+            "#": 0.657283,
+            "#dark-mode": -0.202917
+        },
+        "night mode": {
+            "gating#": -0.198281,
+            "#": -0.082321,
+            "#dark-mode": 0.223341
+        },
+        "gating": {
+            "gating#": 0.802428,
+            "#": -0.055266,
+            "#dark-mode": -0.428283
+        },
+        "supercalifragilisticexpialidocious": [],
+        "": [],
+        "Caf\u00c9 R\u00c9SUM\u00c9 na\u00efve": {
+            "gating#": -0.021481,
+            "#": -0.201959,
+            "#dark-mode": -0.367372
+        }
+    }
+}
