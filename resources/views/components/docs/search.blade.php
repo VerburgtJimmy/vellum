@@ -1,5 +1,4 @@
 @props([
-    'searchHash' => null,
     'currentVersion' => null,
     'staticExport' => false,
 ])

@@ -63,7 +63,7 @@ See [Search](/docs/search).
 'search' => [
     'enabled' => true,
     'hotkey' => 'k',
-    'driver' => env('VELLUM_SEARCH_DRIVER', 'minisearch'),
+    'driver' => env('VELLUM_SEARCH_DRIVER', 'builtin'),
     'scout' => [
         'index' => 'vellum',
     ],

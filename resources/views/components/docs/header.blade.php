@@ -1,7 +1,6 @@
 @props([
     'document' => null,
     'navigation' => [],
-    'searchHash' => null,
     'versions' => [],
     'currentVersion' => null,
     'versionHrefs' => [],

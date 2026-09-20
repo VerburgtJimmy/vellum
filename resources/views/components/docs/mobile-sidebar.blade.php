@@ -2,7 +2,6 @@
     'navigation' => [],
     'document' => null,
     'searchInSidebar' => false,
-    'searchHash' => null,
     'versions' => [],
     'currentVersion' => null,
     'versionHrefs' => [],

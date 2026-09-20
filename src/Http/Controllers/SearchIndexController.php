@@ -10,40 +10,39 @@ use Illuminate\Routing\Controller;
 use Vellum\Content\ContentRepository;
 use Vellum\Search\ScoutIndexer;
 use Vellum\Search\SearchDriver;
-use Vellum\Search\SearchIndexQuery;
 
 /**
- * Live search: MiniSearch index or Scout hits, always filtered for the current user.
+ * Scout search, filtered for the current user. The built-in driver needs no
+ * endpoint of its own: it searches the answer index in the browser.
  */
 final class SearchIndexController extends Controller
 {
-    public function __construct(
-        private readonly SearchIndexQuery $query = new SearchIndexQuery,
-    ) {}
-
-    public function __invoke(Request $request, ?string $hash = null): Response
+    public function __invoke(Request $request): Response
     {
-        $repository = ContentRepository::fromConfig();
-        $version = $request->query('version');
-        $version = is_string($version) && $version !== '' ? $version : null;
-
-        if (SearchDriver::isScout() && ($hash === null || $hash === '')) {
-            SearchDriver::assertScoutInstalled();
-
-            $q = $request->query('q');
-            $q = is_string($q) ? trim($q) : '';
-            $resolved = $this->resolveVersion($repository, $version);
-            $documents = $q === '' ? [] : (new ScoutIndexer)->search($q, $resolved);
-
-            return $this->jsonResponse($request, json_encode(
-                ['driver' => 'scout', 'documents' => $documents],
-                JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE,
-            ));
+        if (! SearchDriver::isScout()) {
+            abort(404);
         }
 
-        $payload = $this->query->json($repository, $version, $hash);
+        SearchDriver::assertScoutInstalled();
 
-        return $this->jsonResponse($request, $payload['json'], $payload['etag']);
+        $repository = ContentRepository::fromConfig();
+        $version = $request->query('version');
+        $query = $request->query('q');
+        $query = is_string($query) ? trim($query) : '';
+
+        $documents = $query === '' ? [] : (new ScoutIndexer)->search($query, $this->resolveVersion(
+            $repository,
+            is_string($version) && $version !== '' ? $version : null,
+        ));
+
+        return response(
+            (string) json_encode(['driver' => 'scout', 'documents' => $documents], JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE),
+            200,
+            [
+                'Content-Type' => 'application/json; charset=UTF-8',
+                'Cache-Control' => 'private, max-age=0, must-revalidate',
+            ],
+        );
     }
 
     private function resolveVersion(ContentRepository $repository, ?string $version): ?string
@@ -52,25 +51,8 @@ final class SearchIndexController extends Controller
             return null;
         }
 
-        if (is_string($version) && in_array($version, $repository->versions(), true)) {
-            return $version;
-        }
-
-        return $repository->latestVersion();
-    }
-
-    private function jsonResponse(Request $request, string $json, ?string $etag = null): Response
-    {
-        $response = response($json, 200, [
-            'Content-Type' => 'application/json; charset=UTF-8',
-            'Cache-Control' => 'private, max-age=0, must-revalidate',
-        ]);
-
-        if ($etag !== null && $etag !== '') {
-            $response->setEtag($etag);
-            $response->isNotModified($request);
-        }
-
-        return $response;
+        return $version !== null && in_array($version, $repository->versions(), true)
+            ? $version
+            : $repository->latestVersion();
     }
 }

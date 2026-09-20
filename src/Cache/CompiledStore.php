@@ -14,7 +14,6 @@ use Vellum\Support\Slug;
  * @phpstan-type NavTree list<array<string, mixed>>
  * @phpstan-type Manifest array{
  *     directory_hash: string,
- *     search_hash: string,
  *     version: string|null
  * }
  */
@@ -163,53 +162,6 @@ final class CompiledStore
     }
 
     /**
-     * @param  array{documents: list<array<string, mixed>>}  $index
-     */
-    public function putSearchIndex(array $index, string $hash, ?string $version = null): void
-    {
-        $dir = $this->versionPath($version);
-
-        if (! is_dir($dir) && ! mkdir($dir, 0755, true) && ! is_dir($dir)) {
-            throw new \RuntimeException("Unable to create compiled cache directory [{$dir}]");
-        }
-
-        $json = json_encode($index, JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-        $path = $dir.DIRECTORY_SEPARATOR.'search-index-'.$hash.'.json';
-        $latest = $dir.DIRECTORY_SEPARATOR.'search-index.json';
-
-        if (file_put_contents($path, $json) === false || file_put_contents($latest, $json) === false) {
-            throw new \RuntimeException("Unable to write search index under [{$dir}]");
-        }
-    }
-
-    public function getSearchIndex(?string $version = null, ?string $hash = null): ?string
-    {
-        $dir = $this->versionPath($version);
-
-        if ($hash !== null && $hash !== '') {
-            $path = $dir.DIRECTORY_SEPARATOR.'search-index-'.$hash.'.json';
-
-            if (! is_file($path)) {
-                return null;
-            }
-
-            $contents = file_get_contents($path);
-
-            return $contents === false ? null : $contents;
-        }
-
-        $latest = $dir.DIRECTORY_SEPARATOR.'search-index.json';
-
-        if (! is_file($latest)) {
-            return null;
-        }
-
-        $contents = file_get_contents($latest);
-
-        return $contents === false ? null : $contents;
-    }
-
-    /**
      * @param  Manifest  $manifest
      */
     public function putManifest(array $manifest, ?string $version = null): void
@@ -234,13 +186,12 @@ final class CompiledStore
             return null;
         }
 
-        if (! isset($data['directory_hash'], $data['search_hash']) || ! is_string($data['directory_hash']) || ! is_string($data['search_hash'])) {
+        if (! isset($data['directory_hash']) || ! is_string($data['directory_hash'])) {
             return null;
         }
 
         return [
             'directory_hash' => $data['directory_hash'],
-            'search_hash' => $data['search_hash'],
             'version' => isset($data['version']) && is_string($data['version']) ? $data['version'] : null,
         ];
     }

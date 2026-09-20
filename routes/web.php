@@ -17,9 +17,6 @@ Route::get('/llms.txt', [LlmsTxtController::class, 'index'])->name('vellum.llms'
 Route::get('/llms-full.txt', [LlmsTxtController::class, 'full'])->name('vellum.llms.full');
 
 Route::get('/_vellum/search.json', SearchIndexController::class)->name('vellum.search');
-Route::get('/_vellum/search-{hash}.json', SearchIndexController::class)
-    ->where('hash', '[a-f0-9]+')
-    ->name('vellum.search.hashed');
 Route::get('/_vellum/answers.json', [AnswersController::class, 'index'])->name('vellum.answers');
 Route::get('/_vellum/semantic.bin', [AnswersController::class, 'semantic'])->name('vellum.answers.semantic');
 

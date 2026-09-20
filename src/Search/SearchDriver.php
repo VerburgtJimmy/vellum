@@ -11,11 +11,20 @@ use RuntimeException;
  */
 final class SearchDriver
 {
+    /**
+     * The in-browser driver. `minisearch` is the name it had while it used that
+     * library, kept working so a published config keeps working.
+     */
+    public const BUILTIN = 'builtin';
+
+    public const BUILTIN_ALIAS = 'minisearch';
+
     public static function name(): string
     {
-        $driver = config('vellum.search.driver', 'minisearch');
+        $driver = config('vellum.search.driver', self::BUILTIN);
+        $driver = is_string($driver) && $driver !== '' ? $driver : self::BUILTIN;
 
-        return is_string($driver) && $driver !== '' ? $driver : 'minisearch';
+        return $driver === self::BUILTIN_ALIAS ? self::BUILTIN : $driver;
     }
 
     public static function isScout(): bool

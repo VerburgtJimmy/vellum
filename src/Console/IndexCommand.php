@@ -5,13 +5,16 @@ declare(strict_types=1);
 namespace Vellum\Console;
 
 use Illuminate\Console\Command;
+use Vellum\Answers\AnswersBuild;
 use Vellum\Content\ContentRepository;
 use Vellum\Content\Document;
 use Vellum\Search\ScoutIndexer;
 use Vellum\Search\SearchDriver;
 
 /**
- * Rebuild search indexes (MiniSearch compile cache, and Scout when that driver is on).
+ * Rebuild what search reads: the answer index and the semantic set, and Scout
+ * when that driver is on. vellum:build does this too; this is for when the
+ * pages are already compiled and only the index is stale.
  */
 final class IndexCommand extends Command
 {
@@ -33,7 +36,9 @@ final class IndexCommand extends Command
             $this->info('Scout index updated ('.$this->count($documents).' documents).');
         }
 
-        $this->info('MiniSearch index rebuilt for '.$this->count($documents).' document(s).');
+        (new AnswersBuild($this->line(...), $this->warn(...)))->run($repository, $documents, prune: $version === null);
+
+        $this->info('Search index rebuilt for '.$this->count($documents).' document(s).');
 
         return self::SUCCESS;
     }

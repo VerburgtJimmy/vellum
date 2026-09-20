@@ -1,7 +1,6 @@
 @props([
     'document' => null,
     'navigation' => [],
-    'searchHash' => null,
     'versions' => [],
     'currentVersion' => null,
     'versionHrefs' => [],
@@ -18,7 +17,6 @@
 <div data-vellum-docs class="flex min-h-screen flex-col" x-data="vellumChrome">
     @if ($searchEnabled)
         <x-vellum::docs.search
-            :search-hash="$searchHash"
             :current-version="$currentVersion ?? null"
             :static-export="$staticExport ?? false"
         />
@@ -55,7 +53,6 @@
         <x-vellum::docs.header
             :document="$document"
             :navigation="$navigation"
-            :search-hash="$searchHash"
             :versions="$versions"
             :current-version="$currentVersion"
             :version-hrefs="$versionHrefs"
@@ -74,7 +71,6 @@
                     :navigation="$navigation"
                     :document="$document"
                     :search-in-sidebar="$searchInSidebar"
-                    :search-hash="$searchHash"
                     :versions="$versions"
                     :current-version="$currentVersion"
                     :version-hrefs="$versionHrefs"
@@ -94,7 +90,6 @@
                 :navigation="$navigation"
                 :document="$document"
                 :search-in-sidebar="$searchInSidebar"
-                :search-hash="$searchHash"
                 :versions="$versions"
                 :current-version="$currentVersion"
                 :version-hrefs="$versionHrefs"

@@ -7,7 +7,7 @@ description: Search in the browser by default, Laravel Scout optional.
 'search' => [
     'enabled' => true,
     'hotkey' => 'k',
-    'driver' => env('VELLUM_SEARCH_DRIVER', 'minisearch'),
+    'driver' => env('VELLUM_SEARCH_DRIVER', 'builtin'),
     'scout' => [
         'index' => 'vellum',
     ],
@@ -16,7 +16,7 @@ description: Search in the browser by default, Laravel Scout optional.
 
 ## In the browser
 
-The default. No extra services. Works on every host, including `vellum:export`.
+The default, `builtin`. No extra services. (`minisearch` still works as its old name; the library it was named after is gone.) Works on every host, including `vellum:export`.
 
 Search reads two files: `/docs/_vellum/answers.json`, every section with the questions it answers, and `/docs/_vellum/semantic.bin`, the vectors that match a question to a section phrased differently. Both are filtered for the current user and cached per visibility set (guest, auth, and per-gate combinations), and both send an ETag so `must-revalidate` can 304. Neither is a public immutable file.
 

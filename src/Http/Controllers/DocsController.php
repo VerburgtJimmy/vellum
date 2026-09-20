@@ -83,7 +83,6 @@ final class DocsController extends Controller
                 'pageTitle' => DocsView::pageTitle('Page not found'),
                 'noindex' => true,
                 'navigation' => $repository->navigation($version),
-                'searchHash' => $repository->searchHash($version),
                 'versions' => $switcher['versions'],
                 'currentVersion' => $switcher['currentVersion'],
                 'versionHrefs' => $switcher['versionHrefs'],

@@ -152,7 +152,7 @@ it('exports documents assets and search index for a static host', function (): v
     $guide = $out.'/docs/guides/one/index.html';
     $asset = $out.'/docs/_vellum/files/assets/diagram.svg';
     $css = $out.'/vendor/vellum/vellum.css';
-    $search = $out.'/docs/_vellum/search.json';
+    $search = $out.'/docs/_vellum/answers.json';
 
     expect(is_file($index))->toBeTrue()
         ->and(is_file($guide))->toBeTrue()
@@ -262,7 +262,7 @@ it('exports the latest version unprefixed and older versions under /docs/{versio
     $this->deleteDirectory($out);
 });
 
-it('drops auth-only pages from the exported MiniSearch index', function (): void {
+it('drops auth-only pages from the exported answer index', function (): void {
     $out = sys_get_temp_dir().'/vellum-tests/export-search-'.$this->fixtureId();
 
     if (is_dir($out)) {
@@ -279,20 +279,12 @@ it('drops auth-only pages from the exported MiniSearch index', function (): void
         ->expectsOutputToContain('Dropped gated page: secret (access: auth)')
         ->assertSuccessful();
 
-    $search = $out.'/docs/_vellum/search.json';
     $html = file_get_contents($out.'/docs/index.html');
 
-    expect(is_file($search))->toBeTrue()
-        ->and($html)->not->toBeFalse()
+    expect($html)->not->toBeFalse()
+        ->and(is_file($out.'/docs/_vellum/search.json'))->toBeFalse()
         ->and(is_file($out.'/docs/secret/index.html'))->toBeFalse()
         ->and(is_file($out.'/docs/_vellum/raw/secret.md'))->toBeFalse();
-
-    /** @var array{driver: string, documents: list<array{title: string}>} $payload */
-    $payload = json_decode((string) file_get_contents($search), true, 512, JSON_THROW_ON_ERROR);
-
-    expect($payload['driver'])->toBe('minisearch')
-        ->and(collect($payload['documents'])->pluck('title')->all())->toContain('Home')
-        ->and(collect($payload['documents'])->pluck('title')->all())->not->toContain('Secret');
 
     // The exported pages search the exported answer index, which a static host
     // serves as a file: an export has no session, so it holds guest pages only.
@@ -308,14 +300,14 @@ it('drops auth-only pages from the exported MiniSearch index', function (): void
     $this->deleteDirectory($out);
 });
 
-it('rebuilds the MiniSearch index via vellum:index', function (): void {
+it('rebuilds the answer index via vellum:index', function (): void {
     $this->writeDoc('index.md', "---\ntitle: Home\n---\nHi");
 
     $this->artisan('vellum:index')
-        ->expectsOutputToContain('MiniSearch index rebuilt')
+        ->expectsOutputToContain('Search index rebuilt')
         ->assertSuccessful();
 
-    expect(is_file($this->cachePath().'/search-index.json'))->toBeTrue();
+    expect(is_file($this->cachePath().'/answers/answers.json'))->toBeTrue();
 });
 
 it('fails vellum:index when scout is configured without laravel/scout', function (): void {

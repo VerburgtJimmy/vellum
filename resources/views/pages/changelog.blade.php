@@ -17,7 +17,6 @@
     <x-vellum::docs.shell
         :document="$document ?? null"
         :navigation="$navigation"
-        :search-hash="$searchHash"
         :versions="$versions ?? []"
         :current-version="$currentVersion ?? null"
         :version-hrefs="$versionHrefs ?? []"

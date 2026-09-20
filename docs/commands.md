@@ -52,8 +52,9 @@ route.
 php artisan vellum:index [--docs-version=v1]
 ```
 
-Rebuilds the search index without recompiling pages. `vellum:build` already does this, so
-reach for `vellum:index` when the index is the only thing that is stale.
+Rebuilds the answer index and the semantic file without recompiling pages. `vellum:build`
+already does this, so reach for `vellum:index` when the index is the only thing that is
+stale.
 
 When `search.driver` is `scout`, this also pushes records to Scout. It fails with a clear
 message if Scout is configured but not installed. See [Search](/docs/search).

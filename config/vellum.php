@@ -182,19 +182,22 @@ return [
     | Search
     |--------------------------------------------------------------------------
     |
-    | driver: minisearch (default) or scout. MiniSearch is zero-setup and
-    | works on every host, including static export. Scout is opt-in for
-    | Meilisearch or Typesense (composer require laravel/scout). Export
-    | always writes MiniSearch JSON, regardless of this setting.
+    | driver: builtin (default) or scout. The built-in driver searches in the
+    | browser, needs no service, and works on every host, including static
+    | export. Scout is opt-in for Meilisearch or Typesense (composer require
+    | laravel/scout) and searches whole pages on the server, so it shows no
+    | answer cards. An export always uses the built-in driver.
     |
-    | The live MiniSearch index is a package route, filtered for the current
-    | user and cached per visibility set. It is not a public static asset.
+    | minisearch is accepted as the old name of builtin.
+    |
+    | What the built-in driver reads is a package route, filtered for the
+    | current user and cached per visibility set. It is not a public asset.
     |
     */
     'search' => [
         'enabled' => true,
         'hotkey' => 'k',
-        'driver' => env('VELLUM_SEARCH_DRIVER', 'minisearch'),
+        'driver' => env('VELLUM_SEARCH_DRIVER', 'builtin'),
         'scout' => [
             'index' => 'vellum',
         ],

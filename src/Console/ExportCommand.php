@@ -15,7 +15,6 @@ use Vellum\Content\ContentRepository;
 use Vellum\Content\Document;
 use Vellum\Content\HeadingExtractor;
 use Vellum\Http\DocsView;
-use Vellum\Search\SearchIndexQuery;
 use Vellum\Semantic\SemanticSet;
 use Vellum\Support\LlmsTxt;
 use Vellum\Support\Sitemap;
@@ -112,7 +111,6 @@ final class ExportCommand extends Command
         $this->writeLlmsTxt($repository, $out);
         $this->copyDist($packageRoot, $out);
         $this->copyContentFiles((string) config('vellum.path'), $prefixRoot);
-        $this->writeSearchIndexes($repository, $prefixRoot);
         $this->writeAnswers($repository, $documents, $prefixRoot);
 
         $elapsed = round((microtime(true) - $started) * 1000);
@@ -187,7 +185,6 @@ final class ExportCommand extends Command
                 'pageTitle' => DocsView::pageTitle('Page not found'),
                 'noindex' => true,
                 'navigation' => $repository->navigation($version),
-                'searchHash' => $repository->searchHash($version),
                 'versions' => $switcher['versions'],
                 'currentVersion' => $switcher['currentVersion'],
                 'versionHrefs' => $switcher['versionHrefs'],
@@ -328,45 +325,6 @@ HTML;
             }
 
             copy($file->getPathname(), $destination);
-        }
-    }
-
-    private function writeSearchIndexes(ContentRepository $repository, string $prefixRoot): void
-    {
-        $searchDir = $prefixRoot.DIRECTORY_SEPARATOR.'_vellum';
-
-        if (! is_dir($searchDir)) {
-            mkdir($searchDir, 0755, true);
-        }
-
-        $store = $repository->store();
-        $versionKeys = $repository->versionsEnabled()
-            ? $repository->versions()
-            : [null];
-
-        $latestJson = null;
-
-        foreach ($versionKeys as $version) {
-            $hash = $repository->searchHash($version);
-            $json = $store->getSearchIndex($version, $hash);
-
-            if ($json === null) {
-                continue;
-            }
-
-            $json = (new SearchIndexQuery)->filterJson($json);
-
-            if ($hash !== null && $hash !== '') {
-                $this->writeFile($searchDir.DIRECTORY_SEPARATOR.'search-'.$hash.'.json', $json);
-            }
-
-            if (! $repository->versionsEnabled() || $version === $repository->latestVersion()) {
-                $latestJson = $json;
-            }
-        }
-
-        if ($latestJson !== null) {
-            $this->writeFile($searchDir.DIRECTORY_SEPARATOR.'search.json', $latestJson);
         }
     }
 

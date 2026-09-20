@@ -41,7 +41,8 @@ it('inherits folder access onto pages that do not set their own', function (): v
     $guestNav = $this->get('/docs')->assertOk()->getContent();
     expect($guestNav)->not->toContain('Invoices');
 
-    $titles = collect($this->get('/docs/_vellum/search.json')->json('documents'))->pluck('title')->all();
+    $this->artisan('vellum:build')->assertSuccessful();
+    $titles = collect($this->get('/docs/_vellum/answers.json')->json('sections'))->pluck('title')->all();
     expect($titles)->toContain('Home')
         ->and($titles)->not->toContain('Invoices');
 

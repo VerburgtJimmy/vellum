@@ -93,11 +93,6 @@ final class ContentRepository
         );
     }
 
-    public function searchIndexBuilder(): SearchIndexBuilder
-    {
-        return new SearchIndexBuilder($this->routePrefix, $this->urlDefaultVersion());
-    }
-
     /**
      * Compile every discovered document and rebuild nav + search index.
      *
@@ -137,7 +132,7 @@ final class ContentRepository
             $documents[] = $this->compileFile($source['path'], $source['slug'], $source['version']);
         }
 
-        $this->rebuildNavAndSearch($documents, $version);
+        $this->rebuildNavigation($documents, $version);
 
         return $documents;
     }
@@ -167,7 +162,7 @@ final class ContentRepository
         }
 
         $documents = $this->documentsForVersion($version);
-        $this->rebuildNavAndSearch($documents, $version);
+        $this->rebuildNavigation($documents, $version);
 
         return $this->visibleNavigation($this->store->getNav($version) ?? []);
     }
@@ -206,30 +201,17 @@ final class ContentRepository
         return $this->visibility->filterNavigation($tree);
     }
 
-    public function searchHash(?string $version = null): ?string
-    {
-        $version = $this->resolveVersion($version);
-        $manifest = $this->store->getManifest($version);
-
-        return $manifest['search_hash'] ?? null;
-    }
-
     /**
      * @param  list<Document>  $documents
      */
-    private function rebuildNavAndSearch(array $documents, ?string $version): void
+    private function rebuildNavigation(array $documents, ?string $version): void
     {
         $navBuilder = $this->navigationBuilder();
-        $searchBuilder = $this->searchIndexBuilder();
-
         $tree = $navBuilder->build($documents, $version);
-        $search = $searchBuilder->build($documents, $version);
 
         $this->store->putNav($tree, $version);
-        $this->store->putSearchIndex(['documents' => $search['documents']], $search['hash'], $version);
         $this->store->putManifest([
             'directory_hash' => $navBuilder->directoryHash($version),
-            'search_hash' => $search['hash'],
             'version' => $version,
         ], $version);
     }
