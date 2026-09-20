@@ -39,8 +39,20 @@ Vellum's own docs: 157 sections, `claude-haiku-4-5`, about 34,000 tokens in and 
 
 That is the whole of what a model does here. Answers shown to readers are quoted from your docs; nothing is generated at request time, and search works the same when no provider is set.
 
+## How search works
+
+Search is built at deploy time and runs in the reader's browser. Nothing is sent to a server as they type, and no model runs when they search.
+
+**What the browser fetches.** On the first search of a visit, two files: the answer index, which is every section with its text, its questions and its answer, and the vectors, which are the numbers that let a question match a section that words alone would miss. For these docs they are about 180 KB and 300 KB, both compressed, fetched once and cached. Both are filtered for whoever is asking: a page behind a gate is not in the copy a guest receives, and neither are the words only that page uses.
+
+**How a section is scored.** Each section gets a similarity between the question and its text, from the vectors. A section whose words the reader actually typed is lifted a little above one that only means the same thing, and a section the query names outright, by heading or by an alias, is lifted again. The words the reader typed are widened first: a query with "night mode" in it also searches for "dark mode", from the built-in list and from any `aliases:` a page declares.
+
+**When an answer card appears.** Search scores how sure it is of its top result, from how close the question is to it, how far ahead of the runner-up it is, and whether the query named it. Above `answers.card_threshold` the top result is shown as a card with its answer; below it, the results stand on their own. On Vellum's own docs about a third of questions get a card, and 19 in 20 of those cards are the right section. Raising the threshold shows fewer cards and gets more of them right.
+
+**What the card shows.** The section's answer: the command to run, the config rows, the option row, or the sentence that defines it, with the passage underneath. All of it is quoted from the page; nothing is written for the card.
+
 ## Where the answer comes from
 
-Each section also carries a short answer taken from its own text: the first that applies of a shell command, the rows of a config table, the option row its heading names, an "X is ..." definition, or its opening sentence with the code block it introduces.
+Each section carries a short answer taken from its own text: the first that applies of a shell command, the rows of a config table, the option row its heading names, an "X is ..." definition, or its opening sentence with the code block it introduces. A section with none of those falls back to the page description, a list, or a code block.
 
 See [Configuration](/docs/getting-started/configuration#answers) for every key.

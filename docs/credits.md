@@ -34,7 +34,6 @@ your editor and on GitHub.
 | [Phosphor Icons](https://phosphoricons.com) | Every icon in the chrome, the callout glyphs and the code-block language marks. Regular weight for chrome, fill for glyphs. MIT. |
 | [Tailwind CSS](https://tailwindcss.com) | The stylesheet, built to a single file at release time. |
 | [Alpine.js](https://alpinejs.dev) | The theme toggle, tabs, dialogs, sidebar and table-of-contents behaviour, with the anchor, collapse and focus plugins. |
-| [MiniSearch](https://github.com/lucaong/minisearch) | Client-side search over a prebuilt index. |
 | [Vite](https://vite.dev) | Builds the CSS and JS bundles. |
 
 ## Foundations
@@ -50,7 +49,9 @@ Testing and quality tooling: [Pest](https://pestphp.com),
 
 ## Search model
 
-The semantic part of search is built from a static embedding model. `vellum:build` ships a pruned, quantised part of its vocabulary vectors, and names it in the header of the file it writes.
+Search is Vellum's own: BM25 over the sections, and a static embedding model for the questions readers actually ask. Until 0.7 the lexical half was [MiniSearch](https://github.com/lucaong/minisearch), whose scoring the current one keeps.
+
+The embedding model: `vellum:build` ships a pruned, quantised part of its vocabulary vectors, and names it in the header of the file it writes.
 
 | Model | Licence | Source |
 | --- | --- | --- |

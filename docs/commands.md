@@ -76,8 +76,8 @@ leave Vellum's caches behind.
 php artisan vellum:export [--out=path/to/dir]
 ```
 
-Writes a complete static site: HTML for every page, the assets, raw Markdown, a
-MiniSearch index, a changelog feed if one is configured, and a `404.html` at the root.
+Writes a complete static site: HTML for every page, the assets, raw Markdown, the
+search index, a changelog feed if one is configured, and a `404.html` at the root.
 
 Gated pages are omitted and each drop is logged. Value tags are resolved at export time.
 See [Export](/docs/export).

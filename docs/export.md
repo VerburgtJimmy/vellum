@@ -7,7 +7,7 @@ description: Write a static HTML site for GitHub Pages, Cloudflare Workers, or a
 php artisan vellum:export
 ```
 
-Writes HTML, assets, a MiniSearch index, and a `sitemap.xml` to `public/docs-static` (configurable via `export.out`). `--out=` overrides the directory.
+Writes HTML, assets, the search index, and a `sitemap.xml` to `public/docs-static` (configurable via `export.out`). `--out=` overrides the directory.
 
 ```php
 'export' => [
@@ -16,7 +16,7 @@ Writes HTML, assets, a MiniSearch index, and a `sitemap.xml` to `public/docs-sta
 ],
 ```
 
-The export always uses MiniSearch, even when `search.driver` is `scout`. Gated pages are omitted; each drop is logged.
+The export always uses the in-browser search, even when `search.driver` is `scout`. Gated pages are omitted; each drop is logged.
 
 Value tags are baked in at export time, so the snapshot matches the app config you exported with.
 
