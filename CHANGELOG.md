@@ -39,7 +39,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - A query lifts a section when it names it: its heading, its page title, or an alias its frontmatter gives it. A term the section merely writes in inline code no longer counts, since most sections mention the command or key they are about
 - `search.driver` is `builtin`, the in-browser driver. `minisearch` keeps working as its old name, since config keys and values are frozen
 - `vellum:index` rebuilds the answer index and the semantic file, which is what search reads now
-
 - Search no longer uses MiniSearch. The lazy chunk is 2 KB gzipped instead of 6.4, plus 1.2 KB for the semantic reader, and results are sections rather than whole pages, each with its heading path. Scout is unchanged and still searches whole pages on the server, so it shows no cards
 - Cached questions from `docs/.vellum/questions` are used whenever the directory is there, with or without `answers.llm.provider` set. A committed cache now does what committing it promised: CI and deploys get the questions without a key
 - The `robots.txt` advice in `docs/seo.md` keeps `Disallow: /docs/_vellum/` but adds `Allow: /docs/_vellum/raw/`. Raw pages now declare their HTML page canonical, so letting crawlers in no longer creates duplicate content, and `llms.txt` links to them
