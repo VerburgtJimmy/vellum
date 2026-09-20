@@ -68,7 +68,13 @@
         "test": "vendor/bin/pest --colors=always",
         "analyse": "vendor/bin/phpstan analyse --memory-limit=512M",
         "format": "vendor/bin/pint",
-        "format:test": "vendor/bin/pint --test"
+        "format:test": "vendor/bin/pint --test",
+        "docs:build": [
+            "@putenv VELLUM_PATH=docs",
+            "@putenv VELLUM_MODEL_PATH=storage/vellum/models",
+            "@putenv VELLUM_CHANGELOG=CHANGELOG.md",
+            "vendor/bin/testbench vellum:build"
+        ]
     },
     "config": {
         "sort-packages": true,

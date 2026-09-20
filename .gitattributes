@@ -15,6 +15,7 @@
 /pint.json              export-ignore
 /testbench.yaml         export-ignore
 /scripts                export-ignore
+/storage                export-ignore
 /tests                  export-ignore
 /vite.anchor.config.js  export-ignore
 /vite.config.js         export-ignore

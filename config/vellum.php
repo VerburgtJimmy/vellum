@@ -222,7 +222,7 @@ return [
         'enabled' => true,
         'semantic' => true,
         'model' => 'potion-base-8M',
-        'model_path' => storage_path('vellum/models'),
+        'model_path' => env('VELLUM_MODEL_PATH', storage_path('vellum/models')),
         'common_tokens' => 1000,
 
         /*
