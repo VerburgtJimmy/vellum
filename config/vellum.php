@@ -232,7 +232,7 @@ return [
         | are meant to be committed, so a deploy or CI needs no key.
         |
         | provider: anthropic, openai, or null (the default: no model).
-        | model: defaults to claude-opus-5 for anthropic; name one for openai.
+        | model: defaults to claude-haiku-4-5 for anthropic; name one for openai.
         */
         'llm' => [
             'provider' => env('VELLUM_LLM_PROVIDER'),

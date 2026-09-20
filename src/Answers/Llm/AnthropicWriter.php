@@ -8,13 +8,17 @@ use RuntimeException;
 
 /**
  * The Claude Messages API over plain HTTP, with the answer constrained to a
- * JSON schema. Effort is low: this is routine extraction, not reasoning.
- * Server-side fallbacks let a request a model declines be retried by the one
- * Anthropic recommends for it, instead of coming back empty.
+ * JSON schema.
+ *
+ * Two options are sent only to the models that accept them. Effort is low
+ * where it applies, since this is routine extraction rather than reasoning,
+ * but Haiku rejects the field. Server-side fallbacks, which retry a declined
+ * request on the model Anthropic recommends instead of returning nothing, are
+ * an Opus 5 and Fable feature.
  */
 final class AnthropicWriter implements QuestionWriter
 {
-    public const DEFAULT_MODEL = 'claude-opus-5';
+    public const DEFAULT_MODEL = 'claude-haiku-4-5';
 
     public function __construct(
         private readonly string $key,
@@ -27,20 +31,35 @@ final class AnthropicWriter implements QuestionWriter
         return $this->model ?? self::DEFAULT_MODEL;
     }
 
+    private static function takesEffort(string $model): bool
+    {
+        return ! str_starts_with($model, 'claude-haiku');
+    }
+
+    private static function takesFallbacks(string $model): bool
+    {
+        return str_starts_with($model, 'claude-opus-5') || str_starts_with($model, 'claude-fable');
+    }
+
     public function questions(string $prompt): array
     {
-        $response = $this->transport->post('https://api.anthropic.com/v1/messages', [
-            'x-api-key' => $this->key,
-            'anthropic-version' => '2023-06-01',
-            'anthropic-beta' => 'server-side-fallback-2026-07-01',
-        ], [
-            'model' => $this->model(),
-            'max_tokens' => 16000,
-            'fallbacks' => 'default',
-            'output_config' => [
-                'effort' => 'low',
-                'format' => ['type' => 'json_schema', 'schema' => Prompt::SCHEMA],
-            ],
+        $model = $this->model();
+        $headers = ['x-api-key' => $this->key, 'anthropic-version' => '2023-06-01'];
+        $outputConfig = ['format' => ['type' => 'json_schema', 'schema' => Prompt::SCHEMA]];
+        $body = ['model' => $model, 'max_tokens' => 16000];
+
+        if (self::takesEffort($model)) {
+            $outputConfig = ['effort' => 'low', ...$outputConfig];
+        }
+
+        if (self::takesFallbacks($model)) {
+            $headers['anthropic-beta'] = 'server-side-fallback-2026-07-01';
+            $body['fallbacks'] = 'default';
+        }
+
+        $response = $this->transport->post('https://api.anthropic.com/v1/messages', $headers, [
+            ...$body,
+            'output_config' => $outputConfig,
             'messages' => [['role' => 'user', 'content' => $prompt]],
         ]);
 

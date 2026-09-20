@@ -51,7 +51,7 @@ beforeEach(function (): void {
     $this->cacheDirectory = fn (): string => $this->docsPath().'/'.LlmQuestions::DIRECTORY;
 });
 
-it('asks Claude with a schema, low effort and fallbacks, and keeps five questions', function (): void {
+it('asks Claude with a schema and keeps five questions', function (): void {
     $transport = new FakeTransport([anthropicAnswer(['One?', 'Two?', ' ', 'Three?', 'Four?', 'Five?', 'Six?'])]);
     $llm = new LlmQuestions(($this->cacheDirectory)(), new AnthropicWriter('key-123', null, $transport), 'Acme');
 
@@ -59,19 +59,31 @@ it('asks Claude with a schema, low effort and fallbacks, and keeps five question
     $request = $transport->requests[0];
 
     expect($request['url'])->toBe('https://api.anthropic.com/v1/messages')
-        ->and($request['headers'])->toBe([
-            'x-api-key' => 'key-123',
-            'anthropic-version' => '2023-06-01',
-            'anthropic-beta' => 'server-side-fallback-2026-07-01',
-        ])
-        ->and($request['body']['model'])->toBe('claude-opus-5')
-        ->and($request['body']['fallbacks'])->toBe('default')
-        ->and($request['body']['output_config']['effort'])->toBe('low')
+        ->and($request['headers'])->toBe(['x-api-key' => 'key-123', 'anthropic-version' => '2023-06-01'])
+        ->and($request['body']['model'])->toBe('claude-haiku-4-5')
+        ->and($request['body'])->not->toHaveKey('fallbacks')
+        ->and($request['body']['output_config'])->not->toHaveKey('effort')
         ->and($request['body']['output_config']['format']['type'])->toBe('json_schema')
         ->and($request['body']['messages'][0]['content'])->toContain('documentation for Acme')
         ->and($request['body']['messages'][0]['content'])->toContain('Vellum is a docs package.')
         ->and($result['questions']['#'])->toBe(['One?', 'Two?', 'Three?', 'Four?', 'Five?'])
         ->and($result)->toMatchArray(['cached' => 0, 'written' => 1, 'missing' => 0, 'failures' => []]);
+});
+
+it('sends effort and fallbacks only to the models that take them', function (): void {
+    $opus = new FakeTransport([anthropicAnswer(['Q?'])]);
+    $haiku = new FakeTransport([anthropicAnswer(['Q?'])]);
+
+    // Separate caches, or the second writer would read the first one's answer.
+    (new LlmQuestions(($this->cacheDirectory)().'/opus', new AnthropicWriter('k', 'claude-opus-5', $opus), 'A'))->for(($this->index)());
+    (new LlmQuestions(($this->cacheDirectory)().'/haiku', new AnthropicWriter('k', 'claude-haiku-4-5', $haiku), 'A'))->for(($this->index)());
+
+    expect($opus->requests[0]['body']['fallbacks'])->toBe('default')
+        ->and($opus->requests[0]['headers'])->toHaveKey('anthropic-beta')
+        ->and($opus->requests[0]['body']['output_config']['effort'])->toBe('low')
+        ->and($haiku->requests[0]['body'])->not->toHaveKey('fallbacks')
+        ->and($haiku->requests[0]['headers'])->not->toHaveKey('anthropic-beta')
+        ->and($haiku->requests[0]['body']['output_config'])->not->toHaveKey('effort');
 });
 
 it('sends the named model to OpenAI with a strict schema', function (): void {
@@ -97,7 +109,7 @@ it('writes a cache file the next build reads without calling anything', function
     expect($files)->toHaveCount(1)
         ->and(json_decode((string) file_get_contents($files[0]), true))->toMatchArray([
             'section' => '#',
-            'model' => 'claude-opus-5',
+            'model' => 'claude-haiku-4-5',
             'questions' => ['Cached one?'],
         ]);
 
