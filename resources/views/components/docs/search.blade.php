@@ -122,12 +122,13 @@
 
                                 <template x-if="card.content.kind === 'config'">
                                     <dl class="mt-2 space-y-1 text-xs">
-                                        <template x-for="row in card.content.rows.slice(0, 4)" :key="row.key">
+                                        <template x-for="row in card.content.rows.slice(0, 5)" :key="row.key">
                                             <div class="flex flex-wrap gap-x-2">
                                                 <dt class="font-mono text-foreground" x-text="row.key"></dt>
-                                                <dd class="text-muted-foreground">
+                                                <dd class="flex flex-wrap gap-x-2 text-muted-foreground">
                                                     <span x-show="row.default" x-text="'default ' + row.default"></span>
-                                                    <span x-show="row.description" x-text="row.description"></span>
+                                                    <span x-show="row.type" x-text="row.type"></span>
+                                                    <span x-show="row.description" class="text-foreground/80" x-text="row.description"></span>
                                                 </dd>
                                             </div>
                                         </template>

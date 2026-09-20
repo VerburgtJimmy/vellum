@@ -270,7 +270,7 @@ function vellumSearchDialog(urls) {
       }))
 
       if (found.card) {
-        const content = search.cardContent(found.card.record)
+        const content = search.cardContent(found.card.record, query)
 
         this.card = {
           url: found.card.record.url,

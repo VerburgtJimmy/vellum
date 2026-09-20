@@ -33,7 +33,11 @@ describe('ranking in the browser', () => {
     expect(cardContent({ answer: { type: 'definition', sentence: 'Vellum is a package.' } }))
       .toEqual({ kind: 'text', text: 'Vellum is a package.', code: '', language: '' })
     expect(cardContent({ answer: null, passage: 'Fallback.' })).toEqual({ kind: 'text', text: 'Fallback.' })
-    expect(cardContent({ answer: { type: 'config', rows: [{ key: 'a' }] } })).toEqual({ kind: 'config', rows: [{ key: 'a' }] })
+    const rows = [{ key: 'checks.strict' }, { key: 'checks.references' }]
+
+    expect(cardContent({ answer: { type: 'config', rows } })).toEqual({ kind: 'config', rows })
+    expect(cardContent({ answer: { type: 'config', rows } }, 'what does checks.references do'))
+      .toEqual({ kind: 'config', rows: [{ key: 'checks.references' }] })
   })
 
   it('reads a result as a breadcrumb and highlights the reader\'s words', () => {

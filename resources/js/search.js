@@ -364,6 +364,20 @@ export function breadcrumb(record) {
 }
 
 /**
+ * The rows of a config card: the ones the reader named, or the first few when
+ * they named none.
+ *
+ * @param {Array<Record<string, string>>} rows
+ * @param {string} query
+ */
+export function configRows(rows, query) {
+  const asked = ` ${normalizePhrase(query)} `
+  const named = rows.filter((row) => row.key && asked.includes(` ${normalizePhrase(row.key)} `))
+
+  return named.length > 0 ? named : rows
+}
+
+/**
  * The passage to show under a card's answer: what the section says beyond the
  * answer itself, so a sentence answer is not printed twice.
  *
@@ -385,8 +399,9 @@ export function remainder(passage, answered) {
  * passage under it. Everything is the docs' own words.
  *
  * @param {Record<string, any>} record
+ * @param {string} query  so a config card shows the key that was asked about
  */
-export function cardContent(record) {
+export function cardContent(record, query = '') {
   const answer = record.answer ?? null
 
   if (answer === null) {
@@ -399,7 +414,7 @@ export function cardContent(record) {
     case 'code':
       return { kind: 'code', code: answer.code, language: answer.language ?? '' }
     case 'config':
-      return { kind: 'config', rows: answer.rows ?? [] }
+      return { kind: 'config', rows: configRows(answer.rows ?? [], query) }
     case 'row':
       return { kind: 'row', row: answer.row ?? {} }
     default:
