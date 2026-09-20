@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Vellum\Answers\Llm;
 
+use Closure;
 use RuntimeException;
 use Vellum\Answers\AnswerIndex;
 
@@ -12,16 +13,34 @@ use Vellum\Answers\AnswerIndex;
  * by the hash of the section they came from, so the file can be committed and
  * a build (or CI) without a key uses what is already there. Nothing here runs
  * when a page is served.
+ *
+ * Sections are asked for in batches, with a retry and a wait on the failures
+ * worth retrying: a rate limit or a server error is a pause, not a loss.
  */
 final class LlmQuestions
 {
     public const DIRECTORY = '.vellum/questions';
 
     /**
-     * Stop calling after this many failures in a row. A bad key or a rate limit
-     * fails for every section, and there is no point paying for all of them.
+     * Requests in flight at once.
+     */
+    public const BATCH = 5;
+
+    /**
+     * Tries per section, including the first.
+     */
+    public const ATTEMPTS = 3;
+
+    /**
+     * Stop calling after this many failures in a row. A bad key fails for every
+     * section, and there is no point paying for all of them.
      */
     public const GIVE_UP_AFTER = 5;
+
+    /**
+     * Report progress every this many sections.
+     */
+    public const PROGRESS_EVERY = 25;
 
     /** @var array<string, true> */
     private array $used = [];
@@ -30,6 +49,8 @@ final class LlmQuestions
         private readonly string $cacheDirectory,
         private readonly ?QuestionWriter $writer,
         private readonly string $site,
+        private readonly Transport $transport = new Transport,
+        private readonly ?Closure $sleeper = null,
     ) {}
 
     /**
@@ -64,16 +85,14 @@ final class LlmQuestions
     }
 
     /**
+     * @param  (Closure(int, int): void)|null  $onProgress  called with done and total
      * @return array{questions: array<string, list<string>>, cached: int, written: int, missing: int, failures: list<string>, stopped: bool}
      */
-    public function for(AnswerIndex $index): array
+    public function for(AnswerIndex $index, ?Closure $onProgress = null): array
     {
         $questions = [];
         $cached = 0;
-        $written = 0;
-        $missing = 0;
-        $failures = [];
-        $consecutive = 0;
+        $pending = [];
 
         foreach ($index->sections as $record) {
             $key = self::key($record);
@@ -87,22 +106,44 @@ final class LlmQuestions
                 continue;
             }
 
+            $pending[] = ['key' => $key, 'record' => $record];
+        }
+
+        $total = count($index->sections);
+        $done = $cached;
+        $written = 0;
+        $missing = 0;
+        $failures = [];
+        $consecutive = 0;
+        $reported = 0;
+
+        foreach (array_chunk($pending, self::BATCH) as $batch) {
             if ($this->writer === null || $consecutive >= self::GIVE_UP_AFTER) {
-                $missing++;
+                $missing += count($batch);
+                $done += count($batch);
 
                 continue;
             }
 
-            try {
-                $written++;
-                $generated = $this->writer->questions(Prompt::for($this->site, $record['title'], $record['heading'], $record['text']));
-                $this->write($key, $record['id'], $generated);
-                $questions[$record['id']] = $generated;
-                $consecutive = 0;
-            } catch (RuntimeException $exception) {
-                $written--;
+            foreach ($this->ask($batch) as $outcome) {
+                $done++;
+
+                if (is_array($outcome['questions'])) {
+                    $this->write($outcome['key'], $outcome['id'], $outcome['questions']);
+                    $questions[$outcome['id']] = $outcome['questions'];
+                    $written++;
+                    $consecutive = 0;
+
+                    continue;
+                }
+
+                $failures[] = $outcome['id'].': '.$outcome['error'];
                 $consecutive++;
-                $failures[] = $record['id'].': '.$exception->getMessage();
+            }
+
+            if ($onProgress !== null && intdiv($done, self::PROGRESS_EVERY) > $reported) {
+                $reported = intdiv($done, self::PROGRESS_EVERY);
+                $onProgress($done, $total);
             }
         }
 
@@ -114,6 +155,81 @@ final class LlmQuestions
             'failures' => $failures,
             'stopped' => $consecutive >= self::GIVE_UP_AFTER,
         ];
+    }
+
+    /**
+     * One batch, retried while requests fail in a way that is worth retrying.
+     *
+     * @param  list<array{key: string, record: array{id: string, title: string, heading: string, text: string}}>  $batch
+     * @return list<array{key: string, id: string, questions: list<string>|null, error: string}>
+     */
+    private function ask(array $batch): array
+    {
+        $writer = $this->writer;
+
+        if ($writer === null) {
+            return [];
+        }
+
+        $outcomes = [];
+        $left = $batch;
+
+        for ($attempt = 1; $attempt <= self::ATTEMPTS && $left !== []; $attempt++) {
+            $site = $this->site;
+            $responses = $this->transport->postMany(array_map(
+                static fn (array $item): array => $writer->request(Prompt::for($site, $item['record']['title'], $item['record']['heading'], $item['record']['text'])),
+                $left,
+            ));
+
+            $retry = [];
+            $wait = 0.0;
+
+            foreach ($left as $index => $item) {
+                $response = $responses[$index] ?? ['status' => 0, 'headers' => [], 'body' => []];
+
+                try {
+                    $outcomes[] = ['key' => $item['key'], 'id' => $item['record']['id'], 'questions' => $writer->parse($response), 'error' => ''];
+                } catch (RuntimeException $exception) {
+                    if ($attempt < self::ATTEMPTS && self::worthRetrying($response['status'])) {
+                        $retry[] = $item;
+                        $wait = max($wait, self::backoff($attempt, $response['headers']['retry-after'] ?? null));
+
+                        continue;
+                    }
+
+                    $outcomes[] = ['key' => $item['key'], 'id' => $item['record']['id'], 'questions' => null, 'error' => $exception->getMessage()];
+                }
+            }
+
+            $left = $retry;
+
+            if ($left !== [] && $wait > 0.0) {
+                ($this->sleeper ?? static fn (float $seconds) => usleep((int) round($seconds * 1_000_000)))($wait);
+            }
+        }
+
+        return $outcomes;
+    }
+
+    /**
+     * A rate limit, a server error, or no response at all. A 400 or a 401 will
+     * fail again the same way.
+     */
+    private static function worthRetrying(int $status): bool
+    {
+        return $status === 0 || $status === 408 || $status === 429 || $status >= 500;
+    }
+
+    /**
+     * The server's own Retry-After when it sent one, else 1, 2, 4 seconds.
+     */
+    private static function backoff(int $attempt, ?string $retryAfter): float
+    {
+        if ($retryAfter !== null && is_numeric($retryAfter)) {
+            return min(60.0, max(0.0, (float) $retryAfter));
+        }
+
+        return min(60.0, 2 ** ($attempt - 1));
     }
 
     /**

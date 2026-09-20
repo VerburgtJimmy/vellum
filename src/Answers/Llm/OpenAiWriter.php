@@ -15,7 +15,6 @@ final class OpenAiWriter implements QuestionWriter
     public function __construct(
         private readonly string $key,
         private readonly string $model,
-        private readonly Transport $transport = new Transport,
     ) {}
 
     public function model(): string
@@ -23,19 +22,24 @@ final class OpenAiWriter implements QuestionWriter
         return $this->model;
     }
 
-    public function questions(string $prompt): array
+    public function request(string $prompt): array
     {
-        $response = $this->transport->post('https://api.openai.com/v1/chat/completions', [
-            'Authorization' => 'Bearer '.$this->key,
-        ], [
-            'model' => $this->model,
-            'messages' => [['role' => 'user', 'content' => $prompt]],
-            'response_format' => [
-                'type' => 'json_schema',
-                'json_schema' => ['name' => 'section_questions', 'strict' => true, 'schema' => Prompt::SCHEMA],
+        return [
+            'url' => 'https://api.openai.com/v1/chat/completions',
+            'headers' => ['Authorization' => 'Bearer '.$this->key],
+            'body' => [
+                'model' => $this->model,
+                'messages' => [['role' => 'user', 'content' => $prompt]],
+                'response_format' => [
+                    'type' => 'json_schema',
+                    'json_schema' => ['name' => 'section_questions', 'strict' => true, 'schema' => Prompt::SCHEMA],
+                ],
             ],
-        ]);
+        ];
+    }
 
+    public function parse(array $response): array
+    {
         $body = $response['body'];
 
         if ($response['status'] !== 200) {

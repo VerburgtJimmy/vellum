@@ -11,23 +11,34 @@ use Vellum\Cache\CompiledStore;
 use Vellum\Content\ContentRepository;
 
 /**
- * A Transport that answers from a queue and records what it was asked.
+ * A Transport that answers from a queue and records what it was asked, batch
+ * by batch.
  */
 final class FakeTransport extends Transport
 {
     /** @var list<array{url: string, headers: array<string, string>, body: array<string, mixed>}> */
     public array $requests = [];
 
+    /** @var list<int> */
+    public array $batches = [];
+
     /**
-     * @param  list<array{status: int, body: array<string, mixed>}>  $responses
+     * @param  list<array{status: int, headers?: array<string, string>, body: array<string, mixed>}>  $responses
      */
     public function __construct(private array $responses = []) {}
 
-    public function post(string $url, array $headers, array $body): array
+    public function postMany(array $requests): array
     {
-        $this->requests[] = ['url' => $url, 'headers' => $headers, 'body' => $body];
+        $this->batches[] = count($requests);
+        $responses = [];
 
-        return array_shift($this->responses) ?? ['status' => 200, 'body' => []];
+        foreach ($requests as $request) {
+            $this->requests[] = $request;
+            $response = array_shift($this->responses) ?? ['status' => 200, 'body' => []];
+            $responses[] = ['headers' => [], ...$response];
+        }
+
+        return $responses;
     }
 }
 
@@ -37,6 +48,20 @@ function anthropicAnswer(array $questions): array
         ['type' => 'thinking', 'thinking' => ''],
         ['type' => 'text', 'text' => json_encode(['questions' => $questions])],
     ]]];
+}
+
+/**
+ * Sections enough to fill $count batches of LlmQuestions::BATCH.
+ */
+function pageOf(int $sections): string
+{
+    $markdown = "---\ntitle: Home\n---\nIntro.\n";
+
+    for ($i = 1; $i < $sections; $i++) {
+        $markdown .= "\n## Heading {$i}\n\nBody {$i}.\n";
+    }
+
+    return $markdown;
 }
 
 beforeEach(function (): void {
@@ -53,7 +78,7 @@ beforeEach(function (): void {
 
 it('asks Claude with a schema and keeps five questions', function (): void {
     $transport = new FakeTransport([anthropicAnswer(['One?', 'Two?', ' ', 'Three?', 'Four?', 'Five?', 'Six?'])]);
-    $llm = new LlmQuestions(($this->cacheDirectory)(), new AnthropicWriter('key-123', null, $transport), 'Acme');
+    $llm = new LlmQuestions(($this->cacheDirectory)(), new AnthropicWriter('key-123'), 'Acme', $transport);
 
     $result = $llm->for(($this->index)());
     $request = $transport->requests[0];
@@ -75,8 +100,8 @@ it('sends effort and fallbacks only to the models that take them', function (): 
     $haiku = new FakeTransport([anthropicAnswer(['Q?'])]);
 
     // Separate caches, or the second writer would read the first one's answer.
-    (new LlmQuestions(($this->cacheDirectory)().'/opus', new AnthropicWriter('k', 'claude-opus-5', $opus), 'A'))->for(($this->index)());
-    (new LlmQuestions(($this->cacheDirectory)().'/haiku', new AnthropicWriter('k', 'claude-haiku-4-5', $haiku), 'A'))->for(($this->index)());
+    (new LlmQuestions(($this->cacheDirectory)().'/opus', new AnthropicWriter('k', 'claude-opus-5'), 'A', $opus))->for(($this->index)());
+    (new LlmQuestions(($this->cacheDirectory)().'/haiku', new AnthropicWriter('k', 'claude-haiku-4-5'), 'A', $haiku))->for(($this->index)());
 
     expect($opus->requests[0]['body']['fallbacks'])->toBe('default')
         ->and($opus->requests[0]['headers'])->toHaveKey('anthropic-beta')
@@ -88,7 +113,7 @@ it('sends effort and fallbacks only to the models that take them', function (): 
 
 it('sends the named model to OpenAI with a strict schema', function (): void {
     $transport = new FakeTransport([['status' => 200, 'body' => ['choices' => [['message' => ['content' => json_encode(['questions' => ['A?']])]]]]]]);
-    $llm = new LlmQuestions(($this->cacheDirectory)(), new OpenAiWriter('sk-test', 'some-model', $transport), 'Acme');
+    $llm = new LlmQuestions(($this->cacheDirectory)(), new OpenAiWriter('sk-test', 'some-model'), 'Acme', $transport);
 
     $result = $llm->for(($this->index)());
 
@@ -101,7 +126,7 @@ it('sends the named model to OpenAI with a strict schema', function (): void {
 
 it('writes a cache file the next build reads without calling anything', function (): void {
     $transport = new FakeTransport([anthropicAnswer(['Cached one?'])]);
-    $llm = new LlmQuestions(($this->cacheDirectory)(), new AnthropicWriter('key', null, $transport), 'Acme');
+    $llm = new LlmQuestions(($this->cacheDirectory)(), new AnthropicWriter('key'), 'Acme', $transport);
     $llm->for(($this->index)());
 
     $files = glob(($this->cacheDirectory)().'/*.json');
@@ -114,7 +139,7 @@ it('writes a cache file the next build reads without calling anything', function
         ]);
 
     $second = new FakeTransport([]);
-    $result = (new LlmQuestions(($this->cacheDirectory)(), new AnthropicWriter('key', null, $second), 'Acme'))->for(($this->index)());
+    $result = (new LlmQuestions(($this->cacheDirectory)(), new AnthropicWriter('key'), 'Acme', $second))->for(($this->index)());
 
     expect($second->requests)->toBe([])
         ->and($result)->toMatchArray(['cached' => 1, 'written' => 0, 'missing' => 0]);
@@ -128,40 +153,92 @@ it('uses the cache and counts what is missing when there is no key', function ()
         ->and($llm->hasWriter())->toBeFalse();
 });
 
-it('reports a section the model failed on without stopping the build', function (): void {
+it('retries a rate limit, waiting as long as the server asks', function (): void {
     $transport = new FakeTransport([
-        ['status' => 429, 'body' => ['error' => ['message' => 'slow down']]],
+        ['status' => 429, 'headers' => ['retry-after' => '7'], 'body' => ['error' => ['message' => 'slow down']]],
+        anthropicAnswer(['After the wait?']),
     ]);
-    $result = (new LlmQuestions(($this->cacheDirectory)(), new AnthropicWriter('key', null, $transport), 'Acme'))->for(($this->index)());
+    $waits = [];
 
-    expect($result['written'])->toBe(0)
+    $result = (new LlmQuestions(($this->cacheDirectory)(), new AnthropicWriter('k'), 'A', $transport, function (float $seconds) use (&$waits): void {
+        $waits[] = $seconds;
+    }))->for(($this->index)());
+
+    expect($result['written'])->toBe(1)
+        ->and($result['failures'])->toBe([])
+        ->and($result['questions']['#'])->toBe(['After the wait?'])
+        ->and($waits)->toBe([7.0])
+        ->and($transport->requests)->toHaveCount(2);
+});
+
+it('backs off 1 then 2 seconds without a Retry-After, then gives the section up', function (): void {
+    $transport = new FakeTransport(array_fill(0, 3, ['status' => 429, 'body' => ['error' => ['message' => 'slow down']]]));
+    $waits = [];
+
+    $result = (new LlmQuestions(($this->cacheDirectory)(), new AnthropicWriter('k'), 'A', $transport, function (float $seconds) use (&$waits): void {
+        $waits[] = $seconds;
+    }))->for(($this->index)());
+
+    expect($transport->requests)->toHaveCount(LlmQuestions::ATTEMPTS)
+        ->and($waits)->toBe([1.0, 2.0])
         ->and($result['failures'])->toBe(['#: Anthropic API returned 429: slow down'])
+        ->and($result['written'])->toBe(0)
         ->and(glob(($this->cacheDirectory)().'/*.json'))->toBe([]);
+});
+
+it('does not retry a request that will fail the same way again', function (): void {
+    $transport = new FakeTransport([['status' => 401, 'body' => ['error' => ['message' => 'API key is invalid.']]]]);
+
+    $result = (new LlmQuestions(($this->cacheDirectory)(), new AnthropicWriter('k'), 'A', $transport, fn () => null))->for(($this->index)());
+
+    expect($transport->requests)->toHaveCount(1)
+        ->and($result['failures'][0])->toContain('401');
+});
+
+it('asks for five sections at a time', function (): void {
+    $this->writeDoc('index.md', pageOf(12));
+    $transport = new FakeTransport(array_fill(0, 12, anthropicAnswer(['Q?'])));
+
+    $result = (new LlmQuestions(($this->cacheDirectory)(), new AnthropicWriter('k'), 'A', $transport))->for(($this->index)());
+
+    expect($transport->batches)->toBe([5, 5, 2])
+        ->and($result['written'])->toBe(12);
+});
+
+it('reports progress every 25 sections', function (): void {
+    $this->writeDoc('index.md', pageOf(30));
+    $transport = new FakeTransport(array_fill(0, 30, anthropicAnswer(['Q?'])));
+    $progress = [];
+
+    (new LlmQuestions(($this->cacheDirectory)(), new AnthropicWriter('k'), 'A', $transport))->for(($this->index)(), function (int $done, int $total) use (&$progress): void {
+        $progress[] = "{$done}/{$total}";
+    });
+
+    expect($progress)->toBe(['25/30']);
 });
 
 it('keeps nothing from a refusal or an answer that is not the agreed JSON', function (): void {
     $refusal = new FakeTransport([['status' => 200, 'body' => ['stop_reason' => 'refusal', 'stop_details' => ['category' => 'cyber']]]]);
     $garbled = new FakeTransport([['status' => 200, 'body' => ['content' => [['type' => 'text', 'text' => 'Sure! Here you go.']]]]]);
 
-    expect((new LlmQuestions(($this->cacheDirectory)(), new AnthropicWriter('k', null, $refusal), 'A'))->for(($this->index)())['failures'][0])->toContain('declined')
-        ->and((new LlmQuestions(($this->cacheDirectory)(), new AnthropicWriter('k', null, $garbled), 'A'))->for(($this->index)())['failures'][0])->toContain('not the expected JSON');
+    expect((new LlmQuestions(($this->cacheDirectory)(), new AnthropicWriter('k'), 'A', $refusal))->for(($this->index)())['failures'][0])->toContain('declined')
+        ->and((new LlmQuestions(($this->cacheDirectory)(), new AnthropicWriter('k'), 'A', $garbled))->for(($this->index)())['failures'][0])->toContain('not the expected JSON');
 });
 
 it('stops asking after five failures in a row', function (): void {
-    $this->writeDoc('index.md', "---\ntitle: Home\n---\nOne.\n\n## A\n\nTwo.\n\n## B\n\nThree.\n\n## C\n\nFour.\n\n## D\n\nFive.\n\n## E\n\nSix.\n\n## F\n\nSeven.\n");
-    $failures = array_fill(0, 9, ['status' => 500, 'body' => []]);
-    $transport = new FakeTransport($failures);
+    $this->writeDoc('index.md', pageOf(12));
+    $transport = new FakeTransport(array_fill(0, 60, ['status' => 500, 'body' => []]));
 
-    $result = (new LlmQuestions(($this->cacheDirectory)(), new AnthropicWriter('k', null, $transport), 'A'))->for(($this->index)());
+    $result = (new LlmQuestions(($this->cacheDirectory)(), new AnthropicWriter('k'), 'A', $transport, fn () => null))->for(($this->index)());
 
-    expect($transport->requests)->toHaveCount(LlmQuestions::GIVE_UP_AFTER)
-        ->and($result['stopped'])->toBeTrue()
+    expect($transport->batches)->toBe([5, 5, 5])
         ->and($result['failures'])->toHaveCount(LlmQuestions::GIVE_UP_AFTER)
-        ->and($result['missing'])->toBe(2);
+        ->and($result['stopped'])->toBeTrue()
+        ->and($result['missing'])->toBe(7);
 });
 
 it('drops cached questions for sections that no longer exist', function (): void {
-    $llm = new LlmQuestions(($this->cacheDirectory)(), new AnthropicWriter('k', null, new FakeTransport([anthropicAnswer(['Q?'])])), 'A');
+    $llm = new LlmQuestions(($this->cacheDirectory)(), new AnthropicWriter('k'), 'A', new FakeTransport([anthropicAnswer(['Q?'])]));
     $llm->for(($this->index)());
     file_put_contents(($this->cacheDirectory)().'/deadbeef.json', '{"questions": []}');
 

@@ -95,7 +95,7 @@ Search that finds a section from a question in the reader's own words. Everythin
 | `answers.llm.model` | `null` | Defaults to `claude-haiku-4-5` for `anthropic`. The `openai` provider has no default; name one |
 | `answers.llm.key` | `VELLUM_LLM_KEY`, else `ANTHROPIC_API_KEY` or `OPENAI_API_KEY` | API key, read only when a provider is set. Without one the build uses the cached questions and says how many are missing |
 
-Generated questions are cached under `docs/.vellum/questions`, keyed by the section they came from. Commit that directory and a deploy never needs the key. The model is only ever called by `vellum:build`.
+Generated questions are cached under `docs/.vellum/questions`, keyed by the section they came from. Commit that directory and a deploy never needs the key. The model is only ever called by `vellum:build`. See [Answers](/docs/answers) for what it costs and what it buys.
 
 Without the model on disk, `vellum:build` warns and carries on without the semantic signal.
 

@@ -134,7 +134,9 @@ final class BuildCommand extends Command
             $suffix = $version === '' ? '' : " {$version}";
 
             if ($llm !== null) {
-                $written = $llm->for($index);
+                $written = $llm->for($index, function (int $done, int $total) use ($suffix): void {
+                    $this->line(sprintf('  llm questions%s: %d of %d sections', $suffix, $done, $total));
+                });
                 $index = $index->withQuestions($written['questions']);
 
                 $this->line(sprintf(

@@ -23,7 +23,6 @@ final class AnthropicWriter implements QuestionWriter
     public function __construct(
         private readonly string $key,
         private readonly ?string $model = null,
-        private readonly Transport $transport = new Transport,
     ) {}
 
     public function model(): string
@@ -41,7 +40,7 @@ final class AnthropicWriter implements QuestionWriter
         return str_starts_with($model, 'claude-opus-5') || str_starts_with($model, 'claude-fable');
     }
 
-    public function questions(string $prompt): array
+    public function request(string $prompt): array
     {
         $model = $this->model();
         $headers = ['x-api-key' => $this->key, 'anthropic-version' => '2023-06-01'];
@@ -57,12 +56,15 @@ final class AnthropicWriter implements QuestionWriter
             $body['fallbacks'] = 'default';
         }
 
-        $response = $this->transport->post('https://api.anthropic.com/v1/messages', $headers, [
-            ...$body,
-            'output_config' => $outputConfig,
-            'messages' => [['role' => 'user', 'content' => $prompt]],
-        ]);
+        return [
+            'url' => 'https://api.anthropic.com/v1/messages',
+            'headers' => $headers,
+            'body' => [...$body, 'output_config' => $outputConfig, 'messages' => [['role' => 'user', 'content' => $prompt]]],
+        ];
+    }
 
+    public function parse(array $response): array
+    {
         $body = $response['body'];
 
         if ($response['status'] !== 200) {

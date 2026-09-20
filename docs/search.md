@@ -37,3 +37,5 @@ Set `VELLUM_SEARCH_DRIVER=scout`. The same visibility filter runs at query time.
 `vellum:export` always writes MiniSearch JSON, regardless of `driver`. Gated pages are dropped from the exported index.
 
 Place the search trigger in the sidebar (default) or the header with `layout.search`.
+
+See [Answers](/docs/answers) for how a question finds the section that answers it.
