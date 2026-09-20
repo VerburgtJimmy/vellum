@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Symfony\Component\Yaml\Yaml;
+use Vellum\Answers\Llm\LlmQuestions;
 use Vellum\Answers\Questions\QuestionGenerators;
 use Vellum\Answers\Sections;
 use Vellum\Cache\CompiledStore;
@@ -140,9 +141,29 @@ it('reports the second evaluation', function (): void {
 function eval2Build(array $documents, string $model, int $bits, string $out): array
 {
     $sections = Sections::from($documents);
+    $cached = [];
+
+    // The questions a model wrote at build time, exactly as vellum:build adds them.
+    foreach (glob(dirname(__DIR__, 2).'/docs/'.LlmQuestions::DIRECTORY.'/*.json') ?: [] as $file) {
+        $entry = json_decode((string) file_get_contents($file), true);
+
+        if (is_array($entry) && is_string($entry['section'] ?? null) && is_array($entry['questions'] ?? null)) {
+            $cached[$entry['section']] = array_map('strval', $entry['questions']);
+        }
+    }
 
     foreach ($sections as $id => $section) {
-        $sections[$id]['generated'] = QuestionGenerators::default()->for($section);
+        $generated = QuestionGenerators::default()->for($section);
+
+        foreach ($cached[$section['page'].'#'.$section['anchor']] ?? [] as $question) {
+            $question = mb_strtolower(trim($question));
+
+            if ($question !== '' && ! in_array($question, $generated, true)) {
+                $generated[] = $question;
+            }
+        }
+
+        $sections[$id]['generated'] = $generated;
     }
 
     $full = WordPiece::fromTokenizerJson($model.'/tokenizer.json');
