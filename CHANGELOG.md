@@ -36,6 +36,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `{prefix}/_vellum/answers.json` and `{prefix}/_vellum/semantic.bin`, each filtered for the reader asking and cached per visibility set with an ETag, and both written by `vellum:export` for a static host
 
 ### Changed
+- A query lifts a section when it names it: its heading, its page title, or an alias its frontmatter gives it. A term the section merely writes in inline code no longer counts, since most sections mention the command or key they are about
 - `search.driver` is `builtin`, the in-browser driver. `minisearch` keeps working as its old name, since config keys and values are frozen
 - `vellum:index` rebuilds the answer index and the semantic file, which is what search reads now
 

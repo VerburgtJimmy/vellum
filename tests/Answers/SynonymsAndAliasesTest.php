@@ -37,11 +37,13 @@ it('adds a group per page from its title and frontmatter aliases', function (): 
     expect($synonyms->expand('where are my invoices'))->toBe(['payments', 'billing']);
 });
 
-it('finds a section by its heading, inline code in prose, and page aliases', function (): void {
+it('separates what a section is called from what it merely mentions', function (): void {
     $this->writeDoc('page.md', "---\ntitle: Billing\naliases:\n  - Invoices\n  - 7\n---\nSet `billing.currency` here.\n\n```php\n'not.this' => 1,\n```\n\n## Refunds\n\nUse `refund()`.\n");
     $sections = Sections::from((new ContentRepository(contentPath: $this->docsPath(), store: new CompiledStore($this->cachePath())))->buildAll());
 
     expect($sections[0]['aliases'])->toBe(['Invoices'])
-        ->and(Aliases::for($sections[0]))->toBe(['billing', 'invoices', 'billing.currency'])
-        ->and(Aliases::for($sections[1]))->toBe(['refunds', 'refund']);
+        ->and(Aliases::names($sections[0]))->toBe(['billing', 'invoices'])
+        ->and(Aliases::terms($sections[0]))->toBe(['billing.currency'])
+        ->and(Aliases::names($sections[1]))->toBe(['refunds'])
+        ->and(Aliases::terms($sections[1]))->toBe(['refund']);
 });

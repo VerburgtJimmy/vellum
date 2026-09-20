@@ -122,9 +122,10 @@
                     "what is gating",
                     "where do i configure gating"
                 ],
-                "aliases": [
+                "names": [
                     "gating"
                 ],
+                "aliases": [],
                 "answer": {
                     "type": "sentence",
                     "sentence": "Hide pages from guests."
@@ -147,9 +148,10 @@
                     "what is home",
                     "where do i configure home"
                 ],
-                "aliases": [
+                "names": [
                     "home"
                 ],
+                "aliases": [],
                 "answer": {
                     "type": "sentence",
                     "sentence": "Install the package with composer."
@@ -172,9 +174,10 @@
                     "what is dark mode",
                     "where do i configure dark mode"
                 ],
-                "aliases": [
+                "names": [
                     "dark mode"
                 ],
+                "aliases": [],
                 "answer": {
                     "type": "sentence",
                     "sentence": "The theme follows the system."

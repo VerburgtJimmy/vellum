@@ -60,7 +60,8 @@ it('records what search needs for each section', function (): void {
         ->and($install['parent'])->toBe('install')
         ->and($install['answer'])->toBe(['type' => 'command', 'command' => 'composer require jimmyverburgt/vellum'])
         ->and($install['questions'])->toContain('how do i install jimmyverburgt/vellum')
-        ->and($install['aliases'])->toBe(['install']);
+        ->and($install['names'])->toBe(['install'])
+        ->and($install['aliases'])->toBe([]);
 });
 
 it('merges extra questions without repeating generated ones', function (): void {

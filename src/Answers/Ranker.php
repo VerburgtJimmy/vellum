@@ -195,13 +195,14 @@ final class Ranker
 
     /**
      * Does the query name this section outright: its heading, its page title,
-     * or one of the aliases it carries?
+     * or an alias its frontmatter gave it? A term it merely mentions does not
+     * count, or every section that mentions a command would claim it.
      *
      * @param  Record  $record
      */
     private function namesSection(array $record, string $normalizedQuery): bool
     {
-        foreach ($record['aliases'] as $alias) {
+        foreach ($record['names'] as $alias) {
             if ($alias !== '' && str_contains($normalizedQuery, ' '.$alias.' ')) {
                 return true;
             }

@@ -239,8 +239,9 @@ export function createRanker(answers, cosine = null) {
       sections.forEach((section, id) => {
         const similarity = cosines.get(section.id) ?? 0
         const term = best > 0 ? (lexical.get(id) ?? 0) / best : 0
-        const exact = (section.aliases ?? []).some(
-          (alias) => alias !== '' && normalized.includes(` ${alias} `),
+        // What the section is called, not what it mentions.
+        const exact = (section.names ?? []).some(
+          (name) => name !== '' && normalized.includes(` ${name} `),
         )
 
         if (similarity <= 0 && term <= 0 && !exact) {
