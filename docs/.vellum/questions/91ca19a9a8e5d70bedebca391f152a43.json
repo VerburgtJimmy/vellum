@@ -1,0 +1,11 @@
+{
+    "section": "getting-started/upgrade#05-to-06",
+    "model": "claude-haiku-4-5",
+    "questions": [
+        "How do I update Vellum to version 0.6?",
+        "How do I enable strict checking in Vellum builds?",
+        "How do I generate a sitemap for my documentation?",
+        "What warnings does the Vellum build command check for?",
+        "How do I set up robots.txt for my Vellum docs?"
+    ]
+}

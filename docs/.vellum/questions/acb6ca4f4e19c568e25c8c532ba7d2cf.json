@@ -1,0 +1,11 @@
+{
+    "section": "writing/navigation#section-headings",
+    "model": "claude-haiku-4-5",
+    "questions": [
+        "how do i add section headings to navigation",
+        "how do i organize navigation into groups",
+        "what are triple dashes in meta.json for",
+        "how do i create a non-clickable label in docs navigation",
+        "how do i break up a long navigation list into sections"
+    ]
+}

@@ -1,0 +1,11 @@
+{
+    "section": "troubleshooting#component-x-name-is-not-in-vellumcomponentsnamespaces",
+    "model": "claude-haiku-4-5",
+    "questions": [
+        "why is my component not found in vellum",
+        "how do I fix component is not in vellum.components.namespaces error",
+        "what does component is not in vellum.components.namespaces mean",
+        "how do I add a component prefix to namespaces",
+        "why won't my view component load in markdown"
+    ]
+}

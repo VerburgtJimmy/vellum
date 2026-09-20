@@ -1,0 +1,11 @@
+{
+    "section": "troubleshooting#invalid-frontmatter-in-file-",
+    "model": "claude-haiku-4-5",
+    "questions": [
+        "why does my frontmatter have invalid yaml error",
+        "how do i fix frontmatter parsing errors",
+        "what does invalid frontmatter mean",
+        "why is my colon in frontmatter causing an error",
+        "how do i fix frontmatter indentation problems"
+    ]
+}

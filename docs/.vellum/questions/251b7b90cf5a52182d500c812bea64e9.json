@@ -1,0 +1,11 @@
+{
+    "section": "search#",
+    "model": "claude-haiku-4-5",
+    "questions": [
+        "how do i enable search in laravel",
+        "what search driver does laravel use by default",
+        "how do i configure the search hotkey",
+        "how do i switch from minisearch to scout",
+        "how do i set up laravel scout search"
+    ]
+}

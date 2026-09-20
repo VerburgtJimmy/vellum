@@ -1,0 +1,11 @@
+{
+    "section": "troubleshooting#the-site-has-no-styling",
+    "model": "claude-haiku-4-5",
+    "questions": [
+        "why does my vellum page have no styling",
+        "how do i fix missing css in vellum",
+        "vellum css not loading what do i do",
+        "where should vellum assets be located",
+        "how do i check if vellum routes are working"
+    ]
+}

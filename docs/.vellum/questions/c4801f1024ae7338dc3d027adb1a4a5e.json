@@ -1,0 +1,11 @@
+{
+    "section": "getting-started/configuration#frontmatter",
+    "model": "claude-haiku-4-5",
+    "questions": [
+        "What can I put in frontmatter to customize page metadata in Laravel docs?",
+        "How do I add custom search questions to a documentation page?",
+        "How do I set a page title and description in Laravel docs frontmatter?",
+        "What frontmatter keys control how a page appears in the table of contents and navigation?",
+        "How do I specify when a documentation page was last updated?"
+    ]
+}

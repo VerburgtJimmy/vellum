@@ -1,0 +1,11 @@
+{
+    "section": "writing/navigation#two-files-one-url",
+    "model": "claude-haiku-4-5",
+    "questions": [
+        "how do I fix two files mapping to the same URL",
+        "what does vellum build error about two files mean",
+        "can I have two documentation files with the same path",
+        "why is my build failing with duplicate pages",
+        "how do I resolve conflicting documentation file paths"
+    ]
+}

@@ -1,0 +1,11 @@
+{
+    "section": "getting-started/configuration#components",
+    "model": "claude-haiku-4-5",
+    "questions": [
+        "how do i configure components in laravel",
+        "where do i set up component namespaces",
+        "how do i allowlist config in components",
+        "what is the components configuration array",
+        "how do i restrict access to env and config in components"
+    ]
+}

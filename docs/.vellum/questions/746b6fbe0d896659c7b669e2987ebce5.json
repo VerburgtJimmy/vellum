@@ -1,0 +1,11 @@
+{
+    "section": "extending#namespaces",
+    "model": "claude-haiku-4-5",
+    "questions": [
+        "how do I use components without the prefix",
+        "why can't I use unprefixed component tags",
+        "how do I register a custom component namespace",
+        "how do I make my app components available in markdown",
+        "what does the vellum components namespaces config do"
+    ]
+}

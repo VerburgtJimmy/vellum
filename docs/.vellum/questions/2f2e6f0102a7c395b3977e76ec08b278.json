@@ -1,0 +1,11 @@
+{
+    "section": "getting-started/configuration#changelog",
+    "model": "claude-haiku-4-5",
+    "questions": [
+        "How do I access the changelog in Laravel",
+        "Where is the changelog file located",
+        "How do I configure the changelog path",
+        "Can I use a custom changelog file",
+        "How do I set up vellum changelog configuration"
+    ]
+}

@@ -1,0 +1,11 @@
+{
+    "section": "getting-started/installation#production",
+    "model": "claude-haiku-4-5",
+    "questions": [
+        "Do I need to compile markdown for laravel",
+        "How do I deploy laravel documentation",
+        "What is the vellum build command",
+        "Should I rebuild docs before deploying",
+        "How do I prepare documentation for production"
+    ]
+}

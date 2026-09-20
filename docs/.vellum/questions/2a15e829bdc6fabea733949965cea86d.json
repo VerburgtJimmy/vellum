@@ -1,0 +1,11 @@
+{
+    "section": "troubleshooting#failures-that-are-quiet",
+    "model": "claude-haiku-4-5",
+    "questions": [
+        "why is my frontmatter showing up as text on the page",
+        "why are my images returning 404 errors",
+        "why did my html tags disappear from the markdown",
+        "why is my sidebar showing a page i didn't add",
+        "why doesn't clicking a table of contents link scroll to the heading"
+    ]
+}

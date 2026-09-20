@@ -1,0 +1,11 @@
+{
+    "section": "writing/code-blocks#title",
+    "model": "claude-haiku-4-5",
+    "questions": [
+        "how do i show the filename in a code block",
+        "how to display the file path above code snippets",
+        "how do i add a title to my code block",
+        "what is the title attribute for code blocks",
+        "how do i label which file code comes from"
+    ]
+}

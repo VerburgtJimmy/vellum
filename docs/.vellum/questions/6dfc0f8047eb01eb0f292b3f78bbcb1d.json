@@ -1,0 +1,11 @@
+{
+    "section": "seo#static-export",
+    "model": "claude-haiku-4-5",
+    "questions": [
+        "How do I create a sitemap for my static site",
+        "Where is the sitemap.xml file generated",
+        "How do I tell the sitemap what URL to use",
+        "Can I generate a sitemap when exporting statically",
+        "What base URL does the sitemap use when exporting"
+    ]
+}

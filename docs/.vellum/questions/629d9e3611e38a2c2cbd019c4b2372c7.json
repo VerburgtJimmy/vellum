@@ -1,0 +1,11 @@
+{
+    "section": "writing/images#",
+    "model": "claude-haiku-4-5",
+    "questions": [
+        "How do I add images to my documentation",
+        "Where should I put image files in my docs",
+        "How do I link images in markdown docs",
+        "Can I use SVG files in my documentation",
+        "What directory do image assets go in"
+    ]
+}

@@ -1,0 +1,11 @@
+{
+    "section": "why#how-it-works",
+    "model": "claude-haiku-4-5",
+    "questions": [
+        "how does vellum build work",
+        "what happens when you run vellum build",
+        "can i export documentation as static html",
+        "how do i deploy vellum docs",
+        "does vellum require node or build tools"
+    ]
+}

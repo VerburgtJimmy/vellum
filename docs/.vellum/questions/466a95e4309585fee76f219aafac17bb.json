@@ -1,0 +1,11 @@
+{
+    "section": "getting-started/installation#publish-config-stubs-and-assets",
+    "model": "claude-haiku-4-5",
+    "questions": [
+        "how do I publish vellum config files",
+        "where do I find the vellum configuration file",
+        "how do I set up vellum documentation",
+        "how do I install vellum css and javascript",
+        "what does vellum install command do"
+    ]
+}

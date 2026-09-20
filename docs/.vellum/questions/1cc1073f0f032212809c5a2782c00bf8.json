@@ -1,0 +1,11 @@
+{
+    "section": "troubleshooting#docs-component-x-name-attributes-must-be-quoted-strings",
+    "model": "claude-haiku-4-5",
+    "questions": [
+        "why can't I use variables in blade syntax in markdown docs",
+        "how do I pass dynamic values to docs components",
+        "why does :type=$foo not work in markdown",
+        "can I use expressions in markdown component attributes",
+        "how do I use variables with component attributes in documentation"
+    ]
+}

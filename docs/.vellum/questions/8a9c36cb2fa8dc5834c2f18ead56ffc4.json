@@ -1,0 +1,11 @@
+{
+    "section": "versions#",
+    "model": "claude-haiku-4-5",
+    "questions": [
+        "How do I set up multiple documentation versions?",
+        "How do I organize docs for different versions of my project?",
+        "How do I make a version switcher for my documentation?",
+        "How do I create unprefixed URLs for the latest documentation?",
+        "How do I structure documentation folders for v1 and v2?"
+    ]
+}

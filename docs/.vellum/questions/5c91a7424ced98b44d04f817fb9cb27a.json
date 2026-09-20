@@ -1,0 +1,11 @@
+{
+    "section": "page-actions#",
+    "model": "claude-haiku-4-5",
+    "questions": [
+        "Where is the copy markdown button",
+        "How do I edit a page on GitHub",
+        "How do I share a Laravel docs page with an AI",
+        "Where do I find the raw source URL",
+        "What are those buttons under the page title for"
+    ]
+}

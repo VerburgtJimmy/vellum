@@ -1,0 +1,11 @@
+{
+    "section": "writing/images#how-they-are-served",
+    "model": "claude-haiku-4-5",
+    "questions": [
+        "how are image files served in vellum",
+        "where do vellum image files get placed",
+        "what happens to image file paths in documentation",
+        "how to access images in vellum docs",
+        "where are exported vellum files stored"
+    ]
+}

@@ -1,0 +1,11 @@
+{
+    "section": "writing/code-blocks#",
+    "model": "claude-haiku-4-5",
+    "questions": [
+        "how to add code block syntax highlighting in Laravel",
+        "where does code highlighting happen server or client",
+        "how to show line numbers in code blocks",
+        "how to highlight specific lines of code",
+        "what code highlighting library does Laravel use"
+    ]
+}

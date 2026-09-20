@@ -1,0 +1,11 @@
+{
+    "section": "components/tabs#island-form",
+    "model": "claude-haiku-4-5",
+    "questions": [
+        "How do I make tabs remember the selected tab when user revisits",
+        "How do I use localStorage to persist tab state",
+        "What attributes can I add to the tabs component",
+        "How do I set a custom label for a tab",
+        "How do I override the panel id on tabs"
+    ]
+}

@@ -1,0 +1,11 @@
+{
+    "section": "writing/navigation#external-and-custom-entries",
+    "model": "claude-haiku-4-5",
+    "questions": [
+        "should I use slug or href for external links",
+        "how do I add external links to docs navigation",
+        "how do I link to a different website in navigation",
+        "what's the difference between slug and href in meta.json",
+        "how do I add custom links that aren't pages in my docs folder"
+    ]
+}

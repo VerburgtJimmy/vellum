@@ -1,0 +1,11 @@
+{
+    "section": "seo#sitemap",
+    "model": "claude-haiku-4-5",
+    "questions": [
+        "How is the sitemap generated in Laravel docs",
+        "Why are some pages missing from the sitemap",
+        "How does the sitemap get updated dates",
+        "Where is the sitemap XML file located",
+        "What does app.url do for the sitemap"
+    ]
+}

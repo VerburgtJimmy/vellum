@@ -1,0 +1,11 @@
+{
+    "section": "credits#interface",
+    "model": "claude-haiku-4-5",
+    "questions": [
+        "how are the icons made in laravel docs",
+        "what icons does laravel documentation use",
+        "where does laravel get its icons from",
+        "what technology powers the laravel docs search",
+        "what packages are used to build laravel documentation"
+    ]
+}

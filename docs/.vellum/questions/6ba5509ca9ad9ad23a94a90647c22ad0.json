@@ -1,0 +1,11 @@
+{
+    "section": "seo#per-page",
+    "model": "claude-haiku-4-5",
+    "questions": [
+        "how do I add meta description to pages?",
+        "what frontmatter should I include on every page?",
+        "how do I set up open graph tags?",
+        "why is my 404 page not showing in search results?",
+        "how do I add canonical links to pages?"
+    ]
+}

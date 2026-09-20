@@ -1,0 +1,11 @@
+{
+    "section": "getting-started/upgrade#update-the-package",
+    "model": "claude-haiku-4-5",
+    "questions": [
+        "how do i update vellum package",
+        "how do i get new configuration options when upgrading vellum",
+        "what do i do after running composer update for vellum",
+        "how do i merge vellum config changes with my custom settings",
+        "how do i publish vellum configuration files"
+    ]
+}

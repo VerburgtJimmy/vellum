@@ -1,0 +1,11 @@
+{
+    "section": "writing/markdown#headings-and-anchors",
+    "model": "claude-haiku-4-5",
+    "questions": [
+        "How do I link to a specific heading in a Laravel doc page?",
+        "Why can't I find a copy link button on the page headings?",
+        "How does the table of contents get generated?",
+        "What happens if two headings have the same text?",
+        "Why does my page title appear twice when I use a heading?"
+    ]
+}

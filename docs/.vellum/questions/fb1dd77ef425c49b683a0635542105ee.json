@@ -1,0 +1,11 @@
+{
+    "section": "writing/images#paths-resolve-from-the-docs-root",
+    "model": "claude-haiku-4-5",
+    "questions": [
+        "how do image paths work in documentation",
+        "where should i put images for docs",
+        "why is my image not showing in the documentation",
+        "do image paths work the same in different doc folders",
+        "how do relative paths resolve in documentation files"
+    ]
+}

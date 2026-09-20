@@ -1,0 +1,11 @@
+{
+    "section": "writing/code-blocks#a-fence",
+    "model": "claude-haiku-4-5",
+    "questions": [
+        "how do I show code syntax highlighting in the docs",
+        "what programming languages are supported for code blocks",
+        "how do I make a code block display as plain text",
+        "what do I put before a code block to specify the language",
+        "how do I get a custom file icon next to my code example"
+    ]
+}

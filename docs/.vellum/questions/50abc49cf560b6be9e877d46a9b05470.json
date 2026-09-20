@@ -1,0 +1,11 @@
+{
+    "section": "troubleshooting#errors-you-will-see",
+    "model": "claude-haiku-4-5",
+    "questions": [
+        "what does class not found error mean",
+        "how to fix Laravel class not found exception",
+        "why is my Laravel class not being found",
+        "class does not exist Laravel error",
+        "how to resolve missing class in Laravel"
+    ]
+}

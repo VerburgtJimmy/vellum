@@ -1,0 +1,11 @@
+{
+    "section": "troubleshooting#editing-changes-nothing",
+    "model": "claude-haiku-4-5",
+    "questions": [
+        "why are my changes not showing up",
+        "page not updating after i edit it",
+        "how do i clear cache laravel vellum",
+        "deleted markdown file still appearing",
+        "why is my site showing old content"
+    ]
+}

@@ -1,0 +1,11 @@
+{
+    "section": "writing/markdown#no-blade",
+    "model": "claude-haiku-4-5",
+    "questions": [
+        "Why isn't my Laravel code executing in the docs",
+        "How do I show actual values in documentation instead of code",
+        "What's the allowlisted value tag for docs",
+        "Why do template tags display as text instead of running",
+        "How do I display real data in markdown documentation"
+    ]
+}

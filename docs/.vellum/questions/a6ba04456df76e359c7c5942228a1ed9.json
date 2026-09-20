@@ -1,0 +1,11 @@
+{
+    "section": "extending#missing-components",
+    "model": "claude-haiku-4-5",
+    "questions": [
+        "what happens when a tag is not found in laravel vellum",
+        "how do i fix unknown tag errors in vellum",
+        "why is my page failing in production with vellum",
+        "what does disallowed namespace mean in vellum",
+        "why am i getting missing component errors in laravel"
+    ]
+}

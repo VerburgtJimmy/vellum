@@ -1,0 +1,11 @@
+{
+    "section": "releases#",
+    "model": "claude-haiku-4-5",
+    "questions": [
+        "where can I find my changelog",
+        "how do I make a changelog page for my docs",
+        "how do I set up an atom feed for releases",
+        "how do I hide unreleased changes from my documentation",
+        "how do I display changelog in my documentation site"
+    ]
+}

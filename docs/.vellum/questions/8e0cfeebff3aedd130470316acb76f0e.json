@@ -1,0 +1,11 @@
+{
+    "section": "writing/code-blocks#inline-code-with-a-language",
+    "model": "claude-haiku-4-5",
+    "questions": [
+        "how to specify language for inline code",
+        "how to highlight inline code in laravel docs",
+        "inline code syntax highlighting",
+        "how to add php syntax to backticks",
+        "when to use language suffix in inline code"
+    ]
+}

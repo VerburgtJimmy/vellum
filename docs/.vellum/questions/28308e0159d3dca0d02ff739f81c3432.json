@@ -1,0 +1,11 @@
+{
+    "section": "credits#inspiration",
+    "model": "claude-haiku-4-5",
+    "questions": [
+        "What documentation framework is Laravel's Vellum based on?",
+        "Where did Vellum get its design inspiration from?",
+        "Why should I use Fumadocs instead of Vellum?",
+        "What syntax highlighting theme does Laravel documentation use?",
+        "How is Vellum different from Fumadocs?"
+    ]
+}

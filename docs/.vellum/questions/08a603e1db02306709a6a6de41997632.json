@@ -1,0 +1,11 @@
+{
+    "section": "getting-started/installation#install",
+    "model": "claude-haiku-4-5",
+    "questions": [
+        "how do i install laravel",
+        "what do i need to install laravel",
+        "laravel installation steps",
+        "how to set up laravel project",
+        "getting started with laravel"
+    ]
+}

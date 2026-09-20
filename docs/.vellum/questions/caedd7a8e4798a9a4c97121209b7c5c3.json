@@ -1,0 +1,11 @@
+{
+    "section": "page-actions#edit-on-github",
+    "model": "claude-haiku-4-5",
+    "questions": [
+        "how do i add an edit on github link to my docs",
+        "how do i configure the github repo url for documentation",
+        "how do i let users edit docs directly on github",
+        "what does the repo configuration do in vellum",
+        "how do i set up github editor links for documentation pages"
+    ]
+}

@@ -1,0 +1,11 @@
+{
+    "section": "value-tags#",
+    "model": "claude-haiku-4-5",
+    "questions": [
+        "how do I show environment variables in documentation",
+        "how do I reference config values in docs",
+        "how do I link to routes in documentation",
+        "how do I show live app values in vellum docs",
+        "what are value tags and how do I use them"
+    ]
+}

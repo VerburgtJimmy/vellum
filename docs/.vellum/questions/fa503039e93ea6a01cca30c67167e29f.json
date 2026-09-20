@@ -1,0 +1,11 @@
+{
+    "section": "#",
+    "model": "claude-haiku-4-5",
+    "questions": [
+        "how do i create documentation for my laravel app",
+        "what is vellum",
+        "can i add a search feature to my markdown docs",
+        "how do i include custom components in my documentation",
+        "does vellum support dark mode"
+    ]
+}

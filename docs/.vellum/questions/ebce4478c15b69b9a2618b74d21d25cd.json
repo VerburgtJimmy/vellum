@@ -1,0 +1,11 @@
+{
+    "section": "gating#",
+    "model": "claude-haiku-4-5",
+    "questions": [
+        "how do i hide pages from guests",
+        "how do i require users to be logged in to view a page",
+        "how do i restrict access to a page with a gate",
+        "how do i require authentication for documentation pages",
+        "can i make certain docs only visible to authenticated users"
+    ]
+}

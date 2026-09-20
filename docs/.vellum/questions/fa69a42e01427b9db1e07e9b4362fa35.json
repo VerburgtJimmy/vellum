@@ -1,0 +1,11 @@
+{
+    "section": "page-actions#raw-markdown",
+    "model": "claude-haiku-4-5",
+    "questions": [
+        "how do I get the markdown source of a page",
+        "how do I access raw markdown from the docs",
+        "what URL pattern serves markdown files",
+        "how do I download documentation as markdown",
+        "how do I get the plain text markdown version of a page"
+    ]
+}

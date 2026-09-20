@@ -1,0 +1,11 @@
+{
+    "section": "getting-started/upgrade#frontmatter",
+    "model": "claude-haiku-4-5",
+    "questions": [
+        "how do i set up guest or auth access for documentation pages",
+        "what is the access property in frontmatter",
+        "how do i restrict documentation to authenticated users",
+        "how does folder meta json inheritance work",
+        "what access options are available for gates"
+    ]
+}

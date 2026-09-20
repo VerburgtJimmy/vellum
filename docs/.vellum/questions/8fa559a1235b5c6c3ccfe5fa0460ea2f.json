@@ -1,0 +1,11 @@
+{
+    "section": "getting-started/upgrade#02-to-05",
+    "model": "claude-haiku-4-5",
+    "questions": [
+        "how do I upgrade Laravel from version 0.2 to 0.5",
+        "what changed in Laravel between 0.2 and 0.5",
+        "Laravel 0.2 to 0.5 upgrade guide",
+        "breaking changes Laravel 0.2 0.5",
+        "what do I need to know upgrading Laravel 0.2"
+    ]
+}

@@ -1,0 +1,11 @@
+{
+    "section": "why#",
+    "model": "claude-haiku-4-5",
+    "questions": [
+        "how do I create a documentation site in Laravel",
+        "can I serve markdown files as docs in my app",
+        "what is vellum laravel package",
+        "how do I build static documentation from markdown",
+        "how do I deploy markdown documentation with laravel"
+    ]
+}

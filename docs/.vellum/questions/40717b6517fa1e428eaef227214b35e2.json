@@ -1,0 +1,11 @@
+{
+    "section": "getting-started/upgrade#",
+    "model": "claude-haiku-4-5",
+    "questions": [
+        "how to upgrade vellum",
+        "what changed in vellum 0.6",
+        "vellum configuration backwards compatibility",
+        "can i upgrade from vellum 0.2 to 0.6",
+        "what php laravel versions does vellum support"
+    ]
+}

@@ -1,0 +1,11 @@
+{
+    "section": "seo#robotstxt",
+    "model": "claude-haiku-4-5",
+    "questions": [
+        "where should I put robots.txt in Laravel",
+        "how do I create a robots.txt file for my Laravel site",
+        "what should my robots.txt contain",
+        "how do I add a sitemap to robots.txt in Laravel",
+        "what paths should I disallow in robots.txt"
+    ]
+}

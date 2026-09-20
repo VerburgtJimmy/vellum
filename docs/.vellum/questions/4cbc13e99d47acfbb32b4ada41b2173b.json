@@ -1,0 +1,11 @@
+{
+    "section": "troubleshooting#",
+    "model": "claude-haiku-4-5",
+    "questions": [
+        "vellum error messages",
+        "what does vellum error mean",
+        "vellum silent failures",
+        "vellum not showing errors",
+        "how to debug vellum"
+    ]
+}

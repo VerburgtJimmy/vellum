@@ -1,0 +1,11 @@
+{
+    "section": "#open-the-site",
+    "model": "claude-haiku-4-5",
+    "questions": [
+        "how do i open the site",
+        "where do i access the documentation",
+        "how do i start editing the docs",
+        "what do i edit to change the documentation",
+        "where are the docs files located"
+    ]
+}

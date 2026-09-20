@@ -1,0 +1,11 @@
+{
+    "section": "writing/navigation#",
+    "model": "claude-haiku-4-5",
+    "questions": [
+        "how does the sidebar work",
+        "how do i organize my documentation files",
+        "how does the folder structure create navigation",
+        "how do i add pages to the sidebar",
+        "where do i define sidebar labels"
+    ]
+}

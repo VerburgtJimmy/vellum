@@ -1,0 +1,11 @@
+{
+    "section": "writing/navigation#keep-the-rest",
+    "model": "claude-haiku-4-5",
+    "questions": [
+        "how do I control the order of pages in documentation",
+        "what does the three dots mean in navigation",
+        "how do I put a page at the end of the navigation menu",
+        "how do I make index appear first in docs",
+        "what happens to pages not listed in the navigation order"
+    ]
+}

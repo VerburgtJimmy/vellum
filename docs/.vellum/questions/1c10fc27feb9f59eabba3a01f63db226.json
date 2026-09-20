@@ -1,0 +1,11 @@
+{
+    "section": "getting-started/upgrade#markdown-plus-components",
+    "model": "claude-haiku-4-5",
+    "questions": [
+        "how do I use callouts in markdown",
+        "what's the difference between islands and directives",
+        "how do I create tabs in my documentation",
+        "can I use components in markdown",
+        "what syntax should I use for cards and steps"
+    ]
+}

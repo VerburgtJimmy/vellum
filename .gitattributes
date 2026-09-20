@@ -3,7 +3,9 @@
 #
 # docs/ itself ships: it is the package's own documentation and can be pointed
 # at with vellum.path. Only the README screenshots are dropped, since GitHub
-# renders those from the repository rather than from a release.
+# renders those from the repository rather than from a release. docs/.vellum
+# ships too: it is 32 KB of cached search questions, and the site that renders
+# these docs from the installed package would otherwise lose them.
 
 /.github                export-ignore
 /.gitattributes         export-ignore
@@ -22,6 +24,5 @@
 /vite.focus.config.js   export-ignore
 /vite.search.config.js  export-ignore
 /docs/screenshots       export-ignore
-/docs/.vellum           export-ignore
 /CONTRIBUTING.md        export-ignore
 /CODE_OF_CONDUCT.md     export-ignore

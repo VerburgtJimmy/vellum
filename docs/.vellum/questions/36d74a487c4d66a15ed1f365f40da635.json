@@ -1,0 +1,11 @@
+{
+    "section": "why#stability",
+    "model": "claude-haiku-4-5",
+    "questions": [
+        "how stable is vellum",
+        "is vellum production ready",
+        "will vellum break my site in updates",
+        "what version is vellum",
+        "does vellum have breaking changes"
+    ]
+}

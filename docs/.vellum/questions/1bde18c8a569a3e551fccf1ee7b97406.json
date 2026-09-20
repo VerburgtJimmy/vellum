@@ -1,0 +1,11 @@
+{
+    "section": "components/tabs#rules-worth-knowing",
+    "model": "claude-haiku-4-5",
+    "questions": [
+        "why shouldn't I use headings inside tabs",
+        "how do tab panel ids get generated",
+        "can I put markdown headings in tab panels",
+        "does search index content inside tabs",
+        "why does clicking a tab heading not scroll to it"
+    ]
+}

@@ -1,0 +1,11 @@
+{
+    "section": "writing/code-blocks#highlighted-lines",
+    "model": "claude-haiku-4-5",
+    "questions": [
+        "how do I highlight specific lines in a code block",
+        "how to show line numbers in markdown code blocks",
+        "how do I emphasize certain lines of code in documentation",
+        "can I highlight lines 3 to 5 in a code example",
+        "how do I mark important lines in a code snippet"
+    ]
+}

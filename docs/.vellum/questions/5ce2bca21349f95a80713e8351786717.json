@@ -1,0 +1,11 @@
+{
+    "section": "troubleshooting#search-returns-nothing",
+    "model": "claude-haiku-4-5",
+    "questions": [
+        "why is search not working",
+        "how do i rebuild the search index",
+        "search returns no results",
+        "search is empty why",
+        "how do i fix broken search"
+    ]
+}

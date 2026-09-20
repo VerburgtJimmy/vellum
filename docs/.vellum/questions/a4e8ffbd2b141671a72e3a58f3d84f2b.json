@@ -1,0 +1,11 @@
+{
+    "section": "troubleshooting#two-docs-files-resolve-to-slug",
+    "model": "claude-haiku-4-5",
+    "questions": [
+        "why do two docs files resolve to the same slug",
+        "how do i fix two pages with the same url",
+        "what does two docs files resolve to slug mean",
+        "how do i rename a documentation file to fix duplicate paths",
+        "why am i getting an error about duplicate documentation slugs"
+    ]
+}

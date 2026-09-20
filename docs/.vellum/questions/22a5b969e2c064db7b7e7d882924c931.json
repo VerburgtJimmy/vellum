@@ -1,0 +1,11 @@
+{
+    "section": "#publish-stubs",
+    "model": "claude-haiku-4-5",
+    "questions": [
+        "how do i install vellum",
+        "what command do i run to set up vellum",
+        "how to initialize vellum in my laravel project",
+        "vellum installation command",
+        "how do i publish vellum stubs"
+    ]
+}

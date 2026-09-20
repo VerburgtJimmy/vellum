@@ -1,0 +1,11 @@
+{
+    "section": "search#minisearch",
+    "model": "claude-haiku-4-5",
+    "questions": [
+        "how does minisearch work",
+        "what search index does laravel use",
+        "how to open search in laravel docs",
+        "can I use minisearch on shared hosting",
+        "what keyboard shortcuts open the search dialog"
+    ]
+}

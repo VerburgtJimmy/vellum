@@ -1,0 +1,11 @@
+{
+    "section": "theming#surfaces",
+    "model": "claude-haiku-4-5",
+    "questions": [
+        "how many surface layers are there",
+        "what is the background color hierarchy",
+        "how do surfaces change between light and dark mode",
+        "what are the different surface levels used for",
+        "why don't surfaces collide with the canvas"
+    ]
+}

@@ -1,0 +1,11 @@
+{
+    "section": "getting-started/upgrade#version-urls",
+    "model": "claude-haiku-4-5",
+    "questions": [
+        "where is the latest documentation located after upgrading",
+        "why are my old documentation links not working anymore",
+        "how do i update inbound links when upgrading laravel docs",
+        "what happened to the version segment in documentation urls",
+        "where did the changelog move to after the upgrade"
+    ]
+}
