@@ -1,0 +1,11 @@
+{
+    "section": "commands#velluminstall",
+    "model": "claude-haiku-4-5",
+    "questions": [
+        "how do i set up vellum in my laravel project",
+        "what does the vellum install command do",
+        "where do vellum files get published",
+        "how do i update vellum after upgrading the package",
+        "how do i regenerate vellum starter files"
+    ]
+}

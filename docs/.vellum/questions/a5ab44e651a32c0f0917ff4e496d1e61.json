@@ -1,0 +1,11 @@
+{
+    "section": "components/tabs#other-directives-inside-a-panel",
+    "model": "claude-haiku-4-5",
+    "questions": [
+        "how to add a callout inside a tab",
+        "can I use markdown in tabs",
+        "what can I put inside a tab panel",
+        "how to include a callout in a tab",
+        "can I use markdown inside tab panels"
+    ]
+}

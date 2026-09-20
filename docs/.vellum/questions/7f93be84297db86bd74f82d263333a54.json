@@ -1,0 +1,11 @@
+{
+    "section": "components/steps#require-the-package",
+    "model": "claude-haiku-4-5",
+    "questions": [
+        "How do I install the vellum package",
+        "What command do I run to add vellum to my project",
+        "How do I get vellum with composer",
+        "Where do I find the require command for vellum",
+        "How do I add jimmyverburgt/vellum to my Laravel project"
+    ]
+}

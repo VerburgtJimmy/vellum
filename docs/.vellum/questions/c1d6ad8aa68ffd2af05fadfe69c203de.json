@@ -1,0 +1,11 @@
+{
+    "section": "components/cards#syntax",
+    "model": "claude-haiku-4-5",
+    "questions": [
+        "how do I create a card in markdown",
+        "what is the syntax for cards",
+        "how do I add a link to a card",
+        "why isn't my card showing up",
+        "how many cards should I put in a row"
+    ]
+}

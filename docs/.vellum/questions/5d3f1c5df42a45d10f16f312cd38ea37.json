@@ -1,0 +1,11 @@
+{
+    "section": "components#",
+    "model": "claude-haiku-4-5",
+    "questions": [
+        "how do i add notes and callouts to my documentation",
+        "what are the built in components in laravel vellum",
+        "how do i use triple colon syntax in blade templates",
+        "can i use x-vellum components instead of directives",
+        "where are the vellum component views stored"
+    ]
+}

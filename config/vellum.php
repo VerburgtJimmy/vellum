@@ -233,11 +233,13 @@ return [
         |
         | provider: anthropic, openai, or null (the default: no model).
         | model: defaults to claude-haiku-4-5 for anthropic; name one for openai.
+        | key: VELLUM_LLM_KEY, or the provider's own ANTHROPIC_API_KEY or
+        | OPENAI_API_KEY. A key is only ever read once a provider is set.
         */
         'llm' => [
             'provider' => env('VELLUM_LLM_PROVIDER'),
             'model' => env('VELLUM_LLM_MODEL'),
-            'key' => env('VELLUM_LLM_KEY'),
+            'key' => env('VELLUM_LLM_KEY') ?: env('ANTHROPIC_API_KEY') ?: env('OPENAI_API_KEY'),
         ],
     ],
 

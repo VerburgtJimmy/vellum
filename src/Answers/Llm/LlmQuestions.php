@@ -17,6 +17,12 @@ final class LlmQuestions
 {
     public const DIRECTORY = '.vellum/questions';
 
+    /**
+     * Stop calling after this many failures in a row. A bad key or a rate limit
+     * fails for every section, and there is no point paying for all of them.
+     */
+    public const GIVE_UP_AFTER = 5;
+
     /** @var array<string, true> */
     private array $used = [];
 
@@ -58,7 +64,7 @@ final class LlmQuestions
     }
 
     /**
-     * @return array{questions: array<string, list<string>>, cached: int, written: int, missing: int, failures: list<string>}
+     * @return array{questions: array<string, list<string>>, cached: int, written: int, missing: int, failures: list<string>, stopped: bool}
      */
     public function for(AnswerIndex $index): array
     {
@@ -67,6 +73,7 @@ final class LlmQuestions
         $written = 0;
         $missing = 0;
         $failures = [];
+        $consecutive = 0;
 
         foreach ($index->sections as $record) {
             $key = self::key($record);
@@ -80,7 +87,7 @@ final class LlmQuestions
                 continue;
             }
 
-            if ($this->writer === null) {
+            if ($this->writer === null || $consecutive >= self::GIVE_UP_AFTER) {
                 $missing++;
 
                 continue;
@@ -91,13 +98,22 @@ final class LlmQuestions
                 $generated = $this->writer->questions(Prompt::for($this->site, $record['title'], $record['heading'], $record['text']));
                 $this->write($key, $record['id'], $generated);
                 $questions[$record['id']] = $generated;
+                $consecutive = 0;
             } catch (RuntimeException $exception) {
                 $written--;
+                $consecutive++;
                 $failures[] = $record['id'].': '.$exception->getMessage();
             }
         }
 
-        return ['questions' => $questions, 'cached' => $cached, 'written' => $written, 'missing' => $missing, 'failures' => $failures];
+        return [
+            'questions' => $questions,
+            'cached' => $cached,
+            'written' => $written,
+            'missing' => $missing,
+            'failures' => $failures,
+            'stopped' => $consecutive >= self::GIVE_UP_AFTER,
+        ];
     }
 
     /**

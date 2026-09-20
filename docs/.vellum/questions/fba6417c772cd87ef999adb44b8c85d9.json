@@ -1,0 +1,11 @@
+{
+    "section": "components/steps#",
+    "model": "claude-haiku-4-5",
+    "questions": [
+        "how do I install vellum",
+        "what is the first step to set up vellum",
+        "how do I require vellum with composer",
+        "how do I publish starter docs in laravel",
+        "how do I run vellum install command"
+    ]
+}

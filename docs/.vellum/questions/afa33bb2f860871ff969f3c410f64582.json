@@ -1,0 +1,11 @@
+{
+    "section": "components/callouts#",
+    "model": "claude-haiku-4-5",
+    "questions": [
+        "how do I add a note or warning box to my documentation",
+        "what are the different callout types in Laravel docs",
+        "how do I create a tip or danger callout",
+        "can I add a title to a callout in markdown",
+        "how do I highlight important information with callouts"
+    ]
+}

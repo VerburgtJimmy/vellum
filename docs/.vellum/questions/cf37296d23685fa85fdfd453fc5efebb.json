@@ -1,0 +1,11 @@
+{
+    "section": "components/steps#install-the-package",
+    "model": "claude-haiku-4-5",
+    "questions": [
+        "how do i install vellum",
+        "how do i add vellum to my project",
+        "how do i set up vellum",
+        "how do i use composer to install vellum",
+        "what's the command to install vellum"
+    ]
+}

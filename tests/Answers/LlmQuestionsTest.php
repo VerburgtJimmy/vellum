@@ -67,7 +67,7 @@ it('asks Claude with a schema and keeps five questions', function (): void {
         ->and($request['body']['messages'][0]['content'])->toContain('documentation for Acme')
         ->and($request['body']['messages'][0]['content'])->toContain('Vellum is a docs package.')
         ->and($result['questions']['#'])->toBe(['One?', 'Two?', 'Three?', 'Four?', 'Five?'])
-        ->and($result)->toMatchArray(['cached' => 0, 'written' => 1, 'missing' => 0, 'failures' => []]);
+        ->and($result)->toMatchArray(['cached' => 0, 'written' => 1, 'missing' => 0, 'failures' => [], 'stopped' => false]);
 });
 
 it('sends effort and fallbacks only to the models that take them', function (): void {
@@ -145,6 +145,19 @@ it('keeps nothing from a refusal or an answer that is not the agreed JSON', func
 
     expect((new LlmQuestions(($this->cacheDirectory)(), new AnthropicWriter('k', null, $refusal), 'A'))->for(($this->index)())['failures'][0])->toContain('declined')
         ->and((new LlmQuestions(($this->cacheDirectory)(), new AnthropicWriter('k', null, $garbled), 'A'))->for(($this->index)())['failures'][0])->toContain('not the expected JSON');
+});
+
+it('stops asking after five failures in a row', function (): void {
+    $this->writeDoc('index.md', "---\ntitle: Home\n---\nOne.\n\n## A\n\nTwo.\n\n## B\n\nThree.\n\n## C\n\nFour.\n\n## D\n\nFive.\n\n## E\n\nSix.\n\n## F\n\nSeven.\n");
+    $failures = array_fill(0, 9, ['status' => 500, 'body' => []]);
+    $transport = new FakeTransport($failures);
+
+    $result = (new LlmQuestions(($this->cacheDirectory)(), new AnthropicWriter('k', null, $transport), 'A'))->for(($this->index)());
+
+    expect($transport->requests)->toHaveCount(LlmQuestions::GIVE_UP_AFTER)
+        ->and($result['stopped'])->toBeTrue()
+        ->and($result['failures'])->toHaveCount(LlmQuestions::GIVE_UP_AFTER)
+        ->and($result['missing'])->toBe(2);
 });
 
 it('drops cached questions for sections that no longer exist', function (): void {

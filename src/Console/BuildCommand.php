@@ -142,7 +142,11 @@ final class BuildCommand extends Command
                     $suffix,
                     $written['cached'],
                     $written['written'],
-                    $written['missing'] > 0 ? sprintf(', %d sections have none (no key set)', $written['missing']) : '',
+                    match (true) {
+                        $written['missing'] === 0 => '',
+                        $written['stopped'] => sprintf(', %d sections not asked for', $written['missing']),
+                        default => sprintf(', %d sections have none (no key set)', $written['missing']),
+                    },
                 ));
 
                 foreach (array_slice($written['failures'], 0, 3) as $failure) {
@@ -151,6 +155,10 @@ final class BuildCommand extends Command
 
                 if (count($written['failures']) > 3) {
                     $this->warn(sprintf('  and %d more sections the model did not answer for', count($written['failures']) - 3));
+                }
+
+                if ($written['stopped']) {
+                    $this->warn(sprintf('  Stopped asking after %d failures in a row. Fix the cause and build again; what was written is cached.', LlmQuestions::GIVE_UP_AFTER));
                 }
             }
 

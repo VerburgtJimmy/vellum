@@ -1,0 +1,11 @@
+{
+    "section": "components/steps#rules-worth-knowing",
+    "model": "claude-haiku-4-5",
+    "questions": [
+        "how do I create steps in documentation",
+        "what heading level starts a new step",
+        "how are step numbers generated in docs",
+        "can I use subheadings inside a step",
+        "do I need to manually number my steps"
+    ]
+}

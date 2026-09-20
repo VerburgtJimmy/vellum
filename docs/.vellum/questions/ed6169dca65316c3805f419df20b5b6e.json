@@ -1,0 +1,11 @@
+{
+    "section": "components/callouts#titles",
+    "model": "claude-haiku-4-5",
+    "questions": [
+        "how to add a title to a callout",
+        "how to set callout titles with square brackets",
+        "callout title syntax",
+        "why isn't my callout title showing up",
+        "how to make callout boxes with titles"
+    ]
+}

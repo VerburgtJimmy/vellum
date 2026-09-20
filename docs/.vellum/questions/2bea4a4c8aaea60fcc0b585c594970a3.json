@@ -1,0 +1,11 @@
+{
+    "section": "commands#a-deploy",
+    "model": "claude-haiku-4-5",
+    "questions": [
+        "How do I optimize Laravel for production deployment?",
+        "What commands should I run when deploying a Laravel application?",
+        "How do I cache routes and configuration in Laravel?",
+        "What is vellum:build and why would I use it?",
+        "How do I make my Laravel site faster by caching Markdown files?"
+    ]
+}

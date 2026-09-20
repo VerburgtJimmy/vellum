@@ -1,0 +1,11 @@
+{
+    "section": "components/cards#only-cards-belong-inside",
+    "model": "claude-haiku-4-5",
+    "questions": [
+        "why is my text showing up as a card in the grid",
+        "how do i add text between cards without it becoming a card",
+        "can i put paragraphs inside cards directive",
+        "why is my paragraph appearing in the cards grid",
+        "how do i write text above the cards directive"
+    ]
+}

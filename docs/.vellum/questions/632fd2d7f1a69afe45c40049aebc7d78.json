@@ -1,0 +1,11 @@
+{
+    "section": "comparisons#outside-laravel",
+    "model": "claude-haiku-4-5",
+    "questions": [
+        "what documentation tool should I use for my next.js project",
+        "is vellum for non-laravel projects",
+        "what's the best docs generator for static sites",
+        "can I use vellum if I'm not using laravel",
+        "should I use vitepress or fumadocs instead"
+    ]
+}

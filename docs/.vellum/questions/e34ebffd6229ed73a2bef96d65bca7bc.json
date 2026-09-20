@@ -1,0 +1,11 @@
+{
+    "section": "components/steps#blocks-inside-a-step",
+    "model": "claude-haiku-4-5",
+    "questions": [
+        "Can I put different types of content in a step",
+        "What can go inside a step",
+        "Does a step support code blocks and tables",
+        "How do I add multiple elements to a single step",
+        "Can I nest lists within a step"
+    ]
+}

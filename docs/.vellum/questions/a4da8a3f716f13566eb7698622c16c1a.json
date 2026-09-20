@@ -1,0 +1,11 @@
+{
+    "section": "commands#",
+    "model": "claude-haiku-4-5",
+    "questions": [
+        "what artisan commands does vellum add",
+        "when should i run vellum build",
+        "how do i rebuild the search index in vellum",
+        "how do i clear the vellum cache",
+        "how do i export a static site with vellum"
+    ]
+}

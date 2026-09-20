@@ -1,0 +1,11 @@
+{
+    "section": "components/tabs#remembering-the-choice",
+    "model": "claude-haiku-4-5",
+    "questions": [
+        "How do I make tabs remember what the user clicked?",
+        "How do I save which tab was selected across pages?",
+        "How do I keep the same tab active on multiple groups?",
+        "What does persist mean in tabs?",
+        "How do I store tab selection in localStorage?"
+    ]
+}

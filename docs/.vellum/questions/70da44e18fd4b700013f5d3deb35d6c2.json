@@ -1,0 +1,11 @@
+{
+    "section": "components/steps#open-the-site",
+    "model": "claude-haiku-4-5",
+    "questions": [
+        "how do i access the documentation",
+        "where can i find the docs",
+        "what url is the documentation at",
+        "how do i view laravel documentation",
+        "where is the docs located"
+    ]
+}

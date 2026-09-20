@@ -1,0 +1,11 @@
+{
+    "section": "components/cards#a-section-index",
+    "model": "claude-haiku-4-5",
+    "questions": [
+        "how do I navigate the documentation",
+        "where do I find different document components",
+        "what components are available in the docs",
+        "how do I get started with documentation features",
+        "what tools does the documentation have"
+    ]
+}

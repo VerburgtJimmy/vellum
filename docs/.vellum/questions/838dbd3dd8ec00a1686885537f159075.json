@@ -1,0 +1,11 @@
+{
+    "section": "commands#vellumclear",
+    "model": "claude-haiku-4-5",
+    "questions": [
+        "how do I clear vellum cache",
+        "what does vellum:clear command do",
+        "how do I remove compiled vellum pages",
+        "how do I rebuild vellum search index",
+        "does laravel cache clear remove vellum files"
+    ]
+}

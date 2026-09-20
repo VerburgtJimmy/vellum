@@ -1,0 +1,11 @@
+{
+    "section": "comparisons#larecipe",
+    "model": "claude-haiku-4-5",
+    "questions": [
+        "Should I use LaRecipe or Vellum for my Laravel docs?",
+        "What's the difference between LaRecipe and Vellum?",
+        "Can I use LaRecipe with older PHP versions?",
+        "How does LaRecipe handle markdown rendering?",
+        "Does LaRecipe have access control for different users?"
+    ]
+}

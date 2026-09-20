@@ -1,0 +1,11 @@
+{
+    "section": "commands#vellumexport",
+    "model": "claude-haiku-4-5",
+    "questions": [
+        "how do I export my documentation to static HTML files",
+        "what does the vellum export command do",
+        "how do I generate a static site from my laravel docs",
+        "how do I create a searchable index for my documentation",
+        "how do I output documentation files to a directory"
+    ]
+}
