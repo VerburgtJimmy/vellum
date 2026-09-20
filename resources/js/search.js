@@ -15,6 +15,7 @@ const FIELD_BOOST = { title: 3, heading: 2, text: 1 }
 const TERM_BOOST = 0.1
 const EXACT_BOOST = 0.1
 const SYNONYM_WEIGHT = 0.5
+const PER_PAGE = 2
 
 let loaded = null
 
@@ -122,15 +123,16 @@ export function score(index, weights) {
 }
 
 /**
- * Terms to search for: what the reader typed, plus what those words are also
- * known by, at half weight.
+ * The terms the docs use for the words in this query, longest phrase first.
+ * Mirrors Synonyms::expand().
  *
  * @param {string} query
  * @param {Array<Array<string>>} groups
+ * @returns {Array<string>}
  */
-export function expand(query, groups) {
-  const weights = new Map(terms(query).map((term) => [term, 1]))
+export function expansions(query, groups) {
   const normalized = ` ${normalizePhrase(query)} `
+  const added = new Set()
 
   for (const group of groups) {
     const phrases = group.map(normalizePhrase)
@@ -140,15 +142,57 @@ export function expand(query, groups) {
     }
 
     for (const phrase of phrases) {
-      for (const term of terms(phrase)) {
-        if (!weights.has(term)) {
-          weights.set(term, SYNONYM_WEIGHT)
-        }
+      if (phrase !== '' && !normalized.includes(` ${phrase} `)) {
+        added.add(phrase)
+      }
+    }
+  }
+
+  return [...added].sort((a, b) => b.length - a.length || a.localeCompare(b))
+}
+
+/**
+ * Terms to search for: what the reader typed, plus what those words are also
+ * known by, at half weight.
+ *
+ * @param {string} query
+ * @param {Array<string>} widened
+ */
+export function expand(query, widened) {
+  const weights = new Map(terms(query).map((term) => [term, 1]))
+
+  for (const phrase of widened) {
+    for (const term of terms(phrase)) {
+      if (!weights.has(term)) {
+        weights.set(term, SYNONYM_WEIGHT)
       }
     }
   }
 
   return weights
+}
+
+/**
+ * The best results, with at most PER_PAGE from any one page before any other
+ * page's. What the cap holds back moves below the rest rather than being
+ * dropped. Mirrors Ranker::spread().
+ *
+ * @param {Array<{record: Record<string, any>}>} scored
+ * @param {number} limit
+ */
+export function spread(scored, limit) {
+  const results = []
+  const held = []
+  const seen = new Map()
+
+  for (const hit of scored) {
+    const page = hit.record.page
+    const count = (seen.get(page) ?? 0) + 1
+    seen.set(page, count)
+    ;(count > PER_PAGE ? held : results).push(hit)
+  }
+
+  return [...results, ...held].slice(0, limit)
 }
 
 /**
@@ -184,9 +228,11 @@ export function createRanker(answers, cosine = null) {
         return { results: [], card: null, confidence: 0 }
       }
 
-      const lexical = score(index, expand(trimmed, groups))
+      const widened = expansions(trimmed, groups)
+      const lexical = score(index, expand(trimmed, widened))
       const best = lexical.size > 0 ? Math.max(...lexical.values()) : 0
-      const cosines = cosine ? cosine(trimmed) : new Map()
+      // Embed the reader's words together with the docs' words for them.
+      const cosines = cosine ? cosine(`${trimmed} ${widened.join(' ')}`.trim()) : new Map()
       const normalized = ` ${normalizePhrase(trimmed)} `
       const scored = []
 
@@ -212,7 +258,7 @@ export function createRanker(answers, cosine = null) {
 
       scored.sort((a, b) => b.score - a.score)
 
-      const results = scored.slice(0, limit)
+      const results = spread(scored, limit)
       const sureness = confidence(scored)
 
       return {

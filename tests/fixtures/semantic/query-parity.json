@@ -43,24 +43,25 @@
         "how do i install the package": {
             "ids": [
                 "#",
-                "gating#",
-                "#dark-mode"
+                "#dark-mode",
+                "gating#"
             ],
-            "confidence": 0.79437,
+            "confidence": 0.841737,
             "card": "#"
         },
         "night mode": {
             "ids": [
                 "#dark-mode"
             ],
-            "confidence": 0.534005,
-            "card": null
+            "confidence": 0.662116,
+            "card": "#dark-mode"
         },
         "gating": {
             "ids": [
-                "gating#"
+                "gating#",
+                "#"
             ],
-            "confidence": 0.881457,
+            "confidence": 0.879239,
             "card": "gating#"
         },
         "supercalifragilisticexpialidocious": {
@@ -100,7 +101,7 @@
                 "#dark-mode",
                 "gating#"
             ],
-            "confidence": 0.427674,
+            "confidence": 0.351342,
             "card": null
         }
     },

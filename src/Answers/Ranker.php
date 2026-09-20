@@ -33,6 +33,12 @@ final class Ranker
      */
     public const SYNONYM_WEIGHT = 0.5;
 
+    /**
+     * Results from one page, at most, so a page with many similar sections
+     * cannot fill the list.
+     */
+    public const PER_PAGE = 2;
+
     private readonly Bm25 $lexical;
 
     private readonly Synonyms $synonyms;
@@ -67,9 +73,14 @@ final class Ranker
             return ['results' => [], 'card' => null, 'confidence' => 0.0];
         }
 
-        $lexical = $this->lexical->searchTerms($this->terms($query));
+        $expansions = $this->synonyms->expand($query);
+        $lexical = $this->lexical->searchTerms($this->terms($query, $expansions));
         $best = $lexical === [] ? 0.0 : max($lexical);
-        $cosines = $this->semantic?->scores($query) ?? [];
+
+        // The words the reader typed, and the words the docs use for them, are
+        // embedded together: a question about "night mode" is then also asked
+        // in the docs' own terms.
+        $cosines = $this->semantic?->scores(trim($query.' '.implode(' ', $expansions))) ?? [];
         $normalized = ' '.Synonyms::normalize($query).' ';
         $scored = [];
 
@@ -92,7 +103,7 @@ final class Ranker
         }
 
         usort($scored, static fn (array $a, array $b): int => $b['score'] <=> $a['score']);
-        $results = array_slice($scored, 0, $limit);
+        $results = self::spread($scored, $limit);
         $confidence = self::confidence($scored);
         $threshold = (float) config('vellum.answers.card_threshold', 0.65);
 
@@ -128,13 +139,44 @@ final class Ranker
     }
 
     /**
-     * The query's terms, with the terms its words are also known by at half
-     * weight. Expansions help the lexical score; the embedding already knows
-     * that two phrasings mean the same thing.
+     * The best results, with at most PER_PAGE from any one page before any
+     * other page's: five sections of the same page are one answer, not five.
+     * What the cap holds back is not dropped, only moved below the rest, so a
+     * page that is genuinely the answer still shows its other sections.
      *
+     * @param  list<Result>  $scored
+     * @return list<Result>
+     */
+    public static function spread(array $scored, int $limit): array
+    {
+        $results = [];
+        $held = [];
+        $seen = [];
+
+        foreach ($scored as $hit) {
+            $page = $hit['record']['page'];
+            $seen[$page] = ($seen[$page] ?? 0) + 1;
+
+            if ($seen[$page] > self::PER_PAGE) {
+                $held[] = $hit;
+
+                continue;
+            }
+
+            $results[] = $hit;
+        }
+
+        return array_slice([...$results, ...$held], 0, $limit);
+    }
+
+    /**
+     * The query's terms, with the terms its words are also known by at half
+     * weight.
+     *
+     * @param  list<string>  $expansions
      * @return array<string, float>
      */
-    private function terms(string $query): array
+    private function terms(string $query, array $expansions): array
     {
         $weights = [];
 
@@ -142,7 +184,7 @@ final class Ranker
             $weights[$term] = 1.0;
         }
 
-        foreach ($this->synonyms->expand($query) as $phrase) {
+        foreach ($expansions as $phrase) {
             foreach (Bm25::terms($phrase) as $term) {
                 $weights[$term] ??= self::SYNONYM_WEIGHT;
             }
