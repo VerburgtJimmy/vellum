@@ -164,7 +164,7 @@
   kind: paraphrase
 - q: 'everyone gets the night look by default'
   page: theming
-  section: the-rest
+  section: default-mode
   kind: paraphrase
 - q: 'shortcut to open the search popup'
   page: search

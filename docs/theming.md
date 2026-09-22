@@ -88,13 +88,40 @@ code block sits on, not what the code is coloured.
 a palette edit drops below that. A custom `accent` is your own responsibility: pick one
 that clears 4.5:1 against your page background.
 
-## The rest
+## Default mode
 
-`default` is `light`, `dark`, or `system`. Readers can still override in the theme menu;
-the choice is stored in `localStorage`.
+`default` decides which mode a first-time reader gets: `light`, `dark`, or `system`,
+which follows the operating system. Readers can still override it in the theme menu, and
+their choice is stored in `localStorage`, so it survives a reload and wins over this
+setting from then on.
 
-`radius` sets `--radius` on the document.
+## Radius
 
-Optional `'fonts'` injects HTML into the layout head (for example a `<link>` tag).
+`radius` sets `--radius` on the document, and every rounded corner in the layout is
+derived from it: cards, buttons, code blocks and the search dialog all scale together.
+Give it any CSS length.
+
+```php
+'radius' => '0.25rem',
+```
+
+## Fonts
+
+`fonts` is a top level key, not part of `theme`. Whatever you put there is injected into
+the layout head as raw HTML, so you can load a typeface without publishing the layout:
+
+```php
+'fonts' => '<link rel="stylesheet" href="https://example.com/inter.css">',
+```
+
+Loading the file does not change anything on its own. Set the family yourself in a
+stylesheet the layout already loads, or in a `<style>` block in the same value:
+
+```php
+'fonts' => '<link rel="stylesheet" href="https://example.com/inter.css">'
+    .'<style>body { font-family: Inter, sans-serif }</style>',
+```
+
+## Where search sits
 
 `layout.search` is `sidebar` (default, no top header) or `header`.

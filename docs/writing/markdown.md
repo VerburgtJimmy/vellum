@@ -37,6 +37,11 @@ becomes the title and is removed from the body, so the page does not ship two `h
 The table of contents is built from these headings. A page with none still keeps its
 column, so the text width does not jump between pages.
 
+Write headings answer-shaped: one thing a reader would ask about per heading. Search
+indexes a page by section, and both the ranking and the answer card on top of the results
+work on one section at a time, so a heading that covers three unrelated settings can only
+ever half-answer each of them. When a section starts collecting leftovers, split it.
+
 ## Links
 
 Internal links are ordinary Markdown: `[Gating](/docs/gating)`.
