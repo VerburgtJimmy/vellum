@@ -75,7 +75,7 @@ final class AnswersQuery
                 // The built-in groups and this reader's page aliases, merged:
                 // the browser expands a query with exactly what PHP would.
                 'synonyms' => $visible->synonymGroups(),
-                'threshold' => (float) config('vellum.answers.card_threshold', 0.65),
+                'threshold' => (float) config('vellum.answers.card_threshold', 0.75),
             ],
             JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE,
         );

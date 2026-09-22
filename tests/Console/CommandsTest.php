@@ -294,7 +294,7 @@ it('drops auth-only pages from the exported answer index', function (): void {
         ->and($html)->toContain('_vellum/answers.json')
         ->and(collect($answers['sections'])->pluck('title')->all())->toContain('Home')
         ->and(collect($answers['sections'])->pluck('title')->all())->not->toContain('Secret')
-        ->and($answers['threshold'])->toBe(0.65)
+        ->and($answers['threshold'])->toBe(0.75)
         ->and(is_file($out.'/docs/_vellum/semantic.bin'))->toBeFalse();
 
     $this->deleteDirectory($out);

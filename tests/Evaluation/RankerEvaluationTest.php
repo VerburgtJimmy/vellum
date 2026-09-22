@@ -10,16 +10,18 @@ use Vellum\Cache\CompiledStore;
 use Vellum\Content\ContentRepository;
 use Vellum\Semantic\SemanticQuery;
 use Vellum\Tests\Evaluation\Metrics;
+use Vellum\Tests\Evaluation\WrittenQuestions;
 
 /*
  * What the shipped ranker scores on every question set, as it runs in
  * production: the answer index, the semantic file, synonym expansion and the
- * per-page cap. Run with VELLUM_EVAL=1 and VELLUM_EVAL_MODELS set.
+ * per-page cap, including the questions a model wrote into the cache. Run
+ * with VELLUM_EVAL=1 and VELLUM_EVAL_MODELS set.
  */
 it('reports what the shipped ranker finds', function (): void {
     $docs = (string) realpath(__DIR__.'/../../docs');
     $repository = new ContentRepository(contentPath: $docs, store: new CompiledStore($this->cachePath()));
-    $index = AnswerIndex::build($repository->buildAll(), $repository);
+    $index = AnswerIndex::build($repository->buildAll(), $repository, WrittenQuestions::all());
     $set = (new SemanticIndexer(rtrim((string) getenv('VELLUM_EVAL_MODELS'), '/').'/potion-base-8M', $this->cachePath().'/semantic'))->build($index)['set'];
     $ranker = new Ranker($index, new SemanticQuery($set->forGroups(['guest'])));
     $sections = array_map(static fn (array $record): array => [

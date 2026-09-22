@@ -105,7 +105,7 @@ final class Ranker
         usort($scored, static fn (array $a, array $b): int => $b['score'] <=> $a['score']);
         $results = self::spread($scored, $limit);
         $confidence = self::confidence($scored);
-        $threshold = (float) config('vellum.answers.card_threshold', 0.65);
+        $threshold = (float) config('vellum.answers.card_threshold', 0.75);
 
         return [
             'results' => $results,

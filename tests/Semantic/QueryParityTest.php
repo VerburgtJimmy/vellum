@@ -67,7 +67,7 @@ it('agrees with the committed query fixture', function (): void {
             'index' => [
                 'sections' => $index->sections,
                 'synonyms' => $index->synonymGroups(),
-                'threshold' => (float) config('vellum.answers.card_threshold', 0.65),
+                'threshold' => (float) config('vellum.answers.card_threshold', 0.75),
             ],
         ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR)."\n");
     }

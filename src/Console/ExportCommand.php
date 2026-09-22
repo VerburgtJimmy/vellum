@@ -356,7 +356,7 @@ HTML;
             [
                 'sections' => $guest->sections,
                 'synonyms' => $guest->synonymGroups(),
-                'threshold' => (float) config('vellum.answers.card_threshold', 0.65),
+                'threshold' => (float) config('vellum.answers.card_threshold', 0.75),
             ],
             JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE,
         ));

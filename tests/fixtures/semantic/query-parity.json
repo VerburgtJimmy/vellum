@@ -54,7 +54,7 @@
                 "#dark-mode"
             ],
             "confidence": 0.662116,
-            "card": "#dark-mode"
+            "card": null
         },
         "gating": {
             "ids": [
@@ -86,7 +86,7 @@
                 "gating#"
             ],
             "confidence": 0.713881,
-            "card": "#"
+            "card": null
         },
         "theme": {
             "ids": [
@@ -492,6 +492,6 @@
                 "invisible"
             ]
         ],
-        "threshold": 0.65
+        "threshold": 0.75
     }
 }

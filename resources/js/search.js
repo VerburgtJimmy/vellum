@@ -212,7 +212,7 @@ export function createRanker(answers, cosine = null) {
     })),
   )
   const groups = answers.synonyms ?? []
-  const threshold = answers.threshold ?? 0.65
+  const threshold = answers.threshold ?? 0.75
 
   return {
     sections,

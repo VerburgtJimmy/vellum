@@ -234,7 +234,7 @@ return [
         | third of questions get a card and 19 in 20 of those cards are right;
         | lower it for more cards and more of them wrong.
         */
-        'card_threshold' => 0.65,
+        'card_threshold' => 0.75,
 
         /*
         | Optional: have a language model write extra questions for each

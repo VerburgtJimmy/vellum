@@ -26,7 +26,7 @@ it('serves a guest only what a guest may read', function (): void {
     $body = (string) $response->getContent();
 
     expect(array_column($payload['sections'], 'id'))->toBe(['#'])
-        ->and($payload['threshold'])->toBe(0.65)
+        ->and($payload['threshold'])->toBe(0.75)
         ->and($payload['synonyms'])->toContain(['dark mode', 'dark theme', 'night mode', 'dark look'])
         ->and($body)->not->toContain('Refunds')
         ->and($body)->not->toContain('Supercalifragilistic')
