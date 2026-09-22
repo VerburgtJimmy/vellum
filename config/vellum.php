@@ -138,10 +138,20 @@ return [
     | strict: turn those warnings into a failed build. Worth switching on in
     | CI, which cannot pass --strict to whatever the deploy script runs.
     |
+    | search: run the questions in questions.yml, if the docs have one, against
+    | the index the build just wrote, and report how many find their answer in
+    | the top five results.
+    |
+    | search_min: the share of those questions that must find their answer, from
+    | 0 to 1, before the build is allowed to pass. 0 reports without failing.
+    | VELLUM_SEARCH_MIN sets it, so CI can demand more than a local build does.
+    |
     */
     'checks' => [
         'references' => true,
         'strict' => false,
+        'search' => true,
+        'search_min' => (float) env('VELLUM_SEARCH_MIN', 0.0),
     ],
 
     /*
@@ -160,11 +170,16 @@ return [
     | prefers text/markdown with the page's raw Markdown instead of HTML.
     | Page responses then send Vary: Accept so caches keep the two apart.
     |
+    | answer: serve {prefix}/_vellum/answer?q=, which runs the same search the
+    | browser runs and returns the answer and the top sections as JSON, for a
+    | client that cannot run it. It sees only what the caller may see.
+    |
     */
     'agents' => [
         'llms_txt' => true,
         'llms_txt_root' => true,
         'content_negotiation' => true,
+        'answer' => true,
     ],
 
     /*

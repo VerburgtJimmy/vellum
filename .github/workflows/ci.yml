@@ -63,6 +63,47 @@ jobs:
         if: matrix.laravel == '12.*'
         run: vendor/bin/phpstan analyse --memory-limit=512M
 
+  docs:
+    name: Docs build and search check
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          coverage: none
+          tools: composer:v2
+
+      - name: Install Composer dependencies
+        run: composer update --prefer-dist --no-interaction --no-progress
+
+      # The model is 30 MB and never changes for a given name, so it is worth
+      # a cache key of its own rather than a download on every run.
+      - name: Cache the embedding model
+        uses: actions/cache@v4
+        with:
+          path: storage/vellum/models
+          key: vellum-model-potion-base-8M
+
+      - name: Fetch the embedding model
+        run: vendor/bin/testbench vellum:model
+        env:
+          VELLUM_MODEL_PATH: storage/vellum/models
+
+      # The questions a model wrote are committed under docs/.vellum, so this
+      # needs no API key. --check-search asks docs/questions.yml and --strict
+      # fails on a link, an image or a question that points at nothing.
+      - name: Build the docs and ask the golden questions
+        run: vendor/bin/testbench vellum:build --check-search --strict
+        env:
+          VELLUM_PATH: docs
+          VELLUM_CHANGELOG: CHANGELOG.md
+          VELLUM_MODEL_PATH: storage/vellum/models
+          VELLUM_SEARCH_MIN: '0.65'
+
   assets:
     name: Frontend assets
     runs-on: ubuntu-latest

@@ -82,3 +82,40 @@ it('404s before the index is built', function (): void {
 
     $this->get('/docs/_vellum/answers.json')->assertNotFound();
 });
+
+it('answers one question as json, from what the caller may see', function (): void {
+    $guest = $this->get('/docs/_vellum/answer?q=install+the+package')->assertOk();
+    $payload = $guest->json();
+
+    expect($payload['query'])->toBe('install the package')
+        ->and(array_column($payload['results'], 'url'))->toBe(['/docs'])
+        ->and($guest->headers->get('content-type'))->toContain('application/json')
+        ->and($guest->headers->get('cache-control'))->toContain('private');
+
+    $member = $this->actingAs(new User)->get('/docs/_vellum/answer?q=refunds')->assertOk()->json();
+
+    expect(array_column($member['results'], 'url'))->toContain('/docs/billing');
+});
+
+it('never puts a gated page in an answer a guest asked for', function (): void {
+    $response = $this->get('/docs/_vellum/answer?q=how+long+do+refunds+take');
+
+    expect((string) $response->getContent())->not->toContain('Refunds')
+        ->and(array_column($response->json('results'), 'url'))->not->toContain('/docs/billing');
+});
+
+it('shows an answer card only when search is sure, by the same threshold', function (): void {
+    config(['vellum.answers.card_threshold' => 0.0]);
+    expect($this->get('/docs/_vellum/answer?q=install+the+package')->json('answer'))->not->toBeNull();
+
+    config(['vellum.answers.card_threshold' => 1.01]);
+    expect($this->get('/docs/_vellum/answer?q=install+the+package')->json('answer'))->toBeNull();
+});
+
+it('wants a question, and can be turned off', function (): void {
+    $this->get('/docs/_vellum/answer')->assertStatus(400);
+    $this->get('/docs/_vellum/answer?q=+')->assertStatus(400);
+
+    config(['vellum.agents.answer' => false]);
+    $this->get('/docs/_vellum/answer?q=install')->assertNotFound();
+});

@@ -29,7 +29,7 @@ package upgrade when you want the new stubs, and diff before you commit.
 ## vellum:build
 
 ```bash
-php artisan vellum:build [--docs-version=v1]
+php artisan vellum:build [--docs-version=v1] [--strict] [--check-search]
 ```
 
 Compiles every Markdown file into the cache at `vellum.cache.path`, then rebuilds the
@@ -45,6 +45,12 @@ cannot be resolved. It warns, without failing, when a page is shadowed by the ch
 route.
 
 `--docs-version` limits the run to a single version folder.
+
+`--strict` turns the warnings about links and images that point at nothing into a failed
+build, and `checks.strict` does the same for a deploy script you cannot pass flags to.
+
+`--check-search` asks the questions in `questions.yml`, if your docs have one, even when
+`checks.search` is off. See [Answers](/docs/answers#checking-search-in-ci).
 
 ## vellum:index
 

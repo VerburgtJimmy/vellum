@@ -56,3 +56,92 @@ Search is built at deploy time and runs in the reader's browser. Nothing is sent
 Each section carries a short answer taken from its own text: the first that applies of a shell command, the rows of a config table, the option row its heading names, an "X is ..." definition, or its opening sentence with the code block it introduces. A section with none of those falls back to the page description, a list, or a code block.
 
 See [Configuration](/docs/getting-started/configuration#answers) for every key.
+
+## Checking search in CI
+
+Search is content, and content rots. A heading that gets renamed, a section that gets split, a page that gets rewritten: any of them can move an answer out of reach without breaking a single link. Put a `questions.yml` next to your Markdown and the build will notice.
+
+```yaml
+- q: What does vellum:install publish?
+  page: commands
+  section: velluminstall
+- q: What should a deploy run?
+  page: commands
+  section: a-deploy
+  also:
+    - page: getting-started/installation
+      section: production
+```
+
+`q` is the question as a reader would type it. `page` is the page slug, and `section` the heading id that answers it; leave `section` off and any section of that page counts. `also` lists further places that answer it equally well. Any other keys are yours to use; Vellum ignores them.
+
+Every build asks them and reports:
+
+```
+search check: 43 of 58 questions answered in the top 5 (74%)
+  missed: How do I highlight lines in a code block? (wanted writing/code-blocks#highlighted-lines)
+```
+
+Set `checks.search_min` to the share that must be answered, and a build below it fails. Start by running it once and setting the minimum a little under what you get, so you find out when a rewrite costs you rather than when it drifts.
+
+A question whose target no longer exists is reported separately, as a broken question rather than a missed one, and left out of the count:
+
+```
+broken question: shortcut to open the search popup (nothing at search#minisearch)
+```
+
+That is the file being wrong, not search, and only you can fix it. `--strict` and `checks.strict` fail the build on one.
+
+The check reads the copy a guest gets, so it never depends on who is running the build. It is on by default and does nothing when there is no `questions.yml`; `vellum:build --check-search` runs it even with `checks.search` off.
+
+`VELLUM_SEARCH_MIN` sets the minimum too, so CI can demand more than a local build does. A run there needs the model, which never changes for a given name and is worth caching:
+
+```yaml
+- name: Cache the embedding model
+  uses: actions/cache@v4
+  with:
+    path: storage/vellum/models
+    key: vellum-model-potion-base-8M
+
+- run: php artisan vellum:model
+- run: php artisan vellum:build --check-search --strict
+  env:
+    VELLUM_SEARCH_MIN: '0.65'
+```
+
+With `docs/.vellum` committed, none of this needs an API key.
+
+:::note[Ordinary questions, not clever ones]
+Write down the questions people actually ask you, before you write the page that answers them. A file of twenty real questions is worth more than a hundred invented ones, and it is the only part of search you have to maintain by hand.
+:::
+
+## The answer endpoint
+
+`{prefix}/_vellum/answer?q=` runs the same search on the server and returns JSON, for a client that cannot run the browser's copy: an agent, a chat bot, a shell script.
+
+```
+GET /docs/_vellum/answer?q=what+does+vellum:clear+remove
+```
+
+```json
+{
+  "query": "what does vellum:clear remove",
+  "answer": {
+    "url": "/docs/commands#vellumclear",
+    "title": "Commands",
+    "heading": "vellum:clear",
+    "passage": "Removes the compiled pages, the navigation tree, the search index and the rendered component fragments.",
+    "updated": "2026-09-20T23:01:13+02:00",
+    "score": 1.01,
+    "answer": { "type": "command", "command": "php artisan vellum:clear" },
+    "confidence": 0.887
+  },
+  "results": []
+}
+```
+
+`answer` is the answer card, and is `null` when search is not sure enough, by the same `answers.card_threshold` the dialog uses, so a client can tell "here is the answer" from "here is where to look". `results` is the top five sections, each with its URL, heading path, passage and last-updated date. Add `version=` when versions are on, and an empty `q` is a 400.
+
+It answers from the copy the caller may see, like every other search route, so a gated page is not in the results and its text is not in the answer. Set `agents.answer` to `false` to turn it off.
+
+It is a route, so a [static export](/docs/export) does not have it. An exported site still searches in the browser from the files it ships.

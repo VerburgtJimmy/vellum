@@ -77,6 +77,16 @@ final class ContentRepository
     }
 
     /**
+     * Where the Markdown lives. A version's files sit in a folder under it.
+     */
+    public function contentPath(?string $version = null): string
+    {
+        return $version === null || $version === ''
+            ? $this->contentPath
+            : $this->contentPath.DIRECTORY_SEPARATOR.$version;
+    }
+
+    /**
      * What the image renderer could not resolve during this process.
      */
     public function imageReport(): ImageReport

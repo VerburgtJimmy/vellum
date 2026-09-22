@@ -564,3 +564,41 @@ it('skips llms.txt in the export when agents.llms_txt is off', function (): void
 
     $this->deleteDirectory($out);
 });
+
+it('asks the questions the docs say search must answer', function (): void {
+    $this->writeDoc('commands.md', "---\ntitle: Commands\n---\n## Build\n\nRun the build.\n\n```bash\nphp artisan vellum:build\n```\n");
+    file_put_contents($this->docsPath().'/questions.yml', "- q: how do i build the docs\n  page: commands\n  section: build\n- q: nothing answers this\n  page: commands\n  section: gone\n");
+
+    $this->artisan('vellum:build')
+        ->expectsOutputToContain('search check: 1 of 1 questions answered in the top 5 (100%)')
+        ->expectsOutputToContain('broken question: nothing answers this')
+        ->assertSuccessful();
+});
+
+it('fails the build when search answers fewer questions than checks.search_min asks for', function (): void {
+    config(['vellum.checks.search_min' => 0.9]);
+    $this->writeDoc('commands.md', "---\ntitle: Commands\n---\n## Build\n\nRun the build.\n");
+    $this->writeDoc('theming.md', "---\ntitle: Theming\n---\n## Radius\n\nRounded corners.\n");
+    file_put_contents($this->docsPath().'/questions.yml', "- q: rounded corners\n  page: commands\n  section: build\n");
+
+    $this->artisan('vellum:build')
+        ->expectsOutputToContain('below the 90% checks.search_min asks for')
+        ->assertFailed();
+});
+
+it('fails a strict build on a question whose target is gone', function (): void {
+    $this->writeDoc('commands.md', "---\ntitle: Commands\n---\n## Build\n\nRun the build.\n");
+    file_put_contents($this->docsPath().'/questions.yml', "- q: how do i build the docs\n  page: commands\n  section: gone\n");
+
+    $this->artisan('vellum:build')->assertSuccessful();
+    $this->artisan('vellum:build --strict')->assertFailed();
+});
+
+it('runs the questions on demand when checks.search is off', function (): void {
+    config(['vellum.checks.search' => false]);
+    $this->writeDoc('commands.md', "---\ntitle: Commands\n---\n## Build\n\nRun the build.\n");
+    file_put_contents($this->docsPath().'/questions.yml', "- q: how do i build the docs\n  page: commands\n  section: build\n");
+
+    $this->artisan('vellum:build')->doesntExpectOutputToContain('search check')->assertSuccessful();
+    $this->artisan('vellum:build --check-search')->expectsOutputToContain('search check: 1 of 1')->assertSuccessful();
+});

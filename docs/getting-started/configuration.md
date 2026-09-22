@@ -21,9 +21,12 @@ Published as `config/vellum.php`. **These names have been frozen since 0.5.** La
 | `fonts` | `null` | HTML injected into the layout head |
 | `checks.references` | `true` | Warn at build time about links and images that point at nothing |
 | `checks.strict` | `false` | Turn those warnings into a failed build |
+| `checks.search` | `true` | Ask the questions in `questions.yml`, if the docs have one, at build time. See [Answers](/docs/answers#checking-search-in-ci) |
+| `checks.search_min` | `env('VELLUM_SEARCH_MIN', 0.0)` | The share of those questions that must find their answer before the build passes. `0` reports without failing |
 | `agents.llms_txt` | `true` | Serve `llms.txt` and `llms-full.txt` under the docs prefix. See [Page actions](/docs/page-actions#for-agents) |
 | `agents.llms_txt_root` | `true` | Also serve both at `/llms.txt` and `/llms-full.txt`, unless the app routes those paths itself |
 | `agents.content_negotiation` | `true` | Serve a page's raw Markdown when the request's `Accept` header prefers `text/markdown` |
+| `agents.answer` | `true` | Serve `{prefix}/_vellum/answer?q=`, one question answered as JSON. See [Answers](/docs/answers#the-answer-endpoint) |
 | `cache.path` | `storage_path('framework/vellum')` | Compile cache |
 | `export.out` | `public_path('docs-static')` | Static export directory |
 | `export.base_url` | `/` | Prefix inside the export |

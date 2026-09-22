@@ -6,6 +6,7 @@ namespace Vellum\Console;
 
 use Illuminate\Console\Command;
 use Vellum\Answers\AnswersBuild;
+use Vellum\Answers\SearchCheck;
 use Vellum\Content\ContentRepository;
 use Vellum\Content\Document;
 use Vellum\Content\LastUpdated;
@@ -21,7 +22,8 @@ final class BuildCommand extends Command
 {
     protected $signature = 'vellum:build
         {--docs-version= : Compile a single version folder}
-        {--strict : Fail the build when a link or image points at nothing}';
+        {--strict : Fail the build when a link or image points at nothing}
+        {--check-search : Ask the questions in questions.yml even when checks.search is off}';
 
     protected $description = 'Compile Markdown docs into the Vellum cache';
 
@@ -52,7 +54,12 @@ final class BuildCommand extends Command
             (new ScoutIndexer)->sync($repository, $documents);
         }
 
-        (new AnswersBuild($this->line(...), $this->warn(...)))->run(
+        $searchFailures = (new AnswersBuild(
+            $this->line(...),
+            $this->warn(...),
+            forceCheck: (bool) $this->option('check-search'),
+            strict: $this->strict(),
+        ))->run(
             $repository,
             $documents,
             prune: $this->option('docs-version') === null,
@@ -87,6 +94,12 @@ final class BuildCommand extends Command
                 $label = $ver ?? 'default';
                 $this->line("  nav: {$label}");
             }
+        }
+
+        if ($searchFailures > 0) {
+            $this->error('Search did not answer the questions '.SearchCheck::FILE.' asks of it.');
+
+            return self::FAILURE;
         }
 
         if ($broken > 0 && $this->strict()) {

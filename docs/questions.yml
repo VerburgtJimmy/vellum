@@ -127,8 +127,8 @@
   section: requirements
   kind: literal
 - q: 'why not fumadocs or starlight'
-  page: why
-  section: compared-with-the-usual-choices
+  page: comparisons
+  section: outside-laravel
   kind: literal
 
 # Paraphrase
@@ -168,7 +168,7 @@
   kind: paraphrase
 - q: 'shortcut to open the search popup'
   page: search
-  section: minisearch
+  section: in-the-browser
   kind: paraphrase
 - q: 'send this page to claude or gpt with one click'
   page: page-actions
@@ -224,12 +224,12 @@
   section: vellumclear
   kind: paraphrase
 - q: 'what makes this worth picking over the react and astro ones'
-  page: why
-  section: compared-with-the-usual-choices
+  page: comparisons
+  section: outside-laravel
   kind: paraphrase
 - q: 'when should i not use this'
   page: why
-  section: when-another-tool-is-the-better-fit
+  section: what-it-does-not-do
   kind: paraphrase
 - q: 'moving up one minor release, anything that will bite me'
   page: getting-started/upgrade
