@@ -150,3 +150,14 @@ it('inserts custom href entries from meta.json', function (): void {
             'href' => '/docs/changelog',
         ]);
 });
+
+it('takes a folder title from _meta.md', function (): void {
+    $this->writeDoc('index.md', "---\ntitle: Home\n---\nHi");
+    $this->writeDoc('billing/_meta.md', "---\ntitle: Billing and invoices\n---\n");
+    $this->writeDoc('billing/invoices.md', "---\ntitle: Invoices\n---\nBody");
+
+    $repository = ContentRepository::fromConfig();
+    $folder = collect($repository->navigation())->firstWhere('type', 'folder');
+
+    expect($folder['title'])->toBe('Billing and invoices');
+});
