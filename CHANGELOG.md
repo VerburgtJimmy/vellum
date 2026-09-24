@@ -5,13 +5,15 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.6.3] - 2026-09-24
+
+Run `vellum:build` after upgrading, so the cached sidebar is rebuilt with the new access rules. If a page on your docs uses one of your own Blade components that shows something about the signed-in user, readers may have been shown someone else's: check what that component displays.
 
 ### Security
 
 - A page using one of your own Blade components could show one reader's output to the next. The rendered page was cached by its content alone, so a component that read the signed-in user, such as one using `@auth`, `@can` or `auth()->user()`, was rendered for the first reader and then served to everyone after them, guests included. A page with a host component is now rendered on every request, and only pages built from Vellum's own components are cached
 - A link listed in a gated folder's `meta.json` was shown to guests, and with it the folder's title, since a link defaulted to `guest` whatever folder it sat in. A link now takes its folder's access the way a page does, from `meta.json` or `_meta.md`, unless it sets `access` itself
-- A `meta.json` link to a gated page, such as `{ "title": "Plan", "slug": "internal/plan" }` at the top level, was shown to every reader in the sidebar and prev/next, and its URL was listed in `sitemap.xml`. The page itself stayed a 404. A link to a gated page is now shown only to readers who can open that page, and the sitemap leaves it out. Run `vellum:build` after upgrading so the cached sidebar is rebuilt
+- A `meta.json` link to a gated page, such as `{ "title": "Plan", "slug": "internal/plan" }` at the top level, was shown to every reader in the sidebar and prev/next, and its URL was listed in `sitemap.xml`. The page itself stayed a 404. A link to a gated page is now shown only to readers who can open that page, and the sitemap leaves it out
 - A `---Section---` heading over pages a reader could not see stayed in their sidebar when another heading followed it, and it then sat above the next section's pages instead. With `index, ---Acquisition Plans---, admin, ---Reference---, webhooks` and `admin` gated, a guest saw Acquisition Plans above Webhooks. Of two headings in a row, the second is now the one kept, as the docs already said
 - With the Scout driver, `vellum:build` only ever added and updated records, so a page that was deleted, renamed or moved into a gated folder kept its old record, content and `guest` access included. Each sync now empties the index and writes every version's pages, including under `--docs-version`
 
