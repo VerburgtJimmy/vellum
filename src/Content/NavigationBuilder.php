@@ -12,7 +12,7 @@ use Vellum\Support\VersionUrl;
 /**
  * Builds the sidebar navigation tree from folders, meta.json, and documents.
  *
- * @phpstan-type NavPage array{type: 'page', slug: string, title: string, description: string|null, icon: string|null, href: string, access: string, requires?: list<string>}
+ * @phpstan-type NavPage array{type: 'page', slug: string|null, title: string, description: string|null, icon: string|null, href: string, access: string, requires?: list<string>}
  * @phpstan-type NavSeparator array{type: 'separator', title: string}
  * @phpstan-type NavNode array<string, mixed>
  * @phpstan-type NavTree list<array<string, mixed>>
@@ -82,7 +82,12 @@ final class NavigationBuilder
      */
     public function adjacent(array $tree, string $slug): array
     {
-        $pages = $this->flattenPages($tree);
+        // A meta.json link to somewhere else is in the sidebar, but it is not
+        // a page to step through.
+        $pages = array_values(array_filter(
+            $this->flattenPages($tree),
+            static fn (array $page): bool => $page['slug'] !== null,
+        ));
         $index = null;
 
         foreach ($pages as $i => $page) {
@@ -516,10 +521,13 @@ final class NavigationBuilder
             return null;
         }
 
-        $slug = isset($entry['slug']) && is_string($entry['slug']) ? $entry['slug'] : '';
+        // Without a slug, a link names no page of these docs. It used to get
+        // an empty one, which is the docs home's, so the home page's sidebar
+        // entry and prev/next matched the link instead.
+        $slug = isset($entry['slug']) && is_string($entry['slug']) ? trim($entry['slug'], '/') : null;
         $href = isset($entry['href']) && is_string($entry['href']) && $entry['href'] !== ''
             ? SafeHref::of($entry['href'])
-            : ($slug !== '' ? $this->hrefForSlug($slug, null) : null);
+            : ($slug !== null ? $this->hrefForSlug($slug, null) : null);
 
         if ($href === null) {
             return null;
@@ -533,7 +541,7 @@ final class NavigationBuilder
         $access = isset($entry['access']) && is_string($entry['access']) && $entry['access'] !== ''
             ? Access::normalize($entry['access'])
             : Access::normalize((new Access)->inherited($absoluteFolder.DIRECTORY_SEPARATOR.'meta.json', $this->contentPath));
-        $target = isset($bySlug[$slug]) ? $bySlug[$slug]->access() : 'guest';
+        $target = $slug !== null && isset($bySlug[$slug]) ? $bySlug[$slug]->access() : 'guest';
 
         $node = [
             'type' => 'page',

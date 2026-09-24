@@ -255,3 +255,21 @@ it('gives a page named in a non-Latin script a URL of its own, not its folder in
 
     expect(array_column($folder['children'], 'slug'))->toEqualCanonicalizing(['guides', 'guides/入门']);
 });
+
+it('does not take a meta.json link for the docs home', function (): void {
+    $this->writeDoc('index.md', "---\ntitle: Home\n---\nHi");
+    $this->writeDoc('alpha.md', "---\ntitle: Alpha\n---\nA");
+    file_put_contents($this->docsPath().'/meta.json', json_encode([
+        'pages' => ['alpha', ['title' => 'GitHub', 'href' => 'https://github.com/example/repo'], 'index'],
+    ], JSON_THROW_ON_ERROR));
+
+    $repository = ContentRepository::fromConfig();
+    $adjacent = $repository->adjacent('');
+
+    expect($adjacent['previous']['title'] ?? null)->toBe('Alpha')
+        ->and($adjacent['next'])->toBeNull();
+
+    $html = (string) $this->get('/docs')->assertOk()->getContent();
+
+    expect($html)->not->toMatch('/href="https:\/\/github\.com\/example\/repo"[^>]*aria-current/');
+});
