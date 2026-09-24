@@ -20,6 +20,7 @@ Run `vellum:build` after upgrading, so the cached sidebar is rebuilt with the ne
 ### Fixed
 
 - The Scout driver did not work. `vellum:build` and `vellum:index` said `laravel/scout` was not installed even when it was, and a search would have looked for its records in a database table that does not exist. Search now reads the engine's own hits, from Meilisearch, Typesense or Algolia. `docs/search.md` covers the `version` filter a versioned site needs the engine to allow
+- Compiled pages, the sidebar and the search index were written straight over the old file, so a request reading a page while production compiled it on a cache miss could load half a file and fail. Each is now written to a temporary file and renamed into place, and a compiled PHP file is dropped from OPcache when it changes
 
 ## [0.6.2] - 2026-09-20
 

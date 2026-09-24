@@ -176,7 +176,7 @@ final class CompiledStore
         $path = $dir.DIRECTORY_SEPARATOR.'search-index-'.$hash.'.json';
         $latest = $dir.DIRECTORY_SEPARATOR.'search-index.json';
 
-        if (file_put_contents($path, $json) === false || file_put_contents($latest, $json) === false) {
+        if (! self::write($path, $json) || ! self::write($latest, $json)) {
             throw new \RuntimeException("Unable to write search index under [{$dir}]");
         }
     }
@@ -299,8 +299,35 @@ return {$export};
 
 PHP;
 
-        if (file_put_contents($path, $contents) === false) {
+        if (! self::write($path, $contents)) {
             throw new \RuntimeException("Unable to write compiled file [{$path}]");
         }
+    }
+
+    /**
+     * Write through a temporary file and rename it into place. Production
+     * compiles on a cache miss while other requests may be reading the same
+     * file, and a rename means a reader sees the old file or the new one,
+     * never half of either.
+     */
+    private static function write(string $path, string $contents): bool
+    {
+        $temporary = $path.'.'.bin2hex(random_bytes(6)).'.tmp';
+
+        if (file_put_contents($temporary, $contents) === false) {
+            return false;
+        }
+
+        if (! rename($temporary, $path)) {
+            @unlink($temporary);
+
+            return false;
+        }
+
+        if (str_ends_with($path, '.php') && function_exists('opcache_invalidate')) {
+            opcache_invalidate($path, true);
+        }
+
+        return true;
     }
 }

@@ -47,3 +47,16 @@ it('clears the compiled directory', function (): void {
 
     expect($store->exists('a'))->toBeFalse();
 });
+
+it('replaces a compiled file whole, leaving nothing half-written behind', function (): void {
+    $store = new CompiledStore($this->cachePath());
+    $page = static fn (string $title): Document => new Document(
+        slug: 'a', title: $title, html: str_repeat('<p>x</p>', 5000), headings: [], frontmatter: [], path: '/tmp/a.md', mtime: 1,
+    );
+
+    $store->put($page('First'));
+    $store->put($page('Second'));
+
+    expect($store->get('a')?->title)->toBe('Second')
+        ->and(glob($this->cachePath().'/*.tmp'))->toBe([]);
+});
