@@ -79,6 +79,17 @@ final class LinkChecker
         $previous = 1;
         $findings = [];
 
+        // A # heading is only dropped when it supplied the title. With a
+        // frontmatter title as well, the page ends up with two h1s.
+        if (preg_match('/<h1[\s>]/', $document->html) === 1) {
+            $findings[] = [
+                'kind' => 'heading',
+                'target' => '# heading',
+                'message' => 'the page has a frontmatter title and a # heading, so it renders two h1s; use ## or drop one',
+                'severity' => 'notice',
+            ];
+        }
+
         foreach ($document->headings as $heading) {
             $level = $heading['level'];
 

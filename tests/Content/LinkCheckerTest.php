@@ -222,3 +222,15 @@ it('marks broken links as errors and heading skips as notices', function (): voi
 
     expect($severities)->toEqualCanonicalizing(['link' => 'error', 'heading' => 'notice']);
 });
+
+it('reports a # heading under a frontmatter title, which renders a second h1', function (): void {
+    $this->writeDoc('start.md', "---\ntitle: Start\n---\n# Getting started\n\n## Two\n\nBody");
+    $this->writeDoc('plain.md', "# Plain\n\n## Two\n\nBody");
+
+    $found = findings($this);
+
+    expect($found)->toHaveCount(1)
+        ->and($found[0]['page'])->toBe('/docs/start')
+        ->and($found[0]['severity'])->toBe('notice')
+        ->and($found[0]['message'])->toContain('two h1s');
+});

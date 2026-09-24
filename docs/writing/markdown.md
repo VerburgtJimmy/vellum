@@ -33,6 +33,8 @@ de-duplicates so each link still lands somewhere.
 `#` is left to the page title. Set `title` in frontmatter; the layout renders the `h1`
 for you. If you open a page with a `# Heading` and no frontmatter title, that heading
 becomes the title and is removed from the body, so the page does not ship two `h1`s.
+With both a frontmatter title and a `# Heading`, the heading stays, and `vellum:build`
+says so.
 
 The table of contents is built from these headings. A page with none still keeps its
 column, so the text width does not jump between pages.
