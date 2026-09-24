@@ -137,3 +137,27 @@ it('emits a valid atom timestamp for every release', function (): void {
 
     unlink($changelog);
 });
+
+it('gives each release its own heading ids, so a link lands on that release', function (): void {
+    $changelog = (new ChangelogParser)->parse(<<<'MD'
+# Changelog
+
+## [1.1.0] - 2026-02-01
+
+### Fixed
+
+- Second
+
+## [1.0.0] - 2026-01-01
+
+### Fixed
+
+- First
+MD, '/tmp/CHANGELOG.md', 1_700_000_000);
+
+    [$newer, $older] = $changelog->releases;
+
+    expect($newer->html)->toContain('id="1.1.0-fixed"')
+        ->and($newer->html)->not->toContain('id="fixed"')
+        ->and($older->html)->toContain('id="1.0.0-fixed"');
+});

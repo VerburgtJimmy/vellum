@@ -24,6 +24,7 @@ Run `vellum:build` after upgrading, so the cached sidebar is rebuilt with the ne
 - `vellum:export` turned each page's canonical link and `og:url` into relative paths whenever `export.base_url` was `/`, the default, or the same origin as `app.url`, since it stripped `app.url` from the whole page. Search engines were told a different URL than `sitemap.xml` listed. Both now stay absolute
 - The redirect stubs `vellum:export` writes at a latest page's version-prefixed URL named the relative redirect target as their canonical. They now give the page's absolute URL, as the sitemap lists it, and leave the canonical out when there is no origin
 - With `route.domain` set, canonical links, `og:url` and `sitemap.xml` named the host in `app.url`, where the docs routes do not answer. They now use `route.domain` as the host, keeping the scheme from `app.url`. A domain with a `{parameter}` in it names no single host, so it still falls back to `app.url`
+- On the changelog page every release's Added, Changed and Fixed headings shared one id, so a link to a later release's Fixed landed on the first one on the page. Heading ids are now prefixed with their release, such as `0.6.3-fixed`
 
 ## [0.6.2] - 2026-09-20
 

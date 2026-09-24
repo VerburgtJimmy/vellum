@@ -54,7 +54,7 @@ final class ChangelogParser
             $end = $index + 1 < $count ? $matches[0][$index + 1][1] : strlen($markdown);
             $body = substr($markdown, $start, $end - $start);
             $parsed = $this->parseHeading($heading);
-            $html = $this->render($this->stripReferences($body), $refBlock);
+            $html = self::scopeHeadingIds($this->render($this->stripReferences($body), $refBlock), $parsed['id']);
 
             $release = new ChangelogRelease(
                 version: $parsed['version'],
@@ -123,6 +123,25 @@ final class ChangelogParser
             'date' => $date,
             'id' => $unreleased ? 'unreleased' : $version,
         ];
+    }
+
+    /**
+     * Every release has its own Added and Fixed, and each is rendered on its
+     * own, so their ids would repeat down the page and every #fixed link would
+     * land on the first. Prefix them with the release: 0.6.3-fixed.
+     */
+    private static function scopeHeadingIds(string $html, string $release): string
+    {
+        if (preg_match_all('/<h[1-6][^>]*\sid="([^"]+)"/', $html, $matches) < 1) {
+            return $html;
+        }
+
+        foreach (array_unique($matches[1]) as $id) {
+            $quoted = preg_quote($id, '/');
+            $html = preg_replace('/(\sid="|\shref="#)'.$quoted.'"/', '${1}'.$release.'-'.$id.'"', $html) ?? $html;
+        }
+
+        return $html;
     }
 
     /**
