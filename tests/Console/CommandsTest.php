@@ -523,3 +523,58 @@ it('keeps canonical and og:url absolute in an export, matching the sitemap', fun
         ->and($html)->toContain('<meta property="og:url" content="https://example.com/docs/guides/one">')
         ->and((string) file_get_contents($out.'/sitemap.xml'))->toContain('<loc>https://example.com/docs/guides/one</loc>');
 })->with(['/', 'https://example.com']);
+
+it('removes what an earlier export published and this one does not, and nothing else', function (): void {
+    $out = sys_get_temp_dir().'/vellum-tests/export-stale-'.$this->fixtureId();
+
+    if (is_dir($out)) {
+        $this->deleteDirectory($out);
+    }
+
+    config()->set('vellum.export.out', $out);
+
+    $this->writeDoc('index.md', "---\ntitle: Home\n---\nHi");
+    $plans = $this->writeDoc('plans.md', "---\ntitle: Plans\n---\nThe plan");
+    $this->writeDoc('old.md', "---\ntitle: Old\n---\nOld page");
+
+    $this->artisan('vellum:export')->assertSuccessful();
+
+    expect(is_file($out.'/docs/plans/index.html'))->toBeTrue()
+        ->and(is_file($out.'/docs/old/index.html'))->toBeTrue();
+
+    file_put_contents($out.'/CNAME', 'docs.example.com');
+    file_put_contents($plans, "---\ntitle: Plans\naccess: auth\n---\nThe plan");
+    unlink($this->docsPath().'/old.md');
+
+    $this->artisan('vellum:export')->assertSuccessful();
+
+    expect(is_file($out.'/docs/plans/index.html'))->toBeFalse()
+        ->and(is_file($out.'/docs/_vellum/raw/plans.md'))->toBeFalse()
+        ->and(is_dir($out.'/docs/old'))->toBeFalse()
+        ->and(is_file($out.'/docs/index.html'))->toBeTrue()
+        ->and(is_file($out.'/CNAME'))->toBeTrue();
+
+    $this->deleteDirectory($out);
+});
+
+it('only strips app.url where it is the origin of a link', function (): void {
+    $out = sys_get_temp_dir().'/vellum-tests/export-origin-'.$this->fixtureId();
+
+    if (is_dir($out)) {
+        $this->deleteDirectory($out);
+    }
+
+    config()->set('app.url', 'https://example.com');
+    config()->set('vellum.export.out', $out);
+
+    $this->writeDoc('index.md', "---\ntitle: Home\n---\nSee [pricing](https://example.com.au/pricing) and https://example.com/about in prose.");
+
+    $this->artisan('vellum:export')->assertSuccessful();
+
+    $html = (string) file_get_contents($out.'/docs/index.html');
+
+    expect($html)->toContain('href="https://example.com.au/pricing"')
+        ->and($html)->toContain('>https://example.com/about<');
+
+    $this->deleteDirectory($out);
+});

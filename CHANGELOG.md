@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.6.3] - 2026-09-24
 
-Run `vellum:build` after upgrading, so the cached sidebar is rebuilt with the new access rules. If a page on your docs uses one of your own Blade components that shows something about the signed-in user, readers may have been shown someone else's: check what that component displays.
+Run `vellum:build` after upgrading, so the sidebar is rebuilt with the new access rules and compiled pages move into their own folder. If you export into the same directory each time, delete it once before the next export, so pages dropped since the last one are gone. If a page on your docs uses one of your own Blade components that shows something about the signed-in user, readers may have been shown someone else's: check what that component displays.
 
 ### Security
 
@@ -18,6 +18,7 @@ Run `vellum:build` after upgrading, so the cached sidebar is rebuilt with the ne
 - With the Scout driver, `vellum:build` only ever added and updated records, so a page that was deleted, renamed or moved into a gated folder kept its old record, content and `guest` access included. Each sync now empties the index and writes every version's pages, including under `--docs-version`
 - A page named `nav.md` or `manifest.md` was compiled to the same file as the sidebar or the build manifest, so visiting `/docs/nav` overwrote the sidebar and every page then failed with a 500 until the next build. Compiled pages now live in a `pages` folder of their own inside `cache.path`
 - A page whose file was deleted, or whose `slug` changed, kept being served from the compiled cache after `vellum:build`, and in local too. A page moved behind a gate by giving it a new slug stayed public at its old URL. `vellum:build` now removes compiled pages it did not produce, and local stops serving a page once its file is gone
+- `vellum:export` into a directory that held an earlier export left every page it no longer wrote in place, so a page gated or deleted since stayed published even though the command logged it as dropped. An export now keeps a list of what it wrote in `.vellum-export.json` and removes what the last one wrote and this one did not. Nothing it did not write is touched. An export made before 0.6.3 has no list, so delete that directory once before exporting into it again
 
 ### Fixed
 
@@ -27,6 +28,7 @@ Run `vellum:build` after upgrading, so the cached sidebar is rebuilt with the ne
 - The redirect stubs `vellum:export` writes at a latest page's version-prefixed URL named the relative redirect target as their canonical. They now give the page's absolute URL, as the sitemap lists it, and leave the canonical out when there is no origin
 - With `route.domain` set, canonical links, `og:url` and `sitemap.xml` named the host in `app.url`, where the docs routes do not answer. They now use `route.domain` as the host, keeping the scheme from `app.url`. A domain with a `{parameter}` in it names no single host, so it still falls back to `app.url`
 - On the changelog page every release's Added, Changed and Fixed headings shared one id, so a link to a later release's Fixed landed on the first one on the page. Heading ids are now prefixed with their release, such as `0.6.3-fixed`
+- `vellum:export` removed `app.url` wherever it appeared in a page, so `https://example.com.au/pricing` became `.au/pricing` when `app.url` was `https://example.com`. It is now only removed where it is the whole origin at the start of a link
 - A page with both a frontmatter `title` and a `# Heading` in its body rendered two `h1`s without a word. `vellum:build` now reports it next to heading level skips, as a notice that never fails a build
 - Every docs page walked the whole docs directory three times per request, in production too, to decide whether the sidebar had changed, and then used the built sidebar whatever the answer. Production now serves the sidebar `vellum:build` wrote without looking, and a request loads it once.
 - In local, the sidebar was only rebuilt when a file changed size, so reordering `meta.json` from `"order": 2` to `"order": 3` left the old order in place. A changed modification time now counts too

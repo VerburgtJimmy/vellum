@@ -26,6 +26,19 @@ final class ExportCommand extends Command
 
     protected $description = 'Export documentation to a static HTML folder';
 
+    /**
+     * The list of files an export wrote, kept at the export root so the next
+     * export can remove the ones it no longer writes.
+     */
+    private const MANIFEST = '.vellum-export.json';
+
+    /**
+     * Every file this run wrote, by absolute path.
+     *
+     * @var array<string, true>
+     */
+    private array $written = [];
+
     public function __construct(
         private readonly ViewFactory $view,
         private readonly HeadingExtractor $headingExtractor = new HeadingExtractor,
@@ -36,6 +49,7 @@ final class ExportCommand extends Command
     public function handle(): int
     {
         $started = microtime(true);
+        $this->written = [];
         $repository = ContentRepository::fromConfig();
         $documents = $repository->buildAll();
 
@@ -110,6 +124,7 @@ final class ExportCommand extends Command
         $this->copyDist($packageRoot, $out);
         $this->copyContentFiles((string) config('vellum.path'), $prefixRoot);
         $this->writeSearchIndexes($repository, $prefixRoot);
+        $this->removeStaleFiles($out);
 
         $elapsed = round((microtime(true) - $started) * 1000);
 
@@ -288,6 +303,7 @@ HTML;
 
         foreach (File::files($source) as $file) {
             copy($file->getPathname(), $target.DIRECTORY_SEPARATOR.$file->getFilename());
+            $this->written[$target.DIRECTORY_SEPARATOR.$file->getFilename()] = true;
         }
     }
 
@@ -327,6 +343,7 @@ HTML;
             }
 
             copy($file->getPathname(), $destination);
+            $this->written[$destination] = true;
         }
     }
 
@@ -392,8 +409,10 @@ HTML;
 
         $appUrl = rtrim((string) config('app.url', ''), '/');
 
+        // Only where app.url starts an attribute or url() value and is the
+        // whole origin, so https://example.com.au and prose are left alone.
         if ($appUrl !== '') {
-            $html = str_replace($appUrl, '', $html);
+            $html = preg_replace('#(?<=["\'(])'.preg_quote($appUrl, '#').'(?=[/"\'?\#)])#', '', $html) ?? $html;
         }
 
         $relativeRoot = $rootRelative
@@ -538,6 +557,52 @@ HTML;
 
         if (file_put_contents($path, $contents) === false) {
             throw new \RuntimeException('Unable to write file: '.$path);
+        }
+
+        $this->written[$path] = true;
+    }
+
+    /**
+     * Delete what the last export wrote and this one did not: a page that was
+     * deleted, renamed or gated since must not stay published. Only files
+     * named in the last export's manifest are touched, never anything else in
+     * the directory.
+     */
+    private function removeStaleFiles(string $out): void
+    {
+        $root = rtrim(str_replace('\\', '/', $out), '/');
+        $manifest = $root.'/'.self::MANIFEST;
+        $current = [];
+
+        foreach (array_keys($this->written) as $path) {
+            $current[ltrim(substr(str_replace('\\', '/', $path), strlen($root)), '/')] = true;
+        }
+
+        $previous = is_file($manifest) ? json_decode((string) file_get_contents($manifest), true) : null;
+
+        foreach (is_array($previous) ? $previous : [] as $relative) {
+            if (! is_string($relative) || isset($current[$relative]) || $relative === '' || str_contains($relative, '..')) {
+                continue;
+            }
+
+            $path = $root.'/'.$relative;
+
+            if (is_file($path)) {
+                unlink($path);
+                $this->removeEmptyParents(dirname($path), $root);
+            }
+        }
+
+        $list = array_keys($current);
+        sort($list);
+        file_put_contents($manifest, json_encode($list, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)."\n");
+    }
+
+    private function removeEmptyParents(string $directory, string $root): void
+    {
+        while ($directory !== $root && str_starts_with($directory, $root.'/') && is_dir($directory) && (scandir($directory) ?: []) === ['.', '..']) {
+            rmdir($directory);
+            $directory = dirname($directory);
         }
     }
 }
