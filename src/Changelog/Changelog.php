@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Vellum\Changelog;
 
+use Illuminate\Support\Facades\Cache;
+use Vellum\Cache\FragmentCache;
+
 /**
  * A parsed Keep a Changelog file ready for the docs page and Atom feed.
  *
@@ -37,16 +40,75 @@ final readonly class Changelog
             return null;
         }
 
+        $mtime = (int) filemtime($configured);
+
+        // Parsing and rendering the whole file took longer than serving a
+        // page, on every request to the page and the feed. Keep the result
+        // until the file, the settings that shape it, or vellum:clear change.
+        $key = 'vellum:changelog:'.hash('xxh128', (string) json_encode([
+            $configured,
+            $mtime,
+            filesize($configured),
+            config('vellum.components'),
+            config('vellum.route'),
+            config('app.url'),
+            (new FragmentCache)->generation(),
+        ]));
+
+        // Stored as plain arrays: an app may forbid objects in its cache
+        // with cache.serializable_classes.
+        $cached = Cache::get($key);
+
+        if (is_array($cached)) {
+            return self::fromArray($cached);
+        }
+
         $markdown = file_get_contents($configured);
 
         if ($markdown === false) {
             return null;
         }
 
-        return (new ChangelogParser)->parse(
-            $markdown,
-            $configured,
-            (int) filemtime($configured),
+        $changelog = (new ChangelogParser)->parse($markdown, $configured, $mtime);
+        Cache::put($key, $changelog->toArray(), now()->addDay());
+
+        return $changelog;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function toArray(): array
+    {
+        return [
+            'title' => $this->title,
+            'introHtml' => $this->introHtml,
+            'markdown' => $this->markdown,
+            'releases' => array_map(static fn (ChangelogRelease $release): array => (array) $release, $this->releases),
+            'headings' => $this->headings,
+            'path' => $this->path,
+            'mtime' => $this->mtime,
+        ];
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     */
+    public static function fromArray(array $data): self
+    {
+        /** @var list<array{version: string, unreleased: bool, date: string|null, id: string, html: string, url: string|null}> $releases */
+        $releases = $data['releases'];
+        /** @var list<HeadingData> $headings */
+        $headings = $data['headings'];
+
+        return new self(
+            title: (string) $data['title'],
+            introHtml: (string) $data['introHtml'],
+            markdown: (string) $data['markdown'],
+            releases: array_map(static fn (array $release): ChangelogRelease => new ChangelogRelease(...$release), $releases),
+            headings: $headings,
+            path: (string) $data['path'],
+            mtime: (int) $data['mtime'],
         );
     }
 

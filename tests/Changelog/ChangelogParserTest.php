@@ -161,3 +161,47 @@ MD, '/tmp/CHANGELOG.md', 1_700_000_000);
         ->and($newer->html)->not->toContain('id="fixed"')
         ->and($older->html)->toContain('id="1.0.0-fixed"');
 });
+
+it('does not split a release on a ## line inside a code block', function (): void {
+    $changelog = (new ChangelogParser)->parse(<<<'MD'
+# Changelog
+
+## [1.1.0] - 2026-02-01
+
+Headings now render like this:
+
+```markdown
+## Not a release
+```
+
+- After the example
+
+## [1.0.0] - 2026-01-01
+
+- First
+MD, '/tmp/CHANGELOG.md', 1_700_000_000);
+
+    expect(array_map(static fn ($release): string => $release->version, $changelog->releases))->toBe(['1.1.0', '1.0.0'])
+        ->and($changelog->releases[0]->html)->toContain('After the example');
+});
+
+it('reads a yanked release and keeps ids fit for a url', function (): void {
+    $changelog = (new ChangelogParser)->parse(<<<'MD'
+# Changelog
+
+## [1.2.0] - 2026-09-13 [YANKED]
+
+- Pulled
+
+## 1.0.0 beta - 2026-01-01
+
+- Early
+MD, '/tmp/CHANGELOG.md', 1_700_000_000);
+
+    [$yanked, $beta] = $changelog->releases;
+
+    expect($yanked->version)->toBe('1.2.0 [YANKED]')
+        ->and($yanked->date)->toBe('2026-09-13')
+        ->and($yanked->id)->toBe('1.2.0')
+        ->and($beta->id)->toBe('1.0.0-beta');
+});

@@ -75,7 +75,7 @@ final class FragmentCache
         return self::PREFIX.$this->generation().':'.hash('xxh128', $payload);
     }
 
-    private function generation(): int
+    public function generation(): int
     {
         return (int) Cache::get(self::GENERATION, 0);
     }

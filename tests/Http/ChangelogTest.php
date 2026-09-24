@@ -1,6 +1,7 @@
 <?php
 
 declare(strict_types=1);
+use Vellum\Changelog\Changelog;
 
 it('hides unreleased from the changelog page and feed by default', function (): void {
     $path = sys_get_temp_dir().'/vellum-tests/changelog-'.$this->fixtureId().'.md';
@@ -48,7 +49,8 @@ MD);
         ->and($xml)->toContain('0.1.0')
         ->and($xml)->toContain('Second release')
         ->and($xml)->not->toContain('Not shipped yet')
-        ->and($xml)->not->toContain('Unreleased');
+        ->and($xml)->not->toContain('Unreleased')
+        ->and($xml)->toMatch('/<author><name>[^<]+<\/name><\/author>/');
 
     unlink($path);
 });
@@ -127,4 +129,22 @@ it('falls through to a docs changelog page when the file changelog is disabled',
         ->assertDontSee('data-vellum-changelog', false);
 
     $this->get('/docs/changelog.atom')->assertNotFound();
+});
+
+it('serves the changelog from the cache until the file changes', function (): void {
+    $path = $this->cachePath().'/CHANGELOG-cached.md';
+    @mkdir(dirname($path), 0755, true);
+    file_put_contents($path, "# Changelog\n\n## [1.0.0] - 2026-01-01\n\n- First\n");
+    config()->set('vellum.changelog.path', $path);
+
+    expect(Changelog::load()?->releases[0]->version)->toBe('1.0.0')
+        ->and(Changelog::load()?->releases[0]->html)->toContain('First');
+
+    file_put_contents($path, "# Changelog\n\n## [1.1.0] - 2026-02-01\n\n- Second\n\n## [1.0.0] - 2026-01-01\n\n- First\n");
+    touch($path, time() + 10);
+    clearstatcache();
+
+    expect(Changelog::load()?->releases[0]->version)->toBe('1.1.0');
+
+    unlink($path);
 });
