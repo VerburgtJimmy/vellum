@@ -160,8 +160,15 @@ final class SearchVisibility
 
         foreach ($tree as $node) {
             if (($node['type'] ?? null) === 'separator') {
-                if ($trimmed === [] || ($trimmed[array_key_last($trimmed)]['type'] ?? null) === 'separator') {
+                if ($trimmed === []) {
                     continue;
+                }
+
+                // Two headings in a row mean everything under the first was
+                // hidden. Keep the second, which heads what follows; the first
+                // names a section this reader cannot see.
+                if (($trimmed[array_key_last($trimmed)]['type'] ?? null) === 'separator') {
+                    array_pop($trimmed);
                 }
 
                 $trimmed[] = $node;
