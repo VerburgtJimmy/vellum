@@ -245,9 +245,10 @@ return [
 
         /*
         | How sure search has to be of its top result before it shows it as an
-        | answer card above the results, from 0 to 1. At the default, about a
-        | third of questions get a card and 19 in 20 of those cards are right;
-        | lower it for more cards and more of them wrong.
+        | answer card above the results, from 0 to 1. At the default, about one
+        | question in five gets a card, and on Vellum's own question sets 22 of
+        | 25 cards named the right section; lower it for more cards and more of
+        | them wrong.
         */
         'card_threshold' => 0.75,
 
