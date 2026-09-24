@@ -140,6 +140,7 @@ final class ContentRepository
             $documents[] = $this->compileFile($source['path'], $source['slug'], $source['version']);
         }
 
+        $this->store->prunePages(array_map('strval', array_keys($seen)), $version);
         $this->rebuildNavAndSearch($documents, $version);
 
         return $documents;
@@ -243,6 +244,7 @@ final class ContentRepository
             'directory_hash' => $navBuilder->directoryHash($version),
             'search_hash' => $search['hash'],
             'version' => $version,
+            'complete' => true,
         ], $version);
     }
 
@@ -283,10 +285,16 @@ final class ContentRepository
             return $compiled;
         }
 
+        if ($compiled === null && $this->servesBuildOnly($version)) {
+            return null;
+        }
+
         $sourcePath = $this->resolveSourcePath($slug, $version);
 
+        // The source is gone, so the compiled copy is of a page that no longer
+        // exists.
         if ($sourcePath === null) {
-            return $compiled;
+            return null;
         }
 
         return $this->compileFile($sourcePath, $slug, $version);
@@ -418,7 +426,8 @@ final class ContentRepository
         $hrefs = [];
 
         foreach ($this->versions as $version) {
-            $targetSlug = $this->store->exists($slug, $version) || $this->resolveSourcePath($slug, $version) !== null
+            $targetSlug = $this->store->exists($slug, $version)
+                || (! $this->servesBuildOnly($version) && $this->resolveSourcePath($slug, $version) !== null)
                 ? $slug
                 : '';
 
@@ -563,6 +572,16 @@ final class ContentRepository
             assetPrefix: $version,
             imageReport: $this->imageReport,
         ));
+    }
+
+    /**
+     * Production serves what the build compiled. Once a build has run, a slug
+     * it did not compile is not a page, and finding that out from the sources
+     * would read every file's frontmatter on every 404.
+     */
+    private function servesBuildOnly(?string $version): bool
+    {
+        return ! $this->isLocal && ($this->store->getManifest($version)['complete'] ?? false);
     }
 
     private function shouldRecompile(Document $document): bool

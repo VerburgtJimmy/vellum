@@ -16,6 +16,8 @@ Run `vellum:build` after upgrading, so the cached sidebar is rebuilt with the ne
 - A `meta.json` link to a gated page, such as `{ "title": "Plan", "slug": "internal/plan" }` at the top level, was shown to every reader in the sidebar and prev/next, and its URL was listed in `sitemap.xml`. The page itself stayed a 404. A link to a gated page is now shown only to readers who can open that page, and the sitemap leaves it out
 - A `---Section---` heading over pages a reader could not see stayed in their sidebar when another heading followed it, and it then sat above the next section's pages instead. With `index, ---Acquisition Plans---, admin, ---Reference---, webhooks` and `admin` gated, a guest saw Acquisition Plans above Webhooks. Of two headings in a row, the second is now the one kept, as the docs already said
 - With the Scout driver, `vellum:build` only ever added and updated records, so a page that was deleted, renamed or moved into a gated folder kept its old record, content and `guest` access included. Each sync now empties the index and writes every version's pages, including under `--docs-version`
+- A page named `nav.md` or `manifest.md` was compiled to the same file as the sidebar or the build manifest, so visiting `/docs/nav` overwrote the sidebar and every page then failed with a 500 until the next build. Compiled pages now live in a `pages` folder of their own inside `cache.path`
+- A page whose file was deleted, or whose `slug` changed, kept being served from the compiled cache after `vellum:build`, and in local too. A page moved behind a gate by giving it a new slug stayed public at its old URL. `vellum:build` now removes compiled pages it did not produce, and local stops serving a page once its file is gone
 
 ### Fixed
 
@@ -29,6 +31,7 @@ Run `vellum:build` after upgrading, so the cached sidebar is rebuilt with the ne
 - Every docs page walked the whole docs directory three times per request, in production too, to decide whether the sidebar had changed, and then used the built sidebar whatever the answer. Production now serves the sidebar `vellum:build` wrote without looking, and a request loads it once.
 - In local, the sidebar was only rebuilt when a file changed size, so reordering `meta.json` from `"order": 2` to `"order": 3` left the old order in place. A changed modification time now counts too
 - HTML, JSON and assets are gzipped at level 6 rather than 9, which is about three times faster for output 1.5% larger
+- Outside `local`, a request for a page the build had not compiled read the frontmatter of every Markdown file to look for it, so every 404, from a mistyped link or a bot, cost a scan of the whole docs directory. Once `vellum:build` has run, production serves what it compiled and answers anything else with a 404 straight away. A page added since the last build is served once it is built, as the sidebar already worked
 
 ## [0.6.2] - 2026-09-20
 

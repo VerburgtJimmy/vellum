@@ -15,8 +15,8 @@ it('builds all documents via artisan', function (): void {
         ->expectsOutputToContain('Compiled 2 documents')
         ->assertSuccessful();
 
-    expect(is_file($this->cachePath().'/index.php'))->toBeTrue()
-        ->and(is_file($this->cachePath().'/guides/one.php'))->toBeTrue();
+    expect(is_file($this->cachePath().'/pages/index.php'))->toBeTrue()
+        ->and(is_file($this->cachePath().'/pages/guides/one.php'))->toBeTrue();
 });
 
 it('warns once when the configured preset was removed in 0.5', function (): void {
@@ -43,13 +43,13 @@ it('clears the cache via artisan', function (): void {
     $this->writeDoc('index.md', "---\ntitle: Home\n---\nHi");
 
     $this->artisan('vellum:build')->assertSuccessful();
-    expect(is_file($this->cachePath().'/index.php'))->toBeTrue();
+    expect(is_file($this->cachePath().'/pages/index.php'))->toBeTrue();
 
     $this->artisan('vellum:clear')
         ->expectsOutputToContain('Vellum cache cleared')
         ->assertSuccessful();
 
-    expect(is_file($this->cachePath().'/index.php'))->toBeFalse();
+    expect(is_file($this->cachePath().'/pages/index.php'))->toBeFalse();
 });
 
 it('clears the island fragment cache via artisan', function (): void {
@@ -82,11 +82,11 @@ it('clears the island fragment cache via artisan', function (): void {
 it('clears vellum caches from optimize:clear', function (): void {
     $this->writeDoc('index.md', "---\ntitle: Home\n---\nHi");
     $this->artisan('vellum:build')->assertSuccessful();
-    expect(is_file($this->cachePath().'/index.php'))->toBeTrue();
+    expect(is_file($this->cachePath().'/pages/index.php'))->toBeTrue();
 
     $this->artisan('optimize:clear')->assertSuccessful();
 
-    expect(is_file($this->cachePath().'/index.php'))->toBeFalse();
+    expect(is_file($this->cachePath().'/pages/index.php'))->toBeFalse();
 });
 
 it('installs config stubs and public assets', function (): void {

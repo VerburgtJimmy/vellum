@@ -99,11 +99,11 @@ it('renders configured version labels in the switcher', function (): void {
 it('compiles on demand when the cache is cold', function (): void {
     $this->writeDoc('cold.md', "---\ntitle: Cold\n---\nCached later");
 
-    expect(is_file($this->cachePath().'/cold.php'))->toBeFalse();
+    expect(is_file($this->cachePath().'/pages/cold.php'))->toBeFalse();
 
     $this->get('/docs/cold')->assertOk()->assertSee('Cold', false);
 
-    expect(is_file($this->cachePath().'/cold.php'))->toBeTrue();
+    expect(is_file($this->cachePath().'/pages/cold.php'))->toBeTrue();
 });
 
 it('serves raw markdown for the current page', function (): void {
@@ -169,7 +169,7 @@ MD);
         ->assertOk()
         ->assertSee('Alpha', false);
 
-    $compiled = file_get_contents($this->cachePath().'/index.php');
+    $compiled = file_get_contents($this->cachePath().'/pages/index.php');
     expect($compiled)->toContain('VELLUMISLAND')
         ->and($compiled)->toContain('vellum::config')
         ->and($compiled)->not->toContain('Alpha');
@@ -180,4 +180,49 @@ MD);
         ->assertOk()
         ->assertSee('Beta', false)
         ->assertDontSee('Alpha', false);
+});
+
+it('keeps a page called nav or manifest from overwriting the sidebar', function (): void {
+    $this->writeDoc('index.md', "---\ntitle: Home\n---\nHi");
+    $this->writeDoc('nav.md', "---\ntitle: Nav\n---\nAbout navigation");
+    $this->writeDoc('manifest.md', "---\ntitle: Manifest\n---\nAbout manifests");
+
+    $this->artisan('vellum:build')->assertSuccessful();
+
+    $this->get('/docs/nav')->assertOk()->assertSee('About navigation', false);
+    $this->get('/docs/manifest')->assertOk()->assertSee('About manifests', false);
+    $this->get('/docs')->assertOk()->assertSee('Nav', false)->assertSee('Manifest', false);
+});
+
+it('stops serving a page whose file was deleted once the docs are built again', function (): void {
+    $this->writeDoc('index.md', "---\ntitle: Home\n---\nHi");
+    $secret = $this->writeDoc('secret.md', "---\ntitle: Secret\n---\nOld body");
+    $this->writeDoc('renamed.md', "---\ntitle: Renamed\nslug: before\n---\nSlugged");
+
+    $this->artisan('vellum:build')->assertSuccessful();
+    $this->get('/docs/secret')->assertOk();
+    $this->get('/docs/before')->assertOk();
+
+    unlink($secret);
+    $this->writeDoc('renamed.md', "---\ntitle: Renamed\nslug: after\n---\nSlugged");
+
+    $this->artisan('vellum:build')->assertSuccessful();
+
+    $this->get('/docs/secret')->assertNotFound();
+    $this->get('/docs/before')->assertNotFound();
+    $this->get('/docs/after')->assertOk();
+});
+
+it('serves only the pages the build compiled outside local', function (): void {
+    $this->writeDoc('index.md', "---\ntitle: Home\n---\nHi");
+
+    $this->artisan('vellum:build')->assertSuccessful();
+
+    $this->writeDoc('late.md', "---\ntitle: Late\n---\nAdded after the build");
+
+    $this->get('/docs/late')->assertNotFound();
+
+    $this->artisan('vellum:build')->assertSuccessful();
+
+    $this->get('/docs/late')->assertOk();
 });

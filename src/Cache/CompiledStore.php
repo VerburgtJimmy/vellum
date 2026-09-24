@@ -15,7 +15,8 @@ use Vellum\Support\Slug;
  * @phpstan-type Manifest array{
  *     directory_hash: string,
  *     search_hash: string,
- *     version: string|null
+ *     version: string|null,
+ *     complete?: bool
  * }
  */
 final class CompiledStore
@@ -36,9 +37,52 @@ final class CompiledStore
         }
 
         $file = ($slug === '' ? 'index' : $slug).'.php';
-        $dir = $this->versionPath($version);
 
-        return $dir.DIRECTORY_SEPARATOR.str_replace('/', DIRECTORY_SEPARATOR, $file);
+        return $this->pagesPath($version).DIRECTORY_SEPARATOR.str_replace('/', DIRECTORY_SEPARATOR, $file);
+    }
+
+    /**
+     * Compiled pages live apart from the sidebar, manifest and search index,
+     * so a page called nav.md or manifest.md cannot overwrite them.
+     */
+    public function pagesPath(?string $version = null): string
+    {
+        return $this->versionPath($version).DIRECTORY_SEPARATOR.'pages';
+    }
+
+    /**
+     * Delete compiled pages a build did not produce: a page whose file was
+     * deleted, renamed or given a new slug must stop being served.
+     *
+     * @param  list<string>  $slugs
+     */
+    public function prunePages(array $slugs, ?string $version = null): void
+    {
+        $root = $this->pagesPath($version);
+
+        if (! is_dir($root)) {
+            return;
+        }
+
+        $keep = [];
+
+        foreach ($slugs as $slug) {
+            $keep[$this->pathFor($slug, $version)] = true;
+        }
+
+        $iterator = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($root, \FilesystemIterator::SKIP_DOTS),
+            \RecursiveIteratorIterator::CHILD_FIRST,
+        );
+
+        foreach ($iterator as $file) {
+            /** @var \SplFileInfo $file */
+            if ($file->isDir()) {
+                @rmdir($file->getPathname());
+            } elseif (! isset($keep[$file->getPathname()])) {
+                unlink($file->getPathname());
+            }
+        }
     }
 
     public function versionPath(?string $version = null): string
@@ -241,6 +285,7 @@ final class CompiledStore
             'directory_hash' => $data['directory_hash'],
             'search_hash' => $data['search_hash'],
             'version' => isset($data['version']) && is_string($data['version']) ? $data['version'] : null,
+            'complete' => ($data['complete'] ?? false) === true,
         ];
     }
 

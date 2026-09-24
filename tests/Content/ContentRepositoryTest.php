@@ -194,3 +194,19 @@ it('rebuilds the local sidebar when an edit keeps the file the same size', funct
 
     expect(array_column($repository()->navigation(), 'title'))->toBe(['Beta', 'Alpha']);
 });
+
+it('forgets a page in local as soon as its file is deleted', function (): void {
+    $path = $this->writeDoc('gone.md', "---\ntitle: Gone\n---\nBody");
+
+    $repository = new ContentRepository(
+        contentPath: $this->docsPath(),
+        store: new CompiledStore($this->cachePath()),
+        isLocal: true,
+    );
+
+    expect($repository->find('gone'))->not->toBeNull();
+
+    unlink($path);
+
+    expect($repository->find('gone'))->toBeNull();
+});
