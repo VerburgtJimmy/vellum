@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Illuminate\Auth\GenericUser;
+use Vellum\Search\SearchDriver;
 
 it('serves a filtered MiniSearch index from a package route', function (): void {
     $this->writeDoc('index.md', "---\ntitle: Home\n---\nHello");
@@ -128,8 +129,14 @@ it('fails when scout is configured but laravel/scout is not installed', function
 
     $this->withoutExceptionHandling();
 
-    expect(fn () => $this->get('/docs/_vellum/search.json'))
-        ->toThrow(RuntimeException::class, 'laravel/scout is not installed');
+    SearchDriver::$scoutTrait = 'Laravel\\Scout\\Missing';
+
+    try {
+        expect(fn () => $this->get('/docs/_vellum/search.json'))
+            ->toThrow(RuntimeException::class, 'laravel/scout is not installed');
+    } finally {
+        SearchDriver::$scoutTrait = 'Laravel\\Scout\\Searchable';
+    }
 });
 
 it('writes nav.php during build', function (): void {

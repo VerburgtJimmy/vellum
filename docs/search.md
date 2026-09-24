@@ -32,6 +32,20 @@ composer require laravel/scout
 
 Set `VELLUM_SEARCH_DRIVER=scout`. The same visibility filter runs at query time. `vellum:build` and `vellum:index` sync Scout when that driver is on.
 
+Each sync replaces the whole index, every version included, so a page you delete, rename or gate does not keep its old record. Keep the index to Vellum alone: `search.scout.index` names it, `vellum` by default.
+
+With versions on, a search is filtered by `version`, which the engine has to allow. For Meilisearch, add it to the index settings in `config/scout.php` and run `php artisan scout:sync-index-settings`:
+
+```php
+'meilisearch' => [
+    'index-settings' => [
+        'vellum' => ['filterableAttributes' => ['version']],
+    ],
+],
+```
+
+Typesense needs a collection schema for `Vellum\Search\SearchableDocument` in `model-settings`, with `id`, `title`, `content`, `url`, `description`, `access` and `version` as string fields, `version` optional and faceted.
+
 ## Export
 
 `vellum:export` always writes MiniSearch JSON, regardless of `driver`. Gated pages are dropped from the exported index.

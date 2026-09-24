@@ -18,6 +18,13 @@ final class SearchDriver
         return is_string($driver) && $driver !== '' ? $driver : 'minisearch';
     }
 
+    /**
+     * The trait whose presence means laravel/scout is installed.
+     *
+     * @internal Tests point it at a missing trait to see the error.
+     */
+    public static string $scoutTrait = 'Laravel\\Scout\\Searchable';
+
     public static function isScout(): bool
     {
         return self::name() === 'scout';
@@ -25,7 +32,8 @@ final class SearchDriver
 
     public static function assertScoutInstalled(): void
     {
-        if (! class_exists('Laravel\\Scout\\Searchable')) {
+        // Searchable is a trait, which class_exists() never reports.
+        if (! trait_exists(self::$scoutTrait)) {
             throw new RuntimeException(
                 'vellum.search.driver is scout but laravel/scout is not installed. Run composer require laravel/scout.',
             );

@@ -14,11 +14,18 @@ use Vellum\Markdown\Islands\IslandRenderer;
 final class ScoutIndexer
 {
     /**
+     * Replace the whole index with these documents. The index is emptied
+     * first: a page that was deleted, renamed or moved behind a gate must not
+     * keep its old public record, so pass every version's documents.
+     *
      * @param  list<Document>  $documents
      */
     public function sync(ContentRepository $repository, array $documents): void
     {
         SearchDriver::assertScoutInstalled();
+
+        $index = new SearchableDocument;
+        $index->searchableUsing()->flush($index);
 
         $records = [];
 
@@ -125,15 +132,23 @@ final class ScoutIndexer
     }
 
     /**
+     * The engine's own hits. Records live only in the search engine, with no
+     * table behind them, so they are read raw rather than loaded as models.
+     * Meilisearch and Algolia return each record as a hit; Typesense wraps it
+     * in a document.
+     *
      * @return list<array<string, mixed>>
      */
     private function fallbackHits(object $builder): array
     {
+        $raw = $builder->take(40)->raw();
         $hits = [];
 
-        foreach ($builder->take(40)->get() as $model) {
-            if ($model instanceof SearchableDocument) {
-                $hits[] = $model->toSearchableArray();
+        foreach (is_array($raw) && is_array($raw['hits'] ?? null) ? $raw['hits'] : [] as $hit) {
+            $record = is_array($hit) && is_array($hit['document'] ?? null) ? $hit['document'] : $hit;
+
+            if (is_array($record)) {
+                $hits[] = $record;
             }
         }
 

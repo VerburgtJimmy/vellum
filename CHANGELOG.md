@@ -13,6 +13,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - A link listed in a gated folder's `meta.json` was shown to guests, and with it the folder's title, since a link defaulted to `guest` whatever folder it sat in. A link now takes its folder's access the way a page does, from `meta.json` or `_meta.md`, unless it sets `access` itself
 - A `meta.json` link to a gated page, such as `{ "title": "Plan", "slug": "internal/plan" }` at the top level, was shown to every reader in the sidebar and prev/next, and its URL was listed in `sitemap.xml`. The page itself stayed a 404. A link to a gated page is now shown only to readers who can open that page, and the sitemap leaves it out. Run `vellum:build` after upgrading so the cached sidebar is rebuilt
 - A `---Section---` heading over pages a reader could not see stayed in their sidebar when another heading followed it, and it then sat above the next section's pages instead. With `index, ---Acquisition Plans---, admin, ---Reference---, webhooks` and `admin` gated, a guest saw Acquisition Plans above Webhooks. Of two headings in a row, the second is now the one kept, as the docs already said
+- With the Scout driver, `vellum:build` only ever added and updated records, so a page that was deleted, renamed or moved into a gated folder kept its old record, content and `guest` access included. Each sync now empties the index and writes every version's pages, including under `--docs-version`
+
+### Fixed
+
+- The Scout driver did not work. `vellum:build` and `vellum:index` said `laravel/scout` was not installed even when it was, and a search would have looked for its records in a database table that does not exist. Search now reads the engine's own hits, from Meilisearch, Typesense or Algolia. `docs/search.md` covers the `version` filter a versioned site needs the engine to allow
 
 ## [0.6.2] - 2026-09-20
 

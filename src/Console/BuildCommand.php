@@ -46,7 +46,9 @@ final class BuildCommand extends Command
 
         if (SearchDriver::isScout()) {
             SearchDriver::assertScoutInstalled();
-            (new ScoutIndexer)->sync($repository, $documents);
+            // Scout is replaced whole, so it gets every version even when
+            // only one was asked for.
+            (new ScoutIndexer)->sync($repository, $version === null ? $documents : $repository->buildAll());
         }
 
         $elapsed = round((microtime(true) - $started) * 1000);

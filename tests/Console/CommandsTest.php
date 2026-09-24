@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use Vellum\Cache\FragmentCache;
 use Vellum\Content\Document;
+use Vellum\Search\SearchDriver;
 
 it('builds all documents via artisan', function (): void {
     $this->writeDoc('index.md', "---\ntitle: Home\n---\nHi");
@@ -313,8 +314,14 @@ it('fails vellum:index when scout is configured without laravel/scout', function
     $this->writeDoc('index.md', "---\ntitle: Home\n---\nHi");
     config()->set('vellum.search.driver', 'scout');
 
-    expect(fn () => $this->artisan('vellum:index'))
-        ->toThrow(RuntimeException::class, 'laravel/scout is not installed');
+    SearchDriver::$scoutTrait = 'Laravel\\Scout\\Missing';
+
+    try {
+        expect(fn () => $this->artisan('vellum:index'))
+            ->toThrow(RuntimeException::class, 'laravel/scout is not installed');
+    } finally {
+        SearchDriver::$scoutTrait = 'Laravel\\Scout\\Searchable';
+    }
 });
 
 it('republishes the config only when --force is given', function (): void {
