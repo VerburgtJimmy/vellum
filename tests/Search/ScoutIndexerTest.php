@@ -92,7 +92,10 @@ beforeEach(function (): void {
     config()->set('vellum.search.driver', 'scout');
     config()->set('scout.driver', 'memory');
     $this->app->singleton(EngineManager::class, fn ($app): EngineManager => new EngineManager($app));
-    $this->app->make(EngineManager::class)->extend('memory', fn (): Engine => $this->engine);
+    // Laravel 13 binds an extend() callback to the manager, so $this inside
+    // it is not the test.
+    $engine = $this->engine;
+    $this->app->make(EngineManager::class)->extend('memory', fn (): Engine => $engine);
 });
 
 it('drops the public record of a page that moved behind a gate', function (): void {
