@@ -31,7 +31,8 @@ final class ChangelogFeed
             .'  <link href="'.$this->e($selfUrl).'" rel="self"/>'."\n"
             .'  <link href="'.$this->e($pageUrl).'"/>'."\n"
             .'  <updated>'.$this->e($updated).'</updated>'."\n"
-            .'  <id>'.$this->e($pageUrl).'</id>'
+            .'  <id>'.$this->e($pageUrl).'</id>'."\n"
+            .'  <author><name>'.$this->e($name).'</name></author>'
             .$entries."\n"
             .'</feed>'."\n";
     }

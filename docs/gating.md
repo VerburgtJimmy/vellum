@@ -14,7 +14,7 @@ access: auth
 
 `guest` and `auth` are matched without regard to case, so `access: Auth` works. Anything else is passed to `Gate::allows()` exactly as written, because a gate is registered under an exact name.
 
-Folder access inherits downward. Set it on `meta.json` or `_meta.md`. A page's own `access` wins.
+Folder access inherits downward. Set it on `meta.json` or `_meta.md`. A page's own `access` wins. Links listed in `meta.json` inherit it too, and a link to a gated page is only shown to readers who can open that page.
 
 ```json
 {

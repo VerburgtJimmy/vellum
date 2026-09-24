@@ -65,7 +65,7 @@ final class AssetController extends Controller
         $acceptsGzip = str_contains(strtolower($request->header('Accept-Encoding', '')), 'gzip');
 
         if ($acceptsGzip) {
-            $encoded = gzencode($contents, 9);
+            $encoded = gzencode($contents, 6);
 
             if ($encoded !== false) {
                 $headers['Content-Encoding'] = 'gzip';

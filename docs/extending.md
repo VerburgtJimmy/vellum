@@ -25,6 +25,8 @@ Then a view at `resources/views/components/alert.blade.php` is available as `<x-
 
 For a named prefix, register a view namespace in your service provider and add that prefix to the list. `<x-docs::figure>` requires `'docs'` in `namespaces`.
 
+Vellum caches the rendered HTML of a page built only from its own components. A page with one of yours is rendered on every request instead, so a component may read the signed-in user, the session or the request, and each reader sees their own output.
+
 ## Slots
 
 The body of a paired tag is Markdown (and may contain nested components). Vellum extracts balanced `<x-…>` islands, runs Markdown on the outer document, then Markdown on each slot, then Blade-renders islands from the inside out.

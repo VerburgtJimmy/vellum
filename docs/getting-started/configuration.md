@@ -13,7 +13,7 @@ Published as `config/vellum.php`. **These names have been frozen since 0.5.** La
 | `path` | `resource_path('docs')` | Markdown root |
 | `route.prefix` | `docs` | URL prefix |
 | `route.middleware` | `['web']` | Route middleware |
-| `route.domain` | `null` | Optional domain |
+| `route.domain` | `null` | Optional domain. Canonical links and the sitemap use it as their host, with the scheme from `app.url` |
 | `repo` | `null` | Base URL for "Edit on GitHub" |
 | `logo` | `null` | SVG path or Blade view in the header |
 | `links` | `[]` | Extra links in the sidebar footer (`label`, `href`, optional `icon: github`) |

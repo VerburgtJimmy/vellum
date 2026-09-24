@@ -275,7 +275,7 @@ final class LlmsTxt
      * Links added in meta.json have no Markdown source, so they are skipped,
      * except the changelog, which is served from its own file.
      *
-     * @param  array{slug: string, title: string, description: string|null, icon: string|null, href: string, access: string}  $page
+     * @param  array{slug: string|null, title: string, description: string|null, icon: string|null, href: string, access: string, requires?: list<string>}  $page
      * @param  array<string, true>  $seen
      * @return Entry|null
      */
@@ -283,7 +283,8 @@ final class LlmsTxt
     {
         // navigation() is filtered for whoever is asking. These files are the
         // same for everyone, so list guest pages only.
-        if (Access::normalize($page['access']) !== 'guest' || isset($seen[$page['slug']])) {
+        // A link without a slug names no page of these docs.
+        if ($page['slug'] === null || Access::normalize($page['access']) !== 'guest' || ($page['requires'] ?? []) !== [] || isset($seen[$page['slug']])) {
             return null;
         }
 

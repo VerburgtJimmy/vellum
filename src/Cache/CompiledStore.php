@@ -14,7 +14,8 @@ use Vellum\Support\Slug;
  * @phpstan-type NavTree list<array<string, mixed>>
  * @phpstan-type Manifest array{
  *     directory_hash: string,
- *     version: string|null
+ *     version: string|null,
+ *     complete?: bool
  * }
  */
 final class CompiledStore
@@ -35,9 +36,52 @@ final class CompiledStore
         }
 
         $file = ($slug === '' ? 'index' : $slug).'.php';
-        $dir = $this->versionPath($version);
 
-        return $dir.DIRECTORY_SEPARATOR.str_replace('/', DIRECTORY_SEPARATOR, $file);
+        return $this->pagesPath($version).DIRECTORY_SEPARATOR.str_replace('/', DIRECTORY_SEPARATOR, $file);
+    }
+
+    /**
+     * Compiled pages live apart from the sidebar, manifest and search index,
+     * so a page called nav.md or manifest.md cannot overwrite them.
+     */
+    public function pagesPath(?string $version = null): string
+    {
+        return $this->versionPath($version).DIRECTORY_SEPARATOR.'pages';
+    }
+
+    /**
+     * Delete compiled pages a build did not produce: a page whose file was
+     * deleted, renamed or given a new slug must stop being served.
+     *
+     * @param  list<string>  $slugs
+     */
+    public function prunePages(array $slugs, ?string $version = null): void
+    {
+        $root = $this->pagesPath($version);
+
+        if (! is_dir($root)) {
+            return;
+        }
+
+        $keep = [];
+
+        foreach ($slugs as $slug) {
+            $keep[$this->pathFor($slug, $version)] = true;
+        }
+
+        $iterator = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($root, \FilesystemIterator::SKIP_DOTS),
+            \RecursiveIteratorIterator::CHILD_FIRST,
+        );
+
+        foreach ($iterator as $file) {
+            /** @var \SplFileInfo $file */
+            if ($file->isDir()) {
+                @rmdir($file->getPathname());
+            } elseif (! isset($keep[$file->getPathname()])) {
+                unlink($file->getPathname());
+            }
+        }
     }
 
     public function versionPath(?string $version = null): string
@@ -193,6 +237,7 @@ final class CompiledStore
         return [
             'directory_hash' => $data['directory_hash'],
             'version' => isset($data['version']) && is_string($data['version']) ? $data['version'] : null,
+            'complete' => ($data['complete'] ?? false) === true,
         ];
     }
 
@@ -251,8 +296,35 @@ return {$export};
 
 PHP;
 
-        if (file_put_contents($path, $contents) === false) {
+        if (! self::write($path, $contents)) {
             throw new \RuntimeException("Unable to write compiled file [{$path}]");
         }
+    }
+
+    /**
+     * Write through a temporary file and rename it into place. Production
+     * compiles on a cache miss while other requests may be reading the same
+     * file, and a rename means a reader sees the old file or the new one,
+     * never half of either.
+     */
+    private static function write(string $path, string $contents): bool
+    {
+        $temporary = $path.'.'.bin2hex(random_bytes(6)).'.tmp';
+
+        if (file_put_contents($temporary, $contents) === false) {
+            return false;
+        }
+
+        if (! rename($temporary, $path)) {
+            @unlink($temporary);
+
+            return false;
+        }
+
+        if (str_ends_with($path, '.php') && function_exists('opcache_invalidate')) {
+            opcache_invalidate($path, true);
+        }
+
+        return true;
     }
 }

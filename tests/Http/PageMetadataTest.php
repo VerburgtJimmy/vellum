@@ -120,3 +120,20 @@ it('does not version-prefix the changelog canonical when versions are off', func
 
     unlink($path);
 });
+
+it('puts the canonical on route.domain, the host that serves the docs', function (): void {
+    config()->set('app.url', 'https://example.com');
+    config()->set('vellum.route.domain', 'docs.example.com');
+
+    expect(DocsView::canonical('/docs/why'))->toBe('https://docs.example.com/docs/why')
+        ->and(DocsView::canonical('/docs'))->toBe('https://docs.example.com/docs');
+
+    config()->set('vellum.route.domain', '{account}.example.com');
+
+    expect(DocsView::canonical('/docs/why'))->toBe('https://example.com/docs/why');
+
+    config()->set('vellum.route.domain', 'docs.example.com');
+    config()->set('vellum.export.base_url', 'https://acme.github.io/docs-site');
+
+    expect(DocsView::canonical('/docs/why', staticExport: true))->toBe('https://acme.github.io/docs-site/docs/why');
+});

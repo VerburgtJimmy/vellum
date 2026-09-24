@@ -22,9 +22,15 @@ it('answers the scout route for the scout driver only', function (): void {
     config()->set('vellum.search.driver', 'scout');
     $this->withoutExceptionHandling();
 
-    // Scout is not installed here, so reaching it at all is what this shows.
-    expect(fn () => $this->get('/docs/_vellum/search.json?q=home'))
-        ->toThrow(RuntimeException::class, 'laravel/scout is not installed');
+    // With Scout reported missing, reaching it at all is what this shows.
+    SearchDriver::$scoutTrait = 'Laravel\\Scout\\Missing';
+
+    try {
+        expect(fn () => $this->get('/docs/_vellum/search.json?q=home'))
+            ->toThrow(RuntimeException::class, 'laravel/scout is not installed');
+    } finally {
+        SearchDriver::$scoutTrait = 'Laravel\\Scout\\Searchable';
+    }
 });
 
 it('points live pages at the filtered answer index', function (): void {

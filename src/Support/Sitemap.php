@@ -50,7 +50,7 @@ final class Sitemap
             foreach ($builder->flattenPages($repository->navigation($version)) as $page) {
                 // navigation() is filtered for whoever is asking. A sitemap is
                 // the same file for everyone, so list guest pages only.
-                if (Access::normalize($page['access']) !== 'guest') {
+                if (Access::normalize($page['access']) !== 'guest' || ($page['requires'] ?? []) !== []) {
                     continue;
                 }
 
@@ -69,7 +69,7 @@ final class Sitemap
                 // points at its own slug's page is looked up for a date.
                 $lastmod = null;
 
-                if ($page['href'] === $repository->hrefFor($page['slug'], $version)) {
+                if ($page['slug'] !== null && $page['href'] === $repository->hrefFor($page['slug'], $version)) {
                     $changelog = $page['slug'] === 'changelog' ? Changelog::load() : null;
                     $lastmod = $changelog !== null
                         ? $changelog->updated()

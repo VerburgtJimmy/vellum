@@ -2,8 +2,10 @@
 
 declare(strict_types=1);
 
+use Illuminate\Support\Facades\URL;
 use Vellum\Cache\FragmentCache;
 use Vellum\Content\Document;
+use Vellum\Search\SearchDriver;
 
 it('builds all documents via artisan', function (): void {
     $this->writeDoc('index.md', "---\ntitle: Home\n---\nHi");
@@ -13,8 +15,8 @@ it('builds all documents via artisan', function (): void {
         ->expectsOutputToContain('Compiled 2 documents')
         ->assertSuccessful();
 
-    expect(is_file($this->cachePath().'/index.php'))->toBeTrue()
-        ->and(is_file($this->cachePath().'/guides/one.php'))->toBeTrue();
+    expect(is_file($this->cachePath().'/pages/index.php'))->toBeTrue()
+        ->and(is_file($this->cachePath().'/pages/guides/one.php'))->toBeTrue();
 });
 
 it('warns once when the configured preset was removed in 0.5', function (): void {
@@ -41,13 +43,13 @@ it('clears the cache via artisan', function (): void {
     $this->writeDoc('index.md', "---\ntitle: Home\n---\nHi");
 
     $this->artisan('vellum:build')->assertSuccessful();
-    expect(is_file($this->cachePath().'/index.php'))->toBeTrue();
+    expect(is_file($this->cachePath().'/pages/index.php'))->toBeTrue();
 
     $this->artisan('vellum:clear')
         ->expectsOutputToContain('Vellum cache cleared')
         ->assertSuccessful();
 
-    expect(is_file($this->cachePath().'/index.php'))->toBeFalse();
+    expect(is_file($this->cachePath().'/pages/index.php'))->toBeFalse();
 });
 
 it('clears the island fragment cache via artisan', function (): void {
@@ -80,11 +82,11 @@ it('clears the island fragment cache via artisan', function (): void {
 it('clears vellum caches from optimize:clear', function (): void {
     $this->writeDoc('index.md', "---\ntitle: Home\n---\nHi");
     $this->artisan('vellum:build')->assertSuccessful();
-    expect(is_file($this->cachePath().'/index.php'))->toBeTrue();
+    expect(is_file($this->cachePath().'/pages/index.php'))->toBeTrue();
 
     $this->artisan('optimize:clear')->assertSuccessful();
 
-    expect(is_file($this->cachePath().'/index.php'))->toBeFalse();
+    expect(is_file($this->cachePath().'/pages/index.php'))->toBeFalse();
 });
 
 it('installs config stubs and public assets', function (): void {
@@ -221,6 +223,8 @@ it('exports the latest version unprefixed and older versions under /docs/{versio
         $this->deleteDirectory($out);
     }
 
+    config()->set('app.url', 'http://example.com');
+    URL::forceRootUrl('http://example.com');
     config()->set('vellum.export.out', $out);
     config()->set('vellum.versions.enabled', true);
     config()->set('vellum.versions.latest', 'v2');
@@ -256,6 +260,7 @@ it('exports the latest version unprefixed and older versions under /docs/{versio
         ->and($redirectHtml)->not->toBeFalse()
         ->and($redirectHtml)->toContain('http-equiv="refresh"')
         ->and($redirectHtml)->toContain('../../../guides/auth/')
+        ->and($redirectHtml)->toContain('<link rel="canonical" href="http://example.com/docs/guides/auth">')
         ->and($olderHtml)->not->toBeFalse()
         ->and($olderHtml)->toContain('Version one');
 
@@ -314,8 +319,14 @@ it('fails vellum:index when scout is configured without laravel/scout', function
     $this->writeDoc('index.md', "---\ntitle: Home\n---\nHi");
     config()->set('vellum.search.driver', 'scout');
 
-    expect(fn () => $this->artisan('vellum:index'))
-        ->toThrow(RuntimeException::class, 'laravel/scout is not installed');
+    SearchDriver::$scoutTrait = 'Laravel\\Scout\\Missing';
+
+    try {
+        expect(fn () => $this->artisan('vellum:index'))
+            ->toThrow(RuntimeException::class, 'laravel/scout is not installed');
+    } finally {
+        SearchDriver::$scoutTrait = 'Laravel\\Scout\\Searchable';
+    }
 });
 
 it('republishes the config only when --force is given', function (): void {
@@ -601,4 +612,82 @@ it('runs the questions on demand when checks.search is off', function (): void {
 
     $this->artisan('vellum:build')->doesntExpectOutputToContain('search check')->assertSuccessful();
     $this->artisan('vellum:build --check-search')->expectsOutputToContain('search check: 1 of 1')->assertSuccessful();
+});
+
+it('keeps canonical and og:url absolute in an export, matching the sitemap', function (string $baseUrl): void {
+    $out = sys_get_temp_dir().'/vellum-tests/export-canonical-'.$this->fixtureId();
+
+    if (is_dir($out)) {
+        $this->deleteDirectory($out);
+    }
+
+    config()->set('app.url', 'https://example.com');
+    config()->set('vellum.export.out', $out);
+    config()->set('vellum.export.base_url', $baseUrl);
+
+    $this->writeDoc('index.md', "---\ntitle: Home\n---\nHi");
+    $this->writeDoc('guides/one.md', "---\ntitle: One\n---\nGuide body");
+
+    $this->artisan('vellum:export')->assertSuccessful();
+
+    $html = (string) file_get_contents($out.'/docs/guides/one/index.html');
+
+    expect($html)->toContain('<link rel="canonical" href="https://example.com/docs/guides/one">')
+        ->and($html)->toContain('<meta property="og:url" content="https://example.com/docs/guides/one">')
+        ->and((string) file_get_contents($out.'/sitemap.xml'))->toContain('<loc>https://example.com/docs/guides/one</loc>');
+})->with(['/', 'https://example.com']);
+
+it('removes what an earlier export published and this one does not, and nothing else', function (): void {
+    $out = sys_get_temp_dir().'/vellum-tests/export-stale-'.$this->fixtureId();
+
+    if (is_dir($out)) {
+        $this->deleteDirectory($out);
+    }
+
+    config()->set('vellum.export.out', $out);
+
+    $this->writeDoc('index.md', "---\ntitle: Home\n---\nHi");
+    $plans = $this->writeDoc('plans.md', "---\ntitle: Plans\n---\nThe plan");
+    $this->writeDoc('old.md', "---\ntitle: Old\n---\nOld page");
+
+    $this->artisan('vellum:export')->assertSuccessful();
+
+    expect(is_file($out.'/docs/plans/index.html'))->toBeTrue()
+        ->and(is_file($out.'/docs/old/index.html'))->toBeTrue();
+
+    file_put_contents($out.'/CNAME', 'docs.example.com');
+    file_put_contents($plans, "---\ntitle: Plans\naccess: auth\n---\nThe plan");
+    unlink($this->docsPath().'/old.md');
+
+    $this->artisan('vellum:export')->assertSuccessful();
+
+    expect(is_file($out.'/docs/plans/index.html'))->toBeFalse()
+        ->and(is_file($out.'/docs/_vellum/raw/plans.md'))->toBeFalse()
+        ->and(is_dir($out.'/docs/old'))->toBeFalse()
+        ->and(is_file($out.'/docs/index.html'))->toBeTrue()
+        ->and(is_file($out.'/CNAME'))->toBeTrue();
+
+    $this->deleteDirectory($out);
+});
+
+it('only strips app.url where it is the origin of a link', function (): void {
+    $out = sys_get_temp_dir().'/vellum-tests/export-origin-'.$this->fixtureId();
+
+    if (is_dir($out)) {
+        $this->deleteDirectory($out);
+    }
+
+    config()->set('app.url', 'https://example.com');
+    config()->set('vellum.export.out', $out);
+
+    $this->writeDoc('index.md', "---\ntitle: Home\n---\nSee [pricing](https://example.com.au/pricing) and https://example.com/about in prose.");
+
+    $this->artisan('vellum:export')->assertSuccessful();
+
+    $html = (string) file_get_contents($out.'/docs/index.html');
+
+    expect($html)->toContain('href="https://example.com.au/pricing"')
+        ->and($html)->toContain('>https://example.com/about<');
+
+    $this->deleteDirectory($out);
 });

@@ -1,6 +1,7 @@
 <?php
 
 declare(strict_types=1);
+use Vellum\Content\ContentRepository;
 
 it('serves the index document at /docs', function (): void {
     $this->writeDoc('index.md', <<<'MD'
@@ -99,11 +100,11 @@ it('renders configured version labels in the switcher', function (): void {
 it('compiles on demand when the cache is cold', function (): void {
     $this->writeDoc('cold.md', "---\ntitle: Cold\n---\nCached later");
 
-    expect(is_file($this->cachePath().'/cold.php'))->toBeFalse();
+    expect(is_file($this->cachePath().'/pages/cold.php'))->toBeFalse();
 
     $this->get('/docs/cold')->assertOk()->assertSee('Cold', false);
 
-    expect(is_file($this->cachePath().'/cold.php'))->toBeTrue();
+    expect(is_file($this->cachePath().'/pages/cold.php'))->toBeTrue();
 });
 
 it('serves raw markdown for the current page', function (): void {
@@ -169,7 +170,7 @@ MD);
         ->assertOk()
         ->assertSee('Alpha', false);
 
-    $compiled = file_get_contents($this->cachePath().'/index.php');
+    $compiled = file_get_contents($this->cachePath().'/pages/index.php');
     expect($compiled)->toContain('VELLUMISLAND')
         ->and($compiled)->toContain('vellum::config')
         ->and($compiled)->not->toContain('Alpha');
@@ -180,4 +181,95 @@ MD);
         ->assertOk()
         ->assertSee('Beta', false)
         ->assertDontSee('Alpha', false);
+});
+
+it('keeps a page called nav or manifest from overwriting the sidebar', function (): void {
+    $this->writeDoc('index.md', "---\ntitle: Home\n---\nHi");
+    $this->writeDoc('nav.md', "---\ntitle: Nav\n---\nAbout navigation");
+    $this->writeDoc('manifest.md', "---\ntitle: Manifest\n---\nAbout manifests");
+
+    $this->artisan('vellum:build')->assertSuccessful();
+
+    $this->get('/docs/nav')->assertOk()->assertSee('About navigation', false);
+    $this->get('/docs/manifest')->assertOk()->assertSee('About manifests', false);
+    $this->get('/docs')->assertOk()->assertSee('Nav', false)->assertSee('Manifest', false);
+});
+
+it('stops serving a page whose file was deleted once the docs are built again', function (): void {
+    $this->writeDoc('index.md', "---\ntitle: Home\n---\nHi");
+    $secret = $this->writeDoc('secret.md', "---\ntitle: Secret\n---\nOld body");
+    $this->writeDoc('renamed.md', "---\ntitle: Renamed\nslug: before\n---\nSlugged");
+
+    $this->artisan('vellum:build')->assertSuccessful();
+    $this->get('/docs/secret')->assertOk();
+    $this->get('/docs/before')->assertOk();
+
+    unlink($secret);
+    $this->writeDoc('renamed.md', "---\ntitle: Renamed\nslug: after\n---\nSlugged");
+
+    $this->artisan('vellum:build')->assertSuccessful();
+
+    $this->get('/docs/secret')->assertNotFound();
+    $this->get('/docs/before')->assertNotFound();
+    $this->get('/docs/after')->assertOk();
+});
+
+it('serves only the pages the build compiled outside local', function (): void {
+    $this->writeDoc('index.md', "---\ntitle: Home\n---\nHi");
+
+    $this->artisan('vellum:build')->assertSuccessful();
+
+    $this->writeDoc('late.md', "---\ntitle: Late\n---\nAdded after the build");
+
+    $this->get('/docs/late')->assertNotFound();
+
+    $this->artisan('vellum:build')->assertSuccessful();
+
+    $this->get('/docs/late')->assertOk();
+});
+
+it('turns a javascript: href on a card or a meta.json link into #', function (): void {
+    $this->writeDoc('index.md', "---\ntitle: Home\n---\n::card[Directive](javascript:alert%28document.domain%29)\n\n<x-vellum::card href=\"javascript:alert(1)\" title=\"Island\" />\n\n::card[Fine](/docs/guide)");
+    file_put_contents($this->docsPath().'/meta.json', json_encode([
+        'pages' => ['index', ['title' => 'Sneaky', 'href' => 'JavaScript:alert(1)']],
+    ], JSON_THROW_ON_ERROR));
+
+    $html = (string) $this->get('/docs')->assertOk()->getContent();
+
+    expect($html)->not->toMatch('/href="\\s*javascript:/i')
+        ->and($html)->toContain('href="/docs/guide"')
+        ->and($html)->toContain('Sneaky');
+});
+
+it('gives a page named in a non-Latin script a URL of its own, not its folder index', function (): void {
+    $this->writeDoc('index.md', "---\ntitle: Home\n---\nHi");
+    $this->writeDoc('guides/index.md', "---\ntitle: Guides\n---\nThe guides index");
+    $this->writeDoc('guides/入门.md', "---\ntitle: Getting started\n---\nIntroduction");
+
+    $this->artisan('vellum:build')->assertSuccessful();
+
+    $this->get('/docs/guides')->assertOk()->assertSee('The guides index', false);
+    $this->get('/docs/guides/'.rawurlencode('入门'))->assertOk()->assertSee('Introduction', false);
+
+    $folder = collect(ContentRepository::fromConfig()->navigation())->firstWhere('type', 'folder');
+
+    expect(array_column($folder['children'], 'slug'))->toEqualCanonicalizing(['guides', 'guides/入门']);
+});
+
+it('does not take a meta.json link for the docs home', function (): void {
+    $this->writeDoc('index.md', "---\ntitle: Home\n---\nHi");
+    $this->writeDoc('alpha.md', "---\ntitle: Alpha\n---\nA");
+    file_put_contents($this->docsPath().'/meta.json', json_encode([
+        'pages' => ['alpha', ['title' => 'GitHub', 'href' => 'https://github.com/example/repo'], 'index'],
+    ], JSON_THROW_ON_ERROR));
+
+    $repository = ContentRepository::fromConfig();
+    $adjacent = $repository->adjacent('');
+
+    expect($adjacent['previous']['title'] ?? null)->toBe('Alpha')
+        ->and($adjacent['next'])->toBeNull();
+
+    $html = (string) $this->get('/docs')->assertOk()->getContent();
+
+    expect($html)->not->toMatch('/href="https:\/\/github\.com\/example\/repo"[^>]*aria-current/');
 });

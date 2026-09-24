@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Vellum\Content;
 
+use Vellum\Support\SafeHref;
 use Vellum\Support\Slug;
 use Vellum\Support\Str;
 use Vellum\Support\VersionUrl;
@@ -11,7 +12,7 @@ use Vellum\Support\VersionUrl;
 /**
  * Builds the sidebar navigation tree from folders, meta.json, and documents.
  *
- * @phpstan-type NavPage array{type: 'page', slug: string, title: string, description: string|null, icon: string|null, href: string, access: string}
+ * @phpstan-type NavPage array{type: 'page', slug: string|null, title: string, description: string|null, icon: string|null, href: string, access: string, requires?: list<string>}
  * @phpstan-type NavSeparator array{type: 'separator', title: string}
  * @phpstan-type NavNode array<string, mixed>
  * @phpstan-type NavTree list<array<string, mixed>>
@@ -81,7 +82,12 @@ final class NavigationBuilder
      */
     public function adjacent(array $tree, string $slug): array
     {
-        $pages = $this->flattenPages($tree);
+        // A meta.json link to somewhere else is in the sidebar, but it is not
+        // a page to step through.
+        $pages = array_values(array_filter(
+            $this->flattenPages($tree),
+            static fn (array $page): bool => $page['slug'] !== null,
+        ));
         $index = null;
 
         foreach ($pages as $i => $page) {
@@ -154,6 +160,8 @@ final class NavigationBuilder
 
     /**
      * Cheap hash of the docs directory listing for local nav invalidation.
+     * Production never calls it on a request: it serves the sidebar the build
+     * wrote.
      */
     public function directoryHash(?string $version = null): string
     {
@@ -171,7 +179,9 @@ final class NavigationBuilder
         foreach ($iterator as $file) {
             /** @var \SplFileInfo $file */
             $relative = $this->relativePath($root, $file->getPathname());
-            $entries[] = $relative.'|'.($file->isFile() ? (string) $file->getSize() : 'dir');
+            // Size and modification time: an edit that keeps the length, such
+            // as order: 2 becoming order: 3, still has to rebuild the sidebar.
+            $entries[] = $relative.'|'.($file->isFile() ? $file->getSize().'|'.$file->getMTime() : 'dir');
         }
 
         sort($entries);
@@ -192,7 +202,7 @@ final class NavigationBuilder
             /** @var list<mixed> $pages */
             $pages = array_values($meta['pages']);
 
-            return $this->orderChildren($children, $pages, $bySlug, $version);
+            return $this->orderChildren($absoluteFolder, $children, $pages, $bySlug, $version);
         }
 
         return $this->defaultOrder($children, $bySlug, $version);
@@ -205,6 +215,7 @@ final class NavigationBuilder
      * @return NavTree
      */
     private function orderChildren(
+        string $absoluteFolder,
         array $children,
         array $pages,
         array $bySlug,
@@ -224,7 +235,7 @@ final class NavigationBuilder
 
         foreach ($pages as $entry) {
             if (is_array($entry)) {
-                $link = $this->materializeLink($entry);
+                $link = $this->materializeLink($entry, $absoluteFolder, $bySlug, $version);
 
                 if ($link !== null) {
                     $ordered[] = $link;
@@ -384,7 +395,7 @@ final class NavigationBuilder
             $path = $absoluteFolder.DIRECTORY_SEPARATOR.$entry;
 
             if (is_dir($path)) {
-                $key = Slug::from($entry);
+                $key = Slug::segment($entry);
                 $folderSlug = $slugPrefix === '' ? $key : $slugPrefix.'/'.$key;
                 $children[$key] = [
                     'key' => $key,
@@ -420,7 +431,7 @@ final class NavigationBuilder
                 continue;
             }
 
-            $key = Slug::from($basename);
+            $key = Slug::segment($basename);
             $slug = $slugPrefix === '' ? $key : $slugPrefix.'/'.$key;
             $document = $bySlug[$slug] ?? null;
 
@@ -494,10 +505,15 @@ final class NavigationBuilder
     }
 
     /**
+     * A meta.json link takes the access its folder gives, like a page does,
+     * unless it sets its own. A link to a gated page also needs the access
+     * that page asks for, so nobody is shown a link they cannot follow.
+     *
      * @param  array<string, mixed>  $entry
+     * @param  array<string, Document>  $bySlug
      * @return NavPage|null
      */
-    private function materializeLink(array $entry): ?array
+    private function materializeLink(array $entry, string $absoluteFolder, array $bySlug, ?string $version): ?array
     {
         $title = isset($entry['title']) && is_string($entry['title']) ? $entry['title'] : null;
 
@@ -505,10 +521,13 @@ final class NavigationBuilder
             return null;
         }
 
-        $slug = isset($entry['slug']) && is_string($entry['slug']) ? $entry['slug'] : '';
+        // Without a slug, a link names no page of these docs. It used to get
+        // an empty one, which is the docs home's, so the home page's sidebar
+        // entry and prev/next matched the link instead.
+        $slug = isset($entry['slug']) && is_string($entry['slug']) ? trim($entry['slug'], '/') : null;
         $href = isset($entry['href']) && is_string($entry['href']) && $entry['href'] !== ''
-            ? $entry['href']
-            : ($slug !== '' ? $this->hrefForSlug($slug, null) : null);
+            ? SafeHref::of($entry['href'])
+            : ($slug !== null ? $this->hrefForSlug($slug, null) : null);
 
         if ($href === null) {
             return null;
@@ -519,15 +538,26 @@ final class NavigationBuilder
             : null;
         $icon = isset($entry['icon']) && is_string($entry['icon']) ? $entry['icon'] : null;
 
-        return [
+        $access = isset($entry['access']) && is_string($entry['access']) && $entry['access'] !== ''
+            ? Access::normalize($entry['access'])
+            : Access::normalize((new Access)->inherited($absoluteFolder.DIRECTORY_SEPARATOR.'meta.json', $this->contentPath));
+        $target = $slug !== null && isset($bySlug[$slug]) ? $bySlug[$slug]->access() : 'guest';
+
+        $node = [
             'type' => 'page',
             'slug' => $slug,
             'title' => $title,
             'description' => $description,
             'icon' => $icon,
             'href' => $href,
-            'access' => Access::normalize($entry['access'] ?? 'guest'),
+            'access' => $access,
         ];
+
+        if ($target !== 'guest' && $target !== $access) {
+            $node['requires'] = [$target];
+        }
+
+        return $node;
     }
 
     private function hrefForSlug(string $slug, ?string $version): string

@@ -15,9 +15,13 @@ jobs:
     name: PHP ${{ matrix.php }} / Laravel ${{ matrix.laravel }}
     runs-on: ubuntu-latest
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
         php: ['8.4']
+        # Listing laravel here makes each version a job of its own. With the
+        # versions only under include, each entry overwrote the last and CI
+        # ran Laravel 13 alone.
+        laravel: ['11.*', '12.*', '13.*']
         include:
           - laravel: '11.*'
             testbench: '^9.0'
@@ -91,17 +95,20 @@ jobs:
       - name: Fetch the embedding model
         run: vendor/bin/testbench vellum:model
         env:
-          VELLUM_MODEL_PATH: storage/vellum/models
+          VELLUM_MODEL_PATH: ${{ github.workspace }}/storage/vellum/models
 
       # The questions a model wrote are committed under docs/.vellum, so this
       # needs no API key. --check-search asks docs/questions.yml and --strict
       # fails on a link, an image or a question that points at nothing.
       - name: Build the docs and ask the golden questions
         run: vendor/bin/testbench vellum:build --check-search --strict
+        # Absolute, since Vellum reads a relative path from the app root, and
+        # Testbench's app root is inside vendor/.
         env:
-          VELLUM_PATH: docs
-          VELLUM_CHANGELOG: CHANGELOG.md
-          VELLUM_MODEL_PATH: storage/vellum/models
+          CACHE_STORE: array
+          VELLUM_PATH: ${{ github.workspace }}/docs
+          VELLUM_CHANGELOG: ${{ github.workspace }}/CHANGELOG.md
+          VELLUM_MODEL_PATH: ${{ github.workspace }}/storage/vellum/models
           VELLUM_SEARCH_MIN: '0.65'
 
   assets:

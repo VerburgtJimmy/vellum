@@ -18,6 +18,8 @@ Writes HTML, assets, the search index, and a `sitemap.xml` to `public/docs-stati
 
 The export always uses the in-browser search, even when `search.driver` is `scout`. Gated pages are omitted; each drop is logged.
 
+Exporting again into the same directory removes what the last export wrote and this one did not, such as a page you deleted or gated since. The list of what was written is kept in `.vellum-export.json` at the export root; anything else in the directory, like a `CNAME`, is left alone.
+
 Value tags are baked in at export time, so the snapshot matches the app config you exported with.
 
 The sitemap lands at the export root and uses `base_url` when it names an origin, falling back to `app.url`. With neither it is skipped and the command says so, because sitemap URLs have to be absolute. See [Search engines](/docs/seo).

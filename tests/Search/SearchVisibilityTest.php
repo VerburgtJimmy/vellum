@@ -50,3 +50,20 @@ it('allows a named gate when it passes for the current user', function (): void 
     expect($visibility->allows($billing))->toBeTrue()
         ->and($visibility->key([$billing]))->toBe('billing');
 });
+
+it('drops the heading of a section whose pages are all hidden, keeping the one after it', function (): void {
+    $page = static fn (string $slug, string $access = 'guest'): array => ['type' => 'page', 'slug' => $slug, 'title' => $slug, 'access' => $access];
+    $separator = static fn (string $title): array => ['type' => 'separator', 'title' => $title];
+
+    $tree = (new SearchVisibility)->filterNavigation([
+        $page('index'),
+        $separator('Acquisition Plans'),
+        $page('admin', 'auth'),
+        $separator('Reference'),
+        $page('webhooks'),
+        $separator('Internal'),
+        $page('ops', 'auth'),
+    ]);
+
+    expect(array_column($tree, 'title'))->toBe(['index', 'Reference', 'webhooks']);
+});

@@ -17,6 +17,7 @@ use Vellum\Console\ModelCommand;
 use Vellum\Http\Controllers\AssetController;
 use Vellum\Http\Middleware\CompressHtmlResponse;
 use Vellum\Http\RootLlmsTxtRoutes;
+use Vellum\Support\Paths;
 
 /**
  * Registers Vellum config, views, routes, and Artisan commands.
@@ -30,6 +31,7 @@ final class VellumServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        Paths::resolveConfig();
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'vellum');
 
         if ($this->app->runningInConsole()) {

@@ -32,7 +32,9 @@ final class IndexCommand extends Command
 
         if (SearchDriver::isScout()) {
             SearchDriver::assertScoutInstalled();
-            (new ScoutIndexer)->sync($repository, $documents);
+            // Scout is replaced whole, so it gets every version even when
+            // only one was asked for.
+            (new ScoutIndexer)->sync($repository, $version === null ? $documents : $repository->buildAll());
             $this->info('Scout index updated ('.$this->count($documents).' documents).');
         }
 

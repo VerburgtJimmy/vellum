@@ -98,8 +98,8 @@ php artisan vellum:clear
 php artisan vellum:build
 ```
 
-Deleting a Markdown file does not remove its compiled page on its own. `vellum:clear`
-does.
+Outside `local`, a page you add is served once `vellum:build` has compiled it, and a page
+you delete or rename stops being served once `vellum:build` runs without it.
 
 ## The site has no styling
 

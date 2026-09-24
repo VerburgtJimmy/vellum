@@ -37,7 +37,9 @@ navigation tree and the search index. **Run this in your deploy**, next to
 `config:cache` and `route:cache`.
 
 In `local`, pages recompile on request when the file changes, so you do not need to run
-this while writing.
+this while writing. Everywhere else, the site is what the last build compiled: a page
+added since is a 404 until the next build, and a page whose file was deleted or renamed
+is removed by it.
 
 The command fails rather than shipping something broken when two files claim the same
 URL, when a directive name is not one Vellum knows, or when a component or value tag

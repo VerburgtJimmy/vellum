@@ -135,3 +135,15 @@ it('escapes urls it writes', function (): void {
     expect(Sitemap::render(['https://e.com/a?b=1&c=2']))
         ->toContain('<loc>https://e.com/a?b=1&amp;c=2</loc>');
 });
+
+it('leaves out a meta.json link to a gated page', function (): void {
+    $this->writeDoc('index.md', "---\ntitle: Home\n---\nHi");
+    $this->writeDoc('internal/plan.md', "---\ntitle: Plan\naccess: auth\n---\nSecret plan");
+    file_put_contents($this->docsPath().'/meta.json', json_encode([
+        'pages' => ['index', ['title' => 'Acquisition plan', 'slug' => 'internal/plan']],
+    ], JSON_THROW_ON_ERROR));
+
+    expect(locations((string) $this->get('/docs/sitemap.xml')->getContent()))->toBe([
+        'https://docs.example.com/docs',
+    ]);
+});

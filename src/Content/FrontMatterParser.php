@@ -52,7 +52,8 @@ final class FrontMatterParser
             ];
         }
 
-        if (! preg_match('/\A---\r?\n(.*?)\r?\n---\r?\n?(.*)\z/s', $contents, $matches)) {
+        // The block may be empty: ---, then --- straight after it.
+        if (! preg_match('/\A---\r?\n(?:(.*?)\r?\n)?---\r?\n?(.*)\z/s', $contents, $matches)) {
             throw InvalidFrontMatterException::forFile(
                 $label,
                 'opening --- found but closing --- is missing',

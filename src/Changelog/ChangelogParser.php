@@ -27,7 +27,8 @@ final class ChangelogParser
             $title = trim($titleMatch[1]);
         }
 
-        if (preg_match_all('/^## (.+)$/m', $markdown, $matches, PREG_OFFSET_CAPTURE) < 1) {
+        // A "## " inside a fenced code block is an example, not a release.
+        if (preg_match_all('/^## (.+)$/m', self::withoutFences($markdown), $matches, PREG_OFFSET_CAPTURE) < 1) {
             $intro = $this->stripTitle($markdown);
 
             return new Changelog(
@@ -48,13 +49,13 @@ final class ChangelogParser
         $count = count($matches[0]);
 
         for ($index = 0; $index < $count; $index++) {
-            $heading = trim($matches[1][$index][0]);
-            $headingLine = $matches[0][$index][0];
+            $headingLine = substr($markdown, $matches[0][$index][1], strlen($matches[0][$index][0]));
+            $heading = trim(substr($headingLine, 3));
             $start = $matches[0][$index][1] + strlen($headingLine);
             $end = $index + 1 < $count ? $matches[0][$index + 1][1] : strlen($markdown);
             $body = substr($markdown, $start, $end - $start);
             $parsed = $this->parseHeading($heading);
-            $html = $this->render($this->stripReferences($body), $refBlock);
+            $html = self::scopeHeadingIds($this->render($this->stripReferences($body), $refBlock), $parsed['id']);
 
             $release = new ChangelogRelease(
                 version: $parsed['version'],
@@ -100,6 +101,9 @@ final class ChangelogParser
             ];
         }
 
+        // Keep a Changelog marks a pulled release "## [1.2.0] - 2026-09-13 [YANKED]".
+        $yanked = preg_match('/\s*\[YANKED\]$/i', $heading) === 1;
+        $heading = $yanked ? (string) preg_replace('/\s*\[YANKED\]$/i', '', $heading) : $heading;
         $version = $heading;
         $date = null;
 
@@ -118,11 +122,70 @@ final class ChangelogParser
         $unreleased = strcasecmp($version, 'Unreleased') === 0;
 
         return [
-            'version' => $version,
+            'version' => $yanked ? $version.' [YANKED]' : $version,
             'unreleased' => $unreleased,
             'date' => $date,
-            'id' => $unreleased ? 'unreleased' : $version,
+            'id' => $unreleased ? 'unreleased' : self::id($version),
         ];
+    }
+
+    /**
+     * A version as an HTML id and URL fragment: "1.0.0 beta" has a space in
+     * it, which is valid in neither.
+     */
+    private static function id(string $version): string
+    {
+        $id = trim((string) preg_replace('/[^A-Za-z0-9._-]+/', '-', $version), '-');
+
+        return $id === '' ? 'release' : $id;
+    }
+
+    /**
+     * The file with every fenced code block blanked out, the same length so
+     * offsets still line up with the original.
+     */
+    private static function withoutFences(string $markdown): string
+    {
+        $lines = explode("\n", $markdown);
+        $fence = null;
+
+        foreach ($lines as $i => $line) {
+            if ($fence === null && preg_match('/^ {0,3}(`{3,}|~{3,})/', $line, $open) === 1) {
+                $fence = $open[1];
+                $lines[$i] = str_repeat(' ', strlen($line));
+
+                continue;
+            }
+
+            if ($fence !== null) {
+                if (preg_match('/^ {0,3}'.preg_quote($fence[0], '/').'{'.strlen($fence).',}\s*$/', $line) === 1) {
+                    $fence = null;
+                }
+
+                $lines[$i] = str_repeat(' ', strlen($line));
+            }
+        }
+
+        return implode("\n", $lines);
+    }
+
+    /**
+     * Every release has its own Added and Fixed, and each is rendered on its
+     * own, so their ids would repeat down the page and every #fixed link would
+     * land on the first. Prefix them with the release: 0.6.3-fixed.
+     */
+    private static function scopeHeadingIds(string $html, string $release): string
+    {
+        if (preg_match_all('/<h[1-6][^>]*\sid="([^"]+)"/', $html, $matches) < 1) {
+            return $html;
+        }
+
+        foreach (array_unique($matches[1]) as $id) {
+            $quoted = preg_quote($id, '/');
+            $html = preg_replace('/(\sid="|\shref="#)'.$quoted.'"/', '${1}'.$release.'-'.$id.'"', $html) ?? $html;
+        }
+
+        return $html;
     }
 
     /**
