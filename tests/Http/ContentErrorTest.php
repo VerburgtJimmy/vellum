@@ -88,3 +88,12 @@ it('leaves json requests to the framework handler', function (): void {
 
     expect($response->getContent())->not->toContain('This page could not be rendered');
 });
+
+it('keeps serving the other pages when one fails to compile on a cold cache', function (): void {
+    $this->writeDoc('index.md', "---\ntitle: Home\n---\nHi");
+    $this->writeDoc('fine.md', "---\ntitle: Fine\n---\nStill here");
+    $this->writeDoc('broken.md', "---\ntitle: Broken\n---\n\n:::ntoe\nOops\n:::");
+
+    $this->get('/docs/fine')->assertOk()->assertSee('Still here', false)->assertDontSee('Broken', false);
+    $this->get('/docs/broken')->assertStatus(500);
+});

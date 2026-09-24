@@ -60,7 +60,7 @@ final class FrontMatterParser
             );
         }
 
-        $yaml = trim($matches[1] ?? '');
+        $yaml = trim($matches[1]);
         $body = $matches[2];
 
         if ($yaml === '') {

@@ -179,7 +179,9 @@ final class ContentRepository
             return $stored;
         }
 
-        $this->rebuildNavAndSearch($this->documentsForVersion($version), $version);
+        $failed = false;
+        $documents = $this->documentsForVersion($version, $failed);
+        $this->rebuildNavAndSearch($documents, $version, complete: ! $failed);
 
         return $this->store->getNav($version) ?? [];
     }
@@ -229,7 +231,7 @@ final class ContentRepository
     /**
      * @param  list<Document>  $documents
      */
-    private function rebuildNavAndSearch(array $documents, ?string $version): void
+    private function rebuildNavAndSearch(array $documents, ?string $version, bool $complete = true): void
     {
         $navBuilder = $this->navigationBuilder();
         $searchBuilder = $this->searchIndexBuilder();
@@ -244,19 +246,31 @@ final class ContentRepository
             'directory_hash' => $navBuilder->directoryHash($version),
             'search_hash' => $search['hash'],
             'version' => $version,
-            'complete' => true,
+            // Every page compiled, so production can serve only these.
+            'complete' => $complete,
         ], $version);
     }
 
     /**
      * @return list<Document>
      */
-    private function documentsForVersion(?string $version): array
+    private function documentsForVersion(?string $version, bool &$failed = false): array
     {
         $documents = [];
+        $failed = false;
 
         foreach ($this->discoverSourceFiles($version) as $source) {
-            $document = $this->find($source['slug'], $source['version']);
+            // Building the sidebar on a request compiles every page. One with
+            // a typo in it must fail on its own URL, not on all of them, so
+            // it is logged and left out here.
+            try {
+                $document = $this->find($source['slug'], $source['version']);
+            } catch (\Throwable $exception) {
+                report($exception);
+                $failed = true;
+
+                continue;
+            }
 
             if ($document !== null) {
                 $documents[] = $document;
