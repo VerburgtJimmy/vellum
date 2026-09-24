@@ -1,16 +1,16 @@
 ---
 title: Callouts
-description: Notes, tips, warnings, and related asides.
+description: Notes, tips, warnings and other asides.
 ---
 
 :::note
-Use callouts for notes, tips, warnings, danger, and info.
+Callouts come in five types: note, tip, info, warning and danger.
 :::
 
 :::warning[Careful]
-Optional titles go in brackets after the directive name.
+Add an optional title in brackets after the callout type.
 :::
 
 :::tip
-`success` aliases tip. `idea` aliases note.
+`success` is an alias for `tip`, and `idea` is an alias for `note`.
 :::

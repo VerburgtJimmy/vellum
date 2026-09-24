@@ -5,12 +5,12 @@ labels: [bug]
 body:
   - type: markdown
     attributes:
-      value: Search existing issues first. Security reports go to hey@jimmyverburgt.com, not here.
+      value: Please search existing issues first. Report security vulnerabilities by email to hey@jimmyverburgt.com instead of opening an issue.
   - type: textarea
     id: what
     attributes:
       label: What happened
-      description: What you expected, what you got, and how to reproduce it.
+      description: What you expected to happen, what happened instead, and the steps to reproduce it.
     validations:
       required: true
   - type: input

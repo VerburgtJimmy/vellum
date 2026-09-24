@@ -5,11 +5,11 @@ labels: [enhancement]
 body:
   - type: markdown
     attributes:
-      value: For questions, use Discussions (Q&A). Open an issue before a large pull request.
+      value: Please ask questions in Discussions (Q&A). For a large change, open an issue before you start on a pull request.
   - type: textarea
     id: what
     attributes:
       label: What
-      description: The problem and the shape of the change. Config and frontmatter names are frozen until 1.0.
+      description: Describe the problem and the change you have in mind. Config keys and frontmatter names are frozen until 1.0.
     validations:
       required: true

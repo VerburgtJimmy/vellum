@@ -3,9 +3,9 @@ title: Tabs
 description: Switchable panels, including code tabs.
 ---
 
-Tabs are for genuine alternatives: two ways to install the same thing, the same call in
-two languages. They hide content, so anything a reader needs to read in sequence belongs
-on the page instead.
+Use tabs for alternatives, such as two ways to install the same package or one call
+written in two languages. Tabs hide all but one panel, so keep content that readers should
+go through in sequence on the page itself.
 
 ```md
 :::tabs
@@ -23,13 +23,14 @@ Run the command.
 Edit the file.
 :::
 
-Each `::tab[Label]` opens a panel that runs to the next `::tab` or the closing `:::`.
-Labels are plain text; Markdown inside the brackets is not rendered.
+Each `::tab[Label]` starts a panel that continues until the next `::tab` or the closing
+`:::`. Labels are plain text, and Markdown inside the brackets is not rendered.
 
 ## Code tabs
 
-When **every** panel holds exactly one fenced code block and nothing else, Vellum renders
-the group as code tabs: one frame, one copy control, labels as an underlined row.
+When every panel holds exactly one fenced code block and nothing else, Vellum renders the
+group as code tabs. They share one frame and one copy button, and the labels sit in an
+underlined row.
 
 :::tabs persist="install"
 ::tab[Composer]
@@ -46,17 +47,16 @@ composer require jimmyverburgt/vellum
 ```
 :::
 
-Add one sentence of prose to any panel and the group falls back to ordinary tabs. That is
-the switch: one fence per panel, nothing else.
+If any panel contains prose as well, even a single sentence, the group renders as
+ordinary tabs.
 
 ## Remembering the choice
 
 `persist="key"` stores the active tab in `localStorage` under `vellum-tabs-{key}`.
 
-Use the same key on every group that asks the same question. A reader who picks
-**Composer** on the installation page sees Composer selected everywhere else, which is
-the whole point. Use a different key, or leave `persist` off, when the groups are
-unrelated.
+Give groups that offer the same choice the same key. A reader who picks Composer on the
+installation page then sees Composer selected in every other group with that key. For
+unrelated groups, use a different key or leave `persist` off.
 
 ## Other directives inside a panel
 
@@ -71,14 +71,14 @@ Ordinary Markdown in the second panel.
 
 ## Rules worth knowing
 
-**Headings inside a panel still join the table of contents.** A reader who clicks one
-while a different panel is showing scrolls nowhere. Avoid `##` inside tabs.
+Headings inside a panel still appear in the table of contents. Clicking one while a
+different panel is showing does not scroll anywhere, so avoid `##` inside tabs.
 
-**Panel ids come from the label**, lowercased and dashed, so `::tab[composer.json]`
-becomes `composer-json`.
+Panel ids are generated from the label: it is lowercased and each run of characters other
+than letters and digits becomes a dash, so `::tab[composer.json]` becomes `composer-json`.
 
-**Every panel is rendered into the page**, hidden with CSS rather than loaded on demand.
-Search indexes all of it, and so do crawlers.
+Every panel is included in the page HTML, and the inactive ones are hidden in the browser.
+Search and crawlers index the content of all panels.
 
 ## Island form
 
@@ -95,7 +95,7 @@ Second panel.
 
 | Attribute | On | Purpose |
 | --- | --- | --- |
-| `persist` | `tabs` | localStorage key, as above. |
-| `code` | `tabs` | Set `"true"` to force the code-tab presentation. |
-| `label` | `tab` | Panel label. `title` is accepted as an alias. |
-| `id` | `tab` | Override the generated panel id. |
+| `persist` | `tabs` | localStorage key, as described above. |
+| `code` | `tabs` | Set to `"true"` to render the group as code tabs. |
+| `label` | `tab` | Panel label. `title` works as an alias. |
+| `id` | `tab` | Replaces the generated panel id. |

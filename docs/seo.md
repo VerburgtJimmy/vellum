@@ -1,18 +1,18 @@
 ---
 title: Search engines
-description: What Vellum emits for crawlers, the sitemap route, and what to put in robots.txt.
+description: The metadata Vellum outputs for crawlers, the sitemap route, and what to put in robots.txt.
 ---
 
-Vellum gives every docs page the metadata a crawler needs, and publishes a sitemap so it can find them all.
+Every docs page includes the metadata a crawler needs, and a sitemap lists all of them.
 
 ## Per page
 
-Each page emits a unique `<title>`, a `<meta name="description">` from its frontmatter, and `<link rel="canonical">`, plus Open Graph and Twitter card tags. The 404 page is marked `noindex`.
+Each page outputs its own `<title>`, a `<meta name="description">` taken from its frontmatter, a `<link rel="canonical">`, and Open Graph and Twitter card tags. The 404 page is marked `noindex`.
 
-The canonical is only written when `app.url` names a real origin. During local development it is omitted rather than pointing at something wrong.
+The canonical link is only written when `app.url` is an absolute `http://` or `https://` URL. Otherwise the tag is left out.
 
 :::note
-Pages without a `description` in frontmatter get no meta description. It is the one frontmatter key worth filling in on every page.
+A page without a `description` in its frontmatter gets no meta description. Of all the frontmatter keys, this is the one to fill in on every page.
 :::
 
 ## Sitemap
@@ -21,15 +21,15 @@ Pages without a `description` in frontmatter get no meta description. It is the 
 /docs/sitemap.xml
 ```
 
-Built from the same navigation that renders the sidebar, so it stays correct as pages are added. Gated pages are left out, including for a signed-in reader, since a sitemap is one public file. Every version is listed when versions are enabled.
+The sitemap is built from the same navigation as the sidebar, so it stays up to date as you add pages. It lists every version when versions are enabled. Gated pages are always left out, even for a signed-in reader, because every visitor gets the same sitemap file.
 
-It sits under the docs prefix rather than at the site root, which the package does not own. A sitemap may list any URL at or below its own path, so this one covers the whole docs tree.
+It lives under the docs prefix because the package does not own the site root. A sitemap can list any URL at or below its own path, so this one covers the whole docs tree.
 
-Like the canonical, it needs `app.url` to be an origin. Without one it returns a 404 rather than publishing relative URLs, which are not valid in a sitemap.
+Like the canonical link, the sitemap needs `app.url` to be an absolute URL. Without one the route returns a 404, because sitemap URLs must be absolute.
 
 ## robots.txt
 
-Laravel does not ship a `robots.txt` with a sitemap reference, so add one:
+Laravel does not ship a `robots.txt` that references a sitemap, so add one:
 
 ```
 User-agent: *
@@ -42,8 +42,8 @@ Disallow: /docs/_vellum/
 Sitemap: https://example.com/docs/sitemap.xml
 ```
 
-The `Disallow` matters more than it looks. [Page actions](/docs/page-actions) link to a raw `.md` copy of every page, so without it each page is crawled twice and indexed as a near-duplicate.
+Keep the `Disallow` line. [Page actions](/docs/page-actions) link to a raw `.md` copy of every page, and without it crawlers fetch each page twice and index the copy as a near-duplicate.
 
 ## Static export
 
-`vellum:export` writes `sitemap.xml` at the export root, since a static host cannot generate one. It uses `export.base_url` when that names an origin, falling back to `app.url`. See [Export](/docs/export).
+A static host cannot generate a sitemap, so `vellum:export` writes `sitemap.xml` to the export root. It uses `export.base_url` when that is an origin and falls back to `app.url` otherwise. See [Export](/docs/export).

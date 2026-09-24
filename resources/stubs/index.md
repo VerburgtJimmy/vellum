@@ -1,20 +1,20 @@
 ---
 title: Introduction
-description: Welcome to your Vellum documentation.
+description: The home page of your documentation.
 ---
 
-This is your documentation home page. Edit `resources/docs/index.md` to get started.
+This is the home page of your documentation. Edit `resources/docs/index.md` to replace it with your own content. The examples below show the Markdown extensions Vellum supports.
 
 ## Markdown extensions
 
-Inline highlight: `Route::get()`{:php}
+Highlight inline code by adding a language: `Route::get()`{:php}
 
 :::note
-Use callouts for notes, tips, warnings, danger, and info.
+Callouts come in five types: note, tip, info, warning and danger.
 :::
 
 :::warning[Careful]
-Optional titles go in brackets after the directive name.
+Add an optional title in brackets after the callout type.
 :::
 
 :::tabs
@@ -26,7 +26,7 @@ composer require jimmyverburgt/vellum
 ```json showLineNumbers
 {
     "require": {
-        "jimmyverburgt/vellum": "^0.5"
+        "jimmyverburgt/vellum": "^0.6"
     }
 }
 ```
@@ -51,5 +51,5 @@ See the [Laravel docs](https://laravel.com) for framework details.
 
 ## Next steps
 
-- Add pages under `resources/docs/`
-- Run `php artisan vellum:build` in production
+- Add pages under `resources/docs/`.
+- Run `php artisan vellum:build` when you deploy to production.

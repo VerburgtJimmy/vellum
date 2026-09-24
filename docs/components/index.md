@@ -1,11 +1,11 @@
 ---
 title: Components
-description: Built-in directives and value tags.
+description: The built-in directives and value tags.
 ---
 
-Callouts, tabs, steps and cards ship with Vellum. Write them with `:::` directives, which is the authoring syntax frozen since 0.5.
+Vellum ships with callouts, tabs, steps and cards. You write them as `:::` directives, a syntax that has been frozen since 0.5.
 
-Each one is a Blade view under `resources/views/components/`, so `:::note` and `<x-vellum::callout type="note">` render exactly the same markup. Prefer `:::` for anything shipped; `<x-…>` is how you add **your** own components. See [Extending](/docs/extending).
+Each one is a Blade view in `resources/views/components/`, so `:::note` and `<x-vellum::callout type="note">` produce identical markup. Use `:::` for the built-in components and `<x-…>` tags for components you add yourself. See [Extending](/docs/extending).
 
 :::cards
 ::card[Callouts](/docs/components/callouts)

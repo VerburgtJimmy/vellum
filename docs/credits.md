@@ -3,20 +3,19 @@ title: Credits
 description: The open source Vellum is built on, and the work it takes its cues from.
 ---
 
-Vellum is a thin layer over other people's work. This page names it.
+Vellum is built on other people's open source work. This page lists the projects it uses and the ones it borrows ideas from.
 
 ## Inspiration
 
-[**Fumadocs**](https://fumadocs.dev) is the reference Vellum is measured against. The
-sidebar and table-of-contents layout, the `:::` directive syntax, code tabs with a shared
-chrome, and the idea that a docs framework should feel like a design system rather than a
-theme all come from spending time in Fumadocs. It is a React and Next.js project; Vellum
-is the same shape of thing for a Laravel app that would rather not add a second codebase.
-If you are building on Next, use Fumadocs.
+Vellum's design follows [Fumadocs](https://fumadocs.dev). The sidebar and
+table-of-contents layout, the `:::` directive syntax, code tabs with a shared chrome, and
+the approach of treating a docs framework as a design system all come from Fumadocs.
+Fumadocs is a React and Next.js project. Vellum provides the same kind of docs site for a
+Laravel app, without adding a second codebase. If you are building on Next.js, use
+Fumadocs.
 
-The syntax highlighting palette is **GitHub Light** and **GitHub Dark**, which is also the
-Shiki theme Fumadocs ships by default. Code in these docs should look the way it looks in
-your editor and on GitHub.
+The syntax highlighting palette is GitHub Light and GitHub Dark, the Shiki themes Fumadocs
+uses by default, so code looks the way it does on GitHub and in most editors.
 
 ## Rendering
 
@@ -39,9 +38,8 @@ your editor and on GitHub.
 
 ## Foundations
 
-[**Laravel**](https://laravel.com) is the whole premise: Vellum is docs that ship inside
-the app you already deploy, which only works because routing, Blade, caching, gates and
-config are already there.
+Vellum relies on [Laravel](https://laravel.com) for routing, Blade, caching, gates and
+config, which is what lets the docs run inside the app you already deploy.
 
 Testing and quality tooling: [Pest](https://pestphp.com),
 [Orchestra Testbench](https://packages.tools/testbench),
@@ -50,5 +48,5 @@ Testing and quality tooling: [Pest](https://pestphp.com),
 
 ## Licences
 
-Vellum is MIT licensed. Every package above is MIT or BSD licensed; running
-`composer licenses` in your app lists the exact terms for the versions you have installed.
+Vellum is MIT licensed. Every package above is MIT or BSD licensed. Run
+`composer licenses` in your app to see the exact terms for the versions you have installed.

@@ -1,6 +1,6 @@
 ---
 title: Search
-description: MiniSearch by default, Laravel Scout optional.
+description: Built-in MiniSearch by default, with Laravel Scout as an option.
 ---
 
 ```php
@@ -16,25 +16,25 @@ description: MiniSearch by default, Laravel Scout optional.
 
 ## MiniSearch
 
-The default. No extra services. Works on every host, including `vellum:export`.
+MiniSearch is the default driver. It needs no extra services and works on every host, including sites built with `vellum:export`.
 
-The live index is `/docs/_vellum/search.json`, filtered for the current user and cached per visibility set (guest, auth, and per-gate combinations). Responses send an ETag (index hash plus visibility) so `must-revalidate` can 304. It is not a public immutable file.
+The live index is served by a package route at `/docs/_vellum/search.json`. It is filtered for the current user and cached per visibility set (guest, authenticated, and each combination of gates). Responses carry an ETag built from the index hash and the visibility set and are sent with `must-revalidate`, so a browser that already has the current index gets a 304.
 
-`Ctrl+K` / `⌘K` opens search. Arrow keys move through results. Escape closes. The dialog is labelled **Search documentation**.
+`Ctrl+K` or `⌘K` opens search. The arrow keys move through the results and Escape closes the dialog. The dialog's accessible label is "Search documentation".
 
 ## Scout
 
-Opt-in for people who already run Meilisearch or Typesense and want heading-level relevance at scale.
+Use Scout if you already run Meilisearch or Typesense and want heading-level relevance on a large docs site.
 
 ```bash
 composer require laravel/scout
 ```
 
-Set `VELLUM_SEARCH_DRIVER=scout`. The same visibility filter runs at query time. `vellum:build` and `vellum:index` sync Scout when that driver is on.
+Set `VELLUM_SEARCH_DRIVER=scout`. The same visibility filter is applied at query time, and `vellum:build` and `vellum:index` sync the Scout index while that driver is active.
 
-Each sync replaces the whole index, every version included, so a page you delete, rename or gate does not keep its old record. Keep the index to Vellum alone: `search.scout.index` names it, `vellum` by default.
+Each sync replaces the whole index, including every version, so pages you delete, rename or gate do not leave old records behind. Because of this, the index should hold Vellum's records only. `search.scout.index` sets its name and defaults to `vellum`.
 
-With versions on, a search is filtered by `version`, which the engine has to allow. For Meilisearch, add it to the index settings in `config/scout.php` and run `php artisan scout:sync-index-settings`:
+When versions are enabled, searches filter on `version`, and the engine has to allow filtering on that attribute. For Meilisearch, add it to the index settings in `config/scout.php` and run `php artisan scout:sync-index-settings`:
 
 ```php
 'meilisearch' => [
@@ -44,10 +44,10 @@ With versions on, a search is filtered by `version`, which the engine has to all
 ],
 ```
 
-Typesense needs a collection schema for `Vellum\Search\SearchableDocument` in `model-settings`, with `id`, `title`, `content`, `url`, `description`, `access` and `version` as string fields, `version` optional and faceted.
+For Typesense, define a collection schema for `Vellum\Search\SearchableDocument` in `model-settings`. It needs `id`, `title`, `content`, `url`, `description`, `access` and `version` as string fields, with `version` marked optional and faceted.
 
 ## Export
 
-`vellum:export` always writes MiniSearch JSON, regardless of `driver`. Gated pages are dropped from the exported index.
+`vellum:export` always writes a MiniSearch JSON index, whatever `driver` is set to. Gated pages are left out of the exported index.
 
-Place the search trigger in the sidebar (default) or the header with `layout.search`.
+Use `layout.search` to place the search trigger in the sidebar (the default) or in the header.

@@ -1,6 +1,7 @@
 # Contributing
 
-Open an issue before a large pull request so the work is not a surprise.
+Thanks for helping out. For anything larger than a small fix, please open an issue first so
+we can agree on the approach before you write the code.
 
 ## Setup
 
@@ -9,9 +10,11 @@ composer install
 npm ci
 ```
 
-PHP 8.4. Laravel 11, 12, and 13 are covered in CI.
+You need PHP 8.4. CI runs the test suite on Laravel 11, 12 and 13.
 
 ## Checks
+
+Run these before opening a pull request:
 
 ```bash
 composer test
@@ -22,7 +25,7 @@ git diff --exit-code -- resources/dist
 npm run check:size
 ```
 
-The public site is a separate Laravel app (`vellum-site`) that installs this package and points `vellum.path` at `vendor/jimmyverburgt/vellum/docs`, so it serves `docs/` live. Docs changes ship by releasing the package and updating that app. There is no static export to regenerate in this repo.
+The public site is a separate Laravel app (`vellum-site`) that installs this package and points `vellum.path` at `vendor/jimmyverburgt/vellum/docs`, so it serves `docs/` directly. Docs changes go live when a new package version is released and that app is updated. There is no static export to regenerate in this repo.
 
 ## Releasing
 
@@ -33,20 +36,21 @@ git tag v0.5.0
 git push origin v0.5.0
 ```
 
-Packagist reads the Git tag. Do not add a `version` field to `composer.json`. The repo is
-submitted once at [packagist.org/packages/submit](https://packagist.org/packages/submit).
+Packagist reads the version from the Git tag, so do not add a `version` field to
+`composer.json`. The repo only needs to be submitted to
+[packagist.org/packages/submit](https://packagist.org/packages/submit) once.
 
 Pushing the tag triggers `.github/workflows/release.yml`, which publishes a GitHub release
 using the matching `## [x.y.z]` section of `CHANGELOG.md` as the notes. Write that section
-before tagging. Without one the release is still created, from generated notes.
+before tagging. If it is missing, the release is still created with generated notes.
 
-`.gitattributes` keeps tests, CI config and build tooling out of the released archive, so
-check anything new at the repo root against it before tagging.
+`.gitattributes` keeps tests, CI config and build tooling out of the released archive.
+Before tagging, check any new files at the repo root against it.
 
 ## Style
 
-Match the surrounding PHP, Blade, and Markdown. Do not add agent instruction files (`.cursor/`, `AGENTS.md`, Copilot templates) to this repo.
+Match the surrounding PHP, Blade and Markdown. Do not add agent instruction files (`.cursor/`, `AGENTS.md`, Copilot templates) to this repo.
 
 ## Conduct
 
-Be decent. See [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md), which is Contributor Covenant 2.1.
+Please be respectful. This project follows the [Contributor Covenant 2.1](CODE_OF_CONDUCT.md).

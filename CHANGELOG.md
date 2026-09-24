@@ -5,6 +5,17 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.4] - 2026-09-24
+
+### Fixed
+
+- A folder's `title` in `_meta.md` was ignored, although the navigation docs said it could be set there. `_meta.md` frontmatter is now read like `meta.json`, and where both set the same key, `_meta.md` wins, as it already did for `access`
+- Several pages described behaviour the code does not have. Card links to external URLs open in the same tab, inline code is only highlighted with a `{:lang}` suffix, a block of raw HTML is dropped along with its text, `vellum:index` recompiles pages as well as the index, and `vtt` files are served as assets. The docs now say so
+
+### Changed
+
+- The documentation, README, contributing guide, issue templates, starter pages and `config/vellum.php` comments have been rewritten to be easier to read. The upgrade guide covers the 0.6 patch releases, and the commands page documents `vellum:build --strict`
+
 ## [0.6.3] - 2026-09-24
 
 Run `vellum:build` after upgrading, so the sidebar is rebuilt with the new access rules and compiled pages move into their own folder. If you export into the same directory each time, delete it once before the next export, so pages dropped since the last one are gone. If a page on your docs uses one of your own Blade components that shows something about the signed-in user, readers may have been shown someone else's: check what that component displays.

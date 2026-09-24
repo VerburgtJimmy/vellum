@@ -3,8 +3,8 @@ title: Cards
 description: Link cards in a two-up grid.
 ---
 
-Cards are a way out of a page: four good next steps at the end of an overview, or the
-entry points on a section index. They are not a layout tool for arbitrary content.
+Cards link to other pages, for example the next steps at the end of an overview or the
+entry points on a section index. They are not meant as a general layout tool.
 
 ```md
 :::cards
@@ -20,28 +20,27 @@ entry points on a section index. They are not a layout tool for arbitrary conten
 
 ## Syntax
 
-Each card is a single line, and the whole line has to match:
+Each card is a single line, and the whole line must match this form:
 
 ```
 ::card[Title](href)
 ```
 
-The title is plain text. The href can be a docs path, an app path, or an external URL.
-External hrefs open in a new tab with `rel="noopener"`, the same as any other external
-link.
+The title is plain text. The href can be a docs path, an app path or an external URL.
+Unlike an external link in prose, a card with an external URL opens in the same tab and
+has no outward arrow.
 
-A card needs both parts. `::card[Title]` with no href does not become a card; it is left
-in the page as the literal text you typed, which is the clearest signal available that
-the line is wrong.
+A card needs both a title and an href. `::card[Title]` without an href is not turned into
+a card. It appears on the page as the literal text you typed, which shows that the line
+needs fixing.
 
-Cards sit in a two-up grid on wide screens and stack on narrow ones. Two, four or six
-read better than three or five.
+Cards are laid out two per row on wide screens and in a single column on narrow ones, so
+an even number of cards fills the grid best.
 
 ## Only cards belong inside
 
-`:::cards` expects `::card` lines. A paragraph written between them is rendered as a
-grid cell of its own, which is almost never what anyone wants. Put the prose above the
-directive:
+`:::cards` should contain only `::card` lines. A paragraph between them becomes a grid
+cell of its own, so put any introductory text above the directive:
 
 ```md
 Pick up where you left off:
@@ -54,7 +53,7 @@ Pick up where you left off:
 
 ## A section index
 
-The pattern this exists for: an overview page that ends by handing the reader onward.
+The typical use is an overview page that ends with links to the pages in its section.
 
 ```md
 :::cards
