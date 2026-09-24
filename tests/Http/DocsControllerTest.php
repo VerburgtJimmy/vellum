@@ -226,3 +226,16 @@ it('serves only the pages the build compiled outside local', function (): void {
 
     $this->get('/docs/late')->assertOk();
 });
+
+it('turns a javascript: href on a card or a meta.json link into #', function (): void {
+    $this->writeDoc('index.md', "---\ntitle: Home\n---\n::card[Directive](javascript:alert%28document.domain%29)\n\n<x-vellum::card href=\"javascript:alert(1)\" title=\"Island\" />\n\n::card[Fine](/docs/guide)");
+    file_put_contents($this->docsPath().'/meta.json', json_encode([
+        'pages' => ['index', ['title' => 'Sneaky', 'href' => 'JavaScript:alert(1)']],
+    ], JSON_THROW_ON_ERROR));
+
+    $html = (string) $this->get('/docs')->assertOk()->getContent();
+
+    expect($html)->not->toMatch('/href="\\s*javascript:/i')
+        ->and($html)->toContain('href="/docs/guide"')
+        ->and($html)->toContain('Sneaky');
+});

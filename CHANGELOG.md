@@ -19,6 +19,7 @@ Run `vellum:build` after upgrading, so the sidebar is rebuilt with the new acces
 - A page named `nav.md` or `manifest.md` was compiled to the same file as the sidebar or the build manifest, so visiting `/docs/nav` overwrote the sidebar and every page then failed with a 500 until the next build. Compiled pages now live in a `pages` folder of their own inside `cache.path`
 - A page whose file was deleted, or whose `slug` changed, kept being served from the compiled cache after `vellum:build`, and in local too. A page moved behind a gate by giving it a new slug stayed public at its old URL. `vellum:build` now removes compiled pages it did not produce, and local stops serving a page once its file is gone
 - `vellum:export` into a directory that held an earlier export left every page it no longer wrote in place, so a page gated or deleted since stayed published even though the command logged it as dropped. An export now keeps a list of what it wrote in `.vellum-export.json` and removes what the last one wrote and this one did not. Nothing it did not write is touched. An export made before 0.6.3 has no list, so delete that directory once before exporting into it again
+- A `javascript:` URL was written as it stood into a card's link, from `::card[...](...)` or `<x-vellum::card href="...">`, and into a sidebar link from `meta.json`. Markdown links have always refused them. These now follow the same rule, and an unsafe URL becomes `#`
 
 ### Fixed
 

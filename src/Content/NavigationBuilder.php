@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Vellum\Content;
 
+use Vellum\Support\SafeHref;
 use Vellum\Support\Slug;
 use Vellum\Support\Str;
 use Vellum\Support\VersionUrl;
@@ -517,7 +518,7 @@ final class NavigationBuilder
 
         $slug = isset($entry['slug']) && is_string($entry['slug']) ? $entry['slug'] : '';
         $href = isset($entry['href']) && is_string($entry['href']) && $entry['href'] !== ''
-            ? $entry['href']
+            ? SafeHref::of($entry['href'])
             : ($slug !== '' ? $this->hrefForSlug($slug, null) : null);
 
         if ($href === null) {
