@@ -42,7 +42,7 @@ final class CompressHtmlResponse
             return $response;
         }
 
-        $encoded = gzencode($content, 9);
+        $encoded = gzencode($content, 6);
 
         if ($encoded === false) {
             return $response;

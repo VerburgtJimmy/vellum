@@ -26,6 +26,9 @@ Run `vellum:build` after upgrading, so the cached sidebar is rebuilt with the ne
 - With `route.domain` set, canonical links, `og:url` and `sitemap.xml` named the host in `app.url`, where the docs routes do not answer. They now use `route.domain` as the host, keeping the scheme from `app.url`. A domain with a `{parameter}` in it names no single host, so it still falls back to `app.url`
 - On the changelog page every release's Added, Changed and Fixed headings shared one id, so a link to a later release's Fixed landed on the first one on the page. Heading ids are now prefixed with their release, such as `0.6.3-fixed`
 - A page with both a frontmatter `title` and a `# Heading` in its body rendered two `h1`s without a word. `vellum:build` now reports it next to heading level skips, as a notice that never fails a build
+- Every docs page walked the whole docs directory three times per request, in production too, to decide whether the sidebar had changed, and then used the built sidebar whatever the answer. Production now serves the sidebar `vellum:build` wrote without looking, and a request loads it once. On a 588-page site that took a page from 42 ms to about 30 ms
+- In local, the sidebar was only rebuilt when a file changed size, so reordering `meta.json` from `"order": 2` to `"order": 3` left the old order in place. A changed modification time now counts too
+- HTML, JSON and assets are gzipped at level 6 rather than 9, which is about three times faster for output 1.5% larger
 
 ## [0.6.2] - 2026-09-20
 

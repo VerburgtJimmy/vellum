@@ -175,3 +175,22 @@ it('resolves versioned documents and omits the latest version from URLs', functi
     expect($document?->title)->toBe('V2 Auth')
         ->and($document?->version)->toBe('v2');
 });
+
+it('rebuilds the local sidebar when an edit keeps the file the same size', function (): void {
+    $this->writeDoc('alpha.md', "---\ntitle: Alpha\n---\nA");
+    $this->writeDoc('beta.md', "---\ntitle: Beta\n---\nB");
+    $meta = $this->writeDoc('meta.json', '{"pages": ["alpha", "beta"]}');
+
+    $repository = fn (): ContentRepository => new ContentRepository(
+        contentPath: $this->docsPath(),
+        store: new CompiledStore($this->cachePath()),
+        isLocal: true,
+    );
+
+    expect(array_column($repository()->navigation(), 'title'))->toBe(['Alpha', 'Beta']);
+
+    file_put_contents($meta, '{"pages": ["beta", "alpha"]}');
+    touch($meta, time() + 10);
+
+    expect(array_column($repository()->navigation(), 'title'))->toBe(['Beta', 'Alpha']);
+});

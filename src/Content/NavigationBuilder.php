@@ -154,6 +154,8 @@ final class NavigationBuilder
 
     /**
      * Cheap hash of the docs directory listing for local nav invalidation.
+     * Production never calls it on a request: it serves the sidebar the build
+     * wrote.
      */
     public function directoryHash(?string $version = null): string
     {
@@ -171,7 +173,9 @@ final class NavigationBuilder
         foreach ($iterator as $file) {
             /** @var \SplFileInfo $file */
             $relative = $this->relativePath($root, $file->getPathname());
-            $entries[] = $relative.'|'.($file->isFile() ? (string) $file->getSize() : 'dir');
+            // Size and modification time: an edit that keeps the length, such
+            // as order: 2 becoming order: 3, still has to rebuild the sidebar.
+            $entries[] = $relative.'|'.($file->isFile() ? $file->getSize().'|'.$file->getMTime() : 'dir');
         }
 
         sort($entries);

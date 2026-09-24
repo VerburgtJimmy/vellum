@@ -44,6 +44,14 @@ final class ContentRepository
     private array $versionPipelines = [];
 
     /**
+     * Sidebar trees already loaded by this repository, by version. A page
+     * asks for the tree three times: sidebar, breadcrumbs and prev/next.
+     *
+     * @var array<string, list<array<string, mixed>>>
+     */
+    private array $navigationTrees = [];
+
+    /**
      * Build a repository from Laravel config values.
      */
     public static function fromConfig(): self
@@ -145,26 +153,34 @@ final class ContentRepository
     public function navigation(?string $version = null): array
     {
         $version = $this->resolveVersion($version);
-        $navBuilder = $this->navigationBuilder();
+        $key = $version ?? '';
+
+        return $this->visibleNavigation($this->navigationTrees[$key] ??= $this->loadNavigation($version));
+    }
+
+    /**
+     * The whole tree, before access is applied. Production trusts the one the
+     * build wrote; only local walks the directory to notice a changed file.
+     *
+     * @return list<array<string, mixed>>
+     */
+    private function loadNavigation(?string $version): array
+    {
+        $stored = $this->store->getNav($version);
+
+        if (! $this->isLocal && $stored !== null) {
+            return $stored;
+        }
+
         $manifest = $this->store->getManifest($version);
-        $currentHash = $navBuilder->directoryHash($version);
 
-        if (
-            $manifest !== null
-            && $manifest['directory_hash'] === $currentHash
-            && ($nav = $this->store->getNav($version)) !== null
-        ) {
-            return $this->visibleNavigation($nav);
+        if ($stored !== null && $manifest !== null && $manifest['directory_hash'] === $this->navigationBuilder()->directoryHash($version)) {
+            return $stored;
         }
 
-        if (! $this->isLocal && ($nav = $this->store->getNav($version)) !== null) {
-            return $this->visibleNavigation($nav);
-        }
+        $this->rebuildNavAndSearch($this->documentsForVersion($version), $version);
 
-        $documents = $this->documentsForVersion($version);
-        $this->rebuildNavAndSearch($documents, $version);
-
-        return $this->visibleNavigation($this->store->getNav($version) ?? []);
+        return $this->store->getNav($version) ?? [];
     }
 
     /**
@@ -221,6 +237,7 @@ final class ContentRepository
         $search = $searchBuilder->build($documents, $version);
 
         $this->store->putNav($tree, $version);
+        unset($this->navigationTrees[$version ?? '']);
         $this->store->putSearchIndex(['documents' => $search['documents']], $search['hash'], $version);
         $this->store->putManifest([
             'directory_hash' => $navBuilder->directoryHash($version),
