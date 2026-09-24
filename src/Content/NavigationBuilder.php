@@ -390,7 +390,7 @@ final class NavigationBuilder
             $path = $absoluteFolder.DIRECTORY_SEPARATOR.$entry;
 
             if (is_dir($path)) {
-                $key = Slug::from($entry);
+                $key = Slug::segment($entry);
                 $folderSlug = $slugPrefix === '' ? $key : $slugPrefix.'/'.$key;
                 $children[$key] = [
                     'key' => $key,
@@ -426,7 +426,7 @@ final class NavigationBuilder
                 continue;
             }
 
-            $key = Slug::from($basename);
+            $key = Slug::segment($basename);
             $slug = $slugPrefix === '' ? $key : $slugPrefix.'/'.$key;
             $document = $bySlug[$slug] ?? null;
 

@@ -1,6 +1,7 @@
 <?php
 
 declare(strict_types=1);
+use Vellum\Content\ContentRepository;
 
 it('serves the index document at /docs', function (): void {
     $this->writeDoc('index.md', <<<'MD'
@@ -238,4 +239,19 @@ it('turns a javascript: href on a card or a meta.json link into #', function ():
     expect($html)->not->toMatch('/href="\\s*javascript:/i')
         ->and($html)->toContain('href="/docs/guide"')
         ->and($html)->toContain('Sneaky');
+});
+
+it('gives a page named in a non-Latin script a URL of its own, not its folder index', function (): void {
+    $this->writeDoc('index.md', "---\ntitle: Home\n---\nHi");
+    $this->writeDoc('guides/index.md', "---\ntitle: Guides\n---\nThe guides index");
+    $this->writeDoc('guides/入门.md', "---\ntitle: Getting started\n---\nIntroduction");
+
+    $this->artisan('vellum:build')->assertSuccessful();
+
+    $this->get('/docs/guides')->assertOk()->assertSee('The guides index', false);
+    $this->get('/docs/guides/'.rawurlencode('入门'))->assertOk()->assertSee('Introduction', false);
+
+    $folder = collect(ContentRepository::fromConfig()->navigation())->firstWhere('type', 'folder');
+
+    expect(array_column($folder['children'], 'slug'))->toEqualCanonicalizing(['guides', 'guides/入门']);
 });

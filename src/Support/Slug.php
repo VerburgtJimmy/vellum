@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Vellum\Support;
 
+use Illuminate\Support\Str;
+
 /**
  * Normalises path segments and filenames into URL-safe slugs.
  */
@@ -68,8 +70,31 @@ final class Slug
             static fn (string $part): bool => $part !== '',
         );
 
-        $parts = array_map(static fn (string $part): string => self::from($part), $parts);
+        $parts = array_map(static fn (string $part): string => self::segment($part), $parts);
 
         return implode('/', $parts);
+    }
+
+    /**
+     * One path segment as a slug. A name written entirely in a non-Latin
+     * script has nothing left once reduced to a-z, and an empty segment would
+     * turn guides/入门.md into guides, the folder's own index. Such a name
+     * keeps its letters instead: guides/入门.
+     */
+    public static function segment(string $part): string
+    {
+        $slug = self::from($part);
+
+        if ($slug !== '') {
+            return $slug;
+        }
+
+        $unicode = Str::slug($part, '-', null);
+
+        if ($unicode === '') {
+            throw new \InvalidArgumentException("The file name [{$part}] has no letters or digits to build a URL from. Rename it, or set slug: in its frontmatter.");
+        }
+
+        return $unicode;
     }
 }
