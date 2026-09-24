@@ -112,6 +112,9 @@ An object adds a link that is not a file in this folder:
 
 `slug` builds a docs URL; `href` is used as written.
 
+A link takes its folder's `access` the way a page does, and an `access` key on the link
+overrides it. A link to a gated page is only shown to readers who can open that page.
+
 ## _meta.md
 
 `_meta.md` is the same idea in frontmatter, for when you only need `access` or a title

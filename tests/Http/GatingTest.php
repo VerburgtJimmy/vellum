@@ -64,3 +64,54 @@ it('renders a host component for each reader instead of caching the first', func
     $this->app['auth']->forgetGuards();
     $this->get('/docs')->assertOk()->assertSee('nobody', false)->assertDontSee('Ada', false);
 });
+
+it('keeps a meta.json link inside a gated folder from guests', function (): void {
+    $this->writeDoc('index.md', "---\ntitle: Home\n---\nHi");
+    $this->writeDoc('ops/meta.json', json_encode([
+        'title' => 'Internal Ops',
+        'access' => 'auth',
+        'pages' => [['title' => 'On-call board', 'href' => 'https://grafana.corp.example/oncall']],
+    ], JSON_THROW_ON_ERROR));
+
+    $guest = $this->get('/docs')->assertOk()->getContent();
+
+    expect($guest)->not->toContain('Internal Ops')
+        ->and($guest)->not->toContain('On-call board')
+        ->and($guest)->not->toContain('grafana.corp.example');
+
+    $this->actingAs(new GenericUser(['id' => 1, 'name' => 'Ada']));
+
+    $this->get('/docs')->assertOk()->assertSee('Internal Ops', false)->assertSee('On-call board', false);
+});
+
+it('takes folder access from _meta.md for a link, and lets a link set its own', function (): void {
+    $this->writeDoc('index.md', "---\ntitle: Home\n---\nHi");
+    $this->writeDoc('ops/_meta.md', "---\naccess: auth\n---\n");
+    $this->writeDoc('ops/meta.json', json_encode([
+        'title' => 'Ops',
+        'pages' => [
+            ['title' => 'Private board', 'href' => 'https://grafana.corp.example/oncall'],
+            ['title' => 'Status page', 'href' => 'https://status.example.com', 'access' => 'guest'],
+        ],
+    ], JSON_THROW_ON_ERROR));
+
+    $this->get('/docs')->assertOk()
+        ->assertSee('Status page', false)
+        ->assertDontSee('Private board', false);
+});
+
+it('shows a link to a gated page only to readers who can open it', function (): void {
+    $this->writeDoc('index.md', "---\ntitle: Home\n---\nHi");
+    $this->writeDoc('internal/plan.md', "---\ntitle: Plan\naccess: auth\n---\nSecret plan");
+    file_put_contents($this->docsPath().'/meta.json', json_encode([
+        'pages' => ['index', ['title' => 'Acquisition plan', 'slug' => 'internal/plan']],
+    ], JSON_THROW_ON_ERROR));
+
+    $this->get('/docs')->assertOk()
+        ->assertDontSee('Acquisition plan', false)
+        ->assertDontSee('/docs/internal/plan', false);
+
+    $this->actingAs(new GenericUser(['id' => 1, 'name' => 'Ada']));
+
+    $this->get('/docs')->assertOk()->assertSee('Acquisition plan', false);
+});

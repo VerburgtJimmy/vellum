@@ -36,7 +36,7 @@ final class Sitemap
             foreach ($builder->flattenPages($repository->navigation($version)) as $page) {
                 // navigation() is filtered for whoever is asking. A sitemap is
                 // the same file for everyone, so list guest pages only.
-                if (Access::normalize($page['access']) !== 'guest') {
+                if (Access::normalize($page['access']) !== 'guest' || ($page['requires'] ?? []) !== []) {
                     continue;
                 }
 

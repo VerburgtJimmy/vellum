@@ -71,7 +71,7 @@ final class SearchVisibility
             $type = $node['type'] ?? null;
 
             if ($type === 'page') {
-                if ($this->allows($node)) {
+                if ($this->allowsNode($node)) {
                     $filtered[] = $node;
                 }
 
@@ -94,6 +94,27 @@ final class SearchVisibility
         }
 
         return $this->trimSeparators($filtered);
+    }
+
+    /**
+     * A sidebar entry's own access, and whatever else it requires: a link to a
+     * gated page is only shown to readers who could open that page.
+     *
+     * @param  array<string, mixed>  $node
+     */
+    public function allowsNode(array $node): bool
+    {
+        if (! $this->allows($node)) {
+            return false;
+        }
+
+        foreach ((array) ($node['requires'] ?? []) as $access) {
+            if (! is_string($access) || ! $this->allowsAccess($access)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /**

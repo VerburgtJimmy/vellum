@@ -11,7 +11,7 @@ use Vellum\Support\VersionUrl;
 /**
  * Builds the sidebar navigation tree from folders, meta.json, and documents.
  *
- * @phpstan-type NavPage array{type: 'page', slug: string, title: string, description: string|null, icon: string|null, href: string, access: string}
+ * @phpstan-type NavPage array{type: 'page', slug: string, title: string, description: string|null, icon: string|null, href: string, access: string, requires?: list<string>}
  * @phpstan-type NavSeparator array{type: 'separator', title: string}
  * @phpstan-type NavNode array<string, mixed>
  * @phpstan-type NavTree list<array<string, mixed>>
@@ -192,7 +192,7 @@ final class NavigationBuilder
             /** @var list<mixed> $pages */
             $pages = array_values($meta['pages']);
 
-            return $this->orderChildren($children, $pages, $bySlug, $version);
+            return $this->orderChildren($absoluteFolder, $children, $pages, $bySlug, $version);
         }
 
         return $this->defaultOrder($children, $bySlug, $version);
@@ -205,6 +205,7 @@ final class NavigationBuilder
      * @return NavTree
      */
     private function orderChildren(
+        string $absoluteFolder,
         array $children,
         array $pages,
         array $bySlug,
@@ -224,7 +225,7 @@ final class NavigationBuilder
 
         foreach ($pages as $entry) {
             if (is_array($entry)) {
-                $link = $this->materializeLink($entry);
+                $link = $this->materializeLink($entry, $absoluteFolder, $bySlug, $version);
 
                 if ($link !== null) {
                     $ordered[] = $link;
@@ -494,10 +495,15 @@ final class NavigationBuilder
     }
 
     /**
+     * A meta.json link takes the access its folder gives, like a page does,
+     * unless it sets its own. A link to a gated page also needs the access
+     * that page asks for, so nobody is shown a link they cannot follow.
+     *
      * @param  array<string, mixed>  $entry
+     * @param  array<string, Document>  $bySlug
      * @return NavPage|null
      */
-    private function materializeLink(array $entry): ?array
+    private function materializeLink(array $entry, string $absoluteFolder, array $bySlug, ?string $version): ?array
     {
         $title = isset($entry['title']) && is_string($entry['title']) ? $entry['title'] : null;
 
@@ -519,15 +525,26 @@ final class NavigationBuilder
             : null;
         $icon = isset($entry['icon']) && is_string($entry['icon']) ? $entry['icon'] : null;
 
-        return [
+        $access = isset($entry['access']) && is_string($entry['access']) && $entry['access'] !== ''
+            ? Access::normalize($entry['access'])
+            : Access::normalize((new Access)->inherited($absoluteFolder.DIRECTORY_SEPARATOR.'meta.json', $this->contentPath));
+        $target = isset($bySlug[$slug]) ? $bySlug[$slug]->access() : 'guest';
+
+        $node = [
             'type' => 'page',
             'slug' => $slug,
             'title' => $title,
             'description' => $description,
             'icon' => $icon,
             'href' => $href,
-            'access' => Access::normalize($entry['access'] ?? 'guest'),
+            'access' => $access,
         ];
+
+        if ($target !== 'guest' && $target !== $access) {
+            $node['requires'] = [$target];
+        }
+
+        return $node;
     }
 
     private function hrefForSlug(string $slug, ?string $version): string
