@@ -58,3 +58,10 @@ MD);
     expect($result['matter']['title'])->toBe('From Disk')
         ->and($result['body'])->toBe('Contents');
 });
+
+it('accepts an empty frontmatter block', function (): void {
+    $parsed = (new FrontMatterParser)->parse("---\n---\nHello");
+
+    expect($parsed['matter'])->toBe([])
+        ->and($parsed['body'])->toBe('Hello');
+});

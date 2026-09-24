@@ -23,6 +23,8 @@ These are components, not Blade echoes. They never run unless the key is listed 
 
 Attributes are strings only. There is no `:bound` syntax.
 
+`env` reads the process environment, as `getenv()` does. Once `php artisan config:cache` has run, Laravel no longer loads `.env`, so a value that only lives there renders empty in production. For anything your config already holds, such as `APP_NAME` through `app.name`, use the `config` tag instead.
+
 On a live docs site, top-level value tags resolve at request time (cached with the page fragment). `vellum:export` renders them into the static HTML so the snapshot matches the values at export time.
 
 Unknown keys throw locally and during `vellum:build`. In production the page fails and the exception is logged.
