@@ -21,6 +21,8 @@ Run `vellum:build` after upgrading, so the cached sidebar is rebuilt with the ne
 
 - The Scout driver did not work. `vellum:build` and `vellum:index` said `laravel/scout` was not installed even when it was, and a search would have looked for its records in a database table that does not exist. Search now reads the engine's own hits, from Meilisearch, Typesense or Algolia. `docs/search.md` covers the `version` filter a versioned site needs the engine to allow
 - Compiled pages, the sidebar and the search index were written straight over the old file, so a request reading a page while production compiled it on a cache miss could load half a file and fail. Each is now written to a temporary file and renamed into place, and a compiled PHP file is dropped from OPcache when it changes
+- `vellum:export` turned each page's canonical link and `og:url` into relative paths whenever `export.base_url` was `/`, the default, or the same origin as `app.url`, since it stripped `app.url` from the whole page. Search engines were told a different URL than `sitemap.xml` listed. Both now stay absolute
+- The redirect stubs `vellum:export` writes at a latest page's version-prefixed URL named the relative redirect target as their canonical. They now give the page's absolute URL, as the sitemap lists it, and leave the canonical out when there is no origin
 
 ## [0.6.2] - 2026-09-20
 

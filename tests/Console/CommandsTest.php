@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Illuminate\Support\Facades\URL;
 use Vellum\Cache\FragmentCache;
 use Vellum\Content\Document;
 use Vellum\Search\SearchDriver;
@@ -222,6 +223,8 @@ it('exports the latest version unprefixed and older versions under /docs/{versio
         $this->deleteDirectory($out);
     }
 
+    config()->set('app.url', 'http://example.com');
+    URL::forceRootUrl('http://example.com');
     config()->set('vellum.export.out', $out);
     config()->set('vellum.versions.enabled', true);
     config()->set('vellum.versions.latest', 'v2');
@@ -257,6 +260,7 @@ it('exports the latest version unprefixed and older versions under /docs/{versio
         ->and($redirectHtml)->not->toBeFalse()
         ->and($redirectHtml)->toContain('http-equiv="refresh"')
         ->and($redirectHtml)->toContain('../../../guides/auth/')
+        ->and($redirectHtml)->toContain('<link rel="canonical" href="http://example.com/docs/guides/auth">')
         ->and($olderHtml)->not->toBeFalse()
         ->and($olderHtml)->toContain('Version one');
 
@@ -496,3 +500,26 @@ it('skips the export sitemap when no origin is configured', function (): void {
 
     $this->deleteDirectory($out);
 });
+
+it('keeps canonical and og:url absolute in an export, matching the sitemap', function (string $baseUrl): void {
+    $out = sys_get_temp_dir().'/vellum-tests/export-canonical-'.$this->fixtureId();
+
+    if (is_dir($out)) {
+        $this->deleteDirectory($out);
+    }
+
+    config()->set('app.url', 'https://example.com');
+    config()->set('vellum.export.out', $out);
+    config()->set('vellum.export.base_url', $baseUrl);
+
+    $this->writeDoc('index.md', "---\ntitle: Home\n---\nHi");
+    $this->writeDoc('guides/one.md', "---\ntitle: One\n---\nGuide body");
+
+    $this->artisan('vellum:export')->assertSuccessful();
+
+    $html = (string) file_get_contents($out.'/docs/guides/one/index.html');
+
+    expect($html)->toContain('<link rel="canonical" href="https://example.com/docs/guides/one">')
+        ->and($html)->toContain('<meta property="og:url" content="https://example.com/docs/guides/one">')
+        ->and((string) file_get_contents($out.'/sitemap.xml'))->toContain('<loc>https://example.com/docs/guides/one</loc>');
+})->with(['/', 'https://example.com']);

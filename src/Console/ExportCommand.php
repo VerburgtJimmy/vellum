@@ -96,7 +96,8 @@ final class ExportCommand extends Command
 
                     $path = $this->prefixedOutputPath($prefixRoot, $document);
                     $targetHref = $this->hrefBetween($path, $this->documentOutputPath($prefixRoot, $document, $repository), $out);
-                    $this->writeFile($path, $this->redirectHtml($targetHref));
+                    $canonical = DocsView::canonical($repository->hrefFor($document->slug, $document->version), staticExport: true);
+                    $this->writeFile($path, $this->redirectHtml($targetHref, $canonical));
                     $pages++;
                 }
             }
@@ -243,17 +244,24 @@ final class ExportCommand extends Command
         return $directory.DIRECTORY_SEPARATOR.'index.html';
     }
 
-    private function redirectHtml(string $targetHref): string
+    /**
+     * A stub sending the version-prefixed URL of a latest page to its
+     * unprefixed one. The canonical names the page as the sitemap does, and
+     * is left out when there is no origin to make it absolute with.
+     */
+    private function redirectHtml(string $targetHref, ?string $canonical): string
     {
         $escaped = htmlspecialchars($targetHref, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+        $canonicalLink = $canonical === null
+            ? ''
+            : "\n    <link rel=\"canonical\" href=\"".htmlspecialchars($canonical, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8').'">';
 
         return <<<HTML
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <meta http-equiv="refresh" content="0;url={$escaped}">
-    <link rel="canonical" href="{$escaped}">
+    <meta http-equiv="refresh" content="0;url={$escaped}">{$canonicalLink}
     <title>Redirecting</title>
 </head>
 <body>
@@ -368,6 +376,20 @@ HTML;
      */
     private function rewriteHtml(string $html, string $out, string $htmlPath, string $prefix, string $baseUrl, bool $rootRelative = false): string
     {
+        // The canonical and og:url name the page for crawlers and have to stay
+        // absolute, matching the sitemap. Set them aside while every other
+        // link is made relative.
+        $kept = [];
+        $html = preg_replace_callback(
+            '#(<link rel="canonical" href="|<meta property="og:url" content=")([^"]*)"#',
+            static function (array $match) use (&$kept): string {
+                $kept[] = $match[2];
+
+                return $match[1].'VELLUMKEPT'.(count($kept) - 1).'_"';
+            },
+            $html,
+        ) ?? $html;
+
         $appUrl = rtrim((string) config('app.url', ''), '/');
 
         if ($appUrl !== '') {
@@ -407,7 +429,11 @@ HTML;
             }
         }
 
-        return $html;
+        return preg_replace_callback(
+            '#VELLUMKEPT(\d+)_#',
+            static fn (array $match): string => $kept[(int) $match[1]] ?? '',
+            $html,
+        ) ?? $html;
     }
 
     /**
