@@ -139,7 +139,7 @@ final class DocsView
         // An export can be served from somewhere other than the app, so its
         // base_url wins when it names an origin. It defaults to "/", which
         // does not, in which case fall back to the app.
-        $base = rtrim((string) config('app.url', ''), '/');
+        $base = self::onDocsDomain(rtrim((string) config('app.url', ''), '/'));
 
         if ($staticExport) {
             $exportBase = rtrim((string) config('vellum.export.base_url', ''), '/');
@@ -156,6 +156,29 @@ final class DocsView
         $path = ltrim($path, '/');
 
         return $path === '' ? $base : $base.'/'.$path;
+    }
+
+    /**
+     * app.url with its host swapped for route.domain when the docs are served
+     * on a domain of their own, since that is the only host that answers for
+     * them. A domain with a {parameter} in it names no single host, so app.url
+     * is kept.
+     */
+    private static function onDocsDomain(string $appUrl): string
+    {
+        $domain = config('vellum.route.domain');
+
+        if (! is_string($domain) || $domain === '' || str_contains($domain, '{') || ! self::isOrigin($appUrl)) {
+            return $appUrl;
+        }
+
+        $parts = parse_url($appUrl);
+
+        if (! is_array($parts) || ! isset($parts['scheme'])) {
+            return $appUrl;
+        }
+
+        return $parts['scheme'].'://'.$domain.(isset($parts['port']) ? ':'.$parts['port'] : '').rtrim($parts['path'] ?? '', '/');
     }
 
     private static function isOrigin(string $value): bool

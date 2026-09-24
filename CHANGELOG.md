@@ -23,6 +23,7 @@ Run `vellum:build` after upgrading, so the cached sidebar is rebuilt with the ne
 - Compiled pages, the sidebar and the search index were written straight over the old file, so a request reading a page while production compiled it on a cache miss could load half a file and fail. Each is now written to a temporary file and renamed into place, and a compiled PHP file is dropped from OPcache when it changes
 - `vellum:export` turned each page's canonical link and `og:url` into relative paths whenever `export.base_url` was `/`, the default, or the same origin as `app.url`, since it stripped `app.url` from the whole page. Search engines were told a different URL than `sitemap.xml` listed. Both now stay absolute
 - The redirect stubs `vellum:export` writes at a latest page's version-prefixed URL named the relative redirect target as their canonical. They now give the page's absolute URL, as the sitemap lists it, and leave the canonical out when there is no origin
+- With `route.domain` set, canonical links, `og:url` and `sitemap.xml` named the host in `app.url`, where the docs routes do not answer. They now use `route.domain` as the host, keeping the scheme from `app.url`. A domain with a `{parameter}` in it names no single host, so it still falls back to `app.url`
 
 ## [0.6.2] - 2026-09-20
 
