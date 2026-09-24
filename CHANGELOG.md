@@ -5,6 +5,12 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Security
+
+- A page using one of your own Blade components could show one reader's output to the next. The rendered page was cached by its content alone, so a component that read the signed-in user, such as one using `@auth`, `@can` or `auth()->user()`, was rendered for the first reader and then served to everyone after them, guests included. A page with a host component is now rendered on every request, and only pages built from Vellum's own components are cached
+
 ## [0.6.2] - 2026-09-20
 
 If you publish a static export, check what is in it before deploying the next one. Anything that sat in your docs directory and was not Markdown or a `meta.json` was copied into the export, including dotfiles. Look for `.env`, editor drafts, notes and anything under a dot-directory, delete them from the published site, and rotate any secret that was exposed.

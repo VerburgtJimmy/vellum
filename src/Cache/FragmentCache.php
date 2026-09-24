@@ -6,9 +6,12 @@ namespace Vellum\Cache;
 
 use Illuminate\Support\Facades\Cache;
 use Vellum\Content\Document;
+use Vellum\Markdown\Islands\Island;
 
 /**
  * App-cache of Blade-rendered island HTML. Busted by generation, document, config, and app version.
+ * Only pages built from Vellum's own components are cached: a host component can
+ * read the signed-in user, so its output belongs to one request, not to the page.
  */
 final class FragmentCache
 {
@@ -21,6 +24,10 @@ final class FragmentCache
      */
     public function remember(Document $document, callable $resolver): string
     {
+        if (! self::cacheable($document->islands)) {
+            return $resolver();
+        }
+
         $key = $this->key($document);
         $cached = Cache::get($key);
 
@@ -38,6 +45,20 @@ final class FragmentCache
     {
         $generation = (int) Cache::get(self::GENERATION, 0);
         Cache::forever(self::GENERATION, $generation + 1);
+    }
+
+    /**
+     * @param  list<Island>  $islands
+     */
+    private static function cacheable(array $islands): bool
+    {
+        foreach ($islands as $island) {
+            if (! str_starts_with($island->name, 'vellum::') || ! self::cacheable($island->children)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private function key(Document $document): string

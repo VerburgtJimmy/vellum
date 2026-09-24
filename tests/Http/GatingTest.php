@@ -52,3 +52,15 @@ it('inherits folder access onto pages that do not set their own', function (): v
         ->assertSee('Invoices', false)
         ->assertSee('Dollars', false);
 });
+
+it('renders a host component for each reader instead of caching the first', function (): void {
+    $this->registerFixtureComponents();
+    config()->set('vellum.components.namespaces', ['vellum', '']);
+    $this->writeDoc('index.md', "---\ntitle: Home\n---\nSigned in as <x-whoami />");
+
+    $this->actingAs(new GenericUser(['id' => 1, 'name' => 'Ada']));
+    $this->get('/docs')->assertOk()->assertSee('Ada', false);
+
+    $this->app['auth']->forgetGuards();
+    $this->get('/docs')->assertOk()->assertSee('nobody', false)->assertDontSee('Ada', false);
+});
