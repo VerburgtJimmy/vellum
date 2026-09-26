@@ -47,6 +47,18 @@ before tagging. If it is missing, the release is still created with generated no
 `.gitattributes` keeps tests, CI config and build tooling out of the released archive.
 Before tagging, check any new files at the repo root against it.
 
+The test suite does not run the site in a browser, so check these by hand before tagging:
+
+- Build and serve the docs, open search with `Ctrl+K` or `⌘K`, type a query, move through
+  the results with the arrow keys and open one with Enter. The browser console should show
+  no errors.
+- Export the docs with `export.base_url` set to a path such as `/handbook/`, serve the
+  export from that path, and repeat the search check.
+- Run Lighthouse on a docs page, for mobile and desktop.
+
+After the release, update `vellum-site` with `composer update jimmyverburgt/vellum`, so the
+public docs and changelog show the new version.
+
 ## Style
 
 Match the surrounding PHP, Blade and Markdown. Do not add agent instruction files (`.cursor/`, `AGENTS.md`, Copilot templates) to this repo.
