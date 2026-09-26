@@ -13,6 +13,7 @@ const PREFIX_WEIGHT = 0.375
 const FIELD_BOOST = { title: 3, heading: 2, text: 1 }
 
 const EXACT_BOOST = 1
+const STEM_WEIGHT = 1
 const SYNONYM_WEIGHT = 0.5
 const PER_PAGE = 2
 
@@ -24,6 +25,115 @@ let loaded = null
  */
 export function terms(text) {
   return text.toLowerCase().split(/[^\p{L}\p{N}]+/u).filter(Boolean)
+}
+
+const VOWELS = new Set(['a', 'e', 'i', 'o', 'u'])
+
+function consonant(word, i) {
+  if (VOWELS.has(word[i])) {
+    return false
+  }
+
+  return word[i] === 'y' ? i === 0 || !consonant(word, i - 1) : true
+}
+
+function measure(word) {
+  let m = 0
+  let vowel = false
+
+  for (let i = 0; i < word.length; i++) {
+    if (!consonant(word, i)) {
+      vowel = true
+    } else if (vowel) {
+      m++
+      vowel = false
+    }
+  }
+
+  return m
+}
+
+function hasVowel(word) {
+  for (let i = 0; i < word.length; i++) {
+    if (!consonant(word, i)) {
+      return true
+    }
+  }
+
+  return false
+}
+
+function endsCvc(word) {
+  const n = word.length
+
+  return n >= 3 && consonant(word, n - 3) && !consonant(word, n - 2) && consonant(word, n - 1) && !'wxy'.includes(word[n - 1])
+}
+
+function tidy(stem) {
+  if (stem.endsWith('at') || stem.endsWith('bl') || stem.endsWith('iz')) {
+    return `${stem}e`
+  }
+
+  const n = stem.length
+
+  if (n >= 2 && stem[n - 1] === stem[n - 2] && consonant(stem, n - 1) && !'lsz'.includes(stem[n - 1])) {
+    return stem.slice(0, -1)
+  }
+
+  if (measure(stem) === 1 && endsCvc(stem)) {
+    return `${stem}e`
+  }
+
+  return stem
+}
+
+/**
+ * Steps 1 and 5a of the Porter stemmer. Mirrors Vellum\Answers\Stemmer.
+ *
+ * @param {string} input
+ */
+export function stem(input) {
+  let word = input
+
+  if (word.length <= 2 || !/^[a-z]+$/.test(word)) {
+    return word
+  }
+
+  if (word.endsWith('sses') || word.endsWith('ies')) {
+    word = word.slice(0, -2)
+  } else if (!word.endsWith('ss') && word.endsWith('s')) {
+    word = word.slice(0, -1)
+  }
+
+  if (word.endsWith('eed')) {
+    if (measure(word.slice(0, -3)) > 0) {
+      word = word.slice(0, -1)
+    }
+  } else {
+    for (const ending of ['ed', 'ing']) {
+      const base = word.slice(0, -ending.length)
+
+      if (word.endsWith(ending) && hasVowel(base)) {
+        word = tidy(base)
+        break
+      }
+    }
+  }
+
+  if (word.endsWith('y') && hasVowel(word.slice(0, -1))) {
+    word = `${word.slice(0, -1)}i`
+  }
+
+  if (word.endsWith('e')) {
+    const base = word.slice(0, -1)
+    const m = measure(base)
+
+    if (m > 1 || (m === 1 && !endsCvc(base))) {
+      word = base
+    }
+  }
+
+  return word
 }
 
 /**
@@ -58,15 +168,20 @@ export function createIndex(documents) {
       lengths[id] = list.length
       total += list.length
 
+      // As written and by its stem, as Bm25.php indexes it.
       for (const term of list) {
-        let docs = postings.get(term)
+        const root = stem(term)
 
-        if (docs === undefined) {
-          docs = new Map()
-          postings.set(term, docs)
+        for (const key of root === term ? [term] : [term, root]) {
+          let docs = postings.get(key)
+
+          if (docs === undefined) {
+            docs = new Map()
+            postings.set(key, docs)
+          }
+
+          docs.set(id, (docs.get(id) ?? 0) + 1)
         }
-
-        docs.set(id, (docs.get(id) ?? 0) + 1)
       }
     })
 
@@ -158,7 +273,15 @@ export function expansions(query, groups) {
  * @param {Array<string>} widened
  */
 export function expand(query, widened) {
-  const weights = new Map(terms(query).map((term) => [term, 1]))
+  const weights = new Map()
+
+  for (const term of terms(query)) {
+    weights.set(term, 1)
+
+    if (!weights.has(stem(term))) {
+      weights.set(stem(term), STEM_WEIGHT)
+    }
+  }
 
   for (const phrase of widened) {
     for (const term of terms(phrase)) {

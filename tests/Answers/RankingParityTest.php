@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use Vellum\Answers\AnswerIndex;
 use Vellum\Answers\Ranker;
+use Vellum\Answers\Stemmer;
 use Vellum\Cache\CompiledStore;
 use Vellum\Content\ContentRepository;
 
@@ -26,6 +27,16 @@ const PARITY_QUERIES = [
     'composer',
     'deploy',
     'hide a page',
+    'gate',
+    'gated pages',
+    'deploying',
+    'charged',
+];
+
+const PARITY_WORDS = [
+    'gate', 'gates', 'gated', 'gating', 'caresses', 'ponies', 'agreed', 'feed', 'hopping', 'filing',
+    'falling', 'configure', 'configured', 'deploying', 'dependency', 'dependencies', 'release', 'used',
+    'css', 'is', 'docs', 'sky', 'happy', 'controll', 'rate', 'cease', 'v2', 'café',
 ];
 
 it('agrees with the committed ranking fixture', function (): void {
@@ -47,10 +58,17 @@ it('agrees with the committed ranking fixture', function (): void {
         ], $ranker->search($text));
     }
 
+    $stems = [];
+
+    foreach (PARITY_WORDS as $word) {
+        $stems[$word] = Stemmer::stem($word);
+    }
+
     if (getenv('VELLUM_FIXTURES') === '1') {
         file_put_contents($fixture, json_encode([
-            'note' => 'Written by tests/Answers/RankingParityTest.php with VELLUM_FIXTURES=1. The browser ranks the index below and must get these rankings and scores.',
+            'note' => 'Written by tests/Answers/RankingParityTest.php with VELLUM_FIXTURES=1. The browser ranks the index below and must get these rankings, scores and stems.',
             'rankings' => $rankings,
+            'stems' => $stems,
             'index' => [
                 'sections' => $index->sections,
                 'synonyms' => $index->synonymGroups(),
@@ -68,6 +86,9 @@ it('agrees with the committed ranking fixture', function (): void {
     }
 
     expect($rankings)->toBe($committed['rankings'])
+        ->and($stems)->toBe($committed['stems'])
+        ->and($stems['gating'])->toBe('gate')
+        ->and($rankings['gate'][0]['id'])->toBe('gating#')
         ->and($rankings['night mode'][0]['id'])->toBe('#dark-mode')
         ->and($rankings['invoices'][0]['id'])->toBe('billing#')
         ->and($rankings['gat'])->not->toBe([]);

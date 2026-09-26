@@ -26,7 +26,7 @@ The browser loads its index from `/docs/_vellum/answers.json`, which holds every
 
 Search works on sections: each heading and the text under it is one result, shown with its page and heading, so a match takes the reader to the right part of a long page. At most two sections of one page are listed before sections from other pages.
 
-Sections are ranked with BM25 over their title, heading and text, with the title weighted highest. A word also matches the start of longer words, at a lower weight, so results appear while the reader is still typing. A section whose heading, page title or alias the query names in full is ranked above one that only mentions those words.
+Sections are ranked with BM25 over their title, heading and text, with the title weighted highest. Words are also matched by their stem, so "gate", "gated" and "gating" find each other, and a word matches the start of longer words at a lower weight, so results appear while the reader is still typing. A section whose heading, page title or alias the query names in full is ranked above one that only mentions those words.
 
 Each section is also indexed with questions derived from its content when the docs are built:
 
@@ -70,8 +70,8 @@ A renamed heading or a rewritten page can move an answer out of reach without br
 `vellum:build` asks every question against the index it just wrote and reports how many find their answer in the top five results:
 
 ```
-search check: 40 of 62 questions answered in the top 5 (65%)
-  missed: which php and laravel do i need (wanted getting-started/installation#requirements)
+search check: 42 of 62 questions answered in the top 5 (68%)
+  missed: How do I rebuild the search index without recompiling pages? (wanted commands#vellumindex)
 ```
 
 Set `checks.search_min` (or `VELLUM_SEARCH_MIN`) to the share that must be answered, and the build fails below it. A good starting point is a little under the rate you get today, so a rewrite that makes search worse is caught.

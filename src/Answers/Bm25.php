@@ -48,8 +48,16 @@ final class Bm25
                 $this->lengths[$field][$id] = count($terms);
                 $total += count($terms);
 
+                // Each word is indexed as written and by its stem, so "gating"
+                // is found by "gate", and a half-typed "gati" still matches it
+                // as a prefix. Length counts the words once.
                 foreach ($terms as $term) {
                     $this->postings[$field][$term][$id] = ($this->postings[$field][$term][$id] ?? 0) + 1;
+                    $stem = Stemmer::stem($term);
+
+                    if ($stem !== $term) {
+                        $this->postings[$field][$stem][$id] = ($this->postings[$field][$stem][$id] ?? 0) + 1;
+                    }
                 }
             }
 

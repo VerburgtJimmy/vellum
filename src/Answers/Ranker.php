@@ -23,6 +23,12 @@ final class Ranker
     public const EXACT_BOOST = 1.0;
 
     /**
+     * What a word's stem counts for, against 1 for the word as typed, so a
+     * section with the reader's exact word ranks above one with a variant.
+     */
+    public const STEM_WEIGHT = 1.0;
+
+    /**
      * What an expanded term counts for, against 1 for one the reader typed.
      */
     public const SYNONYM_WEIGHT = 0.5;
@@ -138,6 +144,7 @@ final class Ranker
 
         foreach (Bm25::terms($query) as $term) {
             $weights[$term] = 1.0;
+            $weights[Stemmer::stem($term)] ??= self::STEM_WEIGHT;
         }
 
         foreach ($expansions as $phrase) {

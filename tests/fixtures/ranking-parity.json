@@ -1,5 +1,5 @@
 {
-    "note": "Written by tests/Answers/RankingParityTest.php with VELLUM_FIXTURES=1. The browser ranks the index below and must get these rankings and scores.",
+    "note": "Written by tests/Answers/RankingParityTest.php with VELLUM_FIXTURES=1. The browser ranks the index below and must get these rankings, scores and stems.",
     "rankings": {
         "how do i install the package": [
             {
@@ -8,31 +8,31 @@
             },
             {
                 "id": "billing#",
-                "score": 0.3785
+                "score": 0.252943
             },
             {
                 "id": "#dark-mode",
-                "score": 0.369275
+                "score": 0.246778
             },
             {
                 "id": "gating#",
-                "score": 0.027217
+                "score": 0.018189
             },
             {
                 "id": "billing#deploy-notes",
-                "score": 0.025314
+                "score": 0.016917
             },
             {
                 "id": "#deploy",
-                "score": 0.215488
+                "score": 0.144006
             },
             {
                 "id": "#deploy-again",
-                "score": 0.026702
+                "score": 0.017844
             },
             {
                 "id": "#deploy-once-more",
-                "score": 0.025752
+                "score": 0.017209
             }
         ],
         "night mode": [
@@ -102,17 +102,83 @@
             },
             {
                 "id": "billing#",
-                "score": 0.70146
+                "score": 0.402819
             },
             {
                 "id": "#deploy-again",
-                "score": 0.36687
+                "score": 0.210678
             },
             {
                 "id": "#deploy-once-more",
-                "score": 0.119567
+                "score": 0.068662
+            }
+        ],
+        "gate": [
+            {
+                "id": "gating#",
+                "score": 1
+            }
+        ],
+        "gated pages": [
+            {
+                "id": "gating#",
+                "score": 1
+            }
+        ],
+        "deploying": [
+            {
+                "id": "#deploy",
+                "score": 1
+            },
+            {
+                "id": "#deploy-again",
+                "score": 0.939155
+            },
+            {
+                "id": "billing#deploy-notes",
+                "score": 0.889006
+            },
+            {
+                "id": "#deploy-once-more",
+                "score": 0.831274
+            }
+        ],
+        "charged": [
+            {
+                "id": "billing#",
+                "score": 1
             }
         ]
+    },
+    "stems": {
+        "gate": "gate",
+        "gates": "gate",
+        "gated": "gate",
+        "gating": "gate",
+        "caresses": "caress",
+        "ponies": "poni",
+        "agreed": "agre",
+        "feed": "feed",
+        "hopping": "hop",
+        "filing": "file",
+        "falling": "fall",
+        "configure": "configur",
+        "configured": "configur",
+        "deploying": "deploi",
+        "dependency": "dependenci",
+        "dependencies": "dependenci",
+        "release": "releas",
+        "used": "us",
+        "css": "css",
+        "is": "is",
+        "docs": "doc",
+        "sky": "sky",
+        "happy": "happi",
+        "controll": "controll",
+        "rate": "rate",
+        "cease": "ceas",
+        "v2": "v2",
+        "café": "café"
     },
     "index": {
         "sections": [

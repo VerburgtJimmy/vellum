@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Each section is indexed with questions derived from its content at build time: from its heading, the Artisan and Composer commands in it, the config keys it documents and its warning callouts. A page can add its own with a `questions:` list in frontmatter
 - Page aliases. A page's `aliases:` frontmatter adds terms it can be found by, and a query that names a section's heading, page title or alias ranks that section first
 - A short built-in list of synonyms for common docs terms, such as "night mode" for "dark mode"
+- English stemming in search, so "gate", "gated" and "gating" match each other and "configured" matches "configure"
 - A search check for CI. List the questions readers ask in a `questions.yml` next to your Markdown, with the page and heading that answer each one, and `vellum:build` reports how many are found in the top five results. `checks.search_min` or `VELLUM_SEARCH_MIN` fails the build below a given share, and a question whose target no longer exists is reported as broken. `checks.search` turns the check off, and `vellum:build --check-search` runs it for one build regardless
 - `{prefix}/_vellum/search?q=`, a JSON search endpoint for agents and scripts. It uses the same ranking as the browser and only returns pages the caller can open. `agents.search` turns it off
 - `{prefix}/llms.txt` and `{prefix}/llms-full.txt`. `llms.txt` lists every public page in sidebar order, grouped under a heading per top-level folder, with a link to each page's raw Markdown and its description. `llms-full.txt` contains the Markdown of every public page, each with its title, URL and version. Both cover the latest version and leave gated pages out. `agents.llms_txt` turns them off
@@ -27,7 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Search no longer uses MiniSearch. The built-in driver loads a section index from `{prefix}/_vellum/answers.json` and ranks it in the browser, and the search script is 1.7 KB gzipped instead of 6.4 KB. `search.driver` is now `builtin`; `minisearch` still works as the old name
+- Search no longer uses MiniSearch. The built-in driver loads a section index from `{prefix}/_vellum/answers.json` and ranks it in the browser, and the search script is 2.2 KB gzipped instead of 6.4 KB. `search.driver` is now `builtin`; `minisearch` still works as the old name
 - `vellum:index` rebuilds the section index, and the Scout index when that driver is on
 - The sidebar's page tree is rendered once per request and reused in the mobile drawer. On a 390-page site this took the median page time from 15.3 ms to 13.1 ms
 - The last-updated date under a page title comes from frontmatter or git. It used to show the file's modification time, which a checkout or `composer install` resets

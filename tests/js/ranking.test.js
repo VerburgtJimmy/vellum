@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { readFileSync } from 'node:fs'
-import { createRanker, breadcrumb, highlight, spread } from '../../resources/js/search.js'
+import { createRanker, breadcrumb, highlight, spread, stem } from '../../resources/js/search.js'
 
 const fixture = JSON.parse(readFileSync(new URL('../fixtures/ranking-parity.json', import.meta.url), 'utf8'))
 const ranker = createRanker(fixture.index)
@@ -13,6 +13,12 @@ describe('ranking in the browser', () => {
       expect(found.map((hit) => hit.id), query).toEqual(expected.map((hit) => hit.id))
 
       found.forEach((hit, i) => expect(hit.score, `${query} #${i}`).toBeCloseTo(expected[i].score, 5))
+    }
+  })
+
+  it('stems words exactly as PHP does', () => {
+    for (const [word, expected] of Object.entries(fixture.stems)) {
+      expect(stem(word), word).toBe(expected)
     }
   })
 
