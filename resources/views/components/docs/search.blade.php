@@ -59,7 +59,7 @@
                         aria-autocomplete="list"
                         aria-expanded="true"
                         aria-controls="vellum-search-results"
-                        :aria-activedescendant="options.length ? 'vellum-search-option-' + active : ''"
+                        :aria-activedescendant="results.length ? 'vellum-search-option-' + active : ''"
                         autocomplete="off"
                         autocorrect="off"
                         spellcheck="false"

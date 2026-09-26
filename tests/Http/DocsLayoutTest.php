@@ -459,3 +459,21 @@ it('ships a scroll spy that measures sections rather than heading elements', fun
     expect($js)->toContain('visibleIds')
         ->and($js)->not->toContain('IntersectionObserver');
 });
+
+it('binds the search dialog only to state the dialog script defines', function (): void {
+    $this->writeDoc('index.md', "---\ntitle: Home\n---\nHi");
+
+    $html = (string) $this->get('/docs')->assertOk()->getContent();
+    $script = (string) file_get_contents(dirname(__DIR__, 2).'/resources/js/vellum.js');
+
+    // The dialog's state lives in vellumSearchDialog(); a name the markup uses
+    // that the script no longer defines is an Alpine error on every keystroke.
+    preg_match('/function vellumSearchDialog\(urls\) \{\s*return \{(.*?)\n  \}\n\}/s', $script, $dialog);
+    preg_match_all('/:aria-activedescendant="(\w+)\./', $html, $bound);
+
+    expect($bound[1])->not->toBeEmpty();
+
+    foreach ($bound[1] as $name) {
+        expect($dialog[1] ?? '')->toMatch('/\b'.$name.'\b/');
+    }
+});
