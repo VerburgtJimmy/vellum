@@ -39,7 +39,8 @@ php artisan vellum:build
 - Markdown with `:::` callouts, tabs, steps and cards, and your own `<x-…>` Blade components
 - Allowlisted `env`, `config` and `route` tags that print values from the running app
 - Server-side code highlighting with titles, line numbers and highlighted lines
-- Client-side search over a prebuilt index, or Laravel Scout
+- Client-side search over the sections of every page, or Laravel Scout
+- `llms.txt`, raw Markdown and content negotiation for AI tools and agents
 - Page access control through `auth` or your existing Laravel gates
 - Optional versioned docs, with the latest version served without a prefix
 - A changelog page and Atom feed built from a Keep a Changelog file

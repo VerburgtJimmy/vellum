@@ -27,8 +27,8 @@ configuration: a page the reader cannot see returns a 404 here as well.
 `vellum:export` writes the same files to `_vellum/raw/`, so the raw links also work on a
 static site.
 
-Each raw response names its HTML page in a `Link: <...>; rel="canonical"` header, so a
-search engine credits the page rather than indexing the source as a copy of it. When
+Each raw response names its HTML page in a `Link: <...>; rel="canonical"` header, so
+search engines treat the HTML page as the original. When
 versions are enabled, raw responses also carry an `X-Vellum-Docs-Version` header naming
 the version. A page with a last-updated date, from its `updated` frontmatter or its last
 git commit, gets a `Last-Modified` header; a page without one gets none. The body stays
@@ -97,9 +97,9 @@ Links are absolute when `app.url` is an origin and root-relative otherwise.
 them off.
 
 Agents look for `llms.txt` at the site root, so both files are also served at `/llms.txt`
-and `/llms-full.txt`, on `route.domain` when that is set. The root is your app's, so
-Vellum only adds those routes when the app does not already have one for the path, and a
-route the app defines for it wins. Set `agents.llms_txt_root` to `false` to keep them
+and `/llms-full.txt`, on `route.domain` when that is set. Vellum only adds these routes
+when your app has no route for the same path, and a route your app defines takes
+precedence. Set `agents.llms_txt_root` to `false` to keep them
 under the docs prefix only.
 
 The links in `llms.txt` point under `/docs/_vellum/raw/`, so keep that path open in
@@ -110,9 +110,9 @@ The links in `llms.txt` point under `/docs/_vellum/raw/`, so keep that path open
 response sends the same URL in a `Link` header.
 
 **Content negotiation.** Request a page with `Accept: text/markdown` and the response is
-the raw Markdown instead of HTML, the same body the raw route returns. It counts when
-`Accept` names `text/markdown` and ranks it above `text/html`, so browsers keep getting
-HTML. Gating applies as it does on the raw route. Page responses send `Vary: Accept` so a
+the raw Markdown instead of HTML, the same body the raw route returns. This applies when
+`Accept` lists `text/markdown` with a higher preference than `text/html`, so browsers
+still get HTML. Gating applies as it does on the raw route. Page responses send `Vary: Accept` so a
 cache keeps the two apart. Set `agents.content_negotiation` to `false` to turn it off.
 
 **A search endpoint.** `/docs/_vellum/search?q=` runs the same search as the browser and
