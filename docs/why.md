@@ -34,6 +34,6 @@ Vellum is a Laravel package that turns a folder of Markdown into a documentation
 
 ## Stability
 
-The current release is 0.6. Config keys, frontmatter and the authoring syntax have been frozen since 0.5. Later releases add to them without renaming anything, and breaking changes wait for 1.0. [Upgrade](/docs/getting-started/upgrade) lists what changed between releases.
+The current release is 0.7. Config keys, frontmatter and the authoring syntax have been frozen since 0.5. Later releases add to them without renaming anything, and breaking changes wait for 1.0. [Upgrade](/docs/getting-started/upgrade) lists what changed between releases.
 
 [Installation](/docs/getting-started/installation) takes about five minutes. [Comparisons](/docs/comparisons) covers how Vellum differs from LaRecipe.

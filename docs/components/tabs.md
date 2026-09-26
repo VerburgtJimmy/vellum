@@ -41,7 +41,7 @@ composer require jimmyverburgt/vellum
 ```json
 {
     "require": {
-        "jimmyverburgt/vellum": "^0.6"
+        "jimmyverburgt/vellum": "^0.7"
     }
 }
 ```
