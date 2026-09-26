@@ -38,6 +38,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - The MiniSearch index, its `{prefix}/_vellum/search.json` route for the built-in driver, and its builder. The route remains for the Scout driver
 
+### Fixed
+
+- Search on a static export hosted under a path, such as `export.base_url` set to `/handbook/`, loaded its index from the site root and found nothing, and its results linked to the root too. The exported pages now take both from the links the export rewrites
+
 ## [0.6.4] - 2026-09-24
 
 ### Fixed

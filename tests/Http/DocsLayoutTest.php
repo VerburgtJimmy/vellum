@@ -468,7 +468,7 @@ it('binds the search dialog only to state the dialog script defines', function (
 
     // The dialog's state lives in vellumSearchDialog(); a name the markup uses
     // that the script no longer defines is an Alpine error on every keystroke.
-    preg_match('/function vellumSearchDialog\(urls\) \{\s*return \{(.*?)\n  \}\n\}/s', $script, $dialog);
+    preg_match('/function vellumSearchDialog\(\w+\) \{(.*?)\n\}\n/s', $script, $dialog);
     preg_match_all('/:aria-activedescendant="(\w+)\./', $html, $bound);
 
     expect($bound[1])->not->toBeEmpty();

@@ -195,13 +195,40 @@ function vellumDialog(initialOpen = false) {
  * Search hotkey root: Cmd/Ctrl+K in capture phase so the browser does not steal it.
  */
 /**
+ * A static export rewrites the links in its HTML to wherever the site is
+ * hosted, which may be under a path such as /handbook/. It cannot rewrite a URL
+ * inside script data or inside the index, so an exported page takes the index
+ * URL, and the base its results link to, from attributes the export did rewrite.
+ *
+ * @param {{static?: boolean, prefix?: string, answers: string}} urls
+ */
+function exportedUrls(urls) {
+  const root = urls.static ? document.querySelector('[data-vellum-search-url]') : null
+
+  if (!root) {
+    return { ...urls, link: (url) => url }
+  }
+
+  const prefix = urls.prefix ?? ''
+  const home = root.dataset.vellumSearchHome ?? prefix
+
+  return {
+    ...urls,
+    answers: root.dataset.vellumSearchUrl ?? urls.answers,
+    link: (url) => (url.startsWith(prefix) ? home + url.slice(prefix.length) : url),
+  }
+}
+
+/**
  * The search dialog: loads the search index on first open, then ranks in the
  * browser. The ranker itself lives in the search chunk, out of Alpine's
  * reactive state.
  *
- * @param {{driver: string, answers: string, scout: string|null}} urls
+ * @param {{driver: string, answers: string, scout: string|null, static?: boolean, prefix?: string}} given
  */
-function vellumSearchDialog(urls) {
+function vellumSearchDialog(given) {
+  const urls = exportedUrls(given)
+
   return {
     query: '',
     results: [],
@@ -259,7 +286,7 @@ function vellumSearchDialog(urls) {
 
       this.results = found.map((hit) => ({
         id: hit.record.id,
-        url: hit.record.url,
+        url: urls.link(hit.record.url),
         breadcrumb: search.breadcrumb(hit.record),
         passage: search.highlight(hit.record.passage ?? '', query),
       }))

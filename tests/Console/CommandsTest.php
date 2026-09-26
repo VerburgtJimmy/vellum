@@ -690,3 +690,28 @@ it('only strips app.url where it is the origin of a link', function (): void {
 
     $this->deleteDirectory($out);
 });
+
+it('points exported search at the index and pages where the export is hosted', function (): void {
+    $out = sys_get_temp_dir().'/vellum-tests/export-search-base-'.$this->fixtureId();
+
+    if (is_dir($out)) {
+        $this->deleteDirectory($out);
+    }
+
+    config()->set('vellum.export.out', $out);
+    config()->set('vellum.export.base_url', '/handbook/');
+
+    $this->writeDoc('index.md', "---\ntitle: Home\n---\nHi");
+    $this->writeDoc('guides/one.md', "---\ntitle: One\n---\nGuide body");
+
+    $this->artisan('vellum:export')->assertSuccessful();
+
+    $html = (string) file_get_contents($out.'/docs/guides/one/index.html');
+
+    // Script data is not rewritten, so the dialog reads both from attributes.
+    expect($html)->toContain('data-vellum-search-url="/handbook/docs/_vellum/answers.json"')
+        ->and($html)->toMatch('/data-vellum-search-home="[^"]*docs"/')
+        ->and($html)->toContain('static: true');
+
+    $this->deleteDirectory($out);
+});

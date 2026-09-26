@@ -25,6 +25,7 @@
     data-vellum-search-hotkey="{{ $hotkey }}"
     data-vellum-search-driver="{{ $driver }}"
     data-vellum-search-url="{{ $answersUrl }}"
+    @if ($staticExport) data-vellum-search-home="/{{ $prefix }}" @endif
     x-data="vellumSearchHotkey(@js($hotkey))"
     x-on:vellum-search-open.window="openSearch()"
     x-on:vellum-search-close.window="closeSearch()"
@@ -42,6 +43,8 @@
                     driver: @js($driver),
                     answers: @js($answersUrl),
                     scout: @js($scoutUrl),
+                    static: @js((bool) $staticExport),
+                    prefix: @js('/'.$prefix),
                 })"
                 x-init="ensureIndex(); $nextTick(() => $refs.query?.focus())"
                 x-on:keydown.arrow-down.prevent="move(1)"
