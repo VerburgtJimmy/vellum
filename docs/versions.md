@@ -1,9 +1,9 @@
 ---
 title: Versions
-description: Version folders, unprefixed latest URLs, and the switcher.
+description: Version folders, unprefixed URLs for the latest version, and the version switcher.
 ---
 
-Off by default. When enabled, Markdown lives in version folders (`docs/v2/`, `docs/v1/`).
+Versioning is off by default. When you enable it, your Markdown lives in one folder per version (`docs/v2/`, `docs/v1/`).
 
 ```php
 'versions' => [
@@ -17,12 +17,12 @@ Off by default. When enabled, Markdown lives in version folders (`docs/v2/`, `do
 ],
 ```
 
-The `latest` folder is served at `/docs/...` with no version in the URL. Other folders are at `/docs/v1/...` or `/docs/next/...`. Visiting `/docs/{latest}/...` redirects to the unprefixed URL with HTTP 301.
+The `latest` folder is served at `/docs/...` with no version in the URL. Other versions are served under their slug, such as `/docs/v1/...` or `/docs/next/...`. A request for `/docs/{latest}/...` gets a 301 redirect to the unprefixed URL.
 
-`list` order is switcher order. Put `next` first so **Next** sits above **1.x (LTS)**. `labels` is switcher text only. Folders and URLs stay the list slug. An unlabelled latest slug still shows **Latest**.
+The order of `list` is the order of the switcher, so put `next` first to show "Next" above "1.x (LTS)". `labels` only changes the switcher text: folders and URLs always use the slug from `list`. If the latest version has no label, the switcher shows "Latest".
 
-Changelog stays at `/docs/changelog` for every version. Do not detect versions from git tags: the `list` in config is the source of truth.
+The changelog stays at `/docs/changelog` for every version. Versions come from `list` in the config, and Vellum does not read git tags.
 
-Each version is its own Markdown tree. A page that exists only in `v1` 404s on the latest tree.
+Each version is a separate Markdown tree, so a page that exists in one version returns a 404 in any version whose folder does not contain it.
 
-The switcher is a keyboard menu: arrows, Home, End, Escape. Screen readers get `Select documentation version` on the trigger.
+The switcher is keyboard accessible with the arrow keys, Home, End and Escape. Its trigger has the accessible label `Select documentation version`.

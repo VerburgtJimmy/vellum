@@ -1,6 +1,6 @@
 ---
 title: Installation
-description: Install Vellum in a Laravel application in under five minutes.
+description: Requirements, installing the package, and the build step for production.
 ---
 
 ## Requirements
@@ -23,29 +23,29 @@ composer require jimmyverburgt/vellum
 php artisan vellum:install
 ```
 
-`vellum:install` publishes `config/vellum.php`, starter Markdown under `resources/docs`, and the compiled CSS/JS to `public/vendor/vellum`.
+`vellum:install` publishes `config/vellum.php`, copies starter Markdown into `resources/docs` and copies the compiled CSS and JavaScript to `public/vendor/vellum`.
 
 ## Open the site
 
-Visit `/docs`. Edit the files in `resources/docs/`.
+Visit `/docs`, then edit the files in `resources/docs/`.
 :::
 
 ## Production
 
-Compile Markdown once per deploy:
+Compile the Markdown once per deploy:
 
 ```bash
 php artisan vellum:build
 ```
 
-In `local`, pages recompile on request as you edit, so this is a deploy step rather than
-something to run while writing. See [Commands](/docs/commands).
+In the `local` environment pages recompile on request as you edit them, so you only need this
+command in your deploy. See [Commands](/docs/commands).
 
 ## Next
 
-- [Markdown](/docs/writing/markdown) for the flavour Vellum renders
-- [Navigation](/docs/writing/navigation) to shape the sidebar
-- [Configuration](/docs/getting-started/configuration) for the frozen config schema
+- [Markdown](/docs/writing/markdown) for the Markdown syntax Vellum renders
+- [Navigation](/docs/writing/navigation) to arrange the sidebar
+- [Configuration](/docs/getting-started/configuration) for every config key and frontmatter field
 - [Commands](/docs/commands) for what to run in a deploy
-- [Upgrade](/docs/getting-started/upgrade) if you are coming from an earlier version
-- [Troubleshooting](/docs/troubleshooting) when something does not render
+- [Upgrade](/docs/getting-started/upgrade) if you are upgrading from an earlier version
+- [Troubleshooting](/docs/troubleshooting) when a page does not render

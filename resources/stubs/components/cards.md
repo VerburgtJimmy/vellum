@@ -1,6 +1,6 @@
 ---
 title: Cards
-description: Link cards in a two-up grid.
+description: Link cards laid out in a two-column grid.
 ---
 
 :::cards

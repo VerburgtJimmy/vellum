@@ -1,18 +1,16 @@
 ---
 title: Page actions
-description: Copy Markdown, raw source URLs, llms.txt, Edit on GitHub, and handing a page to an AI tool.
+description: Copy Markdown, raw source URLs, llms.txt, Edit on GitHub, and opening a page in ChatGPT or Claude.
 ---
 
-Every page carries a small row of actions under its title. They exist so a reader can
-take the page somewhere else: into an editor, into a pull request, or into a chat window.
+Every page has a row of actions under its title. They let a reader copy the page's
+source, edit it on GitHub, or open it in an AI chat tool.
 
 ## Copy Markdown
 
-Copies the page's Markdown source, frontmatter and all, to the clipboard. Not the
-rendered text and not the HTML.
-
-This is the fastest way to give a model the page you are looking at without it having to
-fetch anything.
+Copies the page's Markdown source to the clipboard, including the frontmatter. You can
+paste it straight into a chat with a model, which then has the page without fetching
+anything.
 
 ## Raw Markdown
 
@@ -23,11 +21,11 @@ Every page is also served as plain Markdown:
 /docs/_vellum/raw/writing/markdown.md   its source
 ```
 
-The raw route returns `text/markdown` and honours [gating](/docs/gating): a page a reader
-cannot see returns 404 here too, with no separate configuration.
+The raw route returns `text/markdown` and follows [gating](/docs/gating) with no extra
+configuration: a page the reader cannot see returns a 404 here as well.
 
-`vellum:export` writes the same files into `_vellum/raw/`, so the static build keeps
-working.
+`vellum:export` writes the same files to `_vellum/raw/`, so the raw links also work on a
+static site.
 
 Each raw response names its HTML page in a `Link: <...>; rel="canonical"` header, so a
 search engine credits the page rather than indexing the source as a copy of it. When
@@ -124,15 +122,15 @@ cannot run it. See [Answers](/docs/answers#the-answer-endpoint).
 
 ## Open in ChatGPT / Open in Claude
 
-Both open the tool with a prompt already filled in, pointing at this page's raw Markdown
-URL.
+Both open the chat tool with a prompt that points to the page's raw Markdown URL.
 
-This only works for docs that are reachable from the public internet. On localhost, or
-behind a login, the model cannot fetch the URL. Use **Copy Markdown** and paste instead.
+The model has to fetch that URL, so this only works for docs on the public internet. For
+docs on localhost or behind a login, use Copy Markdown and paste the source instead.
 
-:::note[Why raw Markdown rather than the page]
-A model reading the rendered page spends its budget on navigation, sidebar and chrome.
-The raw file is the content and nothing else, which is both cheaper and more accurate.
+:::note[Why the raw Markdown URL]
+The raw file contains only the page content. A model reading the rendered page also
+has to process the navigation, sidebar and other layout, which uses more tokens and gives
+less accurate answers.
 :::
 
 ## Edit on GitHub
@@ -147,26 +145,27 @@ Vellum appends the page's path relative to `vellum.path`, so
 `resources/docs/billing/invoices.md` becomes
 `https://github.com/acme/app/edit/main/resources/docs/billing/invoices.md`.
 
-The link only appears when `repo` is set. Point it at `/edit/` to open GitHub's editor
-directly, or `/blob/` to land on the file.
+The link only appears when `repo` is set. Use an `/edit/` URL to open GitHub's editor,
+or a `/blob/` URL to open the file view.
 
-Vellum refuses to build the link for a file resolving outside `vellum.path`, so a
-symlinked page cannot leak a path from elsewhere on disk.
+No link is shown for a file whose real path is outside `vellum.path`, so a symlinked page
+cannot expose a path from elsewhere on disk.
 
 ## Changing them
 
-There is no config flag for the row. Override the view instead: Vellum registers
-its views under the `vellum` namespace, so a file at the matching path in your app wins.
+The row has no config option. To change it, override the view. Vellum registers its
+views under the `vellum` namespace, so a file at the matching path in your app takes
+precedence:
 
 ```
 resources/views/vendor/vellum/components/docs/page-actions.blade.php
 ```
 
-Create that file and it replaces the shipped one. An empty file removes the row. Nothing
-needs publishing first, and the same applies to any other Vellum view.
+Creating that file replaces the shipped view, and an empty file removes the row. You do
+not need to publish anything first. The same works for every other Vellum view.
 
 :::warning
-Views are not frozen the way config keys and frontmatter are. An override is a copy, and
-it will not pick up fixes or markup changes from a later release. Keep the override as
-small as you can.
+Views are not frozen the way config keys and frontmatter are. An override is a copy and
+does not receive fixes or markup changes from later releases, so keep it as small as you
+can.
 :::

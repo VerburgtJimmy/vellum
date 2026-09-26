@@ -570,21 +570,20 @@ final class NavigationBuilder
      */
     private function readMeta(string $folder): ?array
     {
+        // _meta.md carries the same settings as frontmatter. Where both files
+        // set a key, _meta.md wins, as it already did for access.
+        $markdown = $folder.DIRECTORY_SEPARATOR.'_meta.md';
+        $meta = is_file($markdown) ? (new FrontMatterParser)->parseFile($markdown)['matter'] : null;
+
         $path = $folder.DIRECTORY_SEPARATOR.'meta.json';
+        $json = is_file($path) ? file_get_contents($path) : false;
+        $decoded = $json === false ? null : json_decode($json, true);
 
-        if (! is_file($path)) {
-            return null;
+        if (is_array($decoded)) {
+            return array_merge($decoded, $meta ?? []);
         }
 
-        $json = file_get_contents($path);
-
-        if ($json === false) {
-            return null;
-        }
-
-        $decoded = json_decode($json, true);
-
-        return is_array($decoded) ? $decoded : null;
+        return $meta === [] ? null : $meta;
     }
 
     private function rootPath(?string $version): string

@@ -1,39 +1,39 @@
 ---
 title: Configuration
-description: Every config key and frontmatter field. The names have been frozen since 0.5.
+description: Every config key and frontmatter field, all frozen since 0.5.
 ---
 
-Published as `config/vellum.php`. **These names have been frozen since 0.5.** Later releases add keys; none is renamed before 1.0.
+`vellum:install` publishes the config to `config/vellum.php`. The key names have been frozen since 0.5. Later releases can add keys, but none will be renamed before 1.0.
 
 ## Site and routing
 
 | Key | Default | Purpose |
 | --- | --- | --- |
-| `name` | `env('APP_NAME')` | Site name in the header and titles |
-| `path` | `resource_path('docs')` | Markdown root |
+| `name` | `env('APP_NAME', 'Docs')` | Site name, shown in the header and page titles |
+| `path` | `env('VELLUM_PATH', resource_path('docs'))` | Root folder of the Markdown files. A relative path is read from the app root |
 | `route.prefix` | `docs` | URL prefix |
 | `route.middleware` | `['web']` | Route middleware |
-| `route.domain` | `null` | Optional domain. Canonical links and the sitemap use it as their host, with the scheme from `app.url` |
-| `repo` | `null` | Base URL for "Edit on GitHub" |
-| `logo` | `null` | SVG path or Blade view in the header |
-| `links` | `[]` | Extra links in the sidebar footer (`label`, `href`, optional `icon: github`) |
-| `layout.search` | `sidebar` | `sidebar` or `header` |
-| `fonts` | `null` | HTML injected into the layout head |
-| `checks.references` | `true` | Warn at build time about links and images that point at nothing |
-| `checks.strict` | `false` | Turn those warnings into a failed build |
-| `checks.search` | `true` | Ask the questions in `questions.yml`, if the docs have one, at build time. See [Answers](/docs/answers#checking-search-in-ci) |
-| `checks.search_min` | `env('VELLUM_SEARCH_MIN', 0.0)` | The share of those questions that must find their answer before the build passes. `0` reports without failing |
+| `route.domain` | `null` | Optional domain for the docs routes. Canonical links and the sitemap use it as their host, with the scheme from `app.url` |
+| `repo` | `null` | Base URL for the "Edit on GitHub" link |
+| `logo` | `null` | Path to an SVG file, or a Blade view name, for the site logo |
+| `links` | `[]` | Extra links, each with `label`, `href` and an optional `icon: github`. Shown in the sidebar footer, or in the header when `layout.search` is `header` |
+| `layout.search` | `sidebar` | Where the search field sits: `sidebar` or `header` |
+| `fonts` | `null` | HTML added to the layout's head, such as a font stylesheet link |
+| `checks.references` | `true` | Warn during `vellum:build` about links and images that point at nothing |
+| `checks.strict` | `false` | Fail the build when there are reference warnings |
+| `checks.search` | `true` | Ask the questions in `questions.yml`, if the docs have one, during `vellum:build`. See [Answers](/docs/answers#checking-search-in-ci) |
+| `checks.search_min` | `env('VELLUM_SEARCH_MIN', 0.0)` | The share of those questions that must find their answer for the build to pass. `0` reports without failing |
 | `agents.llms_txt` | `true` | Serve `llms.txt` and `llms-full.txt` under the docs prefix. See [Page actions](/docs/page-actions#for-agents) |
-| `agents.llms_txt_root` | `true` | Also serve both at `/llms.txt` and `/llms-full.txt`, unless the app routes those paths itself |
+| `agents.llms_txt_root` | `true` | Also serve both at `/llms.txt` and `/llms-full.txt`, unless the app already routes those paths |
 | `agents.content_negotiation` | `true` | Serve a page's raw Markdown when the request's `Accept` header prefers `text/markdown` |
-| `agents.answer` | `true` | Serve `{prefix}/_vellum/answer?q=`, one question answered as JSON. See [Answers](/docs/answers#the-answer-endpoint) |
-| `cache.path` | `storage_path('framework/vellum')` | Compile cache |
-| `export.out` | `public_path('docs-static')` | Static export directory |
-| `export.base_url` | `/` | Prefix inside the export |
+| `agents.answer` | `true` | Serve `{prefix}/_vellum/answer?q=`, which answers one question as JSON. See [Answers](/docs/answers#the-answer-endpoint) |
+| `cache.path` | `storage_path('framework/vellum')` | Directory for compiled pages |
+| `export.out` | `public_path('docs-static')` | Output directory for `vellum:export` |
+| `export.base_url` | `/` | URL prefix used inside the export |
 
 ## Theme
 
-See [Theming](/docs/theming) for the presets, the accent, and the contrast target.
+See [Theming](/docs/theming) for the presets, the accent colour and the contrast target.
 
 ```php
 'theme' => [
@@ -132,20 +132,20 @@ See [Release notes](/docs/releases).
 
 ## Frontmatter
 
-Frozen page keys:
+Pages accept these frontmatter keys, which are also frozen:
 
 | Key | Purpose |
 | --- | --- |
-| `title` | Page title (falls back to the first heading or the file name) |
-| `description` | Meta description and prev/next cards |
-| `slug` | Override the URL slug |
-| `order` | Sort among siblings when `meta.json` does not list pages |
-| `full` | Hide the table of contents column |
+| `title` | Page title. Falls back to the first heading, then the file name |
+| `description` | Meta description, also shown on the prev/next cards |
+| `slug` | Overrides the URL slug |
+| `order` | Position among sibling pages when `meta.json` does not list them |
+| `full` | Hides the table of contents column |
 | `access` | `guest`, `auth`, or a gate name. See [Gating](/docs/gating). |
 | `updated` | Last-updated date, `2026-09-17` or ISO 8601 (`2026-09-17T10:00:00+02:00`). Without it, the file's last git commit date is used, when the docs are in a full git clone. File modification times are never used |
 | `questions` | Questions the page answers, as a list. Search matches a reader's question against them, alongside the ones Vellum derives from headings, commands and config keys |
 | `aliases` | Other names readers use for the page's subject, as a list. A search containing one also matches the page title and the other aliases |
 
-Folder `meta.json`: `title`, `defaultOpen`, `pages`, `access`. See [Navigation](/docs/writing/navigation). `_meta.md` can set `access` (and the usual matter) for the folder.
+A folder's `meta.json` accepts `title`, `defaultOpen`, `pages` and `access`. A `_meta.md` file can set the folder's `access` or title in frontmatter instead. See [Navigation](/docs/writing/navigation).
 
-Unknown keys are stored and ignored. Do not rely on that as an API.
+Unknown keys are stored but ignored. Do not treat that behaviour as an API.

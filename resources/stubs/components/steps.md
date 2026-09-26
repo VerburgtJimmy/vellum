@@ -1,6 +1,6 @@
 ---
 title: Steps
-description: Numbered procedures from headings.
+description: Numbered steps built from headings.
 ---
 
 :::steps

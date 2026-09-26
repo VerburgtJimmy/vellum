@@ -14,12 +14,12 @@ Vellum can render a Keep a Changelog file as `/docs/changelog` with an Atom feed
 
 Set `path` to `null` to disable the page and feed.
 
-`[Unreleased]` stays in the source file for authors. The feed never includes it. The HTML page shows it only when `unreleased` is `true`.
+You can keep an `[Unreleased]` section in the file while you work. The feed never includes it, and the HTML page shows it only when `unreleased` is `true`.
 
-The changelog also has a raw Markdown copy at `/docs/_vellum/raw/changelog.md`, like every page (see [Page actions](/docs/page-actions#raw-markdown)). It follows the same rule: with `unreleased` off, the `[Unreleased]` section is cut from it, so notes the page hides are not one URL away. With `unreleased` on, it is the file as written.
+The changelog also has a raw Markdown copy at `/docs/_vellum/raw/changelog.md`, like every page (see [Page actions](/docs/page-actions#raw-markdown)). It follows the same rule: with `unreleased` off, the `[Unreleased]` section is removed from it as well. With `unreleased` on, it is the file as written.
 
-Headings may be `## [1.2.0] - 2026-09-13` or `## 1.2.0`.
+Release headings can be written as `## [1.2.0] - 2026-09-13` or `## 1.2.0`.
 
-The changelog is not versioned. It stays at `/docs/changelog` even when version folders are on.
+The changelog is not versioned. It stays at `/docs/changelog` when version folders are enabled.
 
-Vellum's own release notes are rendered this way: [Changelog](/docs/changelog).
+Vellum's own [changelog](/docs/changelog) is rendered this way.

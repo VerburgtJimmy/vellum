@@ -5,7 +5,7 @@ description: How Vellum differs from LaRecipe, the other package that serves Mar
 
 ## LaRecipe
 
-[LaRecipe](https://github.com/saleem-hadad/larecipe) is the tool closest to Vellum: a Laravel package that serves Markdown from `resources/docs` at `/docs`. It has been around since 2018 and is still maintained. The table reflects both packages as of September 2026.
+[LaRecipe](https://github.com/saleem-hadad/larecipe) is the closest alternative to Vellum. It is also a Laravel package that serves Markdown from `resources/docs` at `/docs`. It dates from 2018 and is still maintained. The table compares both packages as of September 2026.
 
 | | Vellum | LaRecipe |
 | --- | --- | --- |
@@ -20,10 +20,10 @@ description: How Vellum differs from LaRecipe, the other package that serves Mar
 | Components | `:::` directives and Blade components | Blade, and Vue components through asset packages |
 | Requirements | PHP 8.4, Laravel 11 to 13 | PHP 7.1 or later, Laravel 5.4 to 13 |
 
-**LaRecipe fits better** if you are on an older PHP or Laravel version, or want one of its add-on packages: Swagger, right-to-left layouts, reader feedback, Disqus comments.
+Choose LaRecipe if you are on an older PHP or Laravel version, or if you want one of its add-on packages for Swagger, right-to-left layouts, reader feedback or Disqus comments.
 
-**Vellum fits better** if some pages are for some readers only, if you also want a static copy of the docs, or if you want broken links caught before a deploy.
+Choose Vellum if some pages should only be visible to certain readers, if you also want a static copy of the docs, or if you want broken links caught before a deploy.
 
 ## Outside Laravel
 
-If the product is not a Laravel app, a documentation framework for its own stack will suit it better: [Fumadocs](https://fumadocs.dev) for Next.js, or [VitePress](https://vitepress.dev) as a standalone static site. Vellum's layout takes its cues from Fumadocs; the [credits](/docs/credits) say which.
+If your product is not a Laravel app, use a documentation framework built for its stack, such as [Fumadocs](https://fumadocs.dev) for Next.js or [VitePress](https://vitepress.dev) for a standalone static site. Vellum's layout is based on Fumadocs, and the [credits](/docs/credits) list what it borrows.

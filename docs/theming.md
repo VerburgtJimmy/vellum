@@ -1,6 +1,6 @@
 ---
 title: Theming
-description: Three contrast-tested presets, a brand accent, radius, and light / dark / system.
+description: Three contrast-tested presets, a brand accent, corner radius, and a light, dark or system default.
 ---
 
 ```php
@@ -17,41 +17,41 @@ description: Three contrast-tested presets, a brand accent, radius, and light / 
 
 | Preset | Notes |
 | --- | --- |
-| `neutral` | Default gray. `primary` (oklch hue) only applies here. |
-| `ocean` | Cool blue page, deep navy accent, near-black navy in dark. |
-| `laravel` | laravel.com colours: warm sand neutrals and the Laravel red. |
+| `neutral` | The default grey. `primary` (an oklch hue) only applies to this preset. |
+| `ocean` | Cool blue page and a deep navy accent, with a near-black navy dark mode. |
+| `laravel` | The laravel.com colours: warm sand neutrals and the Laravel red. |
 
-Unknown names fall back to `neutral`.
+An unknown preset name falls back to `neutral`.
 
-Every preset defines the same token set and is tested in both modes. See
-[Surfaces](#surfaces) and [Contrast](#contrast).
+Every preset defines the same set of tokens and is contrast-tested in light and dark mode.
+See [Surfaces](#surfaces) and [Contrast](#contrast).
 
 :::note
 0.5 removed nine presets: `black`, `vitepress`, `dusk`, `catppuccin`, `purple`, `solar`,
-`emerald`, `ruby` and `aspen`. They fall back to `neutral`, and `vellum:build` says so
-once. Most of them existed to change one accent colour, which `accent` now does on any
-preset.
+`emerald`, `ruby` and `aspen`. A config that still names one falls back to `neutral`, and
+`vellum:build` prints a single warning about it. Most of these presets only changed the
+accent colour, which you can now set on any preset with `accent`.
 :::
 
 ## Surfaces
 
-Three layers, the same in every preset and both modes:
+Every preset uses the same three surface layers in both modes:
 
-| Token | Carries | Position |
+| Token | Used for | Position |
 | --- | --- | --- |
 | `--background` | prose | the canvas, at the light or dark extreme |
 | `--card` | sidebar, callouts, popovers | one step toward mid-grey |
 | `--muted` | code blocks, table headers, tab strips, step markers | a second step |
 
-Surfaces only move one way from the canvas: darker in light mode, lighter in dark. That
-keeps the reading surface the cleanest area of the page, makes nesting read correctly (a
-code block inside a callout sits one step deeper), and means a surface can never collide
-with the canvas. The contrast test enforces the direction and the order.
+Each layer steps away from the canvas in one direction: darker in light mode and lighter
+in dark mode. The reading surface stays the cleanest part of the page, and nested elements
+go one step deeper, so a code block inside a callout sits below the callout. The contrast
+test checks both the direction and the order.
 
 ## Accent
 
-`accent` recolours links, buttons, and the focus ring on whichever preset you picked.
-Give it one colour, or one per mode:
+`accent` recolours links, buttons and the focus ring on any preset. Set one colour for
+both modes, or one per mode:
 
 ```php
 'accent' => '#7c3aed',
@@ -64,42 +64,41 @@ Give it one colour, or one per mode:
 ],
 ```
 
-Hex, `hsl()` and `oklch()` are accepted. The button label colour is derived from the
-accent, so a light accent gets dark text and a dark accent gets white. A value Vellum
-cannot parse is ignored rather than breaking the page.
+Hex, `hsl()` and `oklch()` values are accepted. The button label colour is derived from
+the accent: a light accent gets dark text and a dark accent gets white text. A value that
+cannot be parsed is ignored and the page renders with the preset's own colours.
 
-`primary` is the older knob and still works, but it only sets an oklch hue on `neutral`.
-Prefer `accent`.
+`primary` is the older option and still works, but it only sets an oklch hue on
+`neutral`. Use `accent` instead.
 
 ## Contrast
 
-Vellum targets **WCAG AA (4.5:1)** in every shipped preset, in both modes, for:
+Every shipped preset meets WCAG AA (4.5:1) in both modes for:
 
 - body text on the page background
 - secondary text (sidebar items, breadcrumbs, table of contents, page meta)
 - link and accent text
 - button labels on a filled button
 
-Syntax highlighting is one palette for light and one for dark, shared by every preset, and
-every token in it clears 4.5:1 on every preset's code surface. The presets change what the
-code block sits on, not what the code is coloured.
+Syntax highlighting uses one palette for light mode and one for dark, shared by every
+preset. Each token colour clears 4.5:1 on every preset's code surface, so a preset changes
+the code block background and leaves the token colours alone.
 
-`tests/Support/PresetContrastTest.php` reads the real stylesheets and fails the build if
-a palette edit drops below that. A custom `accent` is your own responsibility: pick one
-that clears 4.5:1 against your page background.
+`tests/Support/PresetContrastTest.php` reads the shipped stylesheets and fails if a palette
+change drops below these ratios. A custom `accent` is not covered by that test, so choose
+one that clears 4.5:1 against your page background.
 
 ## Default mode
 
-`default` decides which mode a first-time reader gets: `light`, `dark`, or `system`,
-which follows the operating system. Readers can still override it in the theme menu, and
-their choice is stored in `localStorage`, so it survives a reload and wins over this
-setting from then on.
+`default` sets the mode a first-time reader gets: `light`, `dark` or `system`, which
+follows the operating system. Readers can change it from the theme menu. Their choice is
+stored in `localStorage` and takes precedence over this setting from then on.
 
 ## Radius
 
-`radius` sets `--radius` on the document, and every rounded corner in the layout is
-derived from it: cards, buttons, code blocks and the search dialog all scale together.
-Give it any CSS length.
+`radius` sets the `--radius` CSS variable on the document. Every rounded corner in the
+layout is derived from it, so cards, buttons, code blocks and the search dialog change
+together. Any CSS length works.
 
 ```php
 'radius' => '0.25rem',
@@ -107,15 +106,15 @@ Give it any CSS length.
 
 ## Fonts
 
-`fonts` is a top level key, not part of `theme`. Whatever you put there is injected into
-the layout head as raw HTML, so you can load a typeface without publishing the layout:
+`fonts` is a top-level config key, separate from `theme`. Its value is added to the layout
+head as raw HTML, so you can load a web font without publishing the layout:
 
 ```php
 'fonts' => '<link rel="stylesheet" href="https://example.com/inter.css">',
 ```
 
-Loading the file does not change anything on its own. Set the family yourself in a
-stylesheet the layout already loads, or in a `<style>` block in the same value:
+Loading the font does not apply it. Set the family in a stylesheet the layout already
+loads, or add a `<style>` block to the same value:
 
 ```php
 'fonts' => '<link rel="stylesheet" href="https://example.com/inter.css">'
@@ -124,4 +123,5 @@ stylesheet the layout already loads, or in a `<style>` block in the same value:
 
 ## Where search sits
 
-`layout.search` is `sidebar` (default, no top header) or `header`.
+`layout.search` is either `sidebar` (the default, which also removes the top header) or
+`header`.

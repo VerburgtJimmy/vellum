@@ -1,18 +1,18 @@
 ---
 title: Search engines
-description: What Vellum emits for crawlers, the sitemap route, and what to put in robots.txt.
+description: The metadata Vellum outputs for crawlers, the sitemap route, and what to put in robots.txt.
 ---
 
-Vellum gives every docs page the metadata a crawler needs, and publishes a sitemap so it can find them all.
+Every docs page includes the metadata a crawler needs, and a sitemap lists all of them.
 
 ## Per page
 
-Each page emits a unique `<title>`, a `<meta name="description">` from its frontmatter, and `<link rel="canonical">`, plus Open Graph and Twitter card tags. The 404 page is marked `noindex`.
+Each page outputs its own `<title>`, a `<meta name="description">` taken from its frontmatter, a `<link rel="canonical">`, and Open Graph and Twitter card tags. The 404 page is marked `noindex`.
 
-The canonical is only written when `app.url` names a real origin. During local development it is omitted rather than pointing at something wrong.
+The canonical link is only written when `app.url` is an absolute `http://` or `https://` URL. Otherwise the tag is left out.
 
 :::note
-Pages without a `description` in frontmatter get no meta description. It is the one frontmatter key worth filling in on every page.
+A page without a `description` in its frontmatter gets no meta description. Of all the frontmatter keys, this is the one to fill in on every page.
 :::
 
 ## Sitemap
@@ -21,17 +21,17 @@ Pages without a `description` in frontmatter get no meta description. It is the 
 /docs/sitemap.xml
 ```
 
-Built from the same navigation that renders the sidebar, so it stays correct as pages are added. Gated pages are left out, including for a signed-in reader, since a sitemap is one public file. Every version is listed when versions are enabled.
+The sitemap is built from the same navigation as the sidebar, so it stays up to date as you add pages. It lists every version when versions are enabled. Gated pages are always left out, even for a signed-in reader, because every visitor gets the same sitemap file.
 
-A page gets a `<lastmod>` when it has a last-updated date: its `updated` frontmatter, or its last git commit when the docs are in a full git clone. Pages without one get no `<lastmod>`. File modification times are never used, because a deploy resets them and a crawler told every page changed today learns to ignore the field.
+A page gets a `<lastmod>` when it has a last-updated date: its `updated` frontmatter, or its last git commit when the docs are in a full git clone. Pages without one get no `<lastmod>`. File modification times are not used, because a deploy resets them.
 
-It sits under the docs prefix rather than at the site root, which the package does not own. A sitemap may list any URL at or below its own path, so this one covers the whole docs tree.
+It lives under the docs prefix because the package does not own the site root. A sitemap can list any URL at or below its own path, so this one covers the whole docs tree.
 
-Like the canonical, it needs `app.url` to be an origin. Without one it returns a 404 rather than publishing relative URLs, which are not valid in a sitemap.
+Like the canonical link, the sitemap needs `app.url` to be an absolute URL. Without one the route returns a 404, because sitemap URLs must be absolute.
 
 ## robots.txt
 
-Laravel does not ship a `robots.txt` with a sitemap reference, so add one:
+Laravel does not ship a `robots.txt` that references a sitemap, so add one:
 
 ```
 User-agent: *
@@ -45,12 +45,12 @@ Allow: /docs/_vellum/raw/
 Sitemap: https://example.com/docs/sitemap.xml
 ```
 
-Every raw Markdown response sends `Link: <page URL>; rel="canonical"` naming the HTML page it is a copy of. A crawler that fetches the `.md` credits the page instead of indexing a near-duplicate, so there is no reason to hide the raw files. They are also what [`llms.txt`](/docs/page-actions#for-agents) links to, and a disallow would keep any agent that honours `robots.txt` from following those links.
+Every raw Markdown response sends `Link: <page URL>; rel="canonical"`, naming the HTML page it is a copy of. A crawler that fetches the `.md` file credits the page and does not index the copy as a duplicate. The raw files are also what [`llms.txt`](/docs/page-actions#for-agents) links to, so a `Disallow` for them would stop agents that follow `robots.txt` from reading them.
 
-The rest of `/docs/_vellum/` is the search index and the files pages embed, none of which needs crawling on its own. The longer `Allow` rule wins over the shorter `Disallow`, so only the raw files get through.
+The rest of `/docs/_vellum/` holds the search index and files that pages embed, which do not need crawling on their own. The longer `Allow` rule takes precedence over the shorter `Disallow`, so only the raw files are crawled.
 
-Like the canonical `<link>`, the header is absolute when `app.url` is an origin. Without one it is root-relative, which a client resolves against the URL it requested.
+Like the canonical `<link>`, the header is absolute when `app.url` is an origin. Without one it is root-relative, and a client resolves it against the URL it requested.
 
 ## Static export
 
-`vellum:export` writes `sitemap.xml` at the export root, since a static host cannot generate one. It uses `export.base_url` when that names an origin, falling back to `app.url`. See [Export](/docs/export).
+A static host cannot generate a sitemap, so `vellum:export` writes `sitemap.xml` to the export root. It uses `export.base_url` when that is an origin and falls back to `app.url` otherwise. See [Export](/docs/export).

@@ -1,6 +1,6 @@
 ---
 title: Search
-description: Search in the browser by default, Laravel Scout optional.
+description: Built-in search in the browser by default, with Laravel Scout as an option.
 ---
 
 ```php
@@ -16,27 +16,25 @@ description: Search in the browser by default, Laravel Scout optional.
 
 ## In the browser
 
-The default, `builtin`. No extra services. (`minisearch` still works as its old name; the library it was named after is gone.) Works on every host, including `vellum:export`.
+The default driver is `builtin`. It needs no extra services and works on every host, including sites built with `vellum:export`. `minisearch` is still accepted as its old name.
 
-Search reads two files: `/docs/_vellum/answers.json`, every section with the questions it answers, and `/docs/_vellum/semantic.bin`, the vectors that match a question to a section phrased differently. Both are filtered for the current user and cached per visibility set (guest, auth, and per-gate combinations), and both send an ETag so `must-revalidate` can 304. Neither is a public immutable file.
+The browser loads its index from `/docs/_vellum/answers.json`, which holds every section of every page the reader can open. It is filtered for the current user and cached per visibility set (guest, authenticated, and each combination of gates). Responses carry an ETag and are sent with `must-revalidate`, so a browser that already has the current index gets a 304.
 
-The ranking, and when an answer card is shown, are described in [Answers](/docs/answers).
-
-`Ctrl+K` / `⌘K` opens search. Arrow keys move through results. Escape closes. The dialog is labelled **Search documentation**.
+`Ctrl+K` or `⌘K` opens search. The arrow keys move through the results and Escape closes the dialog. The dialog's accessible label is "Search documentation".
 
 ## Scout
 
-Opt-in for people who already run Meilisearch or Typesense and want heading-level relevance at scale.
+Use Scout if you already run Meilisearch or Typesense and want heading-level relevance on a large docs site.
 
 ```bash
 composer require laravel/scout
 ```
 
-Set `VELLUM_SEARCH_DRIVER=scout`. The same visibility filter runs at query time. `vellum:build` and `vellum:index` sync Scout when that driver is on. Scout searches whole pages on the server, so it has no answer cards.
+Set `VELLUM_SEARCH_DRIVER=scout`. The same visibility filter is applied at query time, and `vellum:build` and `vellum:index` sync the Scout index while that driver is active. Scout searches whole pages on the server, so its results are pages rather than sections.
 
-Each sync replaces the whole index, every version included, so a page you delete, rename or gate does not keep its old record. Keep the index to Vellum alone: `search.scout.index` names it, `vellum` by default.
+Each sync replaces the whole index, including every version, so pages you delete, rename or gate do not leave old records behind. Because of this, the index should hold Vellum's records only. `search.scout.index` sets its name and defaults to `vellum`.
 
-With versions on, a search is filtered by `version`, which the engine has to allow. For Meilisearch, add it to the index settings in `config/scout.php` and run `php artisan scout:sync-index-settings`:
+When versions are enabled, searches filter on `version`, and the engine has to allow filtering on that attribute. For Meilisearch, add it to the index settings in `config/scout.php` and run `php artisan scout:sync-index-settings`:
 
 ```php
 'meilisearch' => [
@@ -46,12 +44,10 @@ With versions on, a search is filtered by `version`, which the engine has to all
 ],
 ```
 
-Typesense needs a collection schema for `Vellum\Search\SearchableDocument` in `model-settings`, with `id`, `title`, `content`, `url`, `description`, `access` and `version` as string fields, `version` optional and faceted.
+For Typesense, define a collection schema for `Vellum\Search\SearchableDocument` in `model-settings`. It needs `id`, `title`, `content`, `url`, `description`, `access` and `version` as string fields, with `version` marked optional and faceted.
 
 ## Export
 
-`vellum:export` always writes the in-browser files, regardless of `driver`. A static host has no session, so the exported index holds public pages only.
+`vellum:export` always writes the built-in index, whatever `driver` is set to. A static host has no session, so the exported index holds public pages only.
 
-Place the search trigger in the sidebar (default) or the header with `layout.search`.
-
-See [Answers](/docs/answers) for how a question finds the section that answers it.
+Use `layout.search` to place the search trigger in the sidebar (the default) or in the header.

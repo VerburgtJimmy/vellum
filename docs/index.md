@@ -3,9 +3,9 @@ title: Vellum
 description: Markdown documentation sites that ship with your Laravel app.
 ---
 
-Vellum turns a folder of Markdown into docs inside the app you already deploy: sidebar, search, light and dark theme, and optional static export.
+Vellum serves a folder of Markdown as a documentation site from the Laravel app you already deploy. It includes a sidebar, search, light and dark themes, and an optional static export.
 
-Authoring is **markdown plus components**. Built-in callouts, tabs, steps, and cards stay as `:::` directives. `<x-…>` is how you add your own Blade components, plus allowlisted `env`, `config`, and `route` tags. There is no `{{ }}`, no Blade directives, and no `@php` in Markdown.
+You write pages in Markdown. The built-in callouts, tabs, steps and cards use `:::` directives, and `<x-…>` tags add your own Blade components and the allowlisted `env`, `config` and `route` value tags. Blade syntax such as `{{ }}`, `@if` and `@php` is not compiled in Markdown files.
 
 :::note
 `config/vellum.php` keys and page frontmatter have been frozen since 0.5. Breaking changes wait for 1.0.

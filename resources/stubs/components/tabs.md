@@ -1,6 +1,6 @@
 ---
 title: Tabs
-description: Switchable panels, including code tabs.
+description: Panels the reader switches between, such as install instructions per tool.
 ---
 
 :::tabs persist="install"
@@ -12,7 +12,7 @@ composer require jimmyverburgt/vellum
 ```json
 {
     "require": {
-        "jimmyverburgt/vellum": "^0.5"
+        "jimmyverburgt/vellum": "^0.6"
     }
 }
 ```

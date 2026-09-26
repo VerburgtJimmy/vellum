@@ -7,7 +7,7 @@ description: Write a static HTML site for GitHub Pages, Cloudflare Workers, or a
 php artisan vellum:export
 ```
 
-Writes HTML, assets, the search index, and a `sitemap.xml` to `public/docs-static` (configurable via `export.out`). `--out=` overrides the directory.
+The command writes the HTML pages, assets, the search index and a `sitemap.xml` to `public/docs-static`. Change the directory with `export.out`, or pass `--out=` for a single run.
 
 ```php
 'export' => [
@@ -16,12 +16,12 @@ Writes HTML, assets, the search index, and a `sitemap.xml` to `public/docs-stati
 ],
 ```
 
-The export always uses the in-browser search, even when `search.driver` is `scout`. Gated pages are omitted; each drop is logged.
+The export always uses the built-in search, even when `search.driver` is `scout`. Gated pages are left out, and the command logs each one it drops.
 
-Exporting again into the same directory removes what the last export wrote and this one did not, such as a page you deleted or gated since. The list of what was written is kept in `.vellum-export.json` at the export root; anything else in the directory, like a `CNAME`, is left alone.
+When you export into the same directory again, files from the previous export that this run did not write are removed, such as a page you have since deleted or gated. The list of written files is kept in `.vellum-export.json` at the export root. Anything else in the directory, like a `CNAME` file, is left alone.
 
-Value tags are baked in at export time, so the snapshot matches the app config you exported with.
+Value tags are resolved at export time, so the exported pages contain the values the app had when you ran the command.
 
-The sitemap lands at the export root and uses `base_url` when it names an origin, falling back to `app.url`. With neither it is skipped and the command says so, because sitemap URLs have to be absolute. See [Search engines](/docs/seo).
+The sitemap is written to the export root. It uses `base_url` when that is an origin and falls back to `app.url`. If neither is an origin, the sitemap is skipped with a warning, because sitemap URLs have to be absolute. See [Search engines](/docs/seo).
 
-Export when the docs have to sit on a host that cannot run PHP. If the app is already deployed, serving the docs from it is simpler and keeps value tags, gating and search resolving against the live application.
+Use the export when the docs need to live on a host that cannot run PHP. If the app is already deployed, it is simpler to serve the docs from it, and value tags, gating and search then resolve against the live application.

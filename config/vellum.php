@@ -3,8 +3,8 @@
 declare(strict_types=1);
 
 /*
- | 0.5 freezes these keys. Add values in the host app; do not rename
- | keys or frontmatter names until 1.0.
+ | These keys and the frontmatter names are frozen until 1.0. Change the
+ | values in your app, but do not rename the keys.
  */
 
 return [
@@ -13,7 +13,7 @@ return [
     | Site name
     |--------------------------------------------------------------------------
     |
-    | Shown in the header and used as a fallback document title prefix.
+    | Shown in the docs header and appended to each page's <title>.
     |
     */
     'name' => env('APP_NAME', 'Docs'),
@@ -23,7 +23,7 @@ return [
     | Content path
     |--------------------------------------------------------------------------
     |
-    | Absolute path to the Markdown documentation root.
+    | Absolute path to the directory that holds your Markdown docs.
     |
     */
     'path' => env('VELLUM_PATH', resource_path('docs')),
@@ -44,12 +44,12 @@ return [
     | Versions
     |--------------------------------------------------------------------------
     |
-    | When enabled, docs live under version folders (e.g. v2/, v1/). The
-    | latest version is served at /docs/... with no version segment. Other
-    | versions are at /docs/v1/.... /docs/{latest}/... redirects to the
-    | unprefixed URL. List order is switcher order. Optional labels
-    | override the switcher text (folder and URL stay the list slug).
-    | Unlabelled latest is "Latest".
+    | When enabled, each version has its own folder (e.g. v2/, v1/). The
+    | latest version is served at /docs/... without a version segment and
+    | the others at /docs/{version}/...; /docs/{latest}/... redirects to the
+    | unprefixed URL. The order of "list" is the switcher order. "labels"
+    | only changes the switcher text; folders and URLs use the list slug.
+    | The latest version is shown as "Latest" unless it has a label.
     |
     */
     'versions' => [
@@ -67,7 +67,8 @@ return [
     | Repository edit URL
     |--------------------------------------------------------------------------
     |
-    | Base URL for "Edit on GitHub" links, pointing at the docs folder.
+    | Base URL of the docs folder in your repository, used for the "Edit on
+    | GitHub" link.
     | Example: https://github.com/org/repo/edit/main/resources/docs
     |
     */
@@ -78,7 +79,7 @@ return [
     | Logo
     |--------------------------------------------------------------------------
     |
-    | Path to an SVG file or a Blade view name rendered in the header.
+    | Path to an SVG file, or the name of a Blade view, shown in the header.
     |
     */
     'logo' => null,
@@ -99,9 +100,9 @@ return [
     | Layout
     |--------------------------------------------------------------------------
     |
-    | search: header keeps the current top bar with the search field;
-    | sidebar places search at the top of the sidebar (Fumadocs style)
-    | and removes the top header.
+    | search: "sidebar" puts search at the top of the sidebar and removes
+    | the top header (Fumadocs style). "header" keeps a top bar with the
+    | search field in it.
     |
     */
     'layout' => [
@@ -116,10 +117,10 @@ return [
     'theme' => [
         // neutral (default), ocean, laravel
         'preset' => 'neutral',
-        // oklch hue override for --primary on Neutral (null keeps the default)
+        // oklch hue for --primary on the neutral preset (null keeps the default)
         'primary' => null,
-        // Brand accent applied to every preset: one colour, or
-        // ['light' => '#...', 'dark' => '#...']. The label colour is derived.
+        // Brand accent for any preset: one colour, or
+        // ['light' => '#...', 'dark' => '#...']. Button label colour is derived.
         'accent' => null,
         'radius' => '0.5rem',
         // light | dark | system
@@ -131,12 +132,12 @@ return [
     | Build checks
     |--------------------------------------------------------------------------
     |
-    | references: warn during vellum:build about links and images that point
-    | at nothing. Both fail silently at runtime, so the build is the only
-    | place they are cheap to catch.
+    | references: warn during vellum:build about links and images whose
+    | target does not exist. Broken references produce no error at runtime.
     |
-    | strict: turn those warnings into a failed build. Worth switching on in
-    | CI, which cannot pass --strict to whatever the deploy script runs.
+    | strict: fail the build when a reference is broken, the same as passing
+    | --strict. Useful when you cannot add the flag to the build command,
+    | for example in CI or a deploy script.
     |
     | search: run the questions in questions.yml, if the docs have one, against
     | the index the build just wrote, and report how many find their answer in
@@ -197,16 +198,15 @@ return [
     | Search
     |--------------------------------------------------------------------------
     |
-    | driver: builtin (default) or scout. The built-in driver searches in the
-    | browser, needs no service, and works on every host, including static
-    | export. Scout is opt-in for Meilisearch or Typesense (composer require
-    | laravel/scout) and searches whole pages on the server, so it shows no
-    | answer cards. An export always uses the built-in driver.
+    | driver: "builtin" (default) or "scout". The built-in driver searches in
+    | the browser, needs no service and works on every host, including static
+    | exports. Use Scout with Meilisearch or Typesense (requires
+    | laravel/scout); it searches whole pages on the server. vellum:export
+    | always uses the built-in driver. "minisearch" is accepted as the old
+    | name of "builtin".
     |
-    | minisearch is accepted as the old name of builtin.
-    |
-    | What the built-in driver reads is a package route, filtered for the
-    | current user and cached per visibility set. It is not a public asset.
+    | The built-in driver reads its index from a package route, filtered for
+    | the current user and cached per visibility set.
     |
     */
     'search' => [
@@ -275,10 +275,12 @@ return [
     | Components
     |--------------------------------------------------------------------------
     |
-    | namespaces: Blade prefixes allowed in Markdown as <x-...>. Default is
-    | vellum. Add '' or 'app' to allow unprefixed host components (<x-alert>).
-    | allowlist: keys permitted on <x-vellum::env />, config, and route.
-    | Empty lists refuse those value tags.
+    | namespaces: Blade component prefixes allowed in Markdown as <x-...>.
+    | Add '' or 'app' to allow your app's unprefixed components (<x-alert>).
+    |
+    | allowlist: the keys the env, config and route value tags may read
+    | (e.g. <x-vellum::env />). An empty list allows no keys, so the tag is
+    | refused.
     |
     */
     'components' => [
@@ -295,9 +297,11 @@ return [
     | Changelog
     |--------------------------------------------------------------------------
     |
-    | path: Keep a Changelog file. Rendered at /docs/changelog with an Atom
-    | feed at /docs/changelog.atom. Set path to null to disable both.
-    | unreleased: show [Unreleased] on the HTML page. The feed never includes it.
+    | path: a Keep a Changelog file, rendered at /docs/changelog with an
+    | Atom feed at /docs/changelog.atom. Set to null to disable both.
+    |
+    | unreleased: show the [Unreleased] section on the HTML page. The feed
+    | never includes it.
     |
     */
     'changelog' => [
