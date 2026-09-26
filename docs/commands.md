@@ -59,7 +59,7 @@ never fail a build.
 build, and `checks.strict` does the same for a deploy script you cannot pass flags to.
 
 `--check-search` asks the questions in `questions.yml`, if your docs have one, even when
-`checks.search` is off. See [Answers](/docs/answers#checking-search-in-ci).
+`checks.search` is off. See [Search](/docs/search#checking-search-in-ci).
 
 ## vellum:index
 

@@ -29,11 +29,6 @@ final class AssetController extends Controller
         return $this->file($request, Assets::searchJsPath(), 'text/javascript; charset=UTF-8');
     }
 
-    public function semantic(Request $request): Response
-    {
-        return $this->file($request, Assets::semanticJsPath(), 'text/javascript; charset=UTF-8');
-    }
-
     public function anchor(Request $request): Response
     {
         return $this->file($request, Assets::anchorJsPath(), 'text/javascript; charset=UTF-8');

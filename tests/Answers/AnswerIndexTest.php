@@ -10,10 +10,10 @@ beforeEach(function (): void {
     $this->writeDoc('index.md', "---\ntitle: Home\ndescription: Where to start.\nupdated: 2026-09-01\n---\nVellum is a docs package.\n\n## Install\n\n```bash\ncomposer require jimmyverburgt/vellum\n```\n");
     $this->writeDoc('billing.md', "---\ntitle: Billing\naccess: auth\naliases:\n  - Supercalifragilistic invoices\n---\nRefunds take five days.\n");
 
-    $this->index = function (array $extra = []): AnswerIndex {
+    $this->index = function (): AnswerIndex {
         $repository = new ContentRepository(contentPath: $this->docsPath(), store: new CompiledStore($this->cachePath()));
 
-        return AnswerIndex::build($repository->buildAll(), $repository, $extra);
+        return AnswerIndex::build($repository->buildAll(), $repository);
     };
 });
 
@@ -51,27 +51,19 @@ it('records what search needs for each section', function (): void {
         'access' => 'guest',
         'url' => '/docs',
         'title' => 'Home',
-        'answer' => ['type' => 'definition', 'sentence' => 'Vellum is a docs package.'],
         'passage' => 'Vellum is a docs package.',
         'updated' => '2026-09-01',
     ])
         ->and($home['questions'])->toContain('what is home')
         ->and($install['url'])->toBe('/docs#install')
         ->and($install['parent'])->toBe('install')
-        ->and($install['answer'])->toBe(['type' => 'command', 'command' => 'composer require jimmyverburgt/vellum'])
+        ->and($install)->not->toHaveKey('answer')
         ->and($install['questions'])->toContain('how do i install jimmyverburgt/vellum')
         ->and($install['names'])->toBe(['install'])
         ->and($install['aliases'])->toBe([]);
 });
 
-it('merges extra questions without repeating generated ones', function (): void {
-    $install = ($this->index)(['#install' => ['How do I add Vellum to my app?', 'what is install']])->sections[2];
-
-    expect($install['questions'])->toContain('how do i add vellum to my app?')
-        ->and(array_count_values($install['questions'])['what is install'])->toBe(1);
-});
-
-it('embeds a section from its words followed by its questions', function (): void {
+it('indexes a section by its words followed by its questions', function (): void {
     $text = AnswerIndex::text(($this->index)()->sections[2]);
 
     expect($text)->toStartWith('Home Install')
@@ -79,15 +71,8 @@ it('embeds a section from its words followed by its questions', function (): voi
         ->and($text)->toEndWith('how do i install jimmyverburgt/vellum');
 });
 
-it('reports the answers index in vellum:build, and skips it when answers are off', function (): void {
-    config(['vellum.answers.semantic' => false]);
+it('reports the search index in vellum:build', function (): void {
+    $this->artisan('vellum:build')->expectsOutputToContain('search index: 3 sections')->assertSuccessful();
 
-    $this->artisan('vellum:build')->expectsOutputToContain('answers: 3 sections')->assertSuccessful();
-
-    config(['vellum.answers.enabled' => false]);
-    $this->deleteDirectory($this->cachePath().'/answers');
-
-    $this->artisan('vellum:build')->doesntExpectOutputToContain('answers:')->assertSuccessful();
-
-    expect(is_dir($this->cachePath().'/answers'))->toBeFalse();
+    expect(is_file($this->cachePath().'/answers/'.AnswerIndex::FILE))->toBeTrue();
 });

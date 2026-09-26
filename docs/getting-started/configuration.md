@@ -21,12 +21,12 @@ description: Every config key and frontmatter field, all frozen since 0.5.
 | `fonts` | `null` | HTML added to the layout's head, such as a font stylesheet link |
 | `checks.references` | `true` | Warn during `vellum:build` about links and images that point at nothing |
 | `checks.strict` | `false` | Fail the build when there are reference warnings |
-| `checks.search` | `true` | Ask the questions in `questions.yml`, if the docs have one, during `vellum:build`. See [Answers](/docs/answers#checking-search-in-ci) |
+| `checks.search` | `true` | Ask the questions in `questions.yml`, if the docs have one, during `vellum:build`. See [Search](/docs/search#checking-search-in-ci) |
 | `checks.search_min` | `env('VELLUM_SEARCH_MIN', 0.0)` | The share of those questions that must find their answer for the build to pass. `0` reports without failing |
 | `agents.llms_txt` | `true` | Serve `llms.txt` and `llms-full.txt` under the docs prefix. See [Page actions](/docs/page-actions#for-agents) |
 | `agents.llms_txt_root` | `true` | Also serve both at `/llms.txt` and `/llms-full.txt`, unless the app already routes those paths |
 | `agents.content_negotiation` | `true` | Serve a page's raw Markdown when the request's `Accept` header prefers `text/markdown` |
-| `agents.answer` | `true` | Serve `{prefix}/_vellum/answer?q=`, which answers one question as JSON. See [Answers](/docs/answers#the-answer-endpoint) |
+| `agents.search` | `true` | Serve `{prefix}/_vellum/search?q=`, which returns search results as JSON. See [Search](/docs/search#the-search-endpoint) |
 | `cache.path` | `storage_path('framework/vellum')` | Directory for compiled pages |
 | `export.out` | `public_path('docs-static')` | Output directory for `vellum:export` |
 | `export.base_url` | `/` | URL prefix used inside the export |
@@ -72,37 +72,6 @@ See [Search](/docs/search).
     ],
 ],
 ```
-
-## Answers
-
-Search that finds a section from a question in the reader's own words. Everything is built in `vellum:build`; no model runs when someone searches.
-
-```php
-'answers' => [
-    'enabled' => true,
-    'semantic' => true,
-    'model' => 'potion-base-8M',
-    'model_path' => storage_path('vellum/models'),
-    'common_tokens' => 1000,
-    'card_threshold' => 0.75,
-],
-```
-
-| Key | Default | Purpose |
-| --- | --- | --- |
-| `answers.enabled` | `true` | Build the answers data at all |
-| `answers.semantic` | `true` | Use the embedding model. `false` keeps search lexical |
-| `answers.model` | `potion-base-8M` | Model2Vec model on the Hugging Face hub, fetched with `php artisan vellum:model` |
-| `answers.model_path` | `env('VELLUM_MODEL_PATH', storage_path('vellum/models'))` | Where the model is stored. Keep it outside `cache.path`, which `vellum:clear` empties |
-| `answers.common_tokens` | `1000` | Everyday words shipped beyond the ones your docs use |
-| `answers.card_threshold` | `0.75` | How sure search must be of its top result before it shows an answer card |
-| `answers.llm.provider` | `null` | `anthropic`, `openai`, or `null`. With a provider set, `vellum:build` asks the model for five more questions per section |
-| `answers.llm.model` | `null` | Defaults to `claude-haiku-4-5` for `anthropic`. The `openai` provider has no default; name one |
-| `answers.llm.key` | `VELLUM_LLM_KEY`, else `ANTHROPIC_API_KEY` or `OPENAI_API_KEY` | API key, read only when a provider is set. Without one the build uses the cached questions and says how many are missing |
-
-Generated questions are cached under `docs/.vellum/questions`, keyed by the section they came from. Commit that directory and a deploy never needs the key. The model is only ever called by `vellum:build`. See [Answers](/docs/answers) for what it costs and what it buys.
-
-Without the model on disk, `vellum:build` warns and carries on without the semantic signal.
 
 ## Components
 

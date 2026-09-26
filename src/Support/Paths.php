@@ -11,7 +11,7 @@ namespace Vellum\Support;
  */
 final class Paths
 {
-    private const KEYS = ['vellum.path', 'vellum.cache.path', 'vellum.changelog.path', 'vellum.export.out', 'vellum.answers.model_path'];
+    private const KEYS = ['vellum.path', 'vellum.cache.path', 'vellum.changelog.path', 'vellum.export.out'];
 
     public static function resolveConfig(): void
     {

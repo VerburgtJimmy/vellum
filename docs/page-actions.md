@@ -40,9 +40,8 @@ The changelog has a raw copy too, at `/docs/_vellum/raw/changelog.md`, served fr
 
 ## For agents
 
-The raw files are there for readers, but also for tools that fetch docs on their own.
-Vellum points them at the Markdown in four ways, and answers a direct question in a
-fifth.
+The raw Markdown is also useful to tools that read docs on their own, such as coding
+agents. Vellum points them to it in four ways and offers a search endpoint as well.
 
 **llms.txt.** `/docs/llms.txt` is an index of the docs in the
 [llms.txt](https://llmstxt.org) format: the site name, the index page's description, then
@@ -116,9 +115,9 @@ the raw Markdown instead of HTML, the same body the raw route returns. It counts
 HTML. Gating applies as it does on the raw route. Page responses send `Vary: Accept` so a
 cache keeps the two apart. Set `agents.content_negotiation` to `false` to turn it off.
 
-**An answer endpoint.** `/docs/_vellum/answer?q=` runs the same search the reader's
-browser runs and returns the answer and the top sections as JSON, for a client that
-cannot run it. See [Answers](/docs/answers#the-answer-endpoint).
+**A search endpoint.** `/docs/_vellum/search?q=` runs the same search as the browser and
+returns the top sections as JSON, for clients that cannot use the browser's index. See
+[Search](/docs/search#the-search-endpoint).
 
 ## Open in ChatGPT / Open in Claude
 

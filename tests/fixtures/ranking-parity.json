@@ -1,0 +1,406 @@
+{
+    "note": "Written by tests/Answers/RankingParityTest.php with VELLUM_FIXTURES=1. The browser ranks the index below and must get these rankings and scores.",
+    "rankings": {
+        "how do i install the package": [
+            {
+                "id": "#",
+                "score": 1
+            },
+            {
+                "id": "billing#",
+                "score": 0.3785
+            },
+            {
+                "id": "#dark-mode",
+                "score": 0.369275
+            },
+            {
+                "id": "gating#",
+                "score": 0.027217
+            },
+            {
+                "id": "billing#deploy-notes",
+                "score": 0.025314
+            },
+            {
+                "id": "#deploy",
+                "score": 0.215488
+            },
+            {
+                "id": "#deploy-again",
+                "score": 0.026702
+            },
+            {
+                "id": "#deploy-once-more",
+                "score": 0.025752
+            }
+        ],
+        "night mode": [
+            {
+                "id": "#dark-mode",
+                "score": 1
+            }
+        ],
+        "gating": [
+            {
+                "id": "gating#",
+                "score": 2
+            }
+        ],
+        "gat": [
+            {
+                "id": "gating#",
+                "score": 1
+            }
+        ],
+        "invoices": [
+            {
+                "id": "billing#",
+                "score": 2
+            },
+            {
+                "id": "billing#deploy-notes",
+                "score": 0.936843
+            }
+        ],
+        "supercalifragilisticexpialidocious": [],
+        "": [],
+        "CafÉ RÉSUMÉ naïve": [
+            {
+                "id": "billing#",
+                "score": 1
+            }
+        ],
+        "composer": [
+            {
+                "id": "#",
+                "score": 1
+            }
+        ],
+        "deploy": [
+            {
+                "id": "#deploy",
+                "score": 2
+            },
+            {
+                "id": "#deploy-again",
+                "score": 0.939155
+            },
+            {
+                "id": "billing#deploy-notes",
+                "score": 0.889006
+            },
+            {
+                "id": "#deploy-once-more",
+                "score": 0.831274
+            }
+        ],
+        "hide a page": [
+            {
+                "id": "gating#",
+                "score": 1
+            },
+            {
+                "id": "billing#",
+                "score": 0.70146
+            },
+            {
+                "id": "#deploy-again",
+                "score": 0.36687
+            },
+            {
+                "id": "#deploy-once-more",
+                "score": 0.119567
+            }
+        ]
+    },
+    "index": {
+        "sections": [
+            {
+                "id": "billing#",
+                "page": "billing",
+                "anchor": "",
+                "parent": "",
+                "version": null,
+                "access": "guest",
+                "url": "/docs/billing",
+                "title": "Billing",
+                "heading": "",
+                "text": "How charges work. A café résumé, naïvely.",
+                "questions": [
+                    "what is billing",
+                    "where do i configure billing"
+                ],
+                "names": [
+                    "billing",
+                    "invoices"
+                ],
+                "aliases": [],
+                "passage": "How charges work. A café résumé, naïvely.",
+                "updated": null
+            },
+            {
+                "id": "billing#deploy-notes",
+                "page": "billing",
+                "anchor": "deploy-notes",
+                "parent": "deploy-notes",
+                "version": null,
+                "access": "guest",
+                "url": "/docs/billing#deploy-notes",
+                "title": "Billing",
+                "heading": "Deploy notes",
+                "text": "Billing changes ship with each deploy.",
+                "questions": [
+                    "what is deploy notes",
+                    "where do i configure deploy notes"
+                ],
+                "names": [
+                    "deploy notes"
+                ],
+                "aliases": [],
+                "passage": "Billing changes ship with each deploy.",
+                "updated": null
+            },
+            {
+                "id": "gating#",
+                "page": "gating",
+                "anchor": "",
+                "parent": "",
+                "version": null,
+                "access": "guest",
+                "url": "/docs/gating",
+                "title": "Gating",
+                "heading": "",
+                "text": "Hide pages from guests.",
+                "questions": [
+                    "what is gating",
+                    "where do i configure gating"
+                ],
+                "names": [
+                    "gating"
+                ],
+                "aliases": [],
+                "passage": "Hide pages from guests.",
+                "updated": null
+            },
+            {
+                "id": "#",
+                "page": "",
+                "anchor": "",
+                "parent": "",
+                "version": null,
+                "access": "guest",
+                "url": "/docs",
+                "title": "Home",
+                "heading": "",
+                "text": "Install the package with composer.",
+                "questions": [
+                    "what is home",
+                    "where do i configure home"
+                ],
+                "names": [
+                    "home"
+                ],
+                "aliases": [],
+                "passage": "Install the package with composer.",
+                "updated": null
+            },
+            {
+                "id": "#dark-mode",
+                "page": "",
+                "anchor": "dark-mode",
+                "parent": "dark-mode",
+                "version": null,
+                "access": "guest",
+                "url": "/docs#dark-mode",
+                "title": "Home",
+                "heading": "Dark mode",
+                "text": "The theme follows the system.",
+                "questions": [
+                    "what is dark mode",
+                    "where do i configure dark mode"
+                ],
+                "names": [
+                    "dark mode"
+                ],
+                "aliases": [],
+                "passage": "The theme follows the system.",
+                "updated": null
+            },
+            {
+                "id": "#deploy",
+                "page": "",
+                "anchor": "deploy",
+                "parent": "deploy",
+                "version": null,
+                "access": "guest",
+                "url": "/docs#deploy",
+                "title": "Home",
+                "heading": "Deploy",
+                "text": "Run the build on every deploy.",
+                "questions": [
+                    "what is deploy",
+                    "where do i configure deploy"
+                ],
+                "names": [
+                    "deploy"
+                ],
+                "aliases": [],
+                "passage": "Run the build on every deploy.",
+                "updated": null
+            },
+            {
+                "id": "#deploy-again",
+                "page": "",
+                "anchor": "deploy-again",
+                "parent": "deploy-again",
+                "version": null,
+                "access": "guest",
+                "url": "/docs#deploy-again",
+                "title": "Home",
+                "heading": "Deploy again",
+                "text": "Deploy, deploy, deploy.",
+                "questions": [
+                    "what is deploy again",
+                    "where do i configure deploy again"
+                ],
+                "names": [
+                    "deploy again"
+                ],
+                "aliases": [],
+                "passage": "Deploy, deploy, deploy.",
+                "updated": null
+            },
+            {
+                "id": "#deploy-once-more",
+                "page": "",
+                "anchor": "deploy-once-more",
+                "parent": "deploy-once-more",
+                "version": null,
+                "access": "guest",
+                "url": "/docs#deploy-once-more",
+                "title": "Home",
+                "heading": "Deploy once more",
+                "text": "Still about deploy.",
+                "questions": [
+                    "what is deploy once more",
+                    "where do i configure deploy once more"
+                ],
+                "names": [
+                    "deploy once more"
+                ],
+                "aliases": [],
+                "passage": "Still about deploy.",
+                "updated": null
+            }
+        ],
+        "synonyms": [
+            [
+                "env",
+                "dotenv",
+                ".env",
+                "environment variable"
+            ],
+            [
+                "auth",
+                "authentication",
+                "logged in",
+                "login",
+                "signed in"
+            ],
+            [
+                "config",
+                "configuration",
+                "settings"
+            ],
+            [
+                "dark mode",
+                "dark theme",
+                "night mode"
+            ],
+            [
+                "install",
+                "installation",
+                "setup",
+                "set up"
+            ],
+            [
+                "deploy",
+                "deployment"
+            ],
+            [
+                "upgrade",
+                "upgrading",
+                "migration guide"
+            ],
+            [
+                "sidebar",
+                "navigation",
+                "nav",
+                "menu"
+            ],
+            [
+                "image",
+                "images",
+                "picture",
+                "screenshot"
+            ],
+            [
+                "crawler",
+                "crawlers",
+                "bot",
+                "bots"
+            ],
+            [
+                "changelog",
+                "release notes"
+            ],
+            [
+                "feed",
+                "rss",
+                "atom"
+            ],
+            [
+                "callout",
+                "callouts",
+                "admonition"
+            ],
+            [
+                "code block",
+                "code blocks",
+                "snippet",
+                "fenced code"
+            ],
+            [
+                "error",
+                "exception"
+            ],
+            [
+                "homepage",
+                "landing page"
+            ],
+            [
+                "stylesheet",
+                "css"
+            ],
+            [
+                "frontmatter",
+                "front matter",
+                "yaml header"
+            ],
+            [
+                "table of contents",
+                "toc",
+                "on this page"
+            ],
+            [
+                "licence",
+                "license"
+            ],
+            [
+                "Billing",
+                "Invoices"
+            ]
+        ]
+    }
+}

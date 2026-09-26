@@ -61,11 +61,7 @@ final class BuildCommand extends Command
             $this->warn(...),
             forceCheck: (bool) $this->option('check-search'),
             strict: $this->strict(),
-        ))->run(
-            $repository,
-            $documents,
-            prune: $this->option('docs-version') === null,
-        );
+        ))->run($repository, $documents);
 
         $elapsed = round((microtime(true) - $started) * 1000);
 

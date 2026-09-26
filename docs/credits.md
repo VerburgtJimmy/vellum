@@ -45,15 +45,9 @@ Testing and quality tooling: [Pest](https://pestphp.com),
 [PHPStan](https://phpstan.org) with [Larastan](https://github.com/larastan/larastan), and
 [Laravel Pint](https://laravel.com/docs/pint).
 
-## Search model
+## Search
 
-Search is Vellum's own: BM25 over the sections, and a static embedding model for the questions readers actually ask. Until 0.7 the lexical half was [MiniSearch](https://github.com/lucaong/minisearch), whose scoring the current one keeps.
-
-The embedding model: `vellum:build` ships a pruned, quantised part of its vocabulary vectors, and names it in the header of the file it writes.
-
-| Model | Licence | Source |
-| --- | --- | --- |
-| potion-base-8M by Minish Lab | MIT | [huggingface.co/minishlab/potion-base-8M](https://huggingface.co/minishlab/potion-base-8M) |
+Search ranks sections with BM25, using the scoring constants of [MiniSearch](https://github.com/lucaong/minisearch), which Vellum used for search before 0.7.
 
 ## Licences
 

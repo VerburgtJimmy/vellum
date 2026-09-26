@@ -10,20 +10,18 @@ use Illuminate\Routing\Controller;
 use Vellum\Answers\AnswersQuery;
 use Vellum\Answers\Ranker;
 use Vellum\Content\ContentRepository;
-use Vellum\Semantic\SemanticQuery;
 
 /**
- * The answer index and the semantic vectors search loads in the browser, always
- * filtered for the reader asking. Neither is a public file: a gated page's text
- * and even its words are only in the copy a reader with that access gets.
+ * The search index the browser loads, always filtered for the reader asking,
+ * so a gated page's text is only in the copy a reader with that access gets.
  *
- * The answer endpoint runs the same search on the server, for a client that
- * cannot run the browser's copy: an agent, a chat bot, a shell script.
+ * The search endpoint runs the same ranking on the server, for a client that
+ * cannot run the browser's copy, such as an agent or a script.
  */
 final class AnswersController extends Controller
 {
     /**
-     * Results the answer endpoint returns, beyond the card.
+     * Results the search endpoint returns.
      */
     private const LIMIT = 5;
 
@@ -31,7 +29,7 @@ final class AnswersController extends Controller
 
     public function index(Request $request): Response
     {
-        if (! (bool) config('vellum.answers.enabled', true)) {
+        if (! (bool) config('vellum.search.enabled', true)) {
             abort(404);
         }
 
@@ -44,62 +42,34 @@ final class AnswersController extends Controller
         return $this->respond($request, $payload['json'], 'application/json; charset=UTF-8', $payload['etag']);
     }
 
-    public function semantic(Request $request): Response
-    {
-        if (! (bool) config('vellum.answers.enabled', true) || ! (bool) config('vellum.answers.semantic', true)) {
-            abort(404);
-        }
-
-        $payload = $this->query->semantic(ContentRepository::fromConfig(), self::version($request));
-
-        if ($payload === null) {
-            abort(404);
-        }
-
-        return $this->respond($request, $payload['bytes'], 'application/octet-stream', $payload['etag']);
-    }
-
     /**
-     * One question, answered from the docs the caller may see. The same ranker
-     * the browser runs, so an agent and a reader get the same answer, and the
-     * same access rules, so neither is told about a page they cannot open.
+     * One query, searched in the docs the caller may see, with the same
+     * ranking the browser runs and the same access rules, so an agent is never
+     * told about a page it cannot open.
      */
-    public function answer(Request $request): Response
+    public function search(Request $request): Response
     {
-        if (! (bool) config('vellum.answers.enabled', true) || ! (bool) config('vellum.agents.answer', true)) {
+        if (! (bool) config('vellum.agents.search', true)) {
             abort(404);
         }
 
         $query = $request->query('q');
         $query = is_string($query) ? trim($query) : '';
-        $repository = ContentRepository::fromConfig();
-        $version = self::version($request);
-        $index = $this->query->index($repository, $version);
+        $index = $this->query->index(ContentRepository::fromConfig(), self::version($request));
 
         if ($index === null) {
             abort(404);
         }
 
         if ($query === '') {
-            return $this->json($request, ['query' => '', 'answer' => null, 'results' => []], 400);
+            return $this->json(['query' => '', 'results' => []], 400);
         }
 
         $visible = $index->forAccess($this->query->allowed($index));
-        $bytes = (bool) config('vellum.answers.semantic', true)
-            ? $this->query->semantic($repository, $version)
-            : null;
 
-        $result = (new Ranker($visible, $bytes === null ? null : new SemanticQuery($bytes['bytes'])))
-            ->search($query, self::LIMIT);
-
-        return $this->json($request, [
+        return $this->json([
             'query' => $query,
-            'answer' => $result['card'] === null ? null : [
-                ...self::hit($result['card']),
-                'answer' => $result['card']['record']['answer'],
-                'confidence' => round($result['confidence'], 3),
-            ],
-            'results' => array_map(self::hit(...), $result['results']),
+            'results' => array_map(self::hit(...), (new Ranker($visible))->search($query, self::LIMIT)),
         ]);
     }
 
@@ -124,7 +94,7 @@ final class AnswersController extends Controller
     /**
      * @param  array<string, mixed>  $payload
      */
-    private function json(Request $request, array $payload, int $status = 200): Response
+    private function json(array $payload, int $status = 200): Response
     {
         return response(
             (string) json_encode($payload, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT),

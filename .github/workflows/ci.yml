@@ -84,22 +84,8 @@ jobs:
       - name: Install Composer dependencies
         run: composer update --prefer-dist --no-interaction --no-progress
 
-      # The model is 30 MB and never changes for a given name, so it is worth
-      # a cache key of its own rather than a download on every run.
-      - name: Cache the embedding model
-        uses: actions/cache@v4
-        with:
-          path: storage/vellum/models
-          key: vellum-model-potion-base-8M
-
-      - name: Fetch the embedding model
-        run: vendor/bin/testbench vellum:model
-        env:
-          VELLUM_MODEL_PATH: ${{ github.workspace }}/storage/vellum/models
-
-      # The questions a model wrote are committed under docs/.vellum, so this
-      # needs no API key. --check-search asks docs/questions.yml and --strict
-      # fails on a link, an image or a question that points at nothing.
+      # --check-search asks docs/questions.yml, and --strict fails on a link,
+      # an image or a question that points at nothing.
       - name: Build the docs and ask the golden questions
         run: vendor/bin/testbench vellum:build --check-search --strict
         # Absolute, since Vellum reads a relative path from the app root, and
@@ -108,8 +94,7 @@ jobs:
           CACHE_STORE: array
           VELLUM_PATH: ${{ github.workspace }}/docs
           VELLUM_CHANGELOG: ${{ github.workspace }}/CHANGELOG.md
-          VELLUM_MODEL_PATH: ${{ github.workspace }}/storage/vellum/models
-          VELLUM_SEARCH_MIN: '0.65'
+          VELLUM_SEARCH_MIN: '0.6'
 
   assets:
     name: Frontend assets
@@ -135,3 +120,8 @@ jobs:
 
       - name: Size gate
         run: npm run check:size
+
+      # The browser ranks with its own copy of the PHP ranker, and these tests
+      # hold the two to the same results.
+      - name: JavaScript tests
+        run: npm test

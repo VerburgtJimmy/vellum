@@ -10,7 +10,6 @@ const limits = {
   'resources/dist/vellum.js': 28 * 1024,
   // Lazy chunks, loaded only when someone searches.
   'resources/dist/vellum-search.js': 10 * 1024,
-  'resources/dist/vellum-semantic.js': 6 * 1024,
 }
 
 const reported = [

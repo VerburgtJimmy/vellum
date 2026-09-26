@@ -39,10 +39,10 @@ and `vellum:build` warns about it.
 The table of contents is built from these headings. A page without any keeps the empty
 column, so the text width stays the same from page to page.
 
-Write headings answer-shaped: one thing a reader would ask about per heading. Search
-indexes a page by section, and both the ranking and the answer card on top of the results
-work on one section at a time, so a heading that covers three unrelated settings can only
-ever half-answer each of them. When a section starts collecting leftovers, split it.
+Give each heading one topic, ideally one thing a reader would ask about. Search returns
+sections, one heading and the text under it at a time, so a section that covers several
+unrelated settings is a weak match for each of them. When a section starts collecting
+leftovers, split it.
 
 ## Links
 

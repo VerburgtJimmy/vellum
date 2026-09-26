@@ -4,7 +4,6 @@
 ])
 
 @php
-    use Vellum\Support\Assets;
 
     $hotkey = (string) config('vellum.search.hotkey', 'k');
     $driver = $staticExport ? 'answers' : (\Vellum\Search\SearchDriver::isScout() ? 'scout' : 'answers');
@@ -12,15 +11,11 @@
     $versioned = is_string($currentVersion) && $currentVersion !== '' && (bool) config('vellum.versions.enabled')
         ? ['version' => $currentVersion]
         : [];
-    $semanticOn = (bool) config('vellum.answers.enabled', true) && (bool) config('vellum.answers.semantic', true);
-
     if ($staticExport) {
         $answersUrl = '/'.$prefix.'/_vellum/answers.json';
-        $semanticUrl = $semanticOn ? '/'.$prefix.'/_vellum/semantic.bin' : null;
         $scoutUrl = null;
     } else {
         $answersUrl = route('vellum.answers', $versioned);
-        $semanticUrl = $semanticOn ? route('vellum.answers.semantic', $versioned) : null;
         $scoutUrl = route('vellum.search', $versioned);
     }
 @endphp
@@ -46,8 +41,6 @@
                 x-data="vellumSearchDialog({
                     driver: @js($driver),
                     answers: @js($answersUrl),
-                    semantic: @js($semanticUrl),
-                    semanticModule: @js($semanticOn ? Assets::semanticJsUrl() : null),
                     scout: @js($scoutUrl),
                 })"
                 x-init="ensureIndex(); $nextTick(() => $refs.query?.focus())"
@@ -95,75 +88,20 @@
                     <template x-if="loading && ! ready">
                         <p class="px-3 py-6 text-center text-sm text-muted-foreground">Loading index...</p>
                     </template>
-                    <template x-if="ready && query.trim() && results.length === 0 && ! card">
+                    <template x-if="ready && query.trim() && results.length === 0">
                         <p class="px-3 py-6 text-center text-sm text-muted-foreground">No results</p>
-                    </template>
-
-                    <template x-if="card">
-                        <div class="vellum-answer-card p-1">
-                            <a
-                                id="vellum-search-option-0"
-                                :href="card.url"
-                                role="option"
-                                :aria-selected="(active === 0).toString()"
-                                class="block rounded-md border border-border bg-card p-3 hover:border-accent-foreground/30"
-                                :class="active === 0 && 'border-accent-foreground/40 bg-accent'"
-                                x-on:mouseenter="active = 0">
-                                <p class="text-xs font-medium uppercase tracking-wide text-muted-foreground">Answer</p>
-                                <p class="mt-1 text-sm font-semibold text-foreground" x-text="card.breadcrumb"></p>
-
-                                <template x-if="card.content.kind === 'code' || card.content.kind === 'sentence-code'">
-                                    <div class="mt-2">
-                                        <p x-show="card.content.text" class="mb-2 text-sm text-foreground" x-text="card.content.text"></p>
-                                        <pre class="vellum-answer-code overflow-x-auto rounded-md bg-muted p-2 text-xs"><code x-text="card.content.code"></code></pre>
-                                    </div>
-                                </template>
-
-                                <template x-if="card.content.kind === 'config'">
-                                    <dl class="mt-2 space-y-1 text-xs">
-                                        <template x-for="row in card.content.rows.slice(0, 5)" :key="row.key">
-                                            <div class="flex flex-wrap gap-x-2">
-                                                <dt class="font-mono text-foreground" x-text="row.key"></dt>
-                                                <dd class="flex flex-wrap gap-x-2 text-muted-foreground">
-                                                    <span x-show="row.default" x-text="'default ' + row.default"></span>
-                                                    <span x-show="row.type" x-text="row.type"></span>
-                                                    <span x-show="row.description" class="text-foreground/80" x-text="row.description"></span>
-                                                </dd>
-                                            </div>
-                                        </template>
-                                    </dl>
-                                </template>
-
-                                <template x-if="card.content.kind === 'row'">
-                                    <dl class="mt-2 flex flex-wrap gap-x-3 text-xs">
-                                        <template x-for="(value, name) in card.content.row" :key="name">
-                                            <div class="flex gap-1">
-                                                <dt class="text-muted-foreground" x-text="name + ':'"></dt>
-                                                <dd class="text-foreground" x-text="value"></dd>
-                                            </div>
-                                        </template>
-                                    </dl>
-                                </template>
-
-                                <template x-if="card.content.kind === 'text'">
-                                    <p class="mt-2 text-sm text-foreground" x-text="card.content.text"></p>
-                                </template>
-
-                                <p x-show="card.passage" class="mt-2 line-clamp-3 text-xs text-muted-foreground" x-text="card.passage"></p>
-                            </a>
-                        </div>
                     </template>
 
                     <template x-for="(hit, index) in results" :key="hit.id">
                         <div class="px-1 py-0.5">
                             <a
-                                :id="'vellum-search-option-' + (card ? index + 1 : index)"
+                                :id="'vellum-search-option-' + index"
                                 :href="hit.url"
                                 role="option"
                                 class="block rounded-md px-3 py-2 text-sm hover:bg-accent"
-                                :class="(card ? index + 1 : index) === active && 'bg-accent'"
-                                :aria-selected="((card ? index + 1 : index) === active).toString()"
-                                x-on:mouseenter="active = card ? index + 1 : index"
+                                :class="index === active && 'bg-accent'"
+                                :aria-selected="(index === active).toString()"
+                                x-on:mouseenter="active = index"
                             >
                                 <span class="font-medium text-foreground" x-text="hit.breadcrumb"></span>
                                 <span x-show="hit.passage" class="mt-0.5 block line-clamp-2 text-muted-foreground" x-html="hit.passage"></span>

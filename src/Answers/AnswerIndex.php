@@ -4,16 +4,15 @@ declare(strict_types=1);
 
 namespace Vellum\Answers;
 
-use Vellum\Answers\Extractors\AnswerExtractors;
 use Vellum\Answers\Questions\QuestionGenerators;
 use Vellum\Content\ContentRepository;
 use Vellum\Content\Document;
 
 /**
- * Every search section of one docs version, with what search needs to find it
- * and answer from it: its text, the questions it answers, the phrases it can
- * be found by, and an answer quoted from the docs. Each record keeps the access
- * level of its page; a reader is only ever given the records they may see.
+ * Every search section of one docs version, with what search needs to find
+ * it: its text, the questions it answers, the phrases it can be found by, and a
+ * passage to show under the result. Each record keeps the access level of its
+ * page; a reader is only ever given the records they may see.
  *
  * @phpstan-type Record array{
  *     id: string,
@@ -29,7 +28,6 @@ use Vellum\Content\Document;
  *     questions: list<string>,
  *     names: list<string>,
  *     aliases: list<string>,
- *     answer: array<string, mixed>|null,
  *     passage: string|null,
  *     updated: string|null
  * }
@@ -50,9 +48,8 @@ final class AnswerIndex
 
     /**
      * @param  list<Document>  $documents
-     * @param  array<string, list<string>>  $extraQuestions  section id => questions (from the LLM cache)
      */
-    public static function build(array $documents, ContentRepository $repository, array $extraQuestions = []): self
+    public static function build(array $documents, ContentRepository $repository): self
     {
         $updated = [];
 
@@ -61,22 +58,12 @@ final class AnswerIndex
         }
 
         $generators = QuestionGenerators::default();
-        $extractors = AnswerExtractors::default();
         $records = [];
         $synonyms = [];
 
         foreach (Sections::from($documents) as $section) {
             $id = $section['page'].'#'.$section['anchor'];
             $questions = $generators->for($section);
-
-            foreach ($extraQuestions[$id] ?? [] as $question) {
-                $question = mb_strtolower(trim($question));
-
-                if ($question !== '' && ! in_array($question, $questions, true)) {
-                    $questions[] = $question;
-                }
-            }
-
             $href = $repository->hrefFor($section['page'], $section['version']);
 
             $records[] = [
@@ -93,8 +80,7 @@ final class AnswerIndex
                 'questions' => $questions,
                 'names' => Aliases::names($section),
                 'aliases' => Aliases::terms($section),
-                'answer' => $extractors->for($section),
-                'passage' => AnswerExtractors::passage($section),
+                'passage' => Passage::of($section),
                 'updated' => $updated[$section['page']] ?? null,
             ];
 
@@ -107,39 +93,14 @@ final class AnswerIndex
     }
 
     /**
-     * The text a section is embedded and indexed from: its words, then the
-     * questions it answers, so a reader's question lands near its answer.
+     * All the text a section can be found by: its words, then the questions
+     * it answers.
      *
      * @param  Record  $record
      */
     public static function text(array $record): string
     {
         return trim(implode(' ', [$record['title'], $record['heading'], $record['text'], ...$record['questions']]));
-    }
-
-    /**
-     * The same index with more questions on the sections named, keeping the
-     * generated ones and dropping repeats.
-     *
-     * @param  array<string, list<string>>  $extra  section id => questions
-     */
-    public function withQuestions(array $extra): self
-    {
-        $sections = [];
-
-        foreach ($this->sections as $record) {
-            foreach ($extra[$record['id']] ?? [] as $question) {
-                $question = mb_strtolower(trim($question));
-
-                if ($question !== '' && ! in_array($question, $record['questions'], true)) {
-                    $record['questions'][] = $question;
-                }
-            }
-
-            $sections[] = $record;
-        }
-
-        return new self($sections, $this->synonyms);
     }
 
     /**

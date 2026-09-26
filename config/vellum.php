@@ -139,13 +139,13 @@ return [
     | --strict. Useful when you cannot add the flag to the build command,
     | for example in CI or a deploy script.
     |
-    | search: run the questions in questions.yml, if the docs have one, against
-    | the index the build just wrote, and report how many find their answer in
-    | the top five results.
+    | search: run the questions in questions.yml, if the docs have one,
+    | against the search index the build just wrote, and report how many find
+    | their answer in the top five results.
     |
-    | search_min: the share of those questions that must find their answer, from
-    | 0 to 1, before the build is allowed to pass. 0 reports without failing.
-    | VELLUM_SEARCH_MIN sets it, so CI can demand more than a local build does.
+    | search_min: the share of those questions, from 0 to 1, that must find
+    | their answer for the build to pass. 0 reports without failing. Set it
+    | with VELLUM_SEARCH_MIN to require more in CI than in a local build.
     |
     */
     'checks' => [
@@ -171,16 +171,16 @@ return [
     | prefers text/markdown with the page's raw Markdown instead of HTML.
     | Page responses then send Vary: Accept so caches keep the two apart.
     |
-    | answer: serve {prefix}/_vellum/answer?q=, which runs the same search the
-    | browser runs and returns the answer and the top sections as JSON, for a
-    | client that cannot run it. It sees only what the caller may see.
+    | search: serve {prefix}/_vellum/search?q=, which runs the same search as
+    | the browser and returns the top sections as JSON, for clients such as
+    | agents and scripts. Results only include pages the caller may open.
     |
     */
     'agents' => [
         'llms_txt' => true,
         'llms_txt_root' => true,
         'content_negotiation' => true,
-        'answer' => true,
+        'search' => true,
     ],
 
     /*
@@ -215,58 +215,6 @@ return [
         'driver' => env('VELLUM_SEARCH_DRIVER', 'builtin'),
         'scout' => [
             'index' => 'vellum',
-        ],
-    ],
-
-    /*
-    |--------------------------------------------------------------------------
-    | Answers
-    |--------------------------------------------------------------------------
-    |
-    | Search that understands a question phrased in the reader's words, built
-    | once in vellum:build from a small static embedding model. Nothing runs a
-    | model at request time. Fetch the model with php artisan vellum:model;
-    | without it the build warns and search stays lexical.
-    |
-    | semantic: false keeps the answers features without the embedding model.
-    | model: the Model2Vec model on the Hugging Face hub.
-    | model_path: where vellum:model stores it. Keep it out of cache.path,
-    | which vellum:clear empties.
-    | common_tokens: everyday words kept in the shipped vocabulary beyond the
-    | ones your docs use, so a reader's own words still carry meaning.
-    |
-    */
-    'answers' => [
-        'enabled' => true,
-        'semantic' => true,
-        'model' => 'potion-base-8M',
-        'model_path' => env('VELLUM_MODEL_PATH', storage_path('vellum/models')),
-        'common_tokens' => 1000,
-
-        /*
-        | How sure search has to be of its top result before it shows it as an
-        | answer card above the results, from 0 to 1. At the default, about one
-        | question in five gets a card, and on Vellum's own question sets 22 of
-        | 25 cards named the right section; lower it for more cards and more of
-        | them wrong.
-        */
-        'card_threshold' => 0.75,
-
-        /*
-        | Optional: have a language model write extra questions for each
-        | section at build time. It runs in vellum:build only, never when a
-        | page is served. Answers are cached under docs/.vellum/questions and
-        | are meant to be committed, so a deploy or CI needs no key.
-        |
-        | provider: anthropic, openai, or null (the default: no model).
-        | model: defaults to claude-haiku-4-5 for anthropic; name one for openai.
-        | key: VELLUM_LLM_KEY, or the provider's own ANTHROPIC_API_KEY or
-        | OPENAI_API_KEY. A key is only ever read once a provider is set.
-        */
-        'llm' => [
-            'provider' => env('VELLUM_LLM_PROVIDER'),
-            'model' => env('VELLUM_LLM_MODEL'),
-            'key' => env('VELLUM_LLM_KEY') ?: env('ANTHROPIC_API_KEY') ?: env('OPENAI_API_KEY'),
         ],
     ],
 

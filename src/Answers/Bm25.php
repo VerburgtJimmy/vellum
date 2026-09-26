@@ -69,9 +69,6 @@ final class Bm25
     }
 
     /**
-     * @return array<int, float> doc => score, best first
-     */
-    /**
      * @param  array<string, float>  $weights  term => weight, an expanded term weighing less
      * @return array<int, float> doc => score, best first
      */

@@ -22,13 +22,13 @@ it('expands a term to the rest of its group, matching whole phrases only', funct
         ->and($synonyms->expand('tiles'))->toBe([]);
 });
 
-it('ships built-in groups seeded from the held-out misses', function (): void {
+it('ships a short list of generic docs synonyms', function (): void {
     $synonyms = Synonyms::withPages([]);
 
-    expect($synonyms->expand('can i use this commercially'))->toContain('licence', 'license')
-        ->and($synonyms->expand('text between my link tiles'))->toContain('cards')
-        ->and($synonyms->expand('what is in the outline on the right'))->toContain('table of contents')
-        ->and($synonyms->expand('where do i put the .env value'))->toContain('dotenv');
+    expect($synonyms->expand('is there a license'))->toContain('licence')
+        ->and($synonyms->expand('what is in the toc'))->toContain('table of contents')
+        ->and($synonyms->expand('where do i put the .env value'))->toContain('dotenv')
+        ->and($synonyms->expand('find a copy'))->toBe([]);
 });
 
 it('adds a group per page from its title and frontmatter aliases', function (): void {

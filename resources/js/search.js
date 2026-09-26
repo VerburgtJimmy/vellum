@@ -1,6 +1,6 @@
 /**
  * Search in the browser: the same ranking Vellum\Answers\Ranker runs in PHP,
- * over the files vellum:build wrote. Loaded on demand when the dialog opens.
+ * over the index vellum:build wrote. Loaded on demand when the dialog opens.
  *
  * Keep this in step with Bm25.php, Synonyms.php and Ranker.php. The numbers
  * below are theirs.
@@ -12,8 +12,7 @@ const DELTA = 0.5
 const PREFIX_WEIGHT = 0.375
 const FIELD_BOOST = { title: 3, heading: 2, text: 1 }
 
-const TERM_BOOST = 0.1
-const EXACT_BOOST = 0.1
+const EXACT_BOOST = 1
 const SYNONYM_WEIGHT = 0.5
 const PER_PAGE = 2
 
@@ -196,13 +195,11 @@ export function spread(scored, limit) {
 }
 
 /**
- * A ranker over one answer index. `cosine` is the semantic scorer when the
- * vectors loaded, and null when they did not: search then runs on words alone.
+ * A ranker over one search index.
  *
- * @param {{sections: Array<Record<string, any>>, synonyms: Array<Array<string>>, threshold?: number}} answers
- * @param {((query: string) => Map<string, number>)|null} cosine
+ * @param {{sections: Array<Record<string, any>>, synonyms: Array<Array<string>>}} answers
  */
-export function createRanker(answers, cosine = null) {
+export function createRanker(answers) {
   const sections = answers.sections ?? []
   const index = createIndex(
     sections.map((section) => ({
@@ -212,7 +209,6 @@ export function createRanker(answers, cosine = null) {
     })),
   )
   const groups = answers.synonyms ?? []
-  const threshold = answers.threshold ?? 0.75
 
   return {
     sections,
@@ -225,33 +221,28 @@ export function createRanker(answers, cosine = null) {
       const trimmed = query.trim()
 
       if (trimmed === '') {
-        return { results: [], card: null, confidence: 0 }
+        return []
       }
 
-      const widened = expansions(trimmed, groups)
-      const lexical = score(index, expand(trimmed, widened))
+      const lexical = score(index, expand(trimmed, expansions(trimmed, groups)))
       const best = lexical.size > 0 ? Math.max(...lexical.values()) : 0
-      // Embed the reader's words together with the docs' words for them.
-      const cosines = cosine ? cosine(`${trimmed} ${widened.join(' ')}`.trim()) : new Map()
       const normalized = ` ${normalizePhrase(trimmed)} `
       const scored = []
 
       sections.forEach((section, id) => {
-        const similarity = cosines.get(section.id) ?? 0
         const term = best > 0 ? (lexical.get(id) ?? 0) / best : 0
         // What the section is called, not what it mentions.
         const exact = (section.names ?? []).some(
           (name) => name !== '' && normalized.includes(` ${name} `),
         )
 
-        if (similarity <= 0 && term <= 0 && !exact) {
+        if (term <= 0 && !exact) {
           return
         }
 
         scored.push({
           record: section,
-          score: similarity + TERM_BOOST * term + (exact ? EXACT_BOOST : 0),
-          cosine: similarity,
+          score: term + (exact ? EXACT_BOOST : 0),
           lexical: term,
           exact,
         })
@@ -259,48 +250,15 @@ export function createRanker(answers, cosine = null) {
 
       scored.sort((a, b) => b.score - a.score)
 
-      const results = spread(scored, limit)
-      const sureness = confidence(scored)
-
-      return {
-        results,
-        confidence: sureness,
-        card: sureness >= threshold ? (results[0] ?? null) : null,
-      }
+      return spread(scored, limit)
     },
   }
 }
 
 /**
- * How sure the top result is, from 0 to 1. Mirrors Ranker::confidence().
+ * Load the search index for this page's version.
  *
- * @param {Array<{score: number, cosine: number, lexical: number, exact: boolean}>} scored
- */
-export function confidence(scored) {
-  if (scored.length === 0) {
-    return 0
-  }
-
-  const top = scored[0]
-  const second = scored[1]?.score ?? 0
-  const lead = top.score > 0 ? (top.score - second) / top.score : 0
-
-  return Math.min(
-    1,
-    Math.max(
-      0,
-      0.6 * Math.max(0, top.cosine) +
-        0.25 * Math.min(1, lead / 0.2) +
-        0.15 * (top.exact || top.lexical >= 1 ? 1 : 0),
-    ),
-  )
-}
-
-/**
- * Load the answer index, and the vectors when the site has them. The vectors
- * are optional: without them search still runs, on words alone.
- *
- * @param {{answers: string, semantic: string|null, semanticModule: string|null}} urls
+ * @param {{answers: string}} urls
  */
 export async function load(urls) {
   if (loaded && loaded.key === urls.answers) {
@@ -313,30 +271,17 @@ export async function load(urls) {
   })
 
   if (!response.ok) {
-    throw new Error(`Failed to load the answer index (${response.status})`)
+    throw new Error(`Failed to load the search index (${response.status})`)
   }
 
-  const answers = await response.json()
-  let cosine = null
-
-  if (urls.semantic && urls.semanticModule) {
-    try {
-      const semantic = await import(/* @vite-ignore */ urls.semanticModule)
-      const vectors = await semantic.loadSemanticFile(urls.semantic)
-      cosine = (query) => semantic.cosines(query, vectors)
-    } catch {
-      cosine = null
-    }
-  }
-
-  loaded = { key: urls.answers, ranker: createRanker(answers, cosine) }
+  loaded = { key: urls.answers, ranker: createRanker(await response.json()) }
 
   return loaded.ranker
 }
 
 /**
- * Scout answers server-side and knows nothing of sections, so its hits are
- * shown as page results with no card.
+ * Scout searches on the server and knows nothing of sections, so its hits are
+ * shown as page results.
  *
  * @param {string} url
  * @param {string} query
@@ -354,23 +299,18 @@ export async function searchScout(url, query) {
   const payload = await response.json()
   const documents = Array.isArray(payload.documents) ? payload.documents : []
 
-  return {
-    results: documents.slice(0, 8).map((document) => ({
-      record: {
-        id: document.id ?? document.url,
-        url: document.url,
-        title: document.title ?? '',
-        heading: '',
-        passage: document.description || (document.content ?? '').slice(0, 200),
-      },
-      score: 0,
-      cosine: 0,
-      lexical: 0,
-      exact: false,
-    })),
-    card: null,
-    confidence: 0,
-  }
+  return documents.slice(0, 8).map((document) => ({
+    record: {
+      id: document.id ?? document.url,
+      url: document.url,
+      title: document.title ?? '',
+      heading: '',
+      passage: document.description || (document.content ?? '').slice(0, 200),
+    },
+    score: 0,
+    lexical: 0,
+    exact: false,
+  }))
 }
 
 /**
@@ -408,68 +348,4 @@ export function highlight(text, query) {
  */
 export function breadcrumb(record) {
   return [record.title, record.heading].filter((part) => part !== '' && part !== undefined).join(' › ')
-}
-
-/**
- * The rows of a config card: the ones the reader named, or the first few when
- * they named none.
- *
- * @param {Array<Record<string, string>>} rows
- * @param {string} query
- */
-export function configRows(rows, query) {
-  const asked = ` ${normalizePhrase(query)} `
-  const named = rows.filter((row) => row.key && asked.includes(` ${normalizePhrase(row.key)} `))
-
-  return named.length > 0 ? named : rows
-}
-
-/**
- * The passage to show under a card's answer: what the section says beyond the
- * answer itself, so a sentence answer is not printed twice.
- *
- * @param {string} passage
- * @param {string} answered
- */
-export function remainder(passage, answered) {
-  const rest = (passage ?? '').trim()
-
-  if (answered && rest.startsWith(answered.trim())) {
-    return rest.slice(answered.trim().length).trim()
-  }
-
-  return rest
-}
-
-/**
- * What a card shows: the answer in the shape its type calls for, with the
- * passage under it. Everything is the docs' own words.
- *
- * @param {Record<string, any>} record
- * @param {string} query  so a config card shows the key that was asked about
- */
-export function cardContent(record, query = '') {
-  const answer = record.answer ?? null
-
-  if (answer === null) {
-    return { kind: 'text', text: record.passage ?? '' }
-  }
-
-  switch (answer.type) {
-    case 'command':
-      return { kind: 'code', code: answer.command, language: 'bash' }
-    case 'code':
-      return { kind: 'code', code: answer.code, language: answer.language ?? '' }
-    case 'config':
-      return { kind: 'config', rows: configRows(answer.rows ?? [], query) }
-    case 'row':
-      return { kind: 'row', row: answer.row ?? {} }
-    default:
-      return {
-        kind: answer.code ? 'sentence-code' : 'text',
-        text: answer.sentence ?? record.passage ?? '',
-        code: answer.code ?? '',
-        language: answer.language ?? '',
-      }
-  }
 }

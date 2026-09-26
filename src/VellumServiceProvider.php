@@ -13,7 +13,6 @@ use Vellum\Console\ClearCommand;
 use Vellum\Console\ExportCommand;
 use Vellum\Console\IndexCommand;
 use Vellum\Console\InstallCommand;
-use Vellum\Console\ModelCommand;
 use Vellum\Http\Controllers\AssetController;
 use Vellum\Http\Middleware\CompressHtmlResponse;
 use Vellum\Http\RootLlmsTxtRoutes;
@@ -41,7 +40,6 @@ final class VellumServiceProvider extends ServiceProvider
                 InstallCommand::class,
                 IndexCommand::class,
                 ExportCommand::class,
-                ModelCommand::class,
             ]);
 
             $this->publishes([
@@ -64,8 +62,6 @@ final class VellumServiceProvider extends ServiceProvider
             ->name('vellum.assets.js');
         Route::get('/vendor/vellum/vellum-search.js', [AssetController::class, 'search'])
             ->name('vellum.assets.search');
-        Route::get('/vendor/vellum/vellum-semantic.js', [AssetController::class, 'semantic'])
-            ->name('vellum.assets.semantic');
         Route::get('/vendor/vellum/vellum-anchor.js', [AssetController::class, 'anchor'])
             ->name('vellum.assets.anchor');
         Route::get('/vendor/vellum/vellum-focus.js', [AssetController::class, 'focus'])

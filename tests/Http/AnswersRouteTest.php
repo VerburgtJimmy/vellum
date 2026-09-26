@@ -3,21 +3,11 @@
 declare(strict_types=1);
 
 use Illuminate\Foundation\Auth\User;
-use Vellum\Semantic\SemanticSet;
-use Vellum\Tests\Semantic\FakeModel;
 
 beforeEach(function (): void {
-    $this->modelRoot = sys_get_temp_dir().'/vellum-route-'.$this->fixtureId();
-    FakeModel::write($this->modelRoot.'/fake-model');
-    config(['vellum.answers.model' => 'acme/fake-model', 'vellum.answers.model_path' => $this->modelRoot]);
-
     $this->writeDoc('index.md', "---\ntitle: Home\n---\nInstall the package.\n");
     $this->writeDoc('billing.md', "---\ntitle: Billing\naccess: auth\naliases:\n  - Supercalifragilistic invoices\n---\nRefunds take five days, supercalifragilisticexpialidocious.\n");
     $this->artisan('vellum:build')->assertSuccessful();
-});
-
-afterEach(function (): void {
-    $this->deleteDirectory($this->modelRoot);
 });
 
 it('serves a guest only what a guest may read', function (): void {
@@ -26,8 +16,8 @@ it('serves a guest only what a guest may read', function (): void {
     $body = (string) $response->getContent();
 
     expect(array_column($payload['sections'], 'id'))->toBe(['#'])
-        ->and($payload['threshold'])->toBe(0.75)
-        ->and($payload['synonyms'])->toContain(['dark mode', 'dark theme', 'night mode', 'dark look'])
+        ->and($payload)->not->toHaveKey('threshold')
+        ->and($payload['synonyms'])->toContain(['dark mode', 'dark theme', 'night mode'])
         ->and($body)->not->toContain('Refunds')
         ->and($body)->not->toContain('Supercalifragilistic')
         ->and($response->headers->get('content-type'))->toContain('application/json')
@@ -39,18 +29,6 @@ it('serves a signed-in reader the gated section as well', function (): void {
 
     expect(array_column($payload['sections'], 'id'))->toContain('billing#')
         ->and($payload['synonyms'])->toContain(['Billing', 'Supercalifragilistic invoices']);
-});
-
-it('serves vectors a guest may have, and no token only a gated page uses', function (): void {
-    $response = $this->get('/docs/_vellum/semantic.bin')->assertOk();
-    $guest = SemanticSet::read((string) $response->getContent());
-    $member = SemanticSet::read((string) $this->actingAs(new User)->get('/docs/_vellum/semantic.bin')->getContent());
-
-    expect($guest['ids'])->toBe(['#'])
-        ->and($member['ids'])->toContain('billing#')
-        ->and(count($member['tokens']))->toBeGreaterThan(count($guest['tokens']))
-        ->and(array_diff($member['tokens'], $guest['tokens']))->not->toBeEmpty()
-        ->and($response->headers->get('content-type'))->toBe('application/octet-stream');
 });
 
 it('answers 304 when the reader already has the file', function (): void {
@@ -68,12 +46,9 @@ it('gives a guest and a member different etags for the same url', function (): v
     expect($guest)->not->toBe($member);
 });
 
-it('is not there when answers or the semantic file are turned off', function (): void {
-    config(['vellum.answers.semantic' => false]);
-    $this->get('/docs/_vellum/semantic.bin')->assertNotFound();
-    $this->get('/docs/_vellum/answers.json')->assertOk();
+it('is not there when search is turned off', function (): void {
+    config(['vellum.search.enabled' => false]);
 
-    config(['vellum.answers.enabled' => false]);
     $this->get('/docs/_vellum/answers.json')->assertNotFound();
 });
 
@@ -83,8 +58,8 @@ it('404s before the index is built', function (): void {
     $this->get('/docs/_vellum/answers.json')->assertNotFound();
 });
 
-it('answers one question as json, from what the caller may see', function (): void {
-    $guest = $this->get('/docs/_vellum/answer?q=install+the+package')->assertOk();
+it('searches as json, in what the caller may see', function (): void {
+    $guest = $this->get('/docs/_vellum/search?q=install+the+package')->assertOk();
     $payload = $guest->json();
 
     expect($payload['query'])->toBe('install the package')
@@ -92,30 +67,30 @@ it('answers one question as json, from what the caller may see', function (): vo
         ->and($guest->headers->get('content-type'))->toContain('application/json')
         ->and($guest->headers->get('cache-control'))->toContain('private');
 
-    $member = $this->actingAs(new User)->get('/docs/_vellum/answer?q=refunds')->assertOk()->json();
+    $member = $this->actingAs(new User)->get('/docs/_vellum/search?q=refunds')->assertOk()->json();
 
     expect(array_column($member['results'], 'url'))->toContain('/docs/billing');
 });
 
-it('never puts a gated page in an answer a guest asked for', function (): void {
-    $response = $this->get('/docs/_vellum/answer?q=how+long+do+refunds+take');
+it('never gives a guest a gated page', function (): void {
+    $response = $this->get('/docs/_vellum/search?q=how+long+do+refunds+take');
 
     expect((string) $response->getContent())->not->toContain('Refunds')
         ->and(array_column($response->json('results'), 'url'))->not->toContain('/docs/billing');
 });
 
-it('shows an answer card only when search is sure, by the same threshold', function (): void {
-    config(['vellum.answers.card_threshold' => 0.0]);
-    expect($this->get('/docs/_vellum/answer?q=install+the+package')->json('answer'))->not->toBeNull();
+it('wants a query, and can be turned off', function (): void {
+    $this->get('/docs/_vellum/search')->assertStatus(400);
+    $this->get('/docs/_vellum/search?q=+')->assertStatus(400);
 
-    config(['vellum.answers.card_threshold' => 1.01]);
-    expect($this->get('/docs/_vellum/answer?q=install+the+package')->json('answer'))->toBeNull();
+    config(['vellum.agents.search' => false]);
+    $this->get('/docs/_vellum/search?q=install')->assertNotFound();
 });
 
-it('wants a question, and can be turned off', function (): void {
-    $this->get('/docs/_vellum/answer')->assertStatus(400);
-    $this->get('/docs/_vellum/answer?q=+')->assertStatus(400);
+it('returns the top sections with their url, heading, passage and date', function (): void {
+    $payload = $this->get('/docs/_vellum/search?q=install')->assertOk()->json();
 
-    config(['vellum.agents.answer' => false]);
-    $this->get('/docs/_vellum/answer?q=install')->assertNotFound();
+    expect($payload)->toHaveKeys(['query', 'results'])
+        ->and($payload)->not->toHaveKey('answer')
+        ->and(array_keys($payload['results'][0]))->toBe(['url', 'title', 'heading', 'passage', 'updated', 'score']);
 });

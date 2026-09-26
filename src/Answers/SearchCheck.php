@@ -6,7 +6,6 @@ namespace Vellum\Answers;
 
 use Symfony\Component\Yaml\Exception\ParseException;
 use Symfony\Component\Yaml\Yaml;
-use Vellum\Semantic\SemanticQuery;
 
 /**
  * Asks search the questions the docs say it must answer, at build time.
@@ -86,9 +85,9 @@ final class SearchCheck
     /**
      * @return array{asked: int, found: int, missed: list<string>, broken: list<string>}
      */
-    public function run(AnswerIndex $index, ?SemanticQuery $semantic = null): array
+    public function run(AnswerIndex $index): array
     {
-        $ranker = new Ranker($index, $semantic);
+        $ranker = new Ranker($index);
         $found = 0;
         $missed = [];
         $broken = [];
@@ -108,7 +107,7 @@ final class SearchCheck
 
             $hit = false;
 
-            foreach (array_slice($ranker->search($entry['q'], self::DEPTH)['results'], 0, self::DEPTH) as $result) {
+            foreach ($ranker->search($entry['q'], self::DEPTH) as $result) {
                 $hit = $hit || self::hits($targets, $result['record']);
             }
 

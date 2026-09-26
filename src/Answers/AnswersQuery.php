@@ -7,11 +7,10 @@ namespace Vellum\Answers;
 use Illuminate\Support\Facades\Cache;
 use Vellum\Content\ContentRepository;
 use Vellum\Search\SearchVisibility;
-use Vellum\Semantic\SemanticSet;
 
 /**
- * The answer index and the semantic file a reader may have, cut to the access
- * levels they hold and cached per set of levels, the way the search index is.
+ * The search index a reader may have, cut to the access levels they hold and
+ * cached per set of levels.
  */
 final class AnswersQuery
 {
@@ -60,7 +59,7 @@ final class AnswersQuery
         }
 
         $allowed = $this->allowed($index);
-        $etag = $this->etag($repository, $version, $allowed, 'answers');
+        $etag = $this->etag($repository, $version, $allowed);
         $cacheKey = 'vellum:answers:'.$etag;
         $cached = Cache::get($cacheKey);
 
@@ -75,55 +74,26 @@ final class AnswersQuery
                 // The built-in groups and this reader's page aliases, merged:
                 // the browser expands a query with exactly what PHP would.
                 'synonyms' => $visible->synonymGroups(),
-                'threshold' => (float) config('vellum.answers.card_threshold', 0.75),
             ],
             JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE,
         );
 
-        Cache::forever($cacheKey, $json);
+        // A new build changes the ETag, so an old copy is never asked for
+        // again. It expires rather than staying in the cache for good.
+        Cache::put($cacheKey, $json, now()->addDay());
 
         return ['json' => $json, 'etag' => $etag];
     }
 
     /**
-     * @return array{bytes: string, etag: string}|null
-     */
-    public function semantic(ContentRepository $repository, ?string $version): ?array
-    {
-        $index = $this->index($repository, $version);
-        $set = SemanticSet::load($this->directory($repository, $version).'/semantic');
-
-        if ($index === null || $set === null) {
-            return null;
-        }
-
-        $allowed = $this->allowed($index);
-        $etag = $this->etag($repository, $version, $allowed, 'semantic');
-        $cacheKey = 'vellum:semantic:'.$etag;
-        $cached = Cache::get($cacheKey);
-
-        if (is_string($cached)) {
-            return ['bytes' => $cached, 'etag' => $etag];
-        }
-
-        $bytes = $set->forGroups($allowed);
-        Cache::forever($cacheKey, $bytes);
-
-        return ['bytes' => $bytes, 'etag' => $etag];
-    }
-
-    /**
      * @param  list<string>  $allowed
      */
-    private function etag(ContentRepository $repository, ?string $version, array $allowed, string $kind): string
+    private function etag(ContentRepository $repository, ?string $version, array $allowed): string
     {
         $directory = $this->directory($repository, $version);
-        $stamp = max(
-            (int) @filemtime($directory.'/answers/'.AnswerIndex::FILE),
-            (int) @filemtime($directory.'/semantic/semantic.bin'),
-        );
+        $stamp = (int) @filemtime($directory.'/answers/'.AnswerIndex::FILE);
 
-        return $kind.'-'.substr(hash('xxh128', $directory.'|'.$stamp.'|'.implode('+', $allowed)), 0, 16);
+        return 'answers-'.substr(hash('xxh128', $directory.'|'.$stamp.'|'.implode('+', $allowed)), 0, 16);
     }
 
     private function version(ContentRepository $repository, ?string $version): ?string

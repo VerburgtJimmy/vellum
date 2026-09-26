@@ -12,9 +12,9 @@ use Vellum\Search\ScoutIndexer;
 use Vellum\Search\SearchDriver;
 
 /**
- * Rebuild what search reads: the answer index and the semantic set, and Scout
- * when that driver is on. vellum:build does this too; this is for when the
- * pages are already compiled and only the index is stale.
+ * Rebuild what search reads: the search index, and the Scout index when that
+ * driver is on. vellum:build does this too; this is for when only the index is
+ * out of date.
  */
 final class IndexCommand extends Command
 {
@@ -38,7 +38,7 @@ final class IndexCommand extends Command
             $this->info('Scout index updated ('.$this->count($documents).' documents).');
         }
 
-        (new AnswersBuild($this->line(...), $this->warn(...)))->run($repository, $documents, prune: $version === null);
+        (new AnswersBuild($this->line(...), $this->warn(...)))->run($repository, $documents);
 
         $this->info('Search index rebuilt for '.$this->count($documents).' document(s).');
 

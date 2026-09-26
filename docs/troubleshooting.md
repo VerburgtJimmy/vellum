@@ -56,7 +56,7 @@ files. Rename one of them.
 
 ### vellum.search.driver is scout but laravel/scout is not installed
 
-Run `composer require laravel/scout`, or set the driver back to `minisearch`. See
+Run `composer require laravel/scout`, or set the driver back to `builtin`. See
 [Search](/docs/search).
 
 ## Where errors appear

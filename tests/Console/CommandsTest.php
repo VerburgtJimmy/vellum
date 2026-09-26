@@ -267,7 +267,7 @@ it('exports the latest version unprefixed and older versions under /docs/{versio
     $this->deleteDirectory($out);
 });
 
-it('drops auth-only pages from the exported answer index', function (): void {
+it('drops auth-only pages from the exported search index', function (): void {
     $out = sys_get_temp_dir().'/vellum-tests/export-search-'.$this->fixtureId();
 
     if (is_dir($out)) {
@@ -291,7 +291,7 @@ it('drops auth-only pages from the exported answer index', function (): void {
         ->and(is_file($out.'/docs/secret/index.html'))->toBeFalse()
         ->and(is_file($out.'/docs/_vellum/raw/secret.md'))->toBeFalse();
 
-    // The exported pages search the exported answer index, which a static host
+    // The exported pages search the exported index, which a static host
     // serves as a file: an export has no session, so it holds guest pages only.
     $answers = json_decode((string) file_get_contents($out.'/docs/_vellum/answers.json'), true, 512, JSON_THROW_ON_ERROR);
 
@@ -299,13 +299,12 @@ it('drops auth-only pages from the exported answer index', function (): void {
         ->and($html)->toContain('_vellum/answers.json')
         ->and(collect($answers['sections'])->pluck('title')->all())->toContain('Home')
         ->and(collect($answers['sections'])->pluck('title')->all())->not->toContain('Secret')
-        ->and($answers['threshold'])->toBe(0.75)
-        ->and(is_file($out.'/docs/_vellum/semantic.bin'))->toBeFalse();
+        ->and($answers)->not->toHaveKey('threshold');
 
     $this->deleteDirectory($out);
 });
 
-it('rebuilds the answer index via vellum:index', function (): void {
+it('rebuilds the search index via vellum:index', function (): void {
     $this->writeDoc('index.md', "---\ntitle: Home\n---\nHi");
 
     $this->artisan('vellum:index')

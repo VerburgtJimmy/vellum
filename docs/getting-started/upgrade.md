@@ -1,11 +1,24 @@
 ---
 title: Upgrade
-description: Upgrading within 0.6, from 0.5 to 0.6, and from 0.2 to the 0.5 freeze.
+description: Upgrading from 0.6 to 0.7, within 0.6, from 0.5 to 0.6, and from 0.2 to the 0.5 freeze.
 ---
 
 0.5 froze the keys in `config/vellum.php` and the page frontmatter names. Later releases add keys without renaming any, and no key will be removed before 1.0.
 
 The requirements have been PHP 8.4+ and Laravel 11, 12, or 13 since 0.2.
+
+## 0.6 to 0.7
+
+No changes to your config or content are required. Update the package, run `vellum:build`, and republish the config if you want the new keys in your file:
+
+```bash
+composer update jimmyverburgt/vellum
+php artisan vellum:build
+```
+
+Search now returns sections instead of whole pages and no longer uses MiniSearch. The default `search.driver` is `builtin`; a config that still says `minisearch` keeps working. The built-in driver no longer serves `{prefix}/_vellum/search.json`, which only matters if something outside Vellum fetched that file. The Scout driver is unchanged. See [Search](/docs/search).
+
+0.7 also adds `llms.txt`, content negotiation and a JSON search endpoint for agents, all on by default under the new `agents` keys. See [Page actions](/docs/page-actions#for-agents) to turn any of them off.
 
 ## Within 0.6
 

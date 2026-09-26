@@ -195,17 +195,16 @@ function vellumDialog(initialOpen = false) {
  * Search hotkey root: Cmd/Ctrl+K in capture phase so the browser does not steal it.
  */
 /**
- * The search dialog: loads the answer index on first open, then ranks in the
+ * The search dialog: loads the search index on first open, then ranks in the
  * browser. The ranker itself lives in the search chunk, out of Alpine's
  * reactive state.
  *
- * @param {{driver: string, answers: string, semantic: string|null, semanticModule: string|null, scout: string|null}} urls
+ * @param {{driver: string, answers: string, scout: string|null}} urls
  */
 function vellumSearchDialog(urls) {
   return {
     query: '',
     results: [],
-    card: null,
     active: 0,
     status: 'Type to search',
     loading: false,
@@ -241,7 +240,6 @@ function vellumSearchDialog(urls) {
 
       if (query === '') {
         this.results = []
-        this.card = null
         this.status = 'Type to search'
 
         return
@@ -259,42 +257,19 @@ function vellumSearchDialog(urls) {
           ? await search.searchScout(urls.scout, query)
           : (await search.load(urls)).search(query, 8)
 
-      // A card is its section's answer, so that section is not repeated below it.
-      const hits = found.card ? found.results.slice(1) : found.results
-
-      this.results = hits.map((hit) => ({
+      this.results = found.map((hit) => ({
         id: hit.record.id,
         url: hit.record.url,
         breadcrumb: search.breadcrumb(hit.record),
         passage: search.highlight(hit.record.passage ?? '', query),
       }))
 
-      if (found.card) {
-        const content = search.cardContent(found.card.record, query)
-
-        this.card = {
-          url: found.card.record.url,
-          breadcrumb: search.breadcrumb(found.card.record),
-          content,
-          passage: search.remainder(found.card.record.passage ?? '', content.text ?? ''),
-        }
-      } else {
-        this.card = null
-      }
-
-      const count = this.results.length + (this.card ? 1 : 0)
+      const count = this.results.length
       this.status = count === 0 ? 'No results' : count === 1 ? '1 result' : `${count} results`
     },
 
-    /**
-     * The card, when there is one, is the first thing the arrows land on.
-     */
-    get options() {
-      return this.card ? [this.card, ...this.results] : this.results
-    },
-
     move(delta) {
-      const total = this.options.length
+      const total = this.results.length
 
       if (total === 0) {
         return
@@ -304,7 +279,7 @@ function vellumSearchDialog(urls) {
     },
 
     go() {
-      const url = this.options[this.active]?.url
+      const url = this.results[this.active]?.url
 
       if (url) {
         window.location.href = url
