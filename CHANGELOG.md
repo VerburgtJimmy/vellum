@@ -29,6 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Search no longer uses MiniSearch. The built-in driver loads a section index from `{prefix}/_vellum/answers.json` and ranks it in the browser, and the search script is 1.7 KB gzipped instead of 6.4 KB. `search.driver` is now `builtin`; `minisearch` still works as the old name
 - `vellum:index` rebuilds the section index, and the Scout index when that driver is on
+- The sidebar's page tree is rendered once per request and reused in the mobile drawer. On a 390-page site this took the median page time from 15.3 ms to 13.1 ms
 - The last-updated date under a page title comes from frontmatter or git. It used to show the file's modification time, which a checkout or `composer install` resets
 - `docs/seo.md` now suggests `Allow: /docs/_vellum/raw/` alongside `Disallow: /docs/_vellum/`, since raw Markdown pages declare their HTML page as canonical and `llms.txt` links to them
 
