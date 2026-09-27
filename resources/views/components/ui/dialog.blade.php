@@ -7,7 +7,7 @@
 ])
 
 @php
-    use Vellum\Support\Cn;
+    use Vellum\View\Cn;
 
     $isSheet = $variant === 'sheet';
     $isSearch = $variant === 'search';

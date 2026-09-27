@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use Illuminate\Foundation\Auth\User;
-use Vellum\Support\LlmsTxt;
+use Vellum\Http\LlmsTxt;
 
 beforeEach(function (): void {
     config()->set('app.url', 'https://docs.example.com');

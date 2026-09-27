@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use Vellum\Support\Assets;
-use Vellum\Support\Cn;
+use Vellum\View\Assets;
+use Vellum\View\Cn;
 
 it('merges conflicting tailwind classes', function (): void {
     expect(Cn::merge('px-2 py-1', 'px-4'))->toBe('py-1 px-4');

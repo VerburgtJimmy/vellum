@@ -16,11 +16,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - A new table of contents style, `window`, now the default: one highlight behind every entry whose section is on screen, whose edges hold on to whole entries and spring to the next one as sections come and go. Nested entries hang from a guide line, and a lighter highlight follows the pointer. `layout.toc` (or `VELLUM_LAYOUT_TOC`) set to `line` keeps the line style
 - Steps from a `:::steps` block show their number in the table of contents, filled while the step is on screen. In the line style the numbers sit on the line
 - `layout.toc` in `config/vellum.php`
+- `jimmyverburgt/vellum-core`, the content engine as a package of its own: pages, navigation, versions, gating, Markdown, the compiled cache, search and the changelog, with no routes, layout or assets. `jimmyverburgt/vellum` includes it, so installing Vellum is unchanged. See Core on its own in the docs
+- `ContentRepository::render()`, which returns a page's HTML with its components rendered
+- An app can replace the markup of a built-in component, for both the `:::` and the `<x-vellum::…>` form, by publishing its view to `resources/views/vendor/vellum/components/`. Before, `:::` blocks ignored a published copy
 
 ### Changed
 
 - Step titles in a `:::steps` block are rendered one heading level below the section the block sits in, and headings inside a step move with them. Steps under a `## Setup` heading are now `h3`, so they nest under that section in the table of contents and the page outline. A steps block before any section heading is unchanged. Authors still start each step with `##`; only CSS that targets step headings by tag, rather than by Vellum's classes, is affected
 - The table of contents marks the active entry with colour instead of a heavier weight, which made entries shift sideways, and the line style no longer has a dot
+- The copy buttons on code blocks and headings are marked with `data-vellum-copy-code` and `data-vellum-heading-copy`, and one script handles every button, instead of an Alpine component on each. Rendered Markdown no longer contains Alpine attributes, apart from tabs
+- Classes that only the site uses moved namespace: `Vellum\Support\Theme`, `Color`, `Assets`, `Cn` and `NavTree` are now in `Vellum\View`, and `Vellum\Support\LlmsTxt`, `Vellum\Support\Sitemap` and `Vellum\Changelog\ChangelogFeed` are in `Vellum\Http`. Only code that used these classes directly is affected
+- Errors in the docs, such as an unknown directive, implement `Vellum\Exceptions\ContentError`. The site renders these as its error page; with core alone, Laravel handles them like any other exception
+
+### Removed
+
+- The `vellum:build` warning about a colour preset removed in 0.5. The site still falls back to `neutral`
 
 ## [0.7.0] - 2026-09-26
 

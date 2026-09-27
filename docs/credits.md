@@ -23,7 +23,9 @@ uses by default, so code looks the way it does on GitHub and in most editors.
 | --- | --- |
 | [league/commonmark](https://commonmark.thephpleague.com) | CommonMark and GitHub Flavored Markdown. Vellum's directives, callouts, tabs, steps and cards are extensions on top of it. |
 | [tempest/highlight](https://github.com/tempestphp/highlight) | Server-side syntax highlighting, so no highlighter ships to the browser. |
+| [league/config](https://config.thephpleague.com) | The options schema CommonMark's extensions, including Vellum's, are configured through. |
 | [symfony/yaml](https://symfony.com/doc/current/components/yaml.html) | Page frontmatter. |
+| [symfony/process](https://symfony.com/doc/current/components/process.html) | Runs git to find when each page last changed. |
 | [tales-from-a-dev/tailwind-merge-php](https://github.com/tales-from-a-dev/tailwind-merge-php) | Resolves conflicting Tailwind classes when a component's classes are overridden. |
 
 ## Interface

@@ -1,0 +1,59 @@
+name: Split packages
+
+# Publishes each directory under packages/ to a read-only repository of its
+# own, which is what Packagist installs from. Changes are made here, never in
+# the split repositories.
+#
+# Needs a SPLIT_TOKEN secret: a token with contents write access to the
+# split repositories. The default GITHUB_TOKEN can only push to this one.
+
+on:
+  push:
+    branches: [master]
+    tags: ['v*']
+
+concurrency:
+  group: split-${{ github.ref }}
+
+jobs:
+  split:
+    name: Split ${{ matrix.package.repository }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        package:
+          - directory: packages/core
+            repository: vellum-core
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Split the branch
+        if: ${{ !startsWith(github.ref, 'refs/tags/') }}
+        uses: danharrin/monorepo-split-github-action@v2.3.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.SPLIT_TOKEN }}
+        with:
+          package_directory: ${{ matrix.package.directory }}
+          repository_organization: VerburgtJimmy
+          repository_name: ${{ matrix.package.repository }}
+          branch: master
+          user_name: VerburgtJimmy
+          user_email: jimmyverburgt@gmail.com
+
+      - name: Split the tag
+        if: ${{ startsWith(github.ref, 'refs/tags/') }}
+        uses: danharrin/monorepo-split-github-action@v2.3.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.SPLIT_TOKEN }}
+        with:
+          package_directory: ${{ matrix.package.directory }}
+          repository_organization: VerburgtJimmy
+          repository_name: ${{ matrix.package.repository }}
+          tag: ${{ github.ref_name }}
+          branch: master
+          user_name: VerburgtJimmy
+          user_email: jimmyverburgt@gmail.com

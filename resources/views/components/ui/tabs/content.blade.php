@@ -3,7 +3,7 @@
 ])
 
 @php
-    use Vellum\Support\Cn;
+    use Vellum\View\Cn;
 
     $classes = Cn::merge(
         'mt-2 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',

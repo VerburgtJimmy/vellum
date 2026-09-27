@@ -10,3 +10,5 @@
 /storage/
 /coverage/
 tmp/
+/packages/*/vendor/
+/packages/*/composer.lock

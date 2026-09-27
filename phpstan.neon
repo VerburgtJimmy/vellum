@@ -5,6 +5,7 @@ parameters:
     level: 8
     paths:
         - src
+        - packages/core/src
     tmpDir: .phpstan.cache
 
     # These two are the only code that touches laravel/scout, which is an
@@ -17,5 +18,5 @@ parameters:
     # configured and not installed, which is the more useful guarantee. Revisit
     # in 1.0, where that test could gate on class_exists instead.
     excludePaths:
-        - src/Search/SearchableDocument.php
-        - src/Search/ScoutIndexer.php
+        - packages/core/src/Search/SearchableDocument.php
+        - packages/core/src/Search/ScoutIndexer.php

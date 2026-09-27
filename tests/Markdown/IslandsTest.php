@@ -184,7 +184,7 @@ MD);
         ->and($html)->not->toContain('VELLUMISLAND');
 });
 
-it('keeps alpine click handlers when a component sits next to a code fence', function (): void {
+it('keeps a code fence\'s copy button when a component sits next to it', function (): void {
     $html = (new MarkdownPipeline)->render(<<<'MD'
 <x-alert>Hi</x-alert>
 
@@ -193,7 +193,7 @@ echo 1;
 ```
 MD);
 
-    expect($html)->toContain('@click')
+    expect($html)->toContain('data-vellum-copy-code')
         ->and($html)->toContain('data-test-alert');
 });
 

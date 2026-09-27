@@ -7,7 +7,7 @@ namespace Vellum\Http\Controllers;
 use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
 use Vellum\Content\ContentRepository;
-use Vellum\Support\LlmsTxt;
+use Vellum\Http\LlmsTxt;
 
 /**
  * Serves {prefix}/llms.txt and {prefix}/llms-full.txt, and the same files at

@@ -1,0 +1,60 @@
+{
+    "name": "jimmyverburgt/vellum-core",
+    "description": "The content engine behind Vellum: Markdown, navigation, versions and search for Laravel docs",
+    "keywords": [
+        "laravel",
+        "documentation",
+        "markdown",
+        "docs",
+        "vellum"
+    ],
+    "homepage": "https://github.com/VerburgtJimmy/vellum",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Jimmy Verburgt",
+            "email": "hey@jimmyverburgt.com",
+            "role": "Developer"
+        }
+    ],
+    "support": {
+        "email": "hey@jimmyverburgt.com",
+        "issues": "https://github.com/VerburgtJimmy/vellum/issues",
+        "source": "https://github.com/VerburgtJimmy/vellum",
+        "security": "https://github.com/VerburgtJimmy/vellum/security/policy"
+    },
+    "require": {
+        "php": "^8.4",
+        "ext-mbstring": "*",
+        "illuminate/console": "^11.0|^12.0|^13.0",
+        "illuminate/contracts": "^11.0|^12.0|^13.0",
+        "illuminate/support": "^11.0|^12.0|^13.0",
+        "illuminate/view": "^11.0|^12.0|^13.0",
+        "league/commonmark": "^2.6",
+        "league/config": "^1.2",
+        "symfony/process": "^7.0|^8.0",
+        "symfony/yaml": "^7.0|^8.0",
+        "tempest/highlight": "^2.28"
+    },
+    "autoload": {
+        "psr-4": {
+            "Vellum\\": "src/"
+        }
+    },
+    "suggest": {
+        "jimmyverburgt/vellum": "The docs site: routes, layout, theme, search dialog and static export.",
+        "laravel/scout": "Required when vellum.search.driver is scout (Meilisearch or Typesense)."
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Vellum\\CoreServiceProvider"
+            ]
+        }
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}

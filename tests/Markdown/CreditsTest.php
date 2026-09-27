@@ -13,8 +13,9 @@ it('credits every runtime dependency the package requires', function () use ($ro
     $missing = [];
 
     foreach (array_keys($composer['require']) as $package) {
-        // php and the illuminate/* split packages are Laravel itself, credited as one.
-        if ($package === 'php' || str_starts_with($package, 'illuminate/')) {
+        // php and the illuminate/* split packages are Laravel itself, credited
+        // as one. ext-* are PHP extensions, not packages.
+        if ($package === 'php' || str_starts_with($package, 'illuminate/') || str_starts_with($package, 'ext-')) {
             continue;
         }
 

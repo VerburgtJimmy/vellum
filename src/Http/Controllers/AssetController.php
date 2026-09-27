@@ -7,7 +7,7 @@ namespace Vellum\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
-use Vellum\Support\Assets;
+use Vellum\View\Assets;
 
 /**
  * Serves compiled package assets when they are not published to public/.

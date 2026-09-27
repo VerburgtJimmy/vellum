@@ -3,7 +3,7 @@
 ])
 
 @php
-    use Vellum\Support\Cn;
+    use Vellum\View\Cn;
 
     $classes = Cn::merge(
         'shrink-0 bg-border',

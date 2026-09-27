@@ -3,6 +3,7 @@ import collapse from '@alpinejs/collapse'
 import '../css/vellum.css'
 import { prefetch, prefetchHover } from './prefetch.js'
 import { vellumScrollSpy } from './scrollspy.js'
+import { initCopyButtons } from './copy.js'
 import { initSidebar } from './sidebar.js'
 import { applyTheme, getStoredTheme, initTheme, resolveTheme } from './theme.js'
 
@@ -462,26 +463,6 @@ function vellumChrome() {
   }
 }
 
-function vellumHeadingCopy() {
-  return {
-    copied: false,
-    copy() {
-      const heading = this.$el.closest('h1, h2, h3, h4, h5, h6')
-      const id = heading?.id
-      if (!id) {
-        return
-      }
-
-      const url = new URL(`#${id}`, window.location.href)
-      navigator.clipboard.writeText(url.href)
-      this.copied = true
-      setTimeout(() => {
-        this.copied = false
-      }, 1500)
-    },
-  }
-}
-
 function vellumCopyMarkdown(source = '') {
   return {
     source,
@@ -636,7 +617,6 @@ if (!window.Alpine) {
   Alpine.data('vellumSearchDialog', vellumSearchDialog)
   Alpine.data('vellumHotkeyChip', vellumHotkeyChip)
   Alpine.data('vellumChrome', vellumChrome)
-  Alpine.data('vellumHeadingCopy', vellumHeadingCopy)
   Alpine.data('vellumPageActions', vellumPageActions)
   Alpine.data('vellumOpenMenu', vellumOpenMenu)
   Alpine.data('vellumScrollSpy', vellumScrollSpy)
@@ -644,6 +624,7 @@ if (!window.Alpine) {
   window.Alpine = Alpine
   Alpine.start()
   initSidebar()
+  initCopyButtons()
 
   function warmupLazyChunksOnce() {
     const warmup = () => {

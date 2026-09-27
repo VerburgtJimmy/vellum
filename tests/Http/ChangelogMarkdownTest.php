@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use Vellum\Support\LlmsTxt;
+use Vellum\Http\LlmsTxt;
 
 const CHANGELOG_SOURCE = <<<'MD'
 # Changelog

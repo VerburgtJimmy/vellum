@@ -7,7 +7,7 @@ namespace Vellum\Http\Controllers;
 use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
 use Vellum\Content\ContentRepository;
-use Vellum\Support\Sitemap;
+use Vellum\Http\Sitemap;
 
 /**
  * Serves the docs sitemap at {prefix}/sitemap.xml.

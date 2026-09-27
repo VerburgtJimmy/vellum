@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 it('keeps the built-in synonyms well formed', function (): void {
-    $groups = require __DIR__.'/../../resources/synonyms.php';
+    $groups = require __DIR__.'/../../packages/core/resources/synonyms.php';
     $seen = [];
 
     expect($groups)->toBeArray()->not->toBeEmpty();

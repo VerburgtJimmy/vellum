@@ -26,7 +26,7 @@ MD);
         ->and($html)->toContain('data-vellum-line-numbers')
         ->and($html)->not->toContain('hl-gutter')
         ->and($html)->toContain('vellum-code-lang-icon')
-        ->and($html)->toContain('x-data')
+        ->and($html)->toContain('data-vellum-copy-code')
         ->and($html)->toMatchSnapshot();
 });
 

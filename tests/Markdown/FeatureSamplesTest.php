@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use Vellum\Markdown\Islands\MarkdownPipeline;
 use Vellum\Markdown\MarkdownRenderer;
-use Vellum\Support\Theme;
+use Vellum\View\Theme;
 
 it('renders documented callout, tabs, steps, and cards samples', function (): void {
     $html = (new MarkdownRenderer)->render(<<<'MD'

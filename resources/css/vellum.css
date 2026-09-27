@@ -439,6 +439,16 @@
   font-weight: 500;
 }
 
+.vellum-heading-anchor-icon svg {
+  width: 0.875rem;
+  height: 0.875rem;
+}
+
+.vellum-heading-anchor:not([data-copied]) .vellum-heading-anchor-copied,
+.vellum-heading-anchor[data-copied] .vellum-heading-anchor-icon {
+  display: none;
+}
+
 .vellum-prose :where(h2, h3, h4, h5, h6):hover .vellum-heading-anchor,
 .vellum-prose :where(h2, h3, h4, h5, h6):focus-within .vellum-heading-anchor,
 .vellum-heading-anchor:focus-visible {
@@ -508,6 +518,11 @@
 .vellum-code-copy svg {
   width: 1rem;
   height: 1rem;
+}
+
+.vellum-code-copy:not([data-copied]) .vellum-code-check-icon,
+.vellum-code-copy[data-copied] .vellum-code-copy-icon {
+  display: none;
 }
 
 .vellum-code-copy:hover,

@@ -1,6 +1,6 @@
 @php
-    use Vellum\Support\Assets;
-    use Vellum\Support\Theme;
+    use Vellum\View\Assets;
+    use Vellum\View\Theme;
 
     $themeDefault = config('vellum.theme.default', 'system');
     $themeRadius = config('vellum.theme.radius', '0.5rem');

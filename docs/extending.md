@@ -43,11 +43,19 @@ Attributes must be quoted strings. Bound attributes such as `:type="$foo"` are r
 
 ## Built-ins share Blade views
 
-`:::note` and `<x-vellum::callout type="note">` both render `resources/views/components/callout.blade.php`. Use `:::` for the built-in callouts, tabs, steps and cards, and `<x-…>` for components you add.
+`:::note` and `<x-vellum::callout type="note">` both render the `vellum::components.callout` view. Use `:::` for the built-in callouts, tabs, steps and cards, and `<x-…>` for components you add.
 
 <x-vellum::callout type="tip" title="Same view">
 This callout is written as an `<x-vellum::callout>` tag and renders the same markup as `:::tip`.
 </x-vellum::callout>
+
+## Change a built-in's markup
+
+To change what a built-in renders, put your own copy of its view in `resources/views/vendor/vellum/components/`, named after the component: `callout`, `card`, `cards`, `step`, `steps`, `tab` or `tabs`. Yours is used for both the `:::` and the `<x-vellum::…>` form.
+
+Start from Vellum's copy, which receives the same data. Most are in `vendor/jimmyverburgt/vellum/packages/core/resources/views/components/`. The site's `tabs.blade.php`, with the script that switches tabs, is in `vendor/jimmyverburgt/vellum/resources/views/components/`.
+
+Compiled pages keep the HTML they were built with, so run `php artisan vellum:clear` after adding or changing a view.
 
 ## Missing components
 

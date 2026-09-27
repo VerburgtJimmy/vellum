@@ -1,7 +1,7 @@
 <?php
 
 declare(strict_types=1);
-use Vellum\Support\Assets;
+use Vellum\View\Assets;
 
 it('renders docs chrome markers on a document page', function (): void {
     $this->writeDoc('index.md', <<<'MD'

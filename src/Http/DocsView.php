@@ -5,12 +5,10 @@ declare(strict_types=1);
 namespace Vellum\Http;
 
 use Illuminate\Support\Carbon;
-use Vellum\Cache\FragmentCache;
 use Vellum\Changelog\Changelog;
 use Vellum\Content\ContentRepository;
 use Vellum\Content\Document;
 use Vellum\Content\HeadingExtractor;
-use Vellum\Markdown\Islands\IslandRenderer;
 use Vellum\Search\SearchDriver;
 
 /**
@@ -33,10 +31,7 @@ final class DocsView
         $adjacent = $repository->adjacent($document->slug, $document->version);
         $switcher = $repository->versionSwitcherData($document->slug, $document->version);
         $searchPlacement = config('vellum.layout.search', 'sidebar') === 'header' ? 'header' : 'sidebar';
-        $render = static fn (): string => (new IslandRenderer)->render($document->html, $document->islands);
-        $html = $cacheFragment
-            ? (new FragmentCache)->remember($document, $render)
-            : $render();
+        $html = $repository->render($document, $cacheFragment);
 
         return [
             'document' => $document,

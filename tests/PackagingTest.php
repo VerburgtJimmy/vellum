@@ -52,7 +52,8 @@ it('still ships everything the package needs at runtime', function () use ($arch
     $required = [
         'composer.json',
         'LICENSE.md',
-        'config/vellum.php',
+        'packages/core/config/vellum.php',
+        'packages/core/src/CoreServiceProvider.php',
         'routes/web.php',
         'src/VellumServiceProvider.php',
         'resources/dist/vellum.css',

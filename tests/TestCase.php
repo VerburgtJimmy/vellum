@@ -6,6 +6,7 @@ namespace Vellum\Tests;
 
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\Facade;
 use Orchestra\Testbench\TestCase as Orchestra;
 use Symfony\Component\Process\ExecutableFinder;
 use Symfony\Component\Process\Process;
@@ -58,6 +59,7 @@ abstract class TestCase extends Orchestra
     {
         $this->deleteDirectory($this->docsPath());
         $this->deleteDirectory($this->cachePath());
+        $this->deleteDirectory($this->publishedViewsPath());
 
         parent::tearDown();
     }
@@ -100,6 +102,36 @@ abstract class TestCase extends Orchestra
         }
 
         Blade::anonymousComponentPath($path);
+    }
+
+    /**
+     * Views an app published to resources/views/vendor/vellum, keyed by their
+     * path under it. The view services are rebuilt, so the providers resolve
+     * the vellum namespace again with these in place.
+     *
+     * @param  array<string, string>  $views
+     */
+    protected function publishViews(array $views): void
+    {
+        foreach ($views as $relativePath => $contents) {
+            $path = $this->publishedViewsPath().'/vendor/vellum/'.$relativePath;
+
+            if (! is_dir(dirname($path))) {
+                mkdir(dirname($path), 0755, true);
+            }
+
+            file_put_contents($path, $contents);
+        }
+
+        config()->set('view.paths', [$this->publishedViewsPath()]);
+        $this->app->forgetInstance('view.finder');
+        $this->app->forgetInstance('view');
+        Facade::clearResolvedInstances();
+    }
+
+    protected function publishedViewsPath(): string
+    {
+        return sys_get_temp_dir().'/vellum-tests/views-'.$this->fixtureId();
     }
 
     protected function writeDoc(string $relativePath, string $contents): string

@@ -93,7 +93,7 @@ Already in 0.2 and still valid: `layout.search` (`sidebar` or `header`), `theme.
 
 0.5 has three presets: `neutral`, `ocean` and `laravel`. These nine were removed: `black`, `vitepress`, `dusk`, `catppuccin`, `purple`, `solar`, `emerald`, `ruby`, `aspen`.
 
-If you used one, the site falls back to `neutral` and `vellum:build` prints a warning naming the preset you set. Most of the removed presets only changed the accent colour, which `theme.accent` now sets on any preset:
+If you used one, the site falls back to `neutral`. Most of the removed presets only changed the accent colour, which `theme.accent` now sets on any preset:
 
 ```php
 'theme' => [

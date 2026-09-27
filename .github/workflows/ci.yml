@@ -67,6 +67,36 @@ jobs:
         if: matrix.laravel == '12.*'
         run: vendor/bin/phpstan analyse --memory-limit=512M
 
+  core:
+    name: Core on its own
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          coverage: none
+          tools: composer:v2
+
+      # jimmyverburgt/vellum-core is split out of packages/core and installed
+      # without the rest of this repository, so it has to resolve with only
+      # its own composer.json.
+      - name: Install core alone
+        working-directory: packages/core
+        run: composer update --prefer-dist --no-interaction --no-progress
+
+      # Fails on a class or function core uses from a package it does not
+      # require. The tests cover what core must not use from the full package.
+      - name: Core requires everything it uses
+        working-directory: packages/core
+        run: |
+          composer global require maglnet/composer-require-checker --no-interaction --no-progress
+          "$(composer global config bin-dir --absolute --quiet)/composer-require-checker" check \
+            --config-file=../../.github/composer-require-checker.json composer.json
+
   docs:
     name: Docs build and search check
     runs-on: ubuntu-latest

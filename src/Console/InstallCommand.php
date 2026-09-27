@@ -6,6 +6,8 @@ namespace Vellum\Console;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
+use ReflectionClass;
+use Vellum\CoreServiceProvider;
 
 /**
  * Publishes config, starter Markdown stubs, and public dist assets.
@@ -43,7 +45,7 @@ final class InstallCommand extends Command
             return;
         }
 
-        $source = $packageRoot.'/config/vellum.php';
+        $source = dirname((string) (new ReflectionClass(CoreServiceProvider::class))->getFileName(), 2).'/config/vellum.php';
 
         if (! is_file($source)) {
             $this->error('Package config missing: '.$source);

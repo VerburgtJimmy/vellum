@@ -19,26 +19,6 @@ it('builds all documents via artisan', function (): void {
         ->and(is_file($this->cachePath().'/pages/guides/one.php'))->toBeTrue();
 });
 
-it('warns once when the configured preset was removed in 0.5', function (): void {
-    config()->set('vellum.theme.preset', 'catppuccin');
-    $this->writeDoc('index.md', "---\ntitle: Home\n---\nHi");
-    $this->writeDoc('guides/one.md', "---\ntitle: One\n---\nOne");
-
-    $this->artisan('vellum:build')
-        ->expectsOutputToContain('Colour preset "catppuccin" was removed in 0.5')
-        ->expectsOutputToContain('neutral, ocean, laravel')
-        ->assertSuccessful();
-});
-
-it('stays quiet for a preset that still ships', function (): void {
-    config()->set('vellum.theme.preset', 'ocean');
-    $this->writeDoc('index.md', "---\ntitle: Home\n---\nHi");
-
-    $this->artisan('vellum:build')
-        ->doesntExpectOutputToContain('was removed in 0.5')
-        ->assertSuccessful();
-});
-
 it('clears the cache via artisan', function (): void {
     $this->writeDoc('index.md', "---\ntitle: Home\n---\nHi");
 
@@ -350,7 +330,7 @@ it('republishes the config only when --force is given', function (): void {
             ->assertSuccessful();
 
         expect(file_get_contents($configTarget))
-            ->toBe(file_get_contents(dirname(__DIR__, 2).'/config/vellum.php'));
+            ->toBe(file_get_contents(dirname(__DIR__, 2).'/packages/core/config/vellum.php'));
     } finally {
         if ($backup !== null) {
             file_put_contents($configTarget, $backup);

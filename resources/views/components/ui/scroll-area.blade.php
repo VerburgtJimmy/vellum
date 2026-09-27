@@ -1,5 +1,5 @@
 @php
-    use Vellum\Support\Cn;
+    use Vellum\View\Cn;
 
     $classes = Cn::merge('vellum-scroll-area relative', $attributes->get('class'));
 @endphp

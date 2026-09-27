@@ -10,7 +10,7 @@
 ])
 
 @php
-    use Vellum\Support\Cn;
+    use Vellum\View\Cn;
 
     $activeSlug = $document?->slug ?? null;
     $links = config('vellum.links', []);
@@ -85,7 +85,7 @@
 
     <x-vellum::ui.scroll-area class="min-h-0 flex-1 px-4 pt-1 pb-4">
         <nav aria-label="Documentation" data-vellum-nav class="flex flex-col gap-1 text-sm">
-            {!! \Vellum\Support\NavTree::render($navigation, $activeSlug, $containsActive) !!}
+            {!! \Vellum\View\NavTree::render($navigation, $activeSlug, $containsActive) !!}
         </nav>
     </x-vellum::ui.scroll-area>
 

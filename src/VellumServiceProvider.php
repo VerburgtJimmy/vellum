@@ -4,53 +4,96 @@ declare(strict_types=1);
 
 namespace Vellum;
 
+use Illuminate\Contracts\Debug\ExceptionHandler;
 use Illuminate\Contracts\Foundation\CachesRoutes;
+use Illuminate\Foundation\Exceptions\Handler;
+use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
-use Vellum\Console\BuildCommand;
-use Vellum\Console\ClearCommand;
+use Illuminate\View\Factory;
 use Vellum\Console\ExportCommand;
-use Vellum\Console\IndexCommand;
 use Vellum\Console\InstallCommand;
+use Vellum\Exceptions\ContentError;
 use Vellum\Http\Controllers\AssetController;
 use Vellum\Http\Middleware\CompressHtmlResponse;
 use Vellum\Http\RootLlmsTxtRoutes;
-use Vellum\Support\Paths;
 
 /**
- * Registers Vellum config, views, routes, and Artisan commands.
+ * The docs site on top of core: routes, layout, theme, assets, and the
+ * install and export commands.
  */
 final class VellumServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        $this->mergeConfigFrom(__DIR__.'/../config/vellum.php', 'vellum');
+        $this->app->register(CoreServiceProvider::class);
     }
 
     public function boot(): void
     {
-        Paths::resolveConfig();
-        $this->loadViewsFrom(__DIR__.'/../resources/views', 'vellum');
+        $this->registerViews();
 
         if ($this->app->runningInConsole()) {
             $this->commands([
-                BuildCommand::class,
-                ClearCommand::class,
                 InstallCommand::class,
-                IndexCommand::class,
                 ExportCommand::class,
             ]);
-
-            $this->publishes([
-                __DIR__.'/../config/vellum.php' => config_path('vellum.php'),
-            ], 'vellum-config');
-
-            $this->optimizes(clear: 'vellum:clear');
         }
 
+        $this->renderContentErrors();
         $this->registerAssetRoutes();
         $this->registerRoutes();
+    }
+
+    /**
+     * The site's views join core's under the vellum namespace, ahead of them,
+     * so a component both ship renders in the site's version. Copies the app
+     * published under resources/views/vendor/vellum still come first.
+     */
+    private function registerViews(): void
+    {
+        $this->callAfterResolving('view', function (Factory $view): void {
+            $view->prependNamespace('vellum', __DIR__.'/../resources/views');
+
+            /** @var list<string> $paths */
+            $paths = config('view.paths', []);
+
+            foreach (array_reverse($paths) as $path) {
+                if (is_dir($published = $path.'/vendor/vellum')) {
+                    $view->prependNamespace('vellum', $published);
+                }
+            }
+        });
+    }
+
+    /**
+     * A mistake in the docs gets a Vellum-branded 500 instead of Laravel's
+     * generic page. The reason and file show only with APP_DEBUG on, so
+     * production never shows a reader a filesystem path.
+     */
+    private function renderContentErrors(): void
+    {
+        $this->callAfterResolving(ExceptionHandler::class, function (ExceptionHandler $handler): void {
+            if (! $handler instanceof Handler) {
+                return;
+            }
+
+            $handler->renderable(function (ContentError $error, Request $request): ?Response {
+                if ($request->expectsJson()) {
+                    return null;
+                }
+
+                $debug = (bool) config('app.debug', false);
+                $html = view()->file(__DIR__.'/../resources/views/pages/error.blade.php', [
+                    'detail' => $debug ? $error->getMessage() : null,
+                    'file' => $debug ? $error->contentFile() : null,
+                ])->render();
+
+                return new Response($html, 500, ['Content-Type' => 'text/html; charset=UTF-8']);
+            });
+        });
     }
 
     private function registerAssetRoutes(): void

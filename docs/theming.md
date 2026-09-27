@@ -28,8 +28,7 @@ See [Surfaces](#surfaces) and [Contrast](#contrast).
 
 :::note
 0.5 removed nine presets: `black`, `vitepress`, `dusk`, `catppuccin`, `purple`, `solar`,
-`emerald`, `ruby` and `aspen`. A config that still names one falls back to `neutral`, and
-`vellum:build` prints a single warning about it. Most of these presets only changed the
+`emerald`, `ruby` and `aspen`. A config that still names one falls back to `neutral`. Most of these presets only changed the
 accent colour, which you can now set on any preset with `accent`.
 :::
 

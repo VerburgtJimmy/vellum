@@ -9,14 +9,14 @@ use Illuminate\Contracts\View\Factory as ViewFactory;
 use Illuminate\Support\Facades\File;
 use Vellum\Answers\AnswerIndex;
 use Vellum\Changelog\Changelog;
-use Vellum\Changelog\ChangelogFeed;
 use Vellum\Content\ContentFiles;
 use Vellum\Content\ContentRepository;
 use Vellum\Content\Document;
 use Vellum\Content\HeadingExtractor;
+use Vellum\Http\ChangelogFeed;
 use Vellum\Http\DocsView;
-use Vellum\Support\LlmsTxt;
-use Vellum\Support\Sitemap;
+use Vellum\Http\LlmsTxt;
+use Vellum\Http\Sitemap;
 
 /**
  * Renders the docs site to a static HTML folder for any static host.

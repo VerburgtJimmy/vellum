@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use Illuminate\Foundation\Auth\User;
 use Vellum\Content\ContentRepository;
-use Vellum\Support\Sitemap;
+use Vellum\Http\Sitemap;
 
 beforeEach(function (): void {
     config()->set('app.url', 'https://docs.example.com');

@@ -19,7 +19,7 @@
             >
                 <span class="inline-flex items-center gap-1.5 font-semibold text-foreground">
                     <span class="sr-only">Previous:</span>
-                    {!! \Vellum\Support\Icons::caretLeft() !!}
+                    {!! \Vellum\Support\Icons::caretLeft(['class' => 'h-4 w-4 shrink-0 -mx-1']) !!}
                     {{ $previous['title'] }}
                 </span>
                 @if (! empty($previous['description']))
@@ -38,7 +38,7 @@
             >
                 <span class="inline-flex flex-row-reverse items-center gap-1.5 font-semibold text-foreground">
                     <span class="sr-only">Next:</span>
-                    {!! \Vellum\Support\Icons::caretRight() !!}
+                    {!! \Vellum\Support\Icons::caretRight(['class' => 'h-4 w-4 shrink-0 -mx-1']) !!}
                     {{ $next['title'] }}
                 </span>
                 @if (! empty($next['description']))
