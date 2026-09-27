@@ -60,3 +60,16 @@ it('replaces a compiled file whole, leaving nothing half-written behind', functi
     expect($store->get('a')?->title)->toBe('Second')
         ->and(glob($this->cachePath().'/*.tmp'))->toBe([]);
 });
+
+it('keeps a step title\'s number when it reads a page back', function (): void {
+    $store = new CompiledStore($this->cachePath());
+    $store->put(new Document(
+        slug: 'setup', title: 'Setup', html: '', path: '/tmp/setup.md', mtime: 1, frontmatter: [],
+        headings: [['id' => 'install', 'text' => 'Install', 'level' => 3, 'step' => 1], ['id' => 'next', 'text' => 'Next', 'level' => 2]],
+    ));
+
+    expect($store->get('setup')?->headings)->toBe([
+        ['id' => 'install', 'text' => 'Install', 'level' => 3, 'step' => 1],
+        ['id' => 'next', 'text' => 'Next', 'level' => 2],
+    ]);
+});

@@ -50,8 +50,9 @@ MD);
         ->toContain('xl:px-8')
         ->toContain('data-vellum-page-row')
         ->toContain('vellum-toc-link')
-        ->toContain('hover:font-semibold')
-        ->toContain('is-active font-semibold text-foreground')
+        // Colour, not weight: a bolder entry is wider and shifts the list.
+        ->not->toContain('hover:font-semibold')
+        ->toContain('is-active text-foreground')
         ->toContain('data-vellum-toc-nav')
         ->toContain('viewBox="0 0 256 256"')
         ->toContain('data-vellum-preset="neutral"');
@@ -489,4 +490,34 @@ it('gives the sidebar what its details need', function (): void {
         ->and($html)->toContain('data-vellum-nav-group')
         // Set before the first paint when arriving from another docs page.
         ->and($html)->toContain("sessionStorage.getItem('vellum-sidebar-marker')");
+});
+
+it('draws the table of contents as a window by default, or as a line', function (): void {
+    $this->writeDoc('index.md', "---\ntitle: Home\n---\n## One\n\nA\n\n## Two\n\nB\n");
+
+    $window = (string) $this->get('/docs')->assertOk()->getContent();
+
+    expect($window)->toContain('data-vellum-toc-style="window"')
+        ->and($window)->toContain('data-vellum-toc-window')
+        ->and($window)->toContain('data-vellum-toc-hover')
+        ->and($window)->not->toContain('data-vellum-toc-track');
+
+    config()->set('vellum.layout.toc', 'line');
+    $line = (string) $this->get('/docs')->assertOk()->getContent();
+
+    expect($line)->toContain('data-vellum-toc-style="line"')
+        ->and($line)->toContain('data-vellum-toc-track')
+        ->and($line)->not->toContain('data-vellum-toc-window')
+        ->and($line)->not->toContain('data-vellum-toc-dot');
+});
+
+it('numbers step titles in the table of contents and joins consecutive steps', function (): void {
+    $this->writeDoc('index.md', "---\ntitle: Home\n---\n## Setup\n\n:::steps\n## Install\nx\n\n## Configure\ny\n:::\n\n## Next\nz\n");
+
+    $html = (string) $this->get('/docs')->assertOk()->getContent();
+
+    expect($html)->toMatch('/data-vellum-toc-id="install"[^>]*data-vellum-toc-step="1"[^>]*data-vellum-toc-joined/s')
+        ->and($html)->toMatch('/data-vellum-toc-id="configure"[^>]*data-vellum-toc-step="2"/s')
+        ->and($html)->not->toMatch('/data-vellum-toc-id="configure"[^>]*data-vellum-toc-joined/s')
+        ->and($html)->toContain('<span class="vellum-toc-step" aria-hidden="true">1</span>Install');
 });

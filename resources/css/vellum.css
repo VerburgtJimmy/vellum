@@ -893,8 +893,7 @@
 .vellum-toc-nav {
   --track-top: 0px;
   --track-bottom: 0px;
-  --offset-distance: 0px;
-  --toc-dot-opacity: 0;
+  isolation: isolate;
 }
 
 .vellum-toc-link {
@@ -904,11 +903,43 @@
   padding-left: calc(1.25rem + var(--vellum-toc-level, 0) * 0.75rem);
 }
 
-.vellum-toc-link:hover,
-.vellum-toc-link.is-active {
-  font-weight: 600;
+/* Colour carries the state, not weight: a bolder entry is wider and shifts the list. */
+.vellum-toc-link.is-active,
+.vellum-toc-link:hover {
+  color: var(--foreground);
 }
 
+/*
+ * Step titles carry the step's number, in a smaller version of the steps
+ * component's circle, filled while the step is on screen.
+ */
+.vellum-toc-step {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 0.95rem;
+  height: 0.95rem;
+  border-radius: 9999px;
+  background: var(--muted);
+  color: var(--muted-foreground);
+  font-size: 0.58rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  transition:
+    background-color 220ms ease,
+    color 220ms ease;
+}
+
+.vellum-toc-link.is-active .vellum-toc-step {
+  background: var(--primary);
+  color: var(--primary-foreground);
+}
+
+/* Line style (layout.toc "line"): a rail beside the entries, lit for what is on screen. */
 .vellum-toc-rail {
   pointer-events: none;
   position: absolute;
@@ -931,28 +962,126 @@
   stroke: var(--foreground);
 }
 
-.vellum-toc-thumb-dot {
+/* The step circle sits on the rail, so the line runs through it. The x per
+   level matches lineOffset() in scrollspy.js. */
+[data-vellum-toc-style='line'] [data-vellum-toc-step] {
+  --vellum-toc-rail-x: 8.5px;
+  padding-left: calc(1.6rem + var(--vellum-toc-level, 0) * 0.75rem);
+}
+
+[data-vellum-toc-style='line'] [data-vellum-toc-step][data-vellum-toc-level='1'] {
+  --vellum-toc-rail-x: 16.5px;
+}
+
+[data-vellum-toc-style='line'] [data-vellum-toc-step]:not([data-vellum-toc-level='0'], [data-vellum-toc-level='1']) {
+  --vellum-toc-rail-x: 24.5px;
+}
+
+[data-vellum-toc-style='line'] .vellum-toc-step {
+  position: absolute;
+  top: 50%;
+  left: calc(var(--vellum-toc-rail-x) - 0.475rem);
+  transform: translateY(-50%);
+}
+
+/*
+ * Window style (layout.toc "window", the default): one highlight behind every
+ * entry whose section is on screen. Its edges hold on to whole entries and
+ * spring to the next one when a section leaves or enters the screen.
+ */
+[data-vellum-toc-style='window'] .vellum-toc-link {
+  padding-right: 0.5rem;
+  padding-left: calc(0.75rem + var(--vellum-toc-level, 0) * 0.75rem);
+}
+
+/* Nested entries hang from a guide line, as the sidebar's folders do. */
+[data-vellum-toc-style='window'] .vellum-toc-link:not([data-vellum-toc-level='0']) {
+  padding-left: calc(1.35rem + (var(--vellum-toc-level) - 1) * 0.75rem);
+}
+
+[data-vellum-toc-style='window'] .vellum-toc-link:not([data-vellum-toc-level='0'])::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(0.75rem + (var(--vellum-toc-level) - 1) * 0.75rem + 0.15rem);
+  width: 1px;
+  background: var(--border);
+}
+
+[data-vellum-toc-style='window'] .vellum-toc-link.is-active:not([data-vellum-toc-level='0'])::before {
+  background: color-mix(in oklab, var(--primary) 55%, var(--border));
+}
+
+/* Steps: circle before the title, joined to the next step by a line. */
+[data-vellum-toc-style='window'] [data-vellum-toc-step] {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+[data-vellum-toc-style='window'] [data-vellum-toc-step]::before {
+  display: none;
+}
+
+[data-vellum-toc-style='window'] [data-vellum-toc-joined]::after {
+  content: '';
+  position: absolute;
+  left: calc(0.75rem + var(--vellum-toc-level, 0) * 0.75rem + 0.475rem - 0.5px);
+  top: calc(50% + 0.475rem);
+  width: 1px;
+  height: calc(100% - 0.95rem);
+  background: var(--border);
+}
+
+[data-vellum-toc-style='window'] [data-vellum-toc-joined]:not([data-vellum-toc-level='0'])::after {
+  left: calc(1.35rem + (var(--vellum-toc-level) - 1) * 0.75rem + 0.475rem - 0.5px);
+}
+
+.vellum-toc-window,
+.vellum-toc-hover {
   pointer-events: none;
   position: absolute;
   top: 0;
   left: 0;
-  z-index: 2;
-  width: 4px;
-  height: 4px;
-  border-radius: 9999px;
-  background: var(--foreground);
-  offset-distance: var(--offset-distance);
-  offset-anchor: center;
-  opacity: var(--toc-dot-opacity, 0);
-  /* No transition on the position. The dot is driven by scroll now, so the
-     scrolling is the animation; easing it as well makes it lag behind the
-     reader and then catch up. */
-  transition: opacity 200ms ease;
+  z-index: 0;
+  width: 100%;
+  height: 0;
+  border-radius: calc(var(--radius) - 2px);
+}
+
+.vellum-toc-window {
+  background: var(--accent);
+}
+
+.vellum-toc-window[data-releasing] {
+  transition:
+    transform 420ms cubic-bezier(0.34, 1.4, 0.5, 1),
+    height 420ms cubic-bezier(0.34, 1.4, 0.5, 1);
+}
+
+.vellum-toc-hover {
+  opacity: 0;
+  background: color-mix(in oklab, var(--accent) 70%, transparent);
+  transition: opacity 160ms ease;
+}
+
+.vellum-toc-hover[data-shown] {
+  opacity: 1;
+}
+
+.vellum-toc-hover[data-gliding] {
+  transition:
+    opacity 160ms ease,
+    transform 200ms cubic-bezier(0.22, 0.9, 0.25, 1),
+    height 200ms cubic-bezier(0.22, 0.9, 0.25, 1);
 }
 
 @media (prefers-reduced-motion: reduce) {
   .vellum-toc-rail-active,
-  .vellum-toc-thumb-dot {
+  .vellum-toc-window[data-releasing],
+  .vellum-toc-hover[data-gliding],
+  .vellum-toc-step {
     transition: none;
   }
 }

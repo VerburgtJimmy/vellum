@@ -127,11 +127,18 @@ final class CompiledStore
                     && is_string($heading['text'])
                     && is_int($heading['level'])
                 ) {
-                    $headings[] = [
+                    $entry = [
                         'id' => $heading['id'],
                         'text' => $heading['text'],
                         'level' => $heading['level'],
                     ];
+
+                    // A step's title carries its number.
+                    if (isset($heading['step']) && is_int($heading['step'])) {
+                        $entry['step'] = $heading['step'];
+                    }
+
+                    $headings[] = $entry;
                 }
             }
         }

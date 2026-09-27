@@ -99,5 +99,6 @@ MD);
     expect($converted['html'])->toMatch('/<h3[^>]*id="install-the-package"/')
         ->and($converted['headings'])->toHaveCount(2)
         ->and($converted['headings'][0])->toMatchArray(['id' => 'steps', 'text' => 'Steps', 'level' => 2])
-        ->and($converted['headings'][1])->toMatchArray(['id' => 'install-the-package', 'text' => 'Install the package', 'level' => 3]);
+        ->and($converted['headings'][1])->toMatchArray(['id' => 'install-the-package', 'text' => 'Install the package', 'level' => 3, 'step' => 1])
+        ->and($converted['headings'][0])->not->toHaveKey('step');
 });

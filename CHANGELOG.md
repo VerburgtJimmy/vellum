@@ -13,10 +13,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - A dot in the sidebar on pages that changed since the reader last opened them. What a reader has opened is kept in their browser
 - The highlight on the current page slides over from the page the reader came from, and fills as they read down the page. Moving the pointer over the sidebar moves a lighter highlight with it. Both sit under the text and respect reduced-motion settings
 - Folders in the sidebar have a guide line, shown in the accent colour for the folder holding the current page
+- A new table of contents style, `window`, now the default: one highlight behind every entry whose section is on screen, whose edges hold on to whole entries and spring to the next one as sections come and go. Nested entries hang from a guide line, and a lighter highlight follows the pointer. `layout.toc` (or `VELLUM_LAYOUT_TOC`) set to `line` keeps the line style
+- Steps from a `:::steps` block show their number in the table of contents, filled while the step is on screen. In the line style the numbers sit on the line
+- `layout.toc` in `config/vellum.php`
 
 ### Changed
 
 - Step titles in a `:::steps` block are rendered one heading level below the section the block sits in, and headings inside a step move with them. Steps under a `## Setup` heading are now `h3`, so they nest under that section in the table of contents and the page outline. A steps block before any section heading is unchanged. Authors still start each step with `##`; only CSS that targets step headings by tag, rather than by Vellum's classes, is affected
+- The table of contents marks the active entry with colour instead of a heavier weight, which made entries shift sideways, and the line style no longer has a dot
 
 ## [0.7.0] - 2026-09-26
 

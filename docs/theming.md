@@ -125,3 +125,29 @@ loads, or add a `<style>` block to the same value:
 
 `layout.search` is either `sidebar` (the default, which also removes the top header) or
 `header`.
+
+## Table of contents
+
+The table of contents beside each page comes in two styles. Choose one with
+`layout.toc`, or set `VELLUM_LAYOUT_TOC`:
+
+```php
+'layout' => [
+    'toc' => 'window', // or 'line'
+],
+```
+
+`window` is the default. One highlight sits behind every entry whose section is on screen,
+so it shows how much of the page you are looking at. As you scroll, its edges hold on to
+whole entries and spring to the next one when a section leaves the screen or a new one
+comes onto it. Nested entries hang from a guide line.
+
+![The window style: one highlight behind the sections on screen](screenshots/toc-window.png)
+
+`line` draws a line beside the entries and lights the part next to the sections on
+screen, bending in and out with nested entries.
+
+![The line style: a line lit beside the sections on screen](screenshots/toc-line.png)
+
+In both styles, a step from a [steps](/docs/components/steps) block shows its number, filled
+while the step is on screen. In the line style the numbers sit on the line.

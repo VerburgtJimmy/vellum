@@ -104,9 +104,14 @@ return [
     | the top header (Fumadocs style). "header" keeps a top bar with the
     | search field in it.
     |
+    | toc: how the table of contents marks what is on screen. "window" puts
+    | one highlight behind every entry whose section is on screen. "line"
+    | draws a line beside the list and follows it down the entries.
+    |
     */
     'layout' => [
         'search' => env('VELLUM_LAYOUT_SEARCH', 'sidebar'),
+        'toc' => env('VELLUM_LAYOUT_TOC', 'window'),
     ],
 
     /*

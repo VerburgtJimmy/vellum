@@ -24,8 +24,8 @@ export function vellumScrollSpy(items = [], pageTitle = 'On this page') {
     resizeObserver: null,
     _onScroll: null,
     _frame: 0,
-    /** Rail anchor points keyed by heading id, refreshed when layout moves. */
-    _anchors: {},
+    /** The active set the window last framed, to tell a change from a redraw. */
+    _framed: '',
     init() {
       this.updateActiveTitle()
       this.updateProgress()
@@ -38,6 +38,8 @@ export function vellumScrollSpy(items = [], pageTitle = 'On this page') {
           this.resizeObserver.observe(nav)
         }
       }
+
+      this.followPointer()
 
       this._onScroll = () => this.schedule()
       window.addEventListener('scroll', this._onScroll, { passive: true })
@@ -57,9 +59,6 @@ export function vellumScrollSpy(items = [], pageTitle = 'On this page') {
         this._frame = 0
         this.updateProgress()
         this.syncActive()
-        // Every frame, not only when the lit set changes: the dot marks where
-        // the reader is, which moves continuously while the set does not.
-        this.updateDot()
       })
     },
     /**
@@ -121,71 +120,6 @@ export function vellumScrollSpy(items = [], pageTitle = 'On this page') {
 
       return rect.top <= 0 ? Math.max(0, rect.bottom) : 0
     },
-    /**
-     * Slide the dot along the rail to match reading position.
-     *
-     * The rail says which sections are on screen. The dot says where in them
-     * you are, which is the thing the rail cannot show: it interpolates
-     * between two headings' rail anchors by how far you have read between
-     * them in the article.
-     */
-    updateDot() {
-      const nav = this.tocNav()
-      const dot = nav?.querySelector('[data-vellum-toc-dot]')
-
-      if (!nav || !dot) {
-        return
-      }
-
-      const anchors = this.ids.map((id) => this._anchors[id]).filter((value) => value !== undefined)
-
-      if (anchors.length === 0) {
-        return
-      }
-
-      const tops = []
-
-      for (const id of this.ids) {
-        const el = document.getElementById(id)
-
-        if (el && this._anchors[id] !== undefined) {
-          tops.push({ top: el.getBoundingClientRect().top, anchor: this._anchors[id] })
-        }
-      }
-
-      if (tops.length === 0) {
-        return
-      }
-
-      const here = this.viewportTop()
-      let distance = tops[0].anchor
-
-      for (let i = 0; i < tops.length; i++) {
-        if (tops[i].top > here) {
-          break
-        }
-
-        const next = tops[i + 1]
-
-        if (!next) {
-          const article = document.querySelector('[data-vellum-article]')
-          const end = article ? article.getBoundingClientRect().bottom : tops[i].top + window.innerHeight
-          const span = Math.max(1, end - tops[i].top)
-          const ratio = Math.min(1, Math.max(0, (here - tops[i].top) / span))
-
-          distance = tops[i].anchor + (this._railEnd - tops[i].anchor) * ratio
-          break
-        }
-
-        const span = Math.max(1, next.top - tops[i].top)
-        const ratio = Math.min(1, Math.max(0, (here - tops[i].top) / span))
-
-        distance = tops[i].anchor + (next.anchor - tops[i].anchor) * ratio
-      }
-
-      nav.style.setProperty('--offset-distance', `${distance}px`)
-      nav.style.setProperty('--toc-dot-opacity', '1')
-    },
     syncActive() {
       const visible = this.visibleIds()
       const changed = visible.length !== this.activeIds.length
@@ -198,8 +132,6 @@ export function vellumScrollSpy(items = [], pageTitle = 'On this page') {
       this.activeIds = visible
       this.activeId = visible[0] ?? ''
       this.updateActiveTitle()
-      // After the bold lands: a heavier weight can rewrap a long entry and
-      // shift every link below it, and the rail is drawn from those offsets.
       this.updateIndicator()
     },
     tocNav() {
@@ -239,6 +171,12 @@ export function vellumScrollSpy(items = [], pageTitle = 'On this page') {
     updateRail() {
       const nav = this.tocNav()
       if (!nav || nav.clientHeight === 0) {
+        return
+      }
+
+      if (nav.dataset.vellumTocStyle === 'window') {
+        this.updateWindow(nav)
+
         return
       }
 
@@ -288,11 +226,6 @@ export function vellumScrollSpy(items = [], pageTitle = 'On this page') {
       trackPath.setAttribute('d', d)
       thumbPath.setAttribute('d', d)
 
-      const dot = nav.querySelector('[data-vellum-toc-dot]')
-      if (dot) {
-        dot.style.offsetPath = `path("${d}")`
-      }
-
       // The rail covers the whole run of active entries, first to last.
       const lit = positions.filter((item) => this.activeIds.includes(item.id))
       const first = lit[0] ?? positions.find((item) => item.id === this.activeId) ?? positions[0]
@@ -300,13 +233,67 @@ export function vellumScrollSpy(items = [], pageTitle = 'On this page') {
 
       nav.style.setProperty('--track-top', `${first.top}px`)
       nav.style.setProperty('--track-bottom', `${last.bottom}px`)
+    },
+    /**
+     * The window style: one highlight from the first entry on screen to the
+     * last. Its edges are the entries' own boxes, the same as the hover
+     * highlight. An edge stays put while its section is on screen and
+     * springs to the next entry when the set changes.
+     */
+    updateWindow(nav) {
+      const box = nav.querySelector('[data-vellum-toc-window]')
+      const links = [...nav.querySelectorAll('[data-vellum-toc-link]')]
+      const lit = links.filter((link) => this.activeIds.includes(link.dataset.vellumTocId))
 
-      this._anchors = Object.fromEntries(
-        positions.filter((item) => item.id).map((item) => [item.id, (item.top + item.bottom) / 2]),
-      )
-      this._railEnd = positions[positions.length - 1].bottom
+      if (!box || lit.length === 0) {
+        return
+      }
 
-      this.updateDot()
+      const first = lit[0]
+      const last = lit[lit.length - 1]
+      const key = this.activeIds.join(' ')
+
+      if (this._framed !== '' && key !== this._framed && !this.reducedMotion()) {
+        box.setAttribute('data-releasing', '')
+        window.clearTimeout(this._release)
+        this._release = window.setTimeout(() => box.removeAttribute('data-releasing'), 450)
+      }
+
+      this._framed = key
+      box.style.transform = `translateY(${first.offsetTop}px)`
+      box.style.height = `${last.offsetTop + last.offsetHeight - first.offsetTop}px`
+    },
+    /**
+     * The window style's hover: a lighter highlight that glides to the entry
+     * under the pointer, as the sidebar's does.
+     */
+    followPointer() {
+      const nav = this.tocNav()
+      const hover = nav?.querySelector('[data-vellum-toc-hover]')
+
+      if (!nav || !hover) {
+        return
+      }
+
+      nav.addEventListener('pointerover', (event) => {
+        const link = event.target.closest('[data-vellum-toc-link]')
+
+        if (!link) {
+          return
+        }
+
+        hover.toggleAttribute('data-gliding', hover.hasAttribute('data-shown') && !this.reducedMotion())
+        hover.style.transform = `translateY(${link.offsetTop}px)`
+        hover.style.height = `${link.offsetHeight}px`
+        hover.setAttribute('data-shown', '')
+      })
+      nav.addEventListener('pointerleave', () => {
+        hover.removeAttribute('data-shown')
+        hover.removeAttribute('data-gliding')
+      })
+    },
+    reducedMotion() {
+      return window.matchMedia('(prefers-reduced-motion: reduce)').matches
     },
     updateIndicator() {
       this.$nextTick(() => this.updateRail())

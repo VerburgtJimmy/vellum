@@ -9,7 +9,7 @@ use Vellum\Markdown\Islands\Island;
 /**
  * Immutable compiled documentation page.
  *
- * @phpstan-type Heading array{id: string, text: string, level: int}
+ * @phpstan-type Heading array{id: string, text: string, level: int, step?: int}
  * @phpstan-type FrontMatter array<string, mixed>
  */
 final readonly class Document

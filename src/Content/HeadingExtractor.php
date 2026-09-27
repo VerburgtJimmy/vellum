@@ -9,11 +9,12 @@ use League\CommonMark\Extension\HeadingPermalink\HeadingPermalink;
 use League\CommonMark\Node\Block\Document;
 use League\CommonMark\Node\NodeIterator;
 use League\CommonMark\Node\StringContainerHelper;
+use Vellum\Markdown\Extensions\Steps\StepBlock;
 
 /**
  * Reads heading outline data from the CommonMark AST after IDs are applied.
  *
- * @phpstan-type HeadingData array{id: string, text: string, level: int}
+ * @phpstan-type HeadingData array{id: string, text: string, level: int, step?: int}
  */
 final class HeadingExtractor
 {
@@ -53,11 +54,20 @@ final class HeadingExtractor
                 continue;
             }
 
-            $headings[] = [
+            $heading = [
                 'id' => $id,
                 'text' => $text,
                 'level' => $level,
             ];
+
+            // A step's title carries its number, for the table of contents.
+            $parent = $node->parent();
+
+            if ($parent instanceof StepBlock && $parent->firstChild() === $node) {
+                $heading['step'] = $parent->getNumber();
+            }
+
+            $headings[] = $heading;
         }
 
         return $headings;
@@ -67,7 +77,7 @@ final class HeadingExtractor
      * Nest a flat heading list into a tree for TOC rendering.
      *
      * @param  list<HeadingData>  $headings
-     * @return list<array{id: string, text: string, level: int, children: list<mixed>}>
+     * @return list<array{id: string, text: string, level: int, step?: int, children: list<mixed>}>
      */
     public function nest(array $headings): array
     {
@@ -75,17 +85,13 @@ final class HeadingExtractor
             return [];
         }
 
-        /** @var list<array{id: string, text: string, level: int}> $nodes */
+        /** @var list<HeadingData> $nodes */
         $nodes = [];
         /** @var list<list<int>> $childIndexes */
         $childIndexes = [];
 
         foreach ($headings as $heading) {
-            $nodes[] = [
-                'id' => $heading['id'],
-                'text' => $heading['text'],
-                'level' => $heading['level'],
-            ];
+            $nodes[] = $heading;
             $childIndexes[] = [];
         }
 
@@ -126,12 +132,7 @@ final class HeadingExtractor
                 $children[] = $build($childIndex);
             }
 
-            return [
-                'id' => $nodes[$index]['id'],
-                'text' => $nodes[$index]['text'],
-                'level' => $nodes[$index]['level'],
-                'children' => $children,
-            ];
+            return [...$nodes[$index], 'children' => $children];
         };
 
         $tree = [];
