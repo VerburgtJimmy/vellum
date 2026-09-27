@@ -14,6 +14,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The highlight on the current page slides over from the page the reader came from, and fills as they read down the page. Moving the pointer over the sidebar moves a lighter highlight with it. Both sit under the text and respect reduced-motion settings
 - Folders in the sidebar have a guide line, shown in the accent colour for the folder holding the current page
 
+### Changed
+
+- Step titles in a `:::steps` block are rendered one heading level below the section the block sits in, and headings inside a step move with them. Steps under a `## Setup` heading are now `h3`, so they nest under that section in the table of contents and the page outline. A steps block before any section heading is unchanged. Authors still start each step with `##`; only CSS that targets step headings by tag, rather than by Vellum's classes, is affected
+
 ## [0.7.0] - 2026-09-26
 
 ### Added

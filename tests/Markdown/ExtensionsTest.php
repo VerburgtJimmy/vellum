@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use Vellum\Content\ContentRepository;
+use Vellum\Content\HeadingExtractor;
 use Vellum\Markdown\MarkdownRenderer;
 
 it('renders code block title, highlights, line numbers, and copy button', function (): void {
@@ -325,4 +327,40 @@ MD);
         ->and($html)->toContain('hl-property')
         ->and($html)->toContain('hl-number')
         ->and($html)->not->toMatch('/<span class="vellum-code-line">\s*<\/span>\s*<\/code>/');
+});
+
+it('nests a steps block under the section it sits in', function (): void {
+    $html = (new MarkdownRenderer)->render(<<<'MD'
+:::steps
+## First
+Before any section.
+:::
+
+## Blocks inside a step
+
+:::steps
+## Require the package
+### A part of it
+Text.
+
+## Open the site
+:::
+MD);
+
+    expect($html)->toMatch('/<h2[^>]*>First/')
+        ->and($html)->toMatch('/<h2[^>]*>Blocks inside a step/')
+        ->and($html)->toMatch('/<h3[^>]*>Require the package/')
+        ->and($html)->toMatch('/<h4[^>]*>A part of it/')
+        ->and($html)->toMatch('/<h3[^>]*>Open the site/')
+        ->and(substr_count($html, 'data-vellum-step='))->toBe(3);
+});
+
+it('lists nested steps under their section in the table of contents', function (): void {
+    $this->writeDoc('index.md', "---\ntitle: Home\n---\n## Setup\n\n:::steps\n## Install\nx\n\n## Configure\ny\n:::\n\n## Next\nz\n");
+
+    $document = ContentRepository::fromConfig()->find('');
+    $toc = (new HeadingExtractor)->nest($document->headings);
+
+    expect(array_column($toc, 'text'))->toBe(['Setup', 'Next'])
+        ->and(array_column($toc[0]['children'], 'text'))->toBe(['Install', 'Configure']);
 });
