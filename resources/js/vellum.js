@@ -3,6 +3,7 @@ import collapse from '@alpinejs/collapse'
 import '../css/vellum.css'
 import { prefetch, prefetchHover } from './prefetch.js'
 import { vellumScrollSpy } from './scrollspy.js'
+import { initSidebar } from './sidebar.js'
 import { applyTheme, getStoredTheme, initTheme, resolveTheme } from './theme.js'
 
 window.VellumTheme = { applyTheme, getStoredTheme, initTheme, resolveTheme }
@@ -642,6 +643,7 @@ if (!window.Alpine) {
   Alpine.data('vellumPrefetchHover', prefetchHover)
   window.Alpine = Alpine
   Alpine.start()
+  initSidebar()
 
   function warmupLazyChunksOnce() {
     const warmup = () => {

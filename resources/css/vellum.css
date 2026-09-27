@@ -1168,3 +1168,112 @@ html {
   }
 }
 
+
+/*
+ * Sidebar details (resources/js/sidebar.js). The marker and the hover
+ * highlight sit under the links, so the text stays readable while they move.
+ * Without the script the current page keeps its plain background.
+ */
+[data-vellum-sidebar-wrap] [data-vellum-nav] {
+  position: relative;
+  isolation: isolate;
+}
+
+[data-vellum-sidebar-wrap] [data-vellum-nav-link] {
+  position: relative;
+  z-index: 1;
+}
+
+html[data-vellum-nav-marker] [data-vellum-sidebar-wrap] [data-vellum-nav-active],
+html[data-vellum-nav-marker] [data-vellum-sidebar-wrap] [data-vellum-nav-link]:hover {
+  background: transparent;
+}
+
+.vellum-nav-marker,
+.vellum-nav-hover {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 0;
+  border-radius: calc(var(--radius) - 2px);
+  pointer-events: none;
+}
+
+.vellum-nav-marker {
+  overflow: hidden;
+  background: var(--accent);
+}
+
+/* The accent bar, and the reading progress filling from the left. */
+.vellum-nav-marker::before {
+  content: '';
+  position: absolute;
+  top: 22%;
+  left: 0;
+  width: 2px;
+  height: 56%;
+  border-radius: 2px;
+  background: var(--primary);
+}
+
+.vellum-nav-marker::after {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: calc(var(--vellum-read, 0) * 100%);
+  background: color-mix(in oklab, var(--primary) 12%, transparent);
+}
+
+/* Inside a folder the group's guide line already marks the section. */
+.vellum-nav-marker[data-nested]::before {
+  display: none;
+}
+
+.vellum-nav-marker[data-sliding] {
+  transition:
+    transform 420ms cubic-bezier(0.22, 0.9, 0.25, 1),
+    width 420ms cubic-bezier(0.22, 0.9, 0.25, 1),
+    height 420ms cubic-bezier(0.22, 0.9, 0.25, 1);
+}
+
+.vellum-nav-hover {
+  opacity: 0;
+  background: color-mix(in oklab, var(--accent) 70%, transparent);
+  transition: opacity 160ms ease;
+}
+
+.vellum-nav-hover[data-shown] {
+  opacity: 1;
+}
+
+.vellum-nav-hover[data-gliding] {
+  transition:
+    opacity 160ms ease,
+    transform 220ms cubic-bezier(0.22, 0.9, 0.25, 1),
+    width 220ms cubic-bezier(0.22, 0.9, 0.25, 1),
+    height 220ms cubic-bezier(0.22, 0.9, 0.25, 1);
+}
+
+/* The folder holding the current page shows its guide line in the accent. */
+[data-vellum-nav-group]:has(> [data-vellum-nav-active]) {
+  border-color: color-mix(in oklab, var(--primary) 70%, var(--border));
+}
+
+/* A page that changed since the reader last opened it. */
+[data-vellum-nav-changed]::after {
+  content: '';
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-left: 0.45rem;
+  border-radius: 999px;
+  background: var(--primary);
+  vertical-align: middle;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vellum-nav-marker[data-sliding],
+  .vellum-nav-hover[data-gliding] {
+    transition: none;
+  }
+}

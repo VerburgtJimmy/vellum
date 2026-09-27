@@ -25,6 +25,7 @@
             href="{{ $href }}"
             data-vellum-nav-link
             @if ($isActive) data-vellum-nav-active @endif
+            @if (is_string($node['updated'] ?? null) && $node['updated'] !== '') data-vellum-nav-updated="{{ $node['updated'] }}" @endif
             x-data="vellumPrefetchHover"
             x-on:pointerenter="onEnter()"
             class="{{ $itemClass }} {{ $isActive ? 'bg-accent font-medium text-accent-foreground' : 'text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground' }}"
@@ -43,7 +44,7 @@
                 </div>
             </x-slot:trigger>
             <x-slot:content>
-                <div class="ml-2 flex flex-col gap-0.5 pl-3">
+                <div data-vellum-nav-group class="ml-2 flex flex-col gap-0.5 border-l border-border pl-3">
                     @include('vellum::components.docs.partials.nav-tree', [
                         'nodes' => $children,
                         'activeSlug' => $activeSlug,

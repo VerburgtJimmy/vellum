@@ -5,6 +5,15 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- The sidebar remembers its scroll position between pages and scrolls the current page into view when it is hidden
+- A dot in the sidebar on pages that changed since the reader last opened them. What a reader has opened is kept in their browser
+- The highlight on the current page slides over from the page the reader came from, and fills as they read down the page. Moving the pointer over the sidebar moves a lighter highlight with it. Both sit under the text and respect reduced-motion settings
+- Folders in the sidebar have a guide line, shown in the accent colour for the folder holding the current page
+
 ## [0.7.0] - 2026-09-26
 
 ### Added

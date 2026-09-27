@@ -37,6 +37,14 @@
                 document.documentElement.classList.toggle('dark', dark);
             } catch (e) {}
             try {
+                // Arriving from another docs page, the sidebar marker slides
+                // over from that page's entry, so the plain highlight is hidden
+                // from the first frame rather than flashing.
+                if (sessionStorage.getItem('vellum-sidebar-marker')) {
+                    document.documentElement.setAttribute('data-vellum-nav-marker', '');
+                }
+            } catch (e) {}
+            try {
                 if (localStorage.getItem('vellum-sidebar') === 'collapsed') {
                     document.documentElement.setAttribute('data-vellum-sidebar', 'collapsed');
                 }

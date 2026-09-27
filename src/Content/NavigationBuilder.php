@@ -12,7 +12,7 @@ use Vellum\Support\VersionUrl;
 /**
  * Builds the sidebar navigation tree from folders, meta.json, and documents.
  *
- * @phpstan-type NavPage array{type: 'page', slug: string|null, title: string, description: string|null, icon: string|null, href: string, access: string, requires?: list<string>}
+ * @phpstan-type NavPage array{type: 'page', slug: string|null, title: string, description: string|null, icon: string|null, href: string, access: string, requires?: list<string>, updated?: string|null}
  * @phpstan-type NavSeparator array{type: 'separator', title: string}
  * @phpstan-type NavNode array<string, mixed>
  * @phpstan-type NavTree list<array<string, mixed>>
@@ -501,6 +501,8 @@ final class NavigationBuilder
             'icon' => $document->icon,
             'href' => $this->hrefForSlug($document->slug, $version ?? $document->version),
             'access' => $document->access(),
+            // The sidebar marks a page that changed since the reader last read it.
+            'updated' => $document->updated,
         ];
     }
 

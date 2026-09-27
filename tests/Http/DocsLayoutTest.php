@@ -477,3 +477,16 @@ it('binds the search dialog only to state the dialog script defines', function (
         expect($dialog[1] ?? '')->toMatch('/\b'.$name.'\b/');
     }
 });
+
+it('gives the sidebar what its details need', function (): void {
+    $this->writeDoc('index.md', "---\ntitle: Home\nupdated: 2026-09-20\n---\nHi");
+    $this->writeDoc('guides/one.md', "---\ntitle: One\n---\nOne");
+
+    $html = (string) $this->get('/docs/guides/one')->assertOk()->getContent();
+
+    expect($html)->toContain('data-vellum-nav ')
+        ->and($html)->toContain('data-vellum-nav-updated="2026-09-20"')
+        ->and($html)->toContain('data-vellum-nav-group')
+        // Set before the first paint when arriving from another docs page.
+        ->and($html)->toContain("sessionStorage.getItem('vellum-sidebar-marker')");
+});
