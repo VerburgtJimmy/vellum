@@ -861,8 +861,25 @@
   background: var(--border);
 }
 
+/* Fills down to where the reader is; set by steps.js. */
+.vellum-step:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  left: 0.8125rem;
+  top: 1.75rem;
+  width: 1px;
+  height: var(--vellum-step-fill, 0px);
+  background: var(--primary);
+}
+
+/*
+ * The number stays in view while its step is read, and links back to its
+ * start. It sticks where a linked heading lands, below any header, or close
+ * to the top when the page has no header, so it parts from its heading late.
+ */
 .vellum-step-indicator {
-  position: relative;
+  position: sticky;
+  top: 5rem;
   z-index: 1;
   display: inline-flex;
   height: 1.75rem;
@@ -874,6 +891,31 @@
   color: var(--foreground);
   font-size: 0.75rem;
   font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  text-decoration: none;
+  transition:
+    background-color 220ms ease,
+    color 220ms ease,
+    box-shadow 220ms ease;
+}
+
+@media (min-width: 48rem) {
+  [data-vellum-docs]:not([data-vellum-header]) .vellum-step-indicator {
+    top: 1.5rem;
+  }
+}
+
+a.vellum-step-indicator:hover {
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--foreground) 12%, transparent);
+}
+
+.vellum-step[data-vellum-step-reached] > .vellum-step-indicator {
+  background: var(--primary);
+  color: var(--primary-foreground);
+}
+
+.vellum-step[data-vellum-step-current] > .vellum-step-indicator {
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--primary) 22%, transparent);
 }
 
 .vellum-step-content > :first-child {
@@ -949,7 +991,8 @@
     color 220ms ease;
 }
 
-.vellum-toc-link.is-active .vellum-toc-step {
+.vellum-toc-link.is-active .vellum-toc-step,
+.vellum-toc-link[data-vellum-toc-step-reached] .vellum-toc-step {
   background: var(--primary);
   color: var(--primary-foreground);
 }
@@ -1096,7 +1139,8 @@
   .vellum-toc-rail-active,
   .vellum-toc-window[data-releasing],
   .vellum-toc-hover[data-gliding],
-  .vellum-toc-step {
+  .vellum-toc-step,
+  .vellum-step-indicator {
     transition: none;
   }
 }

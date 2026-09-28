@@ -5,6 +5,7 @@ import { prefetch, prefetchHover } from './prefetch.js'
 import { vellumScrollSpy } from './scrollspy.js'
 import { initCopyButtons } from './copy.js'
 import { initSidebar } from './sidebar.js'
+import { initSteps } from './steps.js'
 import { applyTheme, getStoredTheme, initTheme, resolveTheme } from './theme.js'
 
 window.VellumTheme = { applyTheme, getStoredTheme, initTheme, resolveTheme }
@@ -625,6 +626,7 @@ if (!window.Alpine) {
   Alpine.start()
   initSidebar()
   initCopyButtons()
+  initSteps()
 
   function warmupLazyChunksOnce() {
     const warmup = () => {

@@ -14,7 +14,7 @@
     $hasHeader = ! $searchInSidebar;
 @endphp
 
-<div data-vellum-docs class="flex min-h-screen flex-col" x-data="vellumChrome">
+<div data-vellum-docs @if (! $searchInSidebar) data-vellum-header @endif class="flex min-h-screen flex-col" x-data="vellumChrome">
     @if ($searchEnabled)
         <x-vellum::docs.search
             :current-version="$currentVersion ?? null"

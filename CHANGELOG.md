@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Folders in the sidebar have a guide line, shown in the accent colour for the folder holding the current page
 - A new table of contents style, `window`, now the default: one highlight behind every entry whose section is on screen, whose edges hold on to whole entries and spring to the next one as sections come and go. Nested entries hang from a guide line, and a lighter highlight follows the pointer. `layout.toc` (or `VELLUM_LAYOUT_TOC`) set to `line` keeps the line style
 - Steps from a `:::steps` block show their number in the table of contents, filled while the step is on screen. In the line style the numbers sit on the line
+- Steps follow the reader: the line between the numbers fills as they read, each number fills once its step is reached, and the table of contents keeps those numbers filled too. The number of the step being read stays in view, and clicking it goes back to the start of the step
 - `layout.toc` in `config/vellum.php`
 - `jimmyverburgt/vellum-core`, the content engine as a package of its own: pages, navigation, versions, gating, Markdown, the compiled cache, search and the changelog, with no routes, layout or assets. `jimmyverburgt/vellum` includes it, so installing Vellum is unchanged. See Core on its own in the docs
 - `ContentRepository::render()`, which returns a page's HTML with its components rendered

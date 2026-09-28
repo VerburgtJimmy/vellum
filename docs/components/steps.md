@@ -55,6 +55,12 @@ php artisan vellum:install
 Visit `/docs`.
 :::
 
+## In the browser
+
+The line between the numbers fills as the reader moves through the steps, and each number fills once its step is reached. The same numbers in the table of contents fill with them, so both show how far through the procedure the reader is.
+
+While a long step is read, its number stays in view at the top of the window. Clicking it scrolls back to the start of that step. Without JavaScript the numbers still link to their steps, and nothing fills.
+
 ## Rules worth knowing
 
 Only `##` starts a step. `###` and lower headings stay ordinary headings inside the

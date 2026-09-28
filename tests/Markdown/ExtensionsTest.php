@@ -106,6 +106,14 @@ MD);
         ->and($html)->toMatchSnapshot();
 });
 
+it('links each step number to the heading its step starts with, for pointers only', function (): void {
+    $html = (new MarkdownRenderer)->render(":::steps\n## Install it\nRun it.\n\n## Configure\nSet it.\n:::");
+
+    expect($html)->toContain('<a class="vellum-step-indicator" href="#install-it" tabindex="-1" aria-hidden="true">1</a>')
+        ->and($html)->toContain('href="#configure" tabindex="-1" aria-hidden="true">2</a>')
+        ->and($html)->toContain('<h2 id="install-it"');
+});
+
 it('renders numbered steps from three headings', function (): void {
     $html = (new MarkdownRenderer)->render(<<<'MD'
 :::steps
