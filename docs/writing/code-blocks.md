@@ -25,10 +25,14 @@ Route::get('/invoices', InvoiceController::class);
 The first word of the info string is the language. Without one, the block is treated as
 plain text.
 
-Each block has a header with a small file glyph, the language label and a copy button. The
-languages below are recognised for the glyph and label, and an alias is labelled with the
-main name. `php` and `blade` use the general code-file glyph; the others have one of their
-own.
+A block without a title has no header. Its language and a copy button sit in the top
+corner, and the label makes way for the button when the pointer is over the block. A block
+with a [title](#title) gets a header naming the file, and a shell block without one is
+shown as a [terminal](#terminal-commands).
+
+The languages below are recognised for the label and the file glyph in a titled block's
+header, and an alias is labelled with the main name. `php` and `blade` use the general
+code-file glyph; the others have one of their own.
 
 | Language | Also accepted as |
 | --- | --- |
@@ -41,7 +45,7 @@ own.
 | `css` | `scss` |
 | `json` | `jsonc` |
 | `yaml` | `yml` |
-| `bash` | `sh`, `shell`, `zsh` |
+| `bash` | `sh`, `shell`, `zsh`, `console` |
 | `python` | `py` |
 | `rust` | `rs` |
 | `cpp` | `c++`, `cxx`, `cc` |
@@ -65,7 +69,33 @@ Route::get('/invoices', InvoiceController::class);
 Route::get('/invoices', InvoiceController::class);
 ```
 
-The title replaces the language label in the header. Single or double quotes both work.
+A titled block gets a header with the file's glyph and name, drawn as an editor tab. Single
+or double quotes both work.
+
+## Terminal commands
+
+A shell block without a title is shown as a terminal, with a `$` before each command:
+
+````md
+```bash
+# Install the package
+composer require jimmyverburgt/vellum \
+    --no-interaction
+```
+````
+
+```bash
+# Install the package
+composer require jimmyverburgt/vellum \
+    --no-interaction
+```
+
+A line gets a `$` unless it is blank, a `#` comment, or the continuation of a line ending in
+`\`. The `$` cannot be selected and the copy button leaves it out, so what the reader copies
+runs as it is. Do not write the `$` yourself.
+
+A shell block with a title is shown as a file, a script to save rather than commands to
+run, so it gets no `$`. With `showLineNumbers`, the line numbers take the place of the `$`.
 
 ## Line numbers
 
@@ -91,7 +121,7 @@ The numbers cannot be selected, so copying the code by hand leaves them out.
 
 ## Highlighted lines
 
-Put the line numbers in braces, as single lines, ranges or a mix, separated by commas:
+Put the line numbers in braces, as single lines, ranges or a mix, separated by commas. They get a bar and a tint in the theme's primary colour:
 
 ````md
 ```php showLineNumbers {1,3-4}

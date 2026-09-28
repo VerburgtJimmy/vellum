@@ -50,7 +50,7 @@ The HTML uses `vellum-*` classes and `data-vellum-*` attributes and carries no s
 
 A few parts need a script to work:
 
-- Code blocks have a copy button marked `data-vellum-copy-code`, inside the block's `data-vellum-code` element.
+- Code blocks have a copy button marked `data-vellum-copy-code`, inside the block's `data-vellum-code` element. Its `data-vellum-code-kind` is `file`, `terminal` or `snippet`, and in a terminal each command line has the class `vellum-code-command`, for a prompt drawn with CSS.
 - Headings have a copy-link button marked `data-vellum-heading-copy`.
 - Tabs follow the WAI-ARIA tabs pattern, with the first panel open and the others `hidden`.
 

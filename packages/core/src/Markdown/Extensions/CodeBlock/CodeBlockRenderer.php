@@ -15,7 +15,14 @@ use Tempest\Highlight\Highlighter;
 use Vellum\Support\Icons;
 
 /**
- * Renders fenced code with Tempest highlighting, a language header, and a copy control.
+ * Renders fenced code with Tempest highlighting and a copy control, as one of
+ * three kinds:
+ *
+ * - file: a block with a title, under a header naming it;
+ * - terminal: an untitled shell block, under a "Terminal" header, with each
+ *   command line marked so a prompt can be shown before it;
+ * - snippet: any other untitled block, with no header, and its language and
+ *   copy control in a corner.
  */
 final class CodeBlockRenderer implements NodeRendererInterface
 {
@@ -30,13 +37,18 @@ final class CodeBlockRenderer implements NodeRendererInterface
         }
 
         $info = CodeBlockInfo::parse($node->getInfo());
+        $language = LanguageIcon::normalize($info->language);
+        $titled = $info->title !== null && $info->title !== '';
+        $kind = $titled ? 'file' : ($language === 'bash' ? 'terminal' : 'snippet');
+
         $highlighted = $this->highlighter->parse($node->getLiteral(), $info->language);
-        $highlighted = $this->wrapHighlightedLines($highlighted, $info->highlightLines);
+        $highlighted = $this->wrapLines($highlighted, $info->highlightLines, commands: $kind === 'terminal');
         $embedded = $node->data->get('vellum_embedded', false) === true;
 
         $attrs = [
             'class' => $embedded ? 'vellum-code vellum-code-embedded' : 'vellum-code',
             'data-vellum-code' => '',
+            'data-vellum-code-kind' => $kind,
         ];
 
         if ($info->showLineNumbers) {
@@ -54,15 +66,22 @@ final class CodeBlockRenderer implements NodeRendererInterface
             ]);
         }
 
-        $label = ($info->title !== null && $info->title !== '')
-            ? $info->title
-            : LanguageIcon::normalize($info->language);
+        if ($kind === 'snippet') {
+            $actions = $language === 'txt'
+                ? [$this->copyButton()]
+                : [new HtmlElement('span', ['class' => 'vellum-code-lang'], Xml::escape($language)), $this->copyButton()];
+
+            return new HtmlElement('div', $attrs, [
+                new HtmlElement('div', ['class' => 'vellum-code-actions'], $actions),
+                $pre,
+            ]);
+        }
 
         return new HtmlElement('div', $attrs, [
             new HtmlElement('div', ['class' => 'vellum-code-header'], [
                 new HtmlElement('span', ['class' => 'vellum-code-header-meta'], [
                     LanguageIcon::svg($info->language),
-                    new HtmlElement('span', ['class' => 'vellum-code-title'], Xml::escape($label)),
+                    new HtmlElement('span', ['class' => 'vellum-code-title'], Xml::escape($titled ? (string) $info->title : 'Terminal')),
                 ]),
                 $this->copyButton(),
             ]),
@@ -71,9 +90,13 @@ final class CodeBlockRenderer implements NodeRendererInterface
     }
 
     /**
+     * Wraps each line in a span, marking highlighted lines and, in a terminal
+     * block, the lines that are commands: not blank, not a # comment, and not
+     * the continuation of a line ending in a backslash.
+     *
      * @param  list<int>  $highlightLines
      */
-    private function wrapHighlightedLines(string $highlighted, array $highlightLines): string
+    private function wrapLines(string $highlighted, array $highlightLines, bool $commands): string
     {
         $lines = preg_split("/\r\n|\n|\r/", $highlighted);
 
@@ -87,6 +110,7 @@ final class CodeBlockRenderer implements NodeRendererInterface
 
         $highlightLookup = array_fill_keys($highlightLines, true);
         $wrapped = [];
+        $continues = false;
 
         foreach ($lines as $index => $line) {
             $lineNumber = $index + 1;
@@ -94,6 +118,16 @@ final class CodeBlockRenderer implements NodeRendererInterface
 
             if (isset($highlightLookup[$lineNumber])) {
                 $classes[] = 'vellum-code-line-highlighted';
+            }
+
+            if ($commands) {
+                $text = trim(html_entity_decode(strip_tags($line), ENT_QUOTES | ENT_HTML5));
+
+                if (! $continues && $text !== '' && ! str_starts_with($text, '#')) {
+                    $classes[] = 'vellum-code-command';
+                }
+
+                $continues = str_ends_with($text, '\\');
             }
 
             $wrapped[] = '<span class="'.implode(' ', $classes).'">'.$line."\n".'</span>';

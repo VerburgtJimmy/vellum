@@ -305,14 +305,62 @@ MD);
 
     expect($html)->toContain('hl-keyword')
         ->and($html)->toContain('language-php')
-        ->and($html)->toContain('vellum-code-lang-icon');
+        ->and($html)->toContain('<span class="vellum-code-lang">php</span>');
+});
+
+it('gives a block with a title a header naming the file', function (): void {
+    $html = (new MarkdownRenderer)->render("```php title=\"routes/web.php\"\necho 1;\n```");
+
+    expect($html)->toContain('data-vellum-code-kind="file"')
+        ->and($html)->toContain('<span class="vellum-code-title">routes/web.php</span>')
+        ->and($html)->not->toContain('vellum-code-actions');
+});
+
+it('gives an untitled block no header, only its language and copy in a corner', function (): void {
+    $php = (new MarkdownRenderer)->render("```php\necho 1;\n```");
+    $plain = (new MarkdownRenderer)->render("```\nplain\n```");
+
+    expect($php)->toContain('data-vellum-code-kind="snippet"')
+        ->and($php)->not->toContain('vellum-code-header')
+        ->and($php)->toMatch('/<div class="vellum-code-actions"><span class="vellum-code-lang">php<\/span><button[^>]*data-vellum-copy-code/')
+        ->and($plain)->toContain('<div class="vellum-code-actions"><button')
+        ->and($plain)->not->toContain('vellum-code-lang"');
+});
+
+it('renders an untitled shell block as a terminal, marking only its commands', function (): void {
+    $html = (new MarkdownRenderer)->render(<<<'MD'
+```bash
+# Install it
+composer require jimmyverburgt/vellum \
+    --no-interaction
+
+php artisan vellum:install
+```
+MD);
+
+    preg_match_all('/<span class="([^"]*)">(.*?)\n<\/span>/s', $html, $lines);
+    $commands = array_map(
+        static fn (string $classes): bool => str_contains($classes, 'vellum-code-command'),
+        $lines[1],
+    );
+
+    expect($html)->toContain('data-vellum-code-kind="terminal"')
+        ->and($html)->toContain('<span class="vellum-code-title">Terminal</span>')
+        ->and($commands)->toBe([false, true, false, false, true]);
+});
+
+it('treats a titled shell block as a file, a script rather than commands to run', function (): void {
+    $html = (new MarkdownRenderer)->render("```bash title=\"deploy.sh\"\nphp artisan vellum:build\n```");
+
+    expect($html)->toContain('data-vellum-code-kind="file"')
+        ->and($html)->not->toContain('vellum-code-command');
 });
 
 it('uses phosphor language marks for php, js, json, and yaml', function (): void {
-    $php = (new MarkdownRenderer)->render("```php\necho 1;\n```");
-    $js = (new MarkdownRenderer)->render("```js\n1\n```");
-    $json = (new MarkdownRenderer)->render("```json\n{}\n```");
-    $yaml = (new MarkdownRenderer)->render("```yaml\na: 1\n```");
+    $php = (new MarkdownRenderer)->render("```php title=\"a\"\necho 1;\n```");
+    $js = (new MarkdownRenderer)->render("```js title=\"a\"\n1\n```");
+    $json = (new MarkdownRenderer)->render("```json title=\"a\"\n{}\n```");
+    $yaml = (new MarkdownRenderer)->render("```yaml title=\"a\"\na: 1\n```");
 
     foreach ([$php, $js, $json, $yaml] as $html) {
         expect($html)->toMatch('/<svg[^>]*class="vellum-code-lang-icon"[^>]*viewBox="0 0 256 256"|<svg[^>]*viewBox="0 0 256 256"[^>]*class="vellum-code-lang-icon"/');

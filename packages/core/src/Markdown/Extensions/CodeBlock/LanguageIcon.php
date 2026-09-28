@@ -55,7 +55,7 @@ final class LanguageIcon
             'ts', 'typescript', 'mts' => 'ts',
             'tsx' => 'tsx',
             'json', 'jsonc' => 'json',
-            'bash', 'sh', 'shell', 'zsh' => 'bash',
+            'bash', 'sh', 'shell', 'zsh', 'console' => 'bash',
             'yaml', 'yml' => 'yaml',
             'css', 'scss' => 'css',
             'html', 'htm' => 'html',
