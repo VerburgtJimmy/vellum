@@ -1,11 +1,31 @@
 ---
 title: Upgrade
-description: Upgrading from 0.6 to 0.7, within 0.6, from 0.5 to 0.6, and from 0.2 to the 0.5 freeze.
+description: Upgrading from 0.7 to 0.8, from 0.6 to 0.7, within 0.6, from 0.5 to 0.6, and from 0.2 to the 0.5 freeze.
 ---
 
 0.5 froze the keys in `config/vellum.php` and the page frontmatter names. Later releases add keys without renaming any, and no key will be removed before 1.0.
 
 The requirements have been PHP 8.4+ and Laravel 11, 12, or 13 since 0.2.
+
+## 0.7 to 0.8
+
+No changes to your config or content are required. Update the package and rebuild:
+
+```bash
+composer update jimmyverburgt/vellum
+php artisan vellum:build
+```
+
+The update also installs `jimmyverburgt/vellum-core`, which now holds the engine Vellum runs on. Nothing changes in how you install or use the full package. See [Core on its own](/docs/core) for what core is.
+
+Run `vellum:build` even outside a deploy. Compiled pages keep the HTML they were built with, and the copy buttons on code blocks and headings have new markup. On pages compiled by 0.7, the heading buttons stop copying links and the code buttons lose their check mark until the pages are rebuilt.
+
+A few things only matter if your app reached into Vellum's internals:
+
+- These classes moved: `Vellum\Support\Theme`, `Color`, `Assets`, `Cn` and `NavTree` are now in `Vellum\View`, and `Vellum\Support\LlmsTxt`, `Vellum\Support\Sitemap` and `Vellum\Changelog\ChangelogFeed` are in `Vellum\Http`.
+- A component view you published to `resources/views/vendor/vellum/components/` now also applies to the `:::` form of that component, not only the `<x-vellum::…>` tag. See [Change a built-in's markup](/docs/extending#change-a-built-ins-markup).
+- The copy buttons are marked `data-vellum-copy-code` and `data-vellum-heading-copy`, without Alpine attributes. Update any CSS or script of yours that targeted the old attributes.
+- Step titles in a `:::steps` block that sits under a section heading are now one level below it, so a step under `## Setup` is an `h3`. CSS that styled step headings by tag may need updating.
 
 ## 0.6 to 0.7
 

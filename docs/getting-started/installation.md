@@ -17,6 +17,8 @@ description: Requirements, installing the package, and the build step for produc
 composer require jimmyverburgt/vellum
 ```
 
+This installs the docs site and `jimmyverburgt/vellum-core`, the engine it runs on. To render the docs in your own front end instead, see [Core on its own](/docs/core).
+
 ## Publish config, stubs, and assets
 
 ```bash

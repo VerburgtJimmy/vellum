@@ -11,6 +11,8 @@ description: The five Artisan commands Vellum adds, and when to run each one.
 | `vellum:clear` | To delete the compiled cache. |
 | `vellum:export` | To produce a static site. |
 
+`vellum:install` and `vellum:export` come with the full package. `vellum:build`, `vellum:index` and `vellum:clear` are part of core, so they also work when you use [core on its own](/docs/core).
+
 ## vellum:install
 
 ```bash

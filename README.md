@@ -34,6 +34,20 @@ compile the docs as part of each deploy:
 php artisan vellum:build
 ```
 
+## Packages
+
+Vellum is two Composer packages, released together under one version:
+
+- `jimmyverburgt/vellum` is the docs site: routes, layout, theme, search dialog and static
+  export. This is the one to install.
+- [`jimmyverburgt/vellum-core`](packages/core) is the engine under it: pages, navigation,
+  versions, access rules, Markdown, the compiled cache, search and the changelog. It comes
+  with the full package, and can be installed on its own when you render the docs yourself.
+  See [Core on its own](https://vellum.jimmyverburgt.com/docs/core).
+
+Both are developed in this repository. Core is copied to a read-only repository on each
+release, which is what Packagist installs it from.
+
 ## What it includes
 
 - Markdown with `:::` callouts, tabs, steps and cards, and your own `<x-…>` Blade components
@@ -56,6 +70,7 @@ itself built with Vellum.
 - [Writing](https://vellum.jimmyverburgt.com/docs/writing/markdown): Markdown, code blocks, images, navigation
 - [Components](https://vellum.jimmyverburgt.com/docs/components) and [extending with your own](https://vellum.jimmyverburgt.com/docs/extending)
 - [Commands](https://vellum.jimmyverburgt.com/docs/commands) and [troubleshooting](https://vellum.jimmyverburgt.com/docs/troubleshooting)
+- [Core on its own](https://vellum.jimmyverburgt.com/docs/core), for rendering the docs in your own front end
 - [Upgrading](https://vellum.jimmyverburgt.com/docs/getting-started/upgrade)
 
 The Markdown source for those pages is in [`docs/`](docs).
@@ -69,6 +84,9 @@ The Markdown source for those pages is in [`docs/`](docs).
 | `vellum:index` | Rebuild the search index only |
 | `vellum:clear` | Clear the compiled cache |
 | `vellum:export` | Export a static HTML site |
+
+`vellum:install` and `vellum:export` come with the full package. The other three are part
+of core.
 
 ## Credits
 
