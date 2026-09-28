@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Folders in the sidebar have a guide line, shown in the accent colour for the folder holding the current page
 - A new table of contents style, `window`, now the default: one highlight behind every entry whose section is on screen, whose edges hold on to whole entries and spring to the next one as sections come and go. Nested entries hang from a guide line, and a lighter highlight follows the pointer. `layout.toc` (or `VELLUM_LAYOUT_TOC`) set to `line` keeps the line style
 - Steps from a `:::steps` block show their number in the table of contents, filled while the step is on screen. In the line style the numbers sit on the line
+- A line under each page's title says when the page last changed, as "3 days ago" for the last month, and how long it takes to read for pages of three minutes or more. When the page changed since the reader last opened it, the line says so, with the sidebar's dot. The page's actions sit on the same line
 - Steps follow the reader: the line between the numbers fills as they read, each number fills once its step is reached, and the table of contents keeps those numbers filled too. The number of the step being read stays in view, and clicking it goes back to the start of the step
 - `layout.toc` in `config/vellum.php`
 - `jimmyverburgt/vellum-core`, the content engine as a package of its own: pages, navigation, versions, gating, Markdown, the compiled cache, search and the changelog, with no routes, layout or assets. `jimmyverburgt/vellum` includes it, so installing Vellum is unchanged. See Core on its own in the docs
@@ -24,6 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Step titles in a `:::steps` block are rendered one heading level below the section the block sits in, and headings inside a step move with them. Steps under a `## Setup` heading are now `h3`, so they nest under that section in the table of contents and the page outline. A steps block before any section heading is unchanged. Authors still start each step with `##`; only CSS that targets step headings by tag, rather than by Vellum's classes, is affected
+- The last-updated date moved from the breadcrumb row to the line under the title, now labelled "Updated" and with a valid `datetime`, which was empty. The rule under the page actions is gone
 - The table of contents marks the active entry with colour instead of a heavier weight, which made entries shift sideways, and the line style no longer has a dot
 - The copy buttons on code blocks and headings are marked with `data-vellum-copy-code` and `data-vellum-heading-copy`, and one script handles every button, instead of an Alpine component on each. Rendered Markdown no longer contains Alpine attributes, apart from tabs
 - Classes that only the site uses moved namespace: `Vellum\Support\Theme`, `Color`, `Assets`, `Cn` and `NavTree` are now in `Vellum\View`, and `Vellum\Support\LlmsTxt`, `Vellum\Support\Sitemap` and `Vellum\Changelog\ChangelogFeed` are in `Vellum\Http`. Only code that used these classes directly is affected

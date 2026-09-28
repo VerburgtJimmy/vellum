@@ -28,7 +28,7 @@
 
             <div data-vellum-page-row class="flex min-w-0 flex-1 gap-8 px-4 py-8 md:px-6 xl:px-8">
             <main id="vellum-content" class="flex min-h-0 w-full min-w-0 max-w-[860px] flex-1 flex-col">
-                <x-vellum::docs.breadcrumb :breadcrumbs="$breadcrumbs" :updated-at="$updatedAt ?? null" />
+                <x-vellum::docs.breadcrumb :breadcrumbs="$breadcrumbs" />
 
                 <article data-vellum-article data-vellum-changelog>
                     <div class="mb-2 flex flex-wrap items-end justify-between gap-3">
@@ -40,6 +40,7 @@
                             class="text-sm text-muted-foreground hover:text-foreground"
                         >Atom feed</a>
                     </div>
+                    <x-vellum::docs.page-meta :updated="$updated ?? null" />
                     <div class="vellum-prose">
                         {!! $changelog->introHtml !!}
                         @foreach ($changelog->visible() as $release)

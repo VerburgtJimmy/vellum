@@ -24,20 +24,22 @@
 
             <div data-vellum-page-row class="flex min-w-0 flex-1 gap-8 px-4 py-8 md:px-6 xl:px-8">
             <main id="vellum-content" class="flex min-h-0 w-full min-w-0 max-w-[860px] flex-1 flex-col">
-                <x-vellum::docs.breadcrumb :breadcrumbs="$breadcrumbs" :updated-at="$updatedAt ?? null" />
+                <x-vellum::docs.breadcrumb :breadcrumbs="$breadcrumbs" />
 
                 <article data-vellum-article>
                     <h1 class="mb-2 text-3xl font-semibold tracking-tight text-foreground md:text-4xl">
                         {{ $document->title }}
                     </h1>
                     @if ($document->description)
-                        <p class="mb-2 text-lg text-muted-foreground">{{ $document->description }}</p>
+                        <p class="text-lg text-muted-foreground">{{ $document->description }}</p>
                     @endif
-                    <x-vellum::docs.page-actions
-                        :markdown-source="$markdownSource ?? ''"
-                        :raw-url="$rawUrl ?? ''"
-                        :edit-url="$editUrl ?? null"
-                    />
+                    <x-vellum::docs.page-meta :updated="$updated ?? null" :reading-minutes="$readingMinutes ?? 0">
+                        <x-vellum::docs.page-actions
+                            :markdown-source="$markdownSource ?? ''"
+                            :raw-url="$rawUrl ?? ''"
+                            :edit-url="$editUrl ?? null"
+                        />
+                    </x-vellum::docs.page-meta>
                     <div class="vellum-prose">
                         {!! $html ?? $document->html !!}
                     </div>

@@ -11,7 +11,7 @@
 
 <div
     data-vellum-page-actions
-    class="mt-4 mb-6 flex flex-wrap items-center gap-1"
+    class="-mr-2 flex flex-wrap items-center gap-1"
     x-data="vellumPageActions(@js($markdownSource))"
 >
     <button
@@ -53,7 +53,7 @@
             x-cloak
             x-show="open"
             x-transition.opacity
-            class="absolute left-0 top-full z-50 mt-1 min-w-[12.5rem] rounded-md border border-border bg-popover p-1 text-popover-foreground shadow-md"
+            class="absolute right-0 top-full z-50 mt-1 min-w-[12.5rem] rounded-md border border-border bg-popover p-1 text-popover-foreground shadow-md"
             role="menu"
             aria-label="Open page"
             x-on:keydown="onMenuKeydown($event)"
@@ -93,4 +93,3 @@
         </div>
     </div>
 </div>
-<hr data-vellum-page-rule class="vellum-page-rule border-0 border-t border-border">

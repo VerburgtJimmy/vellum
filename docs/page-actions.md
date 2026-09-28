@@ -3,8 +3,14 @@ title: Page actions
 description: Copy Markdown, raw source URLs, llms.txt, Edit on GitHub, and opening a page in ChatGPT or Claude.
 ---
 
-Every page has a row of actions under its title. They let a reader copy the page's
-source, edit it on GitHub, or open it in an AI chat tool.
+Every page has a line under its title and description. On the left it says when the page
+last changed, from its `updated` frontmatter or its last git commit, and how long it takes to
+read when that is three minutes or more. A change in the last month reads as "Updated 3 days
+ago", with the date in its tooltip. If the page changed since the reader last opened it, the
+line also says "Changed since your last visit", with the dot the sidebar puts on that page.
+
+On the right are the page's actions. They let a reader copy the page's source, edit it on
+GitHub, or open it in an AI chat tool.
 
 ## Copy Markdown
 

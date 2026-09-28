@@ -313,8 +313,36 @@
   border-top: 1px solid color-mix(in oklch, var(--border) 70%, transparent);
 }
 
-.vellum-page-rule {
-  margin: 0 0 1.5rem;
+/* The line under a page's title: when it changed, how long it takes to read. */
+.vellum-page-facts {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: 0.375rem;
+  font-size: 0.8125rem;
+  color: var(--muted-foreground);
+}
+
+.vellum-page-facts > :not([hidden]) ~ :not([hidden])::before {
+  content: '·';
+  margin-right: 0.375rem;
+  opacity: 0.6;
+}
+
+/* The same dot the sidebar puts on a changed page. */
+.vellum-page-changed {
+  color: var(--foreground);
+}
+
+.vellum-page-changed::after {
+  content: '';
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-left: 0.45rem;
+  vertical-align: middle;
+  border-radius: 999px;
+  background: var(--primary);
 }
 
 .vellum-table {

@@ -53,7 +53,8 @@ final class DocsView
             'markdownSource' => self::source($document),
             'rawUrl' => self::rawUrl($document),
             'editUrl' => self::editUrl($document),
-            'updatedAt' => self::updatedAt($document),
+            'updated' => self::updated($document->updated),
+            'readingMinutes' => self::readingMinutes($html),
             'searchPlacement' => $searchPlacement,
         ];
     }
@@ -101,8 +102,8 @@ final class DocsView
             'canonical' => self::canonical($repository->hrefFor('changelog', $version), $staticExport),
             'feedUrl' => route('vellum.changelog.atom'),
             'rawUrl' => route('vellum.raw', ['slug' => 'changelog']),
-            'updatedAt' => $changelog->mtime > 0
-                ? Carbon::createFromTimestamp($changelog->mtime)->toFormattedDateString()
+            'updated' => $changelog->mtime > 0
+                ? self::updated(Carbon::createFromTimestamp($changelog->mtime)->toIso8601String())
                 : null,
             'searchPlacement' => $searchPlacement,
         ];
@@ -237,16 +238,40 @@ final class DocsView
      * The date shown under a page: frontmatter updated, else git, else none.
      * Never the file mtime, which a checkout or composer install resets.
      */
-    public static function updatedAt(Document $document): ?string
+    /**
+     * When the page last changed, for its <time> element: the machine value,
+     * the short date shown, and the long one in its tooltip.
+     *
+     * @return array{iso: string, label: string, long: string}|null
+     */
+    public static function updated(?string $updated): ?array
     {
-        if ($document->updated === null || $document->updated === '') {
+        if ($updated === null || $updated === '') {
             return null;
         }
 
         try {
-            return Carbon::parse($document->updated)->toFormattedDateString();
+            $date = Carbon::parse($updated);
         } catch (\Throwable) {
             return null;
         }
+
+        return [
+            'iso' => $date->toIso8601String(),
+            'label' => $date->toFormattedDateString(),
+            'long' => $date->format('F j, Y'),
+        ];
+    }
+
+    /**
+     * About how long the page takes to read, at 220 words a minute. Code
+     * blocks are left out: they are scanned or copied, not read.
+     */
+    public static function readingMinutes(string $html): int
+    {
+        $prose = preg_replace('/<pre\b.*?<\/pre>/si', ' ', $html) ?? $html;
+        $words = str_word_count(html_entity_decode(strip_tags($prose), ENT_QUOTES | ENT_HTML5));
+
+        return (int) max(1, round($words / 220));
     }
 }

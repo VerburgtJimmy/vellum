@@ -140,7 +140,7 @@ visible pages left is removed too. See [Gating](/docs/gating).
 
 The sidebar keeps its scroll position as a reader moves between pages, and scrolls the current page into view when it would otherwise be hidden. The highlight on the current page slides over from the page the reader came from.
 
-A dot marks a page that changed since the reader last opened it, based on its `updated` date or last git commit. What each reader has opened is stored in their own browser, so nothing is sent to the server, and a reader who has never opened a page sees no dot on it.
+A dot marks a page that changed since the reader last opened it, based on its `updated` date or last git commit. What each reader has opened is stored in their own browser, so nothing is sent to the server, and a reader who has never opened a page sees no dot on it. The page itself says so as well, in the line under its title.
 
 ## Two files, one URL
 

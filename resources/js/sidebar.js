@@ -2,7 +2,8 @@
  * The desktop sidebar's details: a marker under the current page's entry that
  * slides over from the previous page's entry, a hover highlight that glides
  * between entries, reading progress on the marker, a kept scroll position, and
- * a dot on pages that changed since this reader last opened them.
+ * a dot on pages that changed since this reader last opened them. The page
+ * itself says so too, under its title.
  *
  * All of it is progressive: without this script the sidebar highlights the
  * current page with a plain background, as the markup already does.
@@ -75,6 +76,13 @@ function markChangedPages(active) {
       link.append(note)
     }
   })
+
+  const updated = document.querySelector('[data-vellum-page-meta] time[datetime]')
+  const readAt = Number(local.getItem(READ_PREFIX + window.location.pathname) || 0)
+
+  if (updated && changedSince(updated.dateTime, readAt)) {
+    document.querySelector('[data-vellum-page-changed]')?.removeAttribute('hidden')
+  }
 
   local.setItem(READ_PREFIX + window.location.pathname, String(Date.now()))
 }

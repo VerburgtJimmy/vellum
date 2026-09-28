@@ -4,6 +4,7 @@ import '../css/vellum.css'
 import { prefetch, prefetchHover } from './prefetch.js'
 import { vellumScrollSpy } from './scrollspy.js'
 import { initCopyButtons } from './copy.js'
+import { initPageMeta } from './page-meta.js'
 import { initSidebar } from './sidebar.js'
 import { initSteps } from './steps.js'
 import { applyTheme, getStoredTheme, initTheme, resolveTheme } from './theme.js'
@@ -626,6 +627,7 @@ if (!window.Alpine) {
   Alpine.start()
   initSidebar()
   initCopyButtons()
+  initPageMeta()
   initSteps()
 
   function warmupLazyChunksOnce() {

@@ -275,15 +275,28 @@ it('places search in the sidebar by default', function (): void {
         ->not->toContain('data-vellum-header');
 });
 
-it('moves last updated above the title and omits bottom page meta', function (): void {
-    $this->writeDoc('index.md', "---\ntitle: Home\nupdated: 2026-09-17\n---\nHi");
+it('says when the page changed in the line under its title, with a machine-readable date', function (): void {
+    $this->writeDoc('index.md', "---\ntitle: Home\ndescription: The start.\nupdated: 2026-09-17\n---\nHi");
 
     $html = $this->get('/docs')->assertOk()->getContent();
+    $meta = substr($html, (int) strpos($html, 'data-vellum-page-meta'));
 
-    expect($html)
-        ->toContain('data-vellum-updated')
-        ->toContain('Sep 17, 2026')
-        ->not->toContain('data-vellum-page-meta');
+    expect($meta)->toContain('datetime="2026-09-17T00:00:00+00:00" title="September 17, 2026">Updated Sep 17, 2026</time>')
+        ->and($meta)->toMatch('/data-vellum-page-changed class="vellum-page-changed" hidden>Changed since your last visit/')
+        ->and(strpos($html, 'The start.'))->toBeLessThan(strpos($html, 'data-vellum-page-meta'))
+        ->and(strpos($html, 'data-vellum-page-meta'))->toBeLessThan(strpos($html, 'data-vellum-page-actions'))
+        ->and($html)->not->toContain('data-vellum-page-rule');
+});
+
+it('gives a reading time only to pages long enough to need one, not counting code', function (): void {
+    $words = implode(' ', array_fill(0, 700, 'word'));
+    $code = "```bash\n".implode(' ', array_fill(0, 2000, 'code'))."\n```";
+
+    $this->writeDoc('long.md', "---\ntitle: Long\n---\n{$words}\n\n{$code}");
+    $this->writeDoc('short.md', "---\ntitle: Short\n---\n{$code}");
+
+    expect($this->get('/docs/long')->assertOk()->getContent())->toContain('<span>3 min read</span>')
+        ->and($this->get('/docs/short')->assertOk()->getContent())->not->toContain('min read');
 });
 
 it('shows no last updated date rather than the file mtime', function (): void {
