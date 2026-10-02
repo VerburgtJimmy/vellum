@@ -20,11 +20,15 @@ The default driver is `builtin`. It needs no extra services and works on every h
 
 The browser loads its index from `/docs/_vellum/answers.json`, which holds every section of every page the reader can open. It is filtered for the current user and cached per visibility set (guest, authenticated, and each combination of gates). Responses carry an ETag and are sent with `must-revalidate`, so a browser that already has the current index gets a 304.
 
-`Ctrl+K` or `⌘K` opens search. The arrow keys move through the results and Escape closes the dialog. The dialog's accessible label is "Search documentation".
+`Ctrl+K` or `⌘K` opens search. The arrow keys move through the results, Enter opens one and Escape closes the dialog. The dialog's accessible label is "Search documentation".
+
+Results are grouped by page: each page is named once, with its matching sections under it, in the order of the page's best match. The reader's words are marked in each passage.
+
+Before anything is typed, the dialog lists the last five results the reader opened, under "Recent", so they can return to them in two keystrokes. That list is kept in the reader's own browser and never sent to the server.
 
 ## How results are ranked
 
-Search works on sections: each heading and the text under it is one result, shown with its page and heading, so a match takes the reader to the right part of a long page. At most two sections of one page are listed before sections from other pages.
+Search works on sections: each heading and the text under it is one result, shown with its page and heading, so a match takes the reader to the right part of a long page. At most two sections of one page are ranked ahead of sections from other pages, and the dialog then shows each page's sections together.
 
 Sections are ranked with BM25 over their title, heading and text, with the title weighted highest. Words are also matched by their stem, so "gate", "gated" and "gating" find each other, and a word matches the start of longer words at a lower weight, so results appear while the reader is still typing. A section whose heading, page title or alias the query names in full is ranked above one that only mentions those words.
 

@@ -492,6 +492,24 @@ it('binds the search dialog only to state the dialog script defines', function (
     }
 });
 
+it('groups search results by page under a listbox that scrolls like the sidebar', function (): void {
+    $this->writeDoc('index.md', "---\ntitle: Home\n---\nHi");
+
+    $html = (string) $this->get('/docs')->assertOk()->getContent();
+    $script = (string) file_get_contents(dirname(__DIR__, 2).'/resources/js/vellum.js');
+    preg_match('/function vellumSearchDialog\(\w+\) \{(.*?)\n\}\n/s', $script, $dialog);
+
+    expect($html)->toMatch('/id="vellum-search-results"\s+class="vellum-scroll-area[^"]*"/')
+        ->and($html)->toContain('x-for="group in groups"')
+        ->and($html)->toContain('role="group" :aria-label="group.title"')
+        ->and($html)->toContain('x-for="hit in group.hits"')
+        ->and($html)->toContain(':id="\'vellum-search-option-\' + hit.index"');
+
+    foreach (['groups', 'showingRecent', 'showRecent', 'remember', 'active', 'results'] as $name) {
+        expect($dialog[1] ?? '')->toMatch('/\b'.$name.'\b/');
+    }
+});
+
 it('gives the sidebar what its details need', function (): void {
     $this->writeDoc('index.md', "---\ntitle: Home\nupdated: 2026-09-20\n---\nHi");
     $this->writeDoc('guides/one.md', "---\ntitle: One\n---\nOne");

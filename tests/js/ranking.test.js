@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { readFileSync } from 'node:fs'
-import { createRanker, breadcrumb, highlight, spread, stem } from '../../resources/js/search.js'
+import { createRanker, groupByPage, highlight, spread, stem } from '../../resources/js/search.js'
 
 const fixture = JSON.parse(readFileSync(new URL('../fixtures/ranking-parity.json', import.meta.url), 'utf8'))
 const ranker = createRanker(fixture.index)
@@ -29,9 +29,10 @@ describe('ranking in the browser', () => {
     expect(ordered).toEqual(['a', 'a', 'b', 'a'])
   })
 
-  it('shows the page, then the heading, over a result', () => {
-    expect(breadcrumb({ title: 'Search', heading: 'Scout' })).toBe('Search › Scout')
-    expect(breadcrumb({ title: 'Search', heading: '' })).toBe('Search')
+  it('puts results of one page together, pages in the order of their best result', () => {
+    const hits = ['a#1', 'b#1', 'a#2', 'c#1', 'b#2'].map((id) => ({ id, page: id.split('#')[0] }))
+
+    expect(groupByPage(hits).map((hit) => hit.id)).toEqual(['a#1', 'a#2', 'b#1', 'b#2', 'c#1'])
   })
 
   it('marks the reader\'s words in a passage, escaping the rest', () => {

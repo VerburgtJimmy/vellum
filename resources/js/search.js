@@ -465,10 +465,24 @@ export function highlight(text, query) {
 }
 
 /**
- * The breadcrumb over a result: the page, then the heading inside it.
+ * Puts results from the same page next to each other, pages in the order of
+ * their best result, so the dialog can name each page once with its sections
+ * under it. Within a page, results keep their rank.
  *
- * @param {Record<string, any>} record
+ * @template {{page: string}} T
+ * @param {T[]} hits
+ * @returns {T[]}
  */
-export function breadcrumb(record) {
-  return [record.title, record.heading].filter((part) => part !== '' && part !== undefined).join(' › ')
+export function groupByPage(hits) {
+  const pages = new Map()
+
+  for (const hit of hits) {
+    if (!pages.has(hit.page)) {
+      pages.set(hit.page, [])
+    }
+
+    pages.get(hit.page).push(hit)
+  }
+
+  return [...pages.values()].flat()
 }

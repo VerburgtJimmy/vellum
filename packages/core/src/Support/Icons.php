@@ -119,6 +119,30 @@ final class Icons
     /**
      * @param  array<string, string>  $attributes
      */
+    public static function file(array $attributes = []): HtmlElement
+    {
+        return self::phosphor('M213.66,82.34l-56-56A8,8,0,0,0,152,24H56A16,16,0,0,0,40,40V216a16,16,0,0,0,16,16H200a16,16,0,0,0,16-16V88A8,8,0,0,0,213.66,82.34ZM160,51.31,188.69,80H160ZM200,216H56V40h88V88a8,8,0,0,0,8,8h48V216Z', $attributes);
+    }
+
+    /**
+     * @param  array<string, string>  $attributes
+     */
+    public static function hash(array $attributes = []): HtmlElement
+    {
+        return self::phosphor('M224,88H175.4l8.47-46.57a8,8,0,0,0-15.74-2.86l-9,49.43H111.4l8.47-46.57a8,8,0,0,0-15.74-2.86L95.14,88H48a8,8,0,0,0,0,16H92.23L83.5,152H32a8,8,0,0,0,0,16H80.6l-8.47,46.57a8,8,0,0,0,6.44,9.3A7.79,7.79,0,0,0,80,224a8,8,0,0,0,7.86-6.57l9-49.43H144.6l-8.47,46.57a8,8,0,0,0,6.44,9.3A7.79,7.79,0,0,0,144,224a8,8,0,0,0,7.86-6.57l9-49.43H208a8,8,0,0,0,0-16H163.77l8.73-48H224a8,8,0,0,0,0-16Zm-76.5,64H99.77l8.73-48h47.73Z', $attributes);
+    }
+
+    /**
+     * @param  array<string, string>  $attributes
+     */
+    public static function clock(array $attributes = []): HtmlElement
+    {
+        return self::phosphor('M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm64-88a8,8,0,0,1-8,8H128a8,8,0,0,1-8-8V72a8,8,0,0,1,16,0v48h48A8,8,0,0,1,192,128Z', $attributes);
+    }
+
+    /**
+     * @param  array<string, string>  $attributes
+     */
     public static function magnifyingGlass(array $attributes = []): HtmlElement
     {
         return self::phosphor('M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z', $attributes);

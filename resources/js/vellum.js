@@ -230,16 +230,81 @@ function exportedUrls(urls) {
  *
  * @param {{driver: string, answers: string, scout: string|null, static?: boolean, prefix?: string}} given
  */
+const RECENT_KEY = 'vellum-search-recent'
+const RECENT_LIMIT = 5
+
+/** The results this reader opened last, newest first, kept in their browser. */
+function readRecent() {
+  try {
+    const list = JSON.parse(window.localStorage.getItem(RECENT_KEY) ?? '[]')
+
+    return Array.isArray(list)
+      ? list.filter((hit) => typeof hit?.url === 'string' && typeof hit?.title === 'string').slice(0, RECENT_LIMIT)
+      : []
+  } catch {
+    return []
+  }
+}
+
 function vellumSearchDialog(given) {
   const urls = exportedUrls(given)
 
   return {
     query: '',
     results: [],
+    showingRecent: false,
     active: 0,
     status: 'Type to search',
     loading: false,
     ready: false,
+
+    /**
+     * The results as the dialog shows them: one group per page, or one
+     * "Recent" group before anything is typed. Each hit keeps its place in
+     * the flat list, which is what the arrow keys move through.
+     */
+    get groups() {
+      const groups = []
+
+      this.results.forEach((hit, index) => {
+        const key = this.showingRecent ? 'recent' : hit.page
+        const last = groups[groups.length - 1]
+
+        if (last && last.key === key) {
+          last.hits.push({ ...hit, index })
+        } else {
+          groups.push({ key, title: this.showingRecent ? 'Recent' : hit.title, hits: [{ ...hit, index }] })
+        }
+      })
+
+      return groups
+    },
+
+    showRecent() {
+      this.showingRecent = true
+      this.active = 0
+      this.results = readRecent().map((hit) => ({
+        ...hit,
+        label: [hit.title, hit.heading].filter(Boolean).join(' › '),
+        passage: '',
+      }))
+      this.status = this.results.length === 0 ? 'Type to search' : 'Recent results'
+    },
+
+    remember(hit) {
+      if (!hit) {
+        return
+      }
+
+      const entry = { id: hit.id, url: hit.url, page: hit.page, title: hit.title, heading: hit.heading }
+
+      try {
+        const list = [entry, ...readRecent().filter((old) => old.url !== entry.url)].slice(0, RECENT_LIMIT)
+        window.localStorage.setItem(RECENT_KEY, JSON.stringify(list))
+      } catch {
+        // Private browsing without storage: search still works, just without a history.
+      }
+    },
 
     async ensureIndex() {
       if (this.ready || this.loading) {
@@ -270,8 +335,7 @@ function vellumSearchDialog(given) {
       this.active = 0
 
       if (query === '') {
-        this.results = []
-        this.status = 'Type to search'
+        this.showRecent()
 
         return
       }
@@ -288,12 +352,16 @@ function vellumSearchDialog(given) {
           ? await search.searchScout(urls.scout, query)
           : (await search.load(urls)).search(query, 8)
 
-      this.results = found.map((hit) => ({
+      this.showingRecent = false
+      this.results = search.groupByPage(found.map((hit) => ({
         id: hit.record.id,
         url: urls.link(hit.record.url),
-        breadcrumb: search.breadcrumb(hit.record),
+        page: hit.record.page ?? String(hit.record.url).split('#')[0],
+        title: hit.record.title ?? '',
+        heading: hit.record.heading ?? '',
+        label: hit.record.heading || hit.record.title || '',
         passage: search.highlight(hit.record.passage ?? '', query),
-      }))
+      })))
 
       const count = this.results.length
       this.status = count === 0 ? 'No results' : count === 1 ? '1 result' : `${count} results`
@@ -307,13 +375,15 @@ function vellumSearchDialog(given) {
       }
 
       this.active = (this.active + delta + total) % total
+      this.$nextTick(() => document.getElementById(`vellum-search-option-${this.active}`)?.scrollIntoView({ block: 'nearest' }))
     },
 
     go() {
-      const url = this.results[this.active]?.url
+      const hit = this.results[this.active]
 
-      if (url) {
-        window.location.href = url
+      if (hit?.url) {
+        this.remember(hit)
+        window.location.href = hit.url
       }
     },
 
