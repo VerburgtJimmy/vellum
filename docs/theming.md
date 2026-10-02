@@ -99,6 +99,11 @@ stored in `localStorage` and takes precedence over this setting from then on.
 layout is derived from it, so cards, buttons, code blocks and the search dialog change
 together. Any CSS length works.
 
+Surfaces such as code blocks, tab groups, cards, tables and the search dialog are rounded
+4px past `radius`. Anything set inside a surface, like the panel of a tab group, follows the
+surface's curve: its radius is the surface's less the gap between them, so the two corners
+nest evenly at any `radius`.
+
 ```php
 'radius' => '0.25rem',
 ```

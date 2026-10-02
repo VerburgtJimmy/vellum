@@ -8,6 +8,15 @@
 :root {
   --vellum-primary-hue: 0;
   --radius: 0.5rem;
+  /*
+   * Corners. A surface (a code block, tab group, card, table, image or the
+   * floating sidebar) is rounded a step past --radius. Anything inset in a
+   * surface follows its curve: the surface radius less the gap to the outer
+   * edge, the inset plus the 1px border, so the two corners nest evenly.
+   */
+  --vellum-surface-radius: calc(var(--radius) + 4px);
+  --vellum-inset: 0.25rem;
+  --vellum-inset-radius: max(2px, calc(var(--vellum-surface-radius) - var(--vellum-inset) - 1px));
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(0.982 0 0);
@@ -349,7 +358,7 @@
   margin: 1.25rem 0;
   overflow: auto;
   border: 1px solid color-mix(in oklch, var(--foreground) 14%, transparent);
-  border-radius: var(--radius);
+  border-radius: var(--vellum-surface-radius);
 }
 
 .vellum-prose :where(table) {
@@ -386,7 +395,7 @@
   width: auto;
   height: auto;
   margin: 1.25rem 0;
-  border-radius: var(--radius);
+  border-radius: var(--vellum-surface-radius);
 }
 
 .vellum-prose :where(code):not(pre code):not(.vellum-code code),
@@ -487,7 +496,7 @@
   position: relative;
   margin: 1.25rem 0;
   border: 1px solid var(--border);
-  border-radius: 0.75rem;
+  border-radius: var(--vellum-surface-radius);
   background: var(--muted);
   color: var(--foreground);
   overflow: hidden;
@@ -543,7 +552,7 @@
   padding: 0 0.875rem;
   border: 1px solid var(--border);
   border-bottom-color: var(--muted);
-  border-radius: 0.5rem 0.5rem 0 0;
+  border-radius: var(--vellum-inset-radius) var(--vellum-inset-radius) 0 0;
   background: var(--muted);
   color: var(--foreground);
 }
@@ -578,7 +587,7 @@
 .vellum-code-actions .vellum-code-copy {
   height: 1.75rem;
   width: 1.75rem;
-  border-radius: 0.375rem;
+  border-radius: max(2px, calc(var(--vellum-surface-radius) - 0.4rem - 1px));
 }
 
 .vellum-code-actions .vellum-code-copy:hover {
@@ -858,7 +867,7 @@
 
 .vellum-callout:is(.vellum-callout-warning, .vellum-callout-danger) {
   padding: 0.75rem 1rem 0.75rem 1.25rem;
-  border-radius: 0 calc(var(--radius) + 0.15rem) calc(var(--radius) + 0.15rem) 0;
+  border-radius: 0 var(--vellum-surface-radius) var(--vellum-surface-radius) 0;
   background: color-mix(in oklab, var(--vellum-callout-accent) 7%, transparent);
 }
 
@@ -897,7 +906,7 @@
 .vellum-tabs {
   margin: 1.25rem 0;
   border: 1px solid var(--border);
-  border-radius: 0.75rem;
+  border-radius: var(--vellum-surface-radius);
   background: var(--card);
   overflow: hidden;
 }
@@ -968,10 +977,10 @@
 }
 
 .vellum-tabs-panel {
-  margin: 0 0.25rem 0.25rem;
+  margin: 0 var(--vellum-inset) var(--vellum-inset);
   padding: 1rem;
   border: 1px solid var(--border);
-  border-radius: 0.375rem;
+  border-radius: var(--vellum-inset-radius);
   background: var(--background);
 }
 
@@ -992,7 +1001,7 @@
 .vellum-tabs-code .vellum-code {
   margin: 0;
   border: 1px solid var(--border);
-  border-radius: 0.375rem;
+  border-radius: var(--vellum-inset-radius);
   background: var(--muted);
   color: var(--foreground);
   overflow: hidden;
@@ -1337,7 +1346,7 @@ a.vellum-step-indicator:hover {
   gap: 0.35rem;
   padding: 1rem;
   border: 1px solid var(--border);
-  border-radius: var(--radius);
+  border-radius: var(--vellum-surface-radius);
   text-decoration: none;
   color: inherit;
   transition: background-color 0.15s ease;
@@ -1391,7 +1400,7 @@ a.vellum-step-indicator:hover {
   margin-left: 0.75rem;
   padding: 0.5rem 0.75rem;
   border-left: 1px solid var(--border);
-  border-radius: 0 0.5rem 0.5rem 0;
+  border-radius: 0 var(--vellum-inset-radius) var(--vellum-inset-radius) 0;
   font-size: 0.875rem;
 }
 
@@ -1484,7 +1493,7 @@ html {
     bottom: 0.5rem;
     z-index: 45;
     overflow: hidden;
-    border-radius: 0.75rem;
+    border-radius: var(--vellum-surface-radius);
     border: 1px solid var(--border);
     background-color: var(--background);
     transform: translate3d(-100%, 0, 0);
