@@ -7,6 +7,9 @@ Use tabs for alternatives, such as two ways to install the same package or one c
 written in two languages. Tabs hide all but one panel, so keep content that readers should
 go through in sequence on the page itself.
 
+Every tab group is one card, with an underlined row of labels over the panel. The underline
+slides to the label the reader picks.
+
 ```md
 :::tabs
 ::tab[Composer]
@@ -29,8 +32,7 @@ Each `::tab[Label]` starts a panel that continues until the next `::tab` or the 
 ## Code tabs
 
 When every panel holds exactly one fenced code block and nothing else, Vellum renders the
-group as code tabs. They share one frame and one copy button, and the labels sit in an
-underlined row.
+group as code tabs: the same card, with the code block in place of the panel.
 
 :::tabs persist="install"
 ::tab[Composer]
@@ -54,9 +56,20 @@ ordinary tabs.
 
 `persist="key"` stores the active tab in `localStorage` under `vellum-tabs-{key}`.
 
-Give groups that offer the same choice the same key. A reader who picks Composer on the
-installation page then sees Composer selected in every other group with that key. For
-unrelated groups, use a different key or leave `persist` off.
+Give groups that offer the same choice the same key. A reader who picks Composer in one
+group sees Composer selected at once in every other group with that key on the page, and on
+the pages they open next. The group they clicked stays where it is on screen, even when the
+groups above it change height. For unrelated groups, use a different key or leave `persist`
+off.
+
+This group shares the `install` key with the code tabs above:
+
+:::tabs persist="install"
+::tab[Composer]
+Run `composer require` in your app's root directory.
+::tab[composer.json]
+Add the package to `require`, then run `composer update`.
+:::
 
 ## Other directives inside a panel
 

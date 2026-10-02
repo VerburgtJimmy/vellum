@@ -73,57 +73,78 @@ final class TabsProcessor
     }
 
     /**
+     * Splits a paragraph at its ::tab[Label] lines. The other lines keep their
+     * parsed inline nodes, so code, emphasis and links in a panel survive;
+     * consecutive ones stay one paragraph.
+     *
      * @return list<string|Paragraph>
      */
     private function splitTabParagraph(Paragraph $paragraph): array
     {
-        $text = ParagraphText::of($paragraph);
-        $parts = preg_split('/(?=::tab\[)/', $text, -1, PREG_SPLIT_NO_EMPTY);
+        /** @var list<list<Node>> $lines */
+        $lines = [[]];
 
-        if ($parts === false) {
-            return [$paragraph];
+        foreach ($paragraph->children() as $node) {
+            if ($node instanceof Newline) {
+                $lines[] = [];
+
+                continue;
+            }
+
+            $lines[array_key_last($lines)][] = $node;
         }
 
         $result = [];
+        $current = null;
 
-        foreach ($parts as $part) {
-            $part = trim($part);
+        foreach ($lines as $nodes) {
+            $label = $this->tabLabel($nodes);
 
-            if ($part === '') {
-                continue;
-            }
-
-            if (preg_match('/^::tab\[([^\]]+)\](?:\s*\n([\s\S]*))?$/', $part, $match) !== 1) {
-                $result[] = $this->paragraphFromText($part);
+            if ($label !== null) {
+                $result[] = $label;
+                $current = null;
 
                 continue;
             }
 
-            $result[] = $match[1];
+            if ($nodes === []) {
+                continue;
+            }
 
-            $body = trim($match[2] ?? '');
+            if ($current === null) {
+                $current = new Paragraph;
+                $result[] = $current;
+            } else {
+                $current->appendChild(new Newline(Newline::SOFTBREAK));
+            }
 
-            if ($body !== '') {
-                $result[] = $this->paragraphFromText($body);
+            foreach ($nodes as $node) {
+                $node->detach();
+                $current->appendChild($node);
             }
         }
 
         return $result;
     }
 
-    private function paragraphFromText(string $text): Paragraph
+    /**
+     * The label when a line is only "::tab[Label]". Its text may be split
+     * across several Text nodes, since brackets start a possible link.
+     *
+     * @param  list<Node>  $nodes
+     */
+    private function tabLabel(array $nodes): ?string
     {
-        $paragraph = new Paragraph;
-        $lines = preg_split("/\n/", $text) ?: [$text];
+        $text = '';
 
-        foreach ($lines as $index => $line) {
-            if ($index > 0) {
-                $paragraph->appendChild(new Newline);
+        foreach ($nodes as $node) {
+            if (! $node instanceof Text) {
+                return null;
             }
 
-            $paragraph->appendChild(new Text($line));
+            $text .= $node->getLiteral();
         }
 
-        return $paragraph;
+        return preg_match('/^\s*::tab\[([^\]]+)\]\s*$/', $text, $match) === 1 ? $match[1] : null;
     }
 }

@@ -637,15 +637,86 @@ function vellumTabs(initial = '', persist = null) {
         const first = this.$el.querySelector('[role="tab"]')
         this.active = first?.getAttribute('data-value') ?? ''
       }
+
+      // The underline is drawn once and slides to the selected label. It is
+      // placed before sliding is switched on, so it does not fly in on load.
+      this.$watch('active', () => this.placeUnderline())
+      new ResizeObserver(() => this.placeUnderline()).observe(this.$refs.list)
+      this.placeUnderline()
+      requestAnimationFrame(() => this.$el.setAttribute('data-vellum-tabs-sliding', ''))
     },
-    select(value) {
+    placeUnderline() {
+      const tab = [...this.$refs.list.querySelectorAll('[role="tab"]')].find((tab) => tab.getAttribute('data-value') === this.active)
+
+      if (tab && this.$refs.underline) {
+        this.$refs.underline.style.width = `${tab.offsetWidth}px`
+        this.$refs.underline.style.transform = `translateX(${tab.offsetLeft}px)`
+      }
+    },
+    /**
+     * Shows a panel. Groups that share the persist key follow at once, and the
+     * tab the reader used stays where it is on screen, even when panels above
+     * it change height.
+     */
+    select(value, from = null) {
+      if (value === this.active) {
+        return
+      }
+
       this.active = value
+
       if (!this.persist) {
         return
       }
+
       try {
         localStorage.setItem('vellum-tabs-' + this.persist, value)
       } catch (e) {}
+
+      if (from) {
+        this.keepInPlace(from)
+      }
+
+      window.dispatchEvent(new CustomEvent('vellum-tabs-select', { detail: { key: this.persist, value, group: this.$el } }))
+    },
+    /**
+     * Groups that follow this one change height, which would move the tab the
+     * reader just used. A ResizeObserver runs after layout and before paint,
+     * so scrolling back there means the tab never visibly moves. The
+     * browser's own scroll anchoring is off meanwhile, so the shift is not
+     * corrected twice.
+     */
+    keepInPlace(tab) {
+      const top = tab.getBoundingClientRect().top
+      const root = document.documentElement
+      const watch = new ResizeObserver(() => {
+        const shift = tab.getBoundingClientRect().top - top
+
+        if (Math.abs(shift) >= 1) {
+          window.scrollBy(0, shift)
+        }
+      })
+
+      root.style.overflowAnchor = 'none'
+      document.querySelectorAll('[data-vellum-tabs][data-persist]').forEach((group) => {
+        if (group.getAttribute('data-persist') === this.persist) {
+          watch.observe(group)
+        }
+      })
+
+      window.setTimeout(() => {
+        watch.disconnect()
+        root.style.removeProperty('overflow-anchor')
+      }, 400)
+    },
+    follow(detail) {
+      if (detail.key !== this.persist || detail.group === this.$el) {
+        return
+      }
+
+      if ([...this.$el.querySelectorAll('[role="tab"]')].some((tab) => tab.getAttribute('data-value') === detail.value)) {
+        this.active = detail.value
+      }
     },
     onListKeydown(event) {
       const tabs = [...this.$el.querySelectorAll('[role="tab"]')]
@@ -673,7 +744,7 @@ function vellumTabs(initial = '', persist = null) {
       }
 
       const value = tabs[next].getAttribute('data-value')
-      this.select(value)
+      this.select(value, tabs[next])
       tabs[next].focus()
     },
   }

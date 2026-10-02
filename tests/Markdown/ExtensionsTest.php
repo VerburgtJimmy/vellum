@@ -85,6 +85,15 @@ it('names an alias by the word the author wrote', function (): void {
     expect((new MarkdownRenderer)->render(":::success\nShipped.\n:::"))->toContain('</span>Success</p>');
 });
 
+it('keeps inline Markdown in a panel written straight under its ::tab line', function (): void {
+    $html = (new MarkdownRenderer)->render(":::tabs\n::tab[One]\nRun `composer require` here.\nThen see the [guide](/guide).\n::tab[Two]\nAnd **bold** text.\n:::");
+
+    expect($html)->toContain('Run <code data-vellum-inline-code="">composer require</code> here.')
+        ->and($html)->toContain('<a href="/guide">guide</a>')
+        ->and($html)->toContain('And <strong>bold</strong> text.')
+        ->and(substr_count($html, 'role="tabpanel"'))->toBe(2);
+});
+
 it('renders tabs with persist key in markup', function (): void {
     $html = (new MarkdownRenderer)->render(<<<'MD'
 :::tabs persist="pkg-manager"

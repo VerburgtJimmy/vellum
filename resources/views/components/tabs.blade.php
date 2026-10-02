@@ -18,9 +18,11 @@
     class="{{ $class }}"
     data-vellum-tabs
     x-data="vellumTabs(@js($defaultId), @js($persistKey))"
+    x-on:vellum-tabs-select.window="follow($event.detail)"
     @if ($persistKey) data-persist="{{ $persistKey }}" @endif
 >
-    <div class="vellum-tabs-list" role="tablist" aria-orientation="horizontal" x-on:keydown="onListKeydown($event)">
+    <div class="vellum-tabs-list" role="tablist" aria-orientation="horizontal" x-ref="list" x-on:keydown="onListKeydown($event)">
+        <span class="vellum-tabs-underline" x-ref="underline" aria-hidden="true"></span>
         @foreach ($tabList as $tab)
             @php
                 $tabDomId = $groupId.'-tab-'.$tab['id'];
@@ -35,7 +37,7 @@
                 aria-controls="{{ $panelDomId }}"
                 :aria-selected="(active === @js($tab['id'])).toString()"
                 :tabindex="active === @js($tab['id']) ? 0 : -1"
-                x-on:click="select(@js($tab['id']))"
+                x-on:click="select(@js($tab['id']), $el)"
             >{{ $tab['label'] }}</button>
         @endforeach
     </div>

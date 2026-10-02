@@ -889,84 +889,103 @@
   --vellum-callout-accent: oklch(0.72 0.18 55);
 }
 
+/*
+ * Every tab group is one card: an underlined row of labels over the panels.
+ * Code tabs hold a code block in the panel; other tabs hold a sheet of
+ * prose, inset the same way.
+ */
 .vellum-tabs {
   margin: 1.25rem 0;
   border: 1px solid var(--border);
-  border-radius: var(--radius);
+  border-radius: 0.75rem;
+  background: var(--card);
   overflow: hidden;
 }
 
 .vellum-tabs-list {
-  display: flex;
-  gap: 0.25rem;
-  padding: 0.4rem;
-  border-bottom: 1px solid var(--border);
-  background: var(--muted);
-  overflow-x: auto;
-}
-
-.vellum-tabs-trigger {
-  border: 0;
-  background: transparent;
-  border-radius: 0.375rem;
-  padding: 0.4rem 0.75rem;
-  font-size: 0.875rem;
-  color: var(--muted-foreground);
-  cursor: pointer;
-}
-
-.vellum-tabs-trigger[aria-selected='true'] {
-  background: var(--background);
-  color: var(--foreground);
-  font-weight: 500;
-}
-
-.vellum-tabs-panel {
-  padding: 1rem;
-}
-
-.vellum-tabs-code {
-  background: var(--card);
-  border-radius: 0.75rem;
-  overflow: hidden;
-}
-
-.vellum-tabs-code .vellum-tabs-list {
+  position: relative;
   display: flex;
   align-items: center;
   flex-wrap: nowrap;
   gap: 0.875rem;
   padding: 0 0.75rem;
-  background: transparent;
-  border-bottom: 0;
   overflow-x: auto;
   overflow-y: hidden;
   scrollbar-width: none;
 }
 
-.vellum-tabs-code .vellum-tabs-list::-webkit-scrollbar {
+.vellum-tabs-list::-webkit-scrollbar {
   display: none;
 }
 
-.vellum-tabs-code .vellum-tabs-trigger {
+.vellum-tabs-trigger {
+  flex-shrink: 0;
+  border: 0;
+  border-bottom: 2px solid transparent;
   border-radius: 0;
+  background: transparent;
   padding: 0.5rem 0 0.3rem;
   font-size: 0.875rem;
   font-weight: 500;
-  border-bottom: 2px solid transparent;
+  color: var(--muted-foreground);
+  cursor: pointer;
+}
+
+.vellum-tabs-trigger:hover {
+  color: var(--foreground);
 }
 
 /* The label reads as body text, not accent text: --primary is configurable and
    a light accent against --card fails AA badly. The underline carries the
    accent instead, where contrast is not a legibility question. */
-.vellum-tabs-code .vellum-tabs-trigger[aria-selected='true'] {
-  background: transparent;
+.vellum-tabs-trigger[aria-selected='true'] {
   color: var(--foreground);
   border-bottom-color: var(--primary);
 }
 
+/* With the script running, one underline slides between the labels instead. */
+.vellum-tabs-underline {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 2px;
+  width: 0;
+  border-radius: 2px;
+  background: var(--primary);
+  pointer-events: none;
+  visibility: hidden;
+}
+
+[data-vellum-tabs-sliding] .vellum-tabs-underline {
+  visibility: visible;
+  transition:
+    transform 260ms cubic-bezier(0.22, 0.9, 0.25, 1),
+    width 260ms cubic-bezier(0.22, 0.9, 0.25, 1);
+}
+
+[data-vellum-tabs-sliding] .vellum-tabs-trigger[aria-selected='true'] {
+  border-bottom-color: transparent;
+}
+
+.vellum-tabs-panel {
+  margin: 0 0.25rem 0.25rem;
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 0.375rem;
+  background: var(--background);
+}
+
+.vellum-tabs-panel > :first-child {
+  margin-top: 0;
+}
+
+.vellum-tabs-panel > :last-child {
+  margin-bottom: 0;
+}
+
 .vellum-tabs-code .vellum-tabs-panel {
-  padding: 0 0.25rem 0.25rem;
+  padding: 0;
+  border: 0;
   background: transparent;
 }
 
@@ -981,6 +1000,12 @@
 
 .vellum-tabs-code .vellum-code pre {
   padding: 0.75rem 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-vellum-tabs-sliding] .vellum-tabs-underline {
+    transition: none;
+  }
 }
 
 .vellum-steps {

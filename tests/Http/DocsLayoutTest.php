@@ -335,7 +335,7 @@ it('keeps line-number gutters unselectable in css', function (): void {
         ->and($css)->toMatch('/\.vellum-callout-kind\{[^}]*clip:/')
         ->and($css)->toMatch('/\.vellum-callout-glyph\{[^}]*fill:\s*var\(--vellum-callout-accent\)/')
         ->and($css)->toMatch('/scrollbar-width:\s*none/')
-        ->and($css)->toMatch('/\.vellum-tabs-code\{[^}]*background:var\(--card\)/')
+        ->and($css)->toMatch('/\.vellum-tabs\{[^}]*background:var\(--card\)/')
         ->and($css)->toMatch('/\.vellum-tabs-code \.vellum-code\{[^}]*background:var\(--muted\)/')
         ->and($css)->not->toContain('#191919')
         ->and($css)->toContain('input[type=checkbox]')
@@ -433,16 +433,17 @@ it('keeps tab persist in the shared Alpine helper', function (): void {
         ->and($js)->toContain('localStorage.setItem');
 });
 
-it('keeps the active code tab label readable whatever the accent is', function (): void {
+it('keeps the active tab label readable whatever the accent is', function (): void {
     $css = file_get_contents(Assets::cssPath());
 
     // The accent is configurable and may be very light, so it carries the
     // underline while the label stays on --foreground.
     expect($css)->not->toBeFalse()
-        ->and($css)->toMatch('/\.vellum-tabs-code \.vellum-tabs-trigger\[aria-selected=["\']?true["\']?\]\{[^}]*color:var\(--foreground\)/')
-        ->and($css)->toMatch('/\.vellum-tabs-code \.vellum-tabs-trigger\[aria-selected=["\']?true["\']?\]\{[^}]*border-bottom-color:var\(--primary\)/')
+        ->and($css)->toMatch('/\.vellum-tabs-trigger\[aria-selected=["\']?true["\']?\]\{[^}]*color:var\(--foreground\)/')
+        ->and($css)->toMatch('/\.vellum-tabs-trigger\[aria-selected=["\']?true["\']?\]\{[^}]*border-bottom-color:var\(--primary\)/')
+        ->and($css)->toMatch('/\.vellum-tabs-underline\{[^}]*background:var\(--primary\)/')
         // [;{] so this does not match border-bottom-color, which should be --primary.
-        ->and($css)->not->toMatch('/\.vellum-tabs-code \.vellum-tabs-trigger\[aria-selected=["\']?true["\']?\]\{[^}]*[;{]color:var\(--primary\)/');
+        ->and($css)->not->toMatch('/\.vellum-tabs-trigger\[aria-selected=["\']?true["\']?\]\{[^}]*[;{]color:var\(--primary\)/');
 });
 
 it('lets a long token in inline code wrap rather than widen the page', function (): void {

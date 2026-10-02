@@ -2,8 +2,10 @@
     class="vellum-tabs vellum-tabs-code"
     data-vellum-tabs
     x-data="vellumTabs('npm', 'pkg-manager')"
+    x-on:vellum-tabs-select.window="follow($event.detail)"
      data-persist="pkg-manager" >
-    <div class="vellum-tabs-list" role="tablist" aria-orientation="horizontal" x-on:keydown="onListKeydown($event)">
+    <div class="vellum-tabs-list" role="tablist" aria-orientation="horizontal" x-ref="list" x-on:keydown="onListKeydown($event)">
+        <span class="vellum-tabs-underline" x-ref="underline" aria-hidden="true"></span>
                                 <button
                 type="button"
                 class="vellum-tabs-trigger"
@@ -13,7 +15,7 @@
                 aria-controls="vt1-panel-npm"
                 :aria-selected="(active === 'npm').toString()"
                 :tabindex="active === 'npm' ? 0 : -1"
-                x-on:click="select('npm')"
+                x-on:click="select('npm', $el)"
             >npm</button>
                                 <button
                 type="button"
@@ -24,7 +26,7 @@
                 aria-controls="vt1-panel-pnpm"
                 :aria-selected="(active === 'pnpm').toString()"
                 :tabindex="active === 'pnpm' ? 0 : -1"
-                x-on:click="select('pnpm')"
+                x-on:click="select('pnpm', $el)"
             >pnpm</button>
             </div>
                     <div
