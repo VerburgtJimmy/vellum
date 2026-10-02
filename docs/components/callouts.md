@@ -6,6 +6,10 @@ description: Notes, tips, warnings, and related asides.
 A callout sets one point apart from the surrounding text. Use them sparingly, because
 callouts lose their emphasis when a page has too many of them.
 
+A callout is not a box: a bar in its type's colour runs down its left edge, and its first
+line names the type, such as "Note" or "Warning", with the type's glyph. Warnings and
+dangers are also tinted, so they never read as quietly as a note.
+
 ```md
 :::note
 Use callouts for notes, tips, warnings, danger, and info.
@@ -46,8 +50,9 @@ Extra context that is not a warning.
 Destructive or irreversible actions.
 :::
 
-`success` is an alias of `tip`, and `idea` is an alias of `note`. The name you wrote is
-kept in the `data-vellum-callout` attribute, so you can select an alias separately in CSS
+`success` is an alias of `tip`, and `idea` is an alias of `note`. An alias is labelled with
+the word you wrote, "Success" or "Idea", and that word is kept in the `data-vellum-callout`
+attribute, so you can select an alias separately in CSS
 or JavaScript even though it looks the same as the type it maps to.
 
 ## Titles
@@ -64,7 +69,8 @@ Put the title in square brackets directly after the directive name:
 `vellum:build` has to run after the Markdown changes, not before.
 :::
 
-Without a title, the callout shows only its icon and body.
+The title takes the place of the type's name on the first line. Screen readers still hear
+the type before it, as "Warning: Run this before deploying".
 
 :::warning[title= is not the bracket form]
 `:::note title="Custom"` parses without an error, but the title is ignored. Only the

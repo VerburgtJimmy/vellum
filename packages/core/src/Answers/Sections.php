@@ -98,8 +98,17 @@ final class Sections
         return $sections;
     }
 
+    /**
+     * The words of some HTML. A callout's type label ("Warning") is left out:
+     * it names the kind of box, not what the section is about.
+     */
     public static function text(string $html): string
     {
+        $html = (string) preg_replace(
+            '/<p class="vellum-callout-title" data-vellum-callout-label>.*?<\/p>|<span class="vellum-callout-kind">.*?<\/span>/s',
+            '',
+            $html,
+        );
         $text = html_entity_decode(strip_tags($html), ENT_QUOTES | ENT_HTML5, 'UTF-8');
 
         return trim((string) preg_replace('/\s+/', ' ', $text));

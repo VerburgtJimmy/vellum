@@ -64,6 +64,13 @@ it('turns warning and danger callouts into why-does-it-fail questions', function
     expect((new CalloutQuestions)->generate($sections[0]))->toBe(['why does Assets are not gated fail']);
 });
 
+it('reads an untitled warning from its body, not its type label', function (): void {
+    $sections = ($this->sectionsOf)("---\ntitle: Assets\n---\n:::danger\nDropping the table deletes every row.\n:::\n");
+
+    expect((new CalloutQuestions)->generate($sections[0]))->toBe(['why does Dropping the table deletes fail'])
+        ->and(Sections::text($sections[0]['html']))->not->toContain('Danger');
+});
+
 it('takes an author\'s own questions from frontmatter onto the opening section', function (): void {
     $sections = ($this->sectionsOf)("---\ntitle: Billing\nquestions:\n  - How are refunds handled?\n  - 42\n---\nIntro.\n\n## Refunds\n\nText.\n");
 

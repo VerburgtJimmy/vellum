@@ -76,7 +76,13 @@ MD);
         ->and($html)->toContain('vellum-callout-rail')
         ->and($html)->toContain('Careful')
         ->and($html)->toContain('A note body.')
+        ->and($html)->toMatch('/<p class="vellum-callout-title" data-vellum-callout-label><span class="vellum-callout-icon[^"]*" aria-hidden="true">.*?<\\/span>Note<\\/p>/s')
+        ->and($html)->toContain('<span class="vellum-callout-kind">Warning: </span>Careful</p>')
         ->and($html)->toMatchSnapshot();
+});
+
+it('names an alias by the word the author wrote', function (): void {
+    expect((new MarkdownRenderer)->render(":::success\nShipped.\n:::"))->toContain('</span>Success</p>');
 });
 
 it('renders tabs with persist key in markup', function (): void {

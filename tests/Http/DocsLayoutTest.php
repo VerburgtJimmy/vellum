@@ -332,7 +332,7 @@ it('keeps line-number gutters unselectable in css', function (): void {
         ->and($css)->toContain('#79c0ff')
         ->and($css)->toContain('#0550ae')
         ->and($css)->toContain('vellum-callout-rail')
-        ->and($css)->toMatch('/\.vellum-callout\{[^}]*align-items:\s*flex-start/')
+        ->and($css)->toMatch('/\.vellum-callout-kind\{[^}]*clip:/')
         ->and($css)->toMatch('/\.vellum-callout-glyph\{[^}]*fill:\s*var\(--vellum-callout-accent\)/')
         ->and($css)->toMatch('/scrollbar-width:\s*none/')
         ->and($css)->toMatch('/\.vellum-tabs-code\{[^}]*background:var\(--card\)/')
