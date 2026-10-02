@@ -22,7 +22,7 @@ You write pages in Markdown. The built-in callouts, tabs, steps and cards use `:
 Visit `/docs` and edit `resources/docs/`.
 :::
 
-:::cards
+:::cards describe="pages"
 ::card[What is Vellum](/docs/why)
 ::card[Installation](/docs/getting-started/installation)
 ::card[Writing Markdown](/docs/writing/markdown)

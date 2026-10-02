@@ -1328,6 +1328,7 @@ a.vellum-step-indicator:hover {
 }
 
 .vellum-cards {
+  position: relative;
   display: grid;
   gap: 0.75rem;
   margin: 1.25rem 0;
@@ -1340,10 +1341,19 @@ a.vellum-step-indicator:hover {
   }
 }
 
+/*
+ * A card is a link: its title, an optional description and an arrow. Cards in
+ * a row take the height of the tallest, so a row reads as one even when only
+ * some cards have a description.
+ */
 .vellum-card {
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-content: start;
+  column-gap: 0.75rem;
+  row-gap: 0.25rem;
   padding: 1rem;
   border: 1px solid var(--border);
   border-radius: var(--vellum-surface-radius);
@@ -1356,8 +1366,88 @@ a.vellum-step-indicator:hover {
   background: var(--accent);
 }
 
+.vellum-card:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.vellum-card-icon:empty {
+  display: none;
+}
+
 .vellum-card-title {
+  grid-column: 1;
   font-weight: 600;
+}
+
+.vellum-card-description {
+  display: -webkit-box;
+  grid-column: 1;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--muted-foreground);
+}
+
+.vellum-card-arrow {
+  display: inline-flex;
+  grid-column: 2;
+  grid-row: 1;
+  margin-top: 0.2rem;
+  color: var(--muted-foreground);
+  transition:
+    transform 200ms cubic-bezier(0.22, 0.9, 0.25, 1),
+    color 200ms ease;
+}
+
+.vellum-card-arrow svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.vellum-card:hover .vellum-card-arrow,
+.vellum-card:focus-visible .vellum-card-arrow {
+  transform: translateX(3px);
+  color: var(--foreground);
+}
+
+/* With the script running, the hover highlight glides from card to card instead. */
+.vellum-cards-glide {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 0;
+  border-radius: var(--vellum-surface-radius);
+  background: var(--accent);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 160ms ease;
+}
+
+.vellum-cards-glide[data-shown] {
+  opacity: 1;
+}
+
+.vellum-cards-glide[data-gliding] {
+  transition:
+    opacity 160ms ease,
+    transform 220ms cubic-bezier(0.22, 0.9, 0.25, 1),
+    width 220ms cubic-bezier(0.22, 0.9, 0.25, 1),
+    height 220ms cubic-bezier(0.22, 0.9, 0.25, 1);
+}
+
+[data-vellum-cards-gliding] .vellum-card:hover {
+  background: transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vellum-card,
+  .vellum-card-arrow,
+  .vellum-cards-glide[data-gliding] {
+    transition: none;
+  }
 }
 
 .vellum-figure {

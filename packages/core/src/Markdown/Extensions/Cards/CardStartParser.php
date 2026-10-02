@@ -11,7 +11,8 @@ use League\CommonMark\Parser\MarkdownParserStateInterface;
 use Vellum\Markdown\Extensions\Directive\AttributeParser;
 
 /**
- * Parses a single-line ::card[Title](/url){attrs} as a leaf block.
+ * Parses a single-line ::card[Title](/url){attrs} Description as a leaf block.
+ * The description, everything after the link, is optional.
  */
 final class CardStartParser implements BlockStartParserInterface
 {
@@ -24,7 +25,7 @@ final class CardStartParser implements BlockStartParserInterface
         $cursor->advanceToNextNonSpaceOrTab();
         $line = trim($cursor->getRemainder());
 
-        if (preg_match('/^::card\[([^\]]+)\]\(([^)]+)\)(?:\{([^}]*)\})?$/', $line, $match) !== 1) {
+        if (preg_match('/^::card\[([^\]]+)\]\(([^)\s]+)\)(?:\{([^}]*)\})?(?:\s+(\S.*))?$/', $line, $match) !== 1) {
             return BlockStart::none();
         }
 
@@ -35,6 +36,8 @@ final class CardStartParser implements BlockStartParserInterface
 
         $cursor->advanceToEnd();
 
-        return BlockStart::of(new CardContinueParser(new CardBlock($match[1], $match[2], $attributes)))->at($cursor);
+        $description = trim($match[4] ?? '');
+
+        return BlockStart::of(new CardContinueParser(new CardBlock($match[1], $match[2], $attributes, $description === '' ? null : $description)))->at($cursor);
     }
 }

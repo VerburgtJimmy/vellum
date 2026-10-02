@@ -13,13 +13,17 @@ use Vellum\Support\MarkdownView;
 
 /**
  * Renders :::cards via the cards/card Blade views.
+ *
+ * In a group with describe="pages", a card without its own description is
+ * left a placeholder that ContentRepository::render() fills with the linked
+ * page's description when the page is shown, so it is never out of date.
  */
 final class CardsRenderer implements NodeRendererInterface
 {
     public function render(Node $node, ChildNodeRendererInterface $childRenderer): ?\Stringable
     {
         if ($node instanceof CardBlock) {
-            return $this->renderCard($node);
+            return $this->renderCard($node, describe: false);
         }
 
         if (! $node instanceof DirectiveBlock || $node->getName() !== 'cards') {
@@ -27,10 +31,11 @@ final class CardsRenderer implements NodeRendererInterface
         }
 
         $items = '';
+        $describe = $node->getAttribute('describe') === 'pages';
 
         foreach ($node->children() as $child) {
             if ($child instanceof CardBlock) {
-                $items .= (string) $this->renderCard($child);
+                $items .= (string) $this->renderCard($child, $describe);
             } else {
                 $items .= (string) $childRenderer->renderNodes([$child]);
             }
@@ -41,12 +46,14 @@ final class CardsRenderer implements NodeRendererInterface
         ]);
     }
 
-    private function renderCard(CardBlock $card): \Stringable
+    private function renderCard(CardBlock $card, bool $describe): \Stringable
     {
         return MarkdownView::render('card', [
             'href' => $card->getHref(),
             'title' => $card->getTitle(),
             'icon' => $card->getIcon(),
+            'description' => $card->getDescription(),
+            'describe' => $describe,
         ]);
     }
 }

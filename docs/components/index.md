@@ -7,7 +7,7 @@ Vellum ships with callouts, tabs, steps and cards. You write them as `:::` direc
 
 Each one is a Blade view in `resources/views/components/`, so `:::note` and `<x-vellum::callout type="note">` produce identical markup. Use `:::` for the built-in components and `<x-…>` tags for components you add yourself. See [Extending](/docs/extending).
 
-:::cards
+:::cards describe="pages"
 ::card[Callouts](/docs/components/callouts)
 ::card[Tabs](/docs/components/tabs)
 ::card[Steps](/docs/components/steps)

@@ -288,8 +288,47 @@ final class ContentRepository
     public function render(Document $document, bool $cache = true): string
     {
         $render = static fn (): string => (new IslandRenderer)->render($document->html, $document->islands);
+        $html = $cache ? (new FragmentCache)->remember($document, $render) : $render();
 
-        return $cache ? (new FragmentCache)->remember($document, $render) : $render();
+        return $this->describeCards($html, $document->version);
+    }
+
+    /**
+     * Fills in each card that asked for the linked page's own description,
+     * from the pages this reader may see, so a gated page's description is
+     * never shown to someone who cannot open it. A link outside the docs is
+     * described by its domain. This runs after the fragment cache and reads
+     * the navigation, so a card follows its page without its own page being
+     * compiled again.
+     */
+    private function describeCards(string $html, ?string $version): string
+    {
+        if (! str_contains($html, 'data-vellum-card-describe')) {
+            return $html;
+        }
+
+        $descriptions = [];
+
+        foreach ($this->navigationBuilder()->flattenPages($this->navigation($version)) as $page) {
+            $description = $page['description'] ?? null;
+
+            if (is_string($description) && $description !== '') {
+                $descriptions[rtrim($page['href'], '/')] = $description;
+            }
+        }
+
+        return (string) preg_replace_callback(
+            '/<span class="vellum-card-description" data-vellum-card-describe="([^"]*)"><\/span>/',
+            static function (array $match) use ($descriptions): string {
+                $href = html_entity_decode($match[1], ENT_QUOTES | ENT_HTML5);
+                $path = rtrim(preg_split('/[?#]/', $href)[0] ?? '', '/');
+                $host = preg_match('#^https?://#i', $href) === 1 ? parse_url($href, PHP_URL_HOST) : null;
+                $text = $descriptions[$path] ?? (is_string($host) ? $host : null);
+
+                return $text === null ? '' : '<span class="vellum-card-description">'.e($text).'</span>';
+            },
+            $html,
+        );
     }
 
     /**

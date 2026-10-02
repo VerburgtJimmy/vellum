@@ -7,7 +7,7 @@ namespace Vellum\Markdown\Extensions\Cards;
 use League\CommonMark\Node\Block\AbstractBlock;
 
 /**
- * A link card produced from ::card[Title](/url){icon=...}.
+ * A link card produced from ::card[Title](/url){icon=...} Description.
  */
 final class CardBlock extends AbstractBlock
 {
@@ -18,6 +18,7 @@ final class CardBlock extends AbstractBlock
         private readonly string $title,
         private readonly string $href,
         private readonly array $attributes = [],
+        private readonly ?string $description = null,
     ) {
         parent::__construct();
     }
@@ -30,6 +31,14 @@ final class CardBlock extends AbstractBlock
     public function getHref(): string
     {
         return $this->href;
+    }
+
+    /**
+     * The text after the link on the card's line, if the author wrote any.
+     */
+    public function getDescription(): ?string
+    {
+        return $this->description;
     }
 
     public function getIcon(): ?string

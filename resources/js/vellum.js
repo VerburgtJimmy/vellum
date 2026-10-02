@@ -3,6 +3,7 @@ import collapse from '@alpinejs/collapse'
 import '../css/vellum.css'
 import { prefetch, prefetchHover } from './prefetch.js'
 import { vellumScrollSpy } from './scrollspy.js'
+import { initCards } from './cards.js'
 import { initCopyButtons } from './copy.js'
 import { initPageMeta } from './page-meta.js'
 import { initSidebar } from './sidebar.js'
@@ -768,6 +769,7 @@ if (!window.Alpine) {
   Alpine.start()
   initSidebar()
   initCopyButtons()
+  initCards()
   initPageMeta()
   initSteps()
 
