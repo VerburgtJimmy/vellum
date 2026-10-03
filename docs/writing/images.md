@@ -66,10 +66,16 @@ name. `assets/800x600.png` works and `assets/chart-800x600.png` does not.
 
 **Alt text.** The Markdown alt text is used as written, so always provide it.
 
+**A frame and a larger view.** An image on a line of its own sits on a mat with a border, so
+a screenshot with the same background as the page still has an edge, and a tall image is
+held to a readable height. When an image is shown smaller than it is, the reader can open
+it at full size with a click, or with Enter when it has focus, and close it with Escape. An
+image inside a line of text is left as it is.
+
 ## Captions
 
 An image with a title is wrapped in a `<figure>`, and the title becomes its
-`<figcaption>`:
+`<figcaption>`, shown under the image inside its frame:
 
 ```md
 ![Request lifecycle](assets/architecture.svg "How a docs request is resolved")

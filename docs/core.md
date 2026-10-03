@@ -52,6 +52,7 @@ A few parts need a script to work:
 
 - Code blocks have a copy button marked `data-vellum-copy-code`, inside the block's `data-vellum-code` element. Its `data-vellum-code-kind` is `file`, `terminal` or `snippet`, and in a terminal each command line has the class `vellum-code-command`, for a prompt drawn with CSS.
 - Headings have a copy-link button marked `data-vellum-heading-copy`.
+- Table cells carry their column's heading in `data-label`, for laying rows out as blocks on a narrow screen, and an image alone in its paragraph is marked `data-vellum-image-block`.
 - Tabs follow the WAI-ARIA tabs pattern, with the first panel open and the others `hidden`.
 
 To change the markup of a component, see [Change a built-in's markup](/docs/extending#change-a-built-ins-markup).

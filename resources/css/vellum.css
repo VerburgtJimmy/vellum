@@ -354,6 +354,12 @@
   background: var(--primary);
 }
 
+/*
+ * A table is a surface. Keys in its first column stay on one line, so a table
+ * too wide for the page scrolls sideways rather than breaking them. One that
+ * fits pins its header while the reader scrolls it (tables.js marks those),
+ * and on a phone each row becomes a block with every value under its heading.
+ */
 .vellum-table {
   margin: 1.25rem 0;
   overflow: auto;
@@ -364,7 +370,8 @@
 .vellum-prose :where(table) {
   width: 100%;
   margin: 0;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
   font-size: 0.9rem;
 }
 
@@ -374,19 +381,119 @@
   border-bottom: 1px solid color-mix(in oklch, var(--foreground) 14%, transparent);
   padding: 0.55rem 0.75rem;
   text-align: left;
+  vertical-align: top;
 }
 
 .vellum-prose :where(th:last-child, td:last-child) {
   border-right: 0;
 }
 
-.vellum-prose :where(tr:last-child td) {
+.vellum-prose :where(tbody tr:last-child td) {
   border-bottom: 0;
 }
 
 .vellum-prose :where(th) {
   background: var(--muted);
+  font-size: 0.8125rem;
   font-weight: 600;
+  color: var(--muted-foreground);
+}
+
+.vellum-prose td:first-child :is(code, [data-vellum-inline-code]) {
+  white-space: nowrap;
+  overflow-wrap: normal;
+  word-break: normal;
+}
+
+.vellum-prose tbody tr:hover > td {
+  background: color-mix(in oklab, var(--foreground) 3.5%, transparent);
+}
+
+/* The wrapper stops clipping so the header can stick to the page, and the
+   corner cells take over its rounding. */
+.vellum-table[data-vellum-table-fits] {
+  overflow: visible;
+}
+
+.vellum-table[data-vellum-table-fits] thead th {
+  position: sticky;
+  top: var(--vellum-sticky-top, 0px);
+  z-index: 2;
+}
+
+.vellum-table[data-vellum-table-fits] thead th:first-child {
+  border-top-left-radius: calc(var(--vellum-surface-radius) - 1px);
+}
+
+.vellum-table[data-vellum-table-fits] thead th:last-child {
+  border-top-right-radius: calc(var(--vellum-surface-radius) - 1px);
+}
+
+.vellum-table[data-vellum-table-fits] tbody tr:last-child td:first-child {
+  border-bottom-left-radius: calc(var(--vellum-surface-radius) - 1px);
+}
+
+.vellum-table[data-vellum-table-fits] tbody tr:last-child td:last-child {
+  border-bottom-right-radius: calc(var(--vellum-surface-radius) - 1px);
+}
+
+@media (max-width: 40rem) {
+  .vellum-table {
+    overflow: visible;
+  }
+
+  .vellum-prose thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+  }
+
+  .vellum-prose :is(table, tbody, tr, td) {
+    display: block;
+  }
+
+  .vellum-prose tbody tr {
+    padding: 0.75rem;
+    border-bottom: 1px solid color-mix(in oklch, var(--foreground) 14%, transparent);
+  }
+
+  .vellum-prose tbody tr:last-child {
+    border-bottom: 0;
+  }
+
+  .vellum-prose tbody tr:hover > td {
+    background: transparent;
+  }
+
+  .vellum-prose td {
+    padding: 0;
+    border: 0;
+  }
+
+  .vellum-prose td + td {
+    margin-top: 0.5rem;
+  }
+
+  .vellum-prose td + td::before {
+    content: attr(data-label);
+    display: block;
+    font-size: 0.6875rem;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--muted-foreground);
+  }
+
+  .vellum-prose td:first-child {
+    font-weight: 600;
+  }
+
+  .vellum-prose td:first-child :is(code, [data-vellum-inline-code]) {
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
 }
 
 .vellum-prose :where(img) {
@@ -396,6 +503,73 @@
   height: auto;
   margin: 1.25rem 0;
   border-radius: var(--vellum-surface-radius);
+}
+
+/*
+ * An image on its own sits on a mat, so a screenshot with the page's own
+ * background still has an edge, and a tall one is held to a readable height.
+ * zoom.js lets the reader open it at full size.
+ */
+.vellum-prose p:has(> img[data-vellum-image-block]),
+.vellum-figure {
+  margin: 1.25rem 0;
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--vellum-surface-radius);
+  background: var(--muted);
+}
+
+.vellum-prose img[data-vellum-image-block] {
+  max-height: 28rem;
+  margin: 0 auto;
+  border: 1px solid var(--border);
+  border-radius: var(--vellum-inset-radius);
+}
+
+.vellum-prose img[data-vellum-zoomable] {
+  cursor: zoom-in;
+}
+
+.vellum-prose img[data-vellum-zoomable]:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.vellum-zoom {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  padding: 2rem;
+  border: 0;
+  background: color-mix(in oklab, var(--background) 82%, transparent);
+  backdrop-filter: blur(6px);
+  cursor: zoom-out;
+  opacity: 0;
+  transition: opacity 180ms ease;
+}
+
+.vellum-zoom[data-shown] {
+  opacity: 1;
+}
+
+.vellum-zoom img {
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  max-height: 100%;
+  border: 1px solid var(--border);
+  border-radius: var(--vellum-surface-radius);
+  box-shadow: 0 24px 64px rgb(0 0 0 / 0.25);
+  transition: transform 260ms cubic-bezier(0.22, 0.9, 0.25, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vellum-zoom,
+  .vellum-zoom img {
+    transition: none;
+  }
 }
 
 .vellum-prose :where(code):not(pre code):not(.vellum-code code),
@@ -1450,20 +1624,10 @@ a.vellum-step-indicator:hover {
   }
 }
 
-.vellum-figure {
-  margin: 1.25rem 0;
-}
-
-.vellum-figure :where(img) {
-  display: block;
-  width: auto;
-  max-width: 100%;
-  margin: 0;
-}
-
 .vellum-figure-caption {
-  margin-top: 0.5rem;
-  font-size: 0.875rem;
+  margin-top: 0.75rem;
+  text-align: center;
+  font-size: 0.8125rem;
   color: var(--muted-foreground);
 }
 

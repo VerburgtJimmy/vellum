@@ -12,7 +12,7 @@ that works in a GitHub README works here.
 | --- | --- |
 | Headings | `##` to `######` get anchors. See below. |
 | Emphasis, lists, blockquotes | Standard CommonMark. |
-| Tables | GFM pipe tables. On narrow screens a table scrolls sideways inside its own wrapper and the page keeps its width. |
+| Tables | GFM pipe tables. See [Tables](#tables). |
 | Task lists | `- [x] done` renders a styled checkbox. |
 | Strikethrough | `~~gone~~`. |
 | Autolinks | Bare URLs become links. |
@@ -23,6 +23,18 @@ that works in a GitHub README works here.
 Vellum also adds `:::` directives for [callouts, tabs, steps and
 cards](/docs/components), `<x-…>` tags for [your own
 components](/docs/extending), and allowlisted [value tags](/docs/value-tags).
+
+## Tables
+
+A table is written as a GFM pipe table and needs no options:
+
+- Code in the first column, such as a config key, is never broken across lines.
+- The header row stays at the top of the window while the reader scrolls through a long
+  table.
+- A table too wide for the page scrolls sideways inside its own frame, and the page keeps
+  its width.
+- On a phone each row becomes a block: the first cell in bold, then every other value under
+  its column's heading. Nothing scrolls sideways.
 
 ## Headings and anchors
 

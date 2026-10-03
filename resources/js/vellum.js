@@ -8,6 +8,8 @@ import { initCopyButtons } from './copy.js'
 import { initPageMeta } from './page-meta.js'
 import { initSidebar } from './sidebar.js'
 import { initSteps } from './steps.js'
+import { initTables } from './tables.js'
+import { initImageZoom } from './zoom.js'
 import { applyTheme, getStoredTheme, initTheme, resolveTheme } from './theme.js'
 
 window.VellumTheme = { applyTheme, getStoredTheme, initTheme, resolveTheme }
@@ -770,6 +772,8 @@ if (!window.Alpine) {
   initSidebar()
   initCopyButtons()
   initCards()
+  initTables()
+  initImageZoom()
   initPageMeta()
   initSteps()
 

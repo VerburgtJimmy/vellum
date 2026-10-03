@@ -6,6 +6,7 @@ namespace Vellum\Markdown\Extensions\Image;
 
 use InvalidArgumentException;
 use League\CommonMark\Extension\CommonMark\Node\Inline\Image;
+use League\CommonMark\Node\Block\Paragraph;
 use League\CommonMark\Node\Inline\Newline;
 use League\CommonMark\Node\Node;
 use League\CommonMark\Node\NodeIterator;
@@ -66,6 +67,12 @@ final class ImageRenderer implements ConfigurationAwareInterface, NodeRendererIn
         }
 
         $this->applyDimensions($attrs, $url);
+
+        // An image alone in its paragraph is a block of its own, which a
+        // stylesheet can frame; one in a line of text is left as it is.
+        if ($node->previous() === null && $node->next() === null && $node->parent() instanceof Paragraph) {
+            $attrs['data-vellum-image-block'] = '';
+        }
 
         $img = new HtmlElement('img', $attrs, '', true);
 

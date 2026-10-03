@@ -55,6 +55,7 @@
     @if ($showMobile && $toc !== [])
         <div
             data-vellum-toc-mobile
+            data-vellum-sticky-bar
             class="sticky {{ $mobileStickyClass }} relative z-30 lg:hidden"
             :class="open && 'z-[60]'"
             x-data="vellumScrollSpy(@js($flat), @js($pageTitle))"

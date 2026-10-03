@@ -38,7 +38,7 @@ final class ConfigKeyQuestions implements QuestionGenerator
                 continue;
             }
 
-            preg_match_all('/<tr>\s*<td[^>]*>\s*<code\b[^>]*>([a-zA-Z_.]+)<\/code>/', $table, $rows);
+            preg_match_all('/<tr\b[^>]*>\s*<td[^>]*>\s*<code\b[^>]*>([a-zA-Z_.]+)<\/code>/', $table, $rows);
             array_push($keys, ...$rows[1]);
         }
 
