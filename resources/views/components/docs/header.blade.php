@@ -19,6 +19,20 @@
     class="sticky top-0 z-40 flex h-14 shrink-0 items-center gap-3 border-b border-border bg-background/95 px-4 backdrop-blur supports-[backdrop-filter]:bg-background/80 md:px-6"
 >
     <div class="flex min-w-0 flex-1 items-center gap-2 md:gap-3">
+        {{-- The sidebar has no row of its own in this layout, so its toggle lives here. --}}
+        <button
+            type="button"
+            data-vellum-sidebar-toggle
+            data-vellum-button
+            class="-ml-1.5 hidden h-8 w-8 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:inline-flex"
+            aria-label="Collapse sidebar"
+            :aria-label="collapsed ? 'Expand sidebar' : 'Collapse sidebar'"
+            :aria-expanded="(! collapsed).toString()"
+            x-on:click="toggleSidebar()"
+        >
+            {!! \Vellum\Support\Icons::sidebar(['class' => 'h-4 w-4']) !!}
+        </button>
+
         <x-vellum::docs.brand />
 
         @if (config('vellum.versions.enabled'))

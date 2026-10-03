@@ -49,7 +49,9 @@
     @endif
     x-init="$nextTick(() => $el.querySelector('[data-vellum-nav-active]')?.scrollIntoView({ block: 'nearest' }))"
 >
-    @if ($chrome)
+    {{-- With the header layout the brand and the collapse button are in the
+         header, so the sidebar starts with its navigation. --}}
+    @if ($chrome && $searchInSidebar)
     <div class="flex items-center gap-2 px-3 py-3">
         @if ($showBrand)
             <div class="min-w-0 flex-1">
@@ -89,7 +91,7 @@
         </div>
     @endif
 
-    <x-vellum::ui.scroll-area class="min-h-0 flex-1 px-4 pt-1 pb-4">
+    <x-vellum::ui.scroll-area class="min-h-0 flex-1 px-4 pb-4 {{ $chrome && ! $searchInSidebar ? 'pt-4' : 'pt-1' }}">
         <nav aria-label="Documentation" data-vellum-nav class="flex flex-col gap-1 text-sm">
             {!! \Vellum\View\NavTree::render($navigation, $activeSlug, $containsActive) !!}
         </nav>

@@ -130,6 +130,10 @@ loads, or add a `<style>` block to the same value:
 `layout.search` is either `sidebar` (the default, which also removes the top header) or
 `header`.
 
+With `sidebar`, the site name, the version switcher, search and the button that collapses the
+sidebar are all in the sidebar. With `header`, they move to a bar across the top, and the
+sidebar holds only the navigation.
+
 ## Table of contents
 
 The table of contents beside each page comes in two styles. Choose one with

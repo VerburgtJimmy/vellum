@@ -276,6 +276,26 @@ it('renders a header when search is placed in the header', function (): void {
         ->not->toContain('data-vellum-search-trigger-variant="sidebar"');
 });
 
+it('puts the sidebar toggle in the header in that layout, and leaves the sidebar to its navigation', function (): void {
+    config()->set('vellum.layout.search', 'header');
+    $this->writeDoc('index.md', "---\ntitle: Home\n---\nHi");
+
+    $html = (string) $this->get('/docs')->assertOk()->getContent();
+    $header = substr($html, (int) strpos($html, '<header'), (int) strpos($html, '</header>') - (int) strpos($html, '<header'));
+
+    expect($header)->toContain('data-vellum-sidebar-toggle')
+        ->and(strpos($header, 'data-vellum-sidebar-toggle'))->toBeLessThan(strpos($header, 'data-vellum-brand'))
+        ->and($html)->not->toContain('data-vellum-sidebar-collapse')
+        ->and($html)->not->toContain('data-vellum-sidebar-pill');
+
+    config()->set('vellum.layout.search', 'sidebar');
+    $sidebar = (string) $this->get('/docs')->assertOk()->getContent();
+
+    expect($sidebar)->toContain('data-vellum-sidebar-collapse')
+        ->and($sidebar)->toContain('data-vellum-sidebar-pill')
+        ->and($sidebar)->not->toContain('data-vellum-sidebar-toggle');
+});
+
 it('places search in the sidebar by default', function (): void {
     $this->writeDoc('index.md', "---\ntitle: Home\n---\nHi");
 

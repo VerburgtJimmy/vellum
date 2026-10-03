@@ -23,6 +23,9 @@
         />
     @endif
 
+    {{-- The floating pill reopens a collapsed sidebar. With a header, the
+         header's own toggle does that. --}}
+    @if (! $hasHeader)
     <div
         data-vellum-sidebar-pill
         class="fixed left-4 z-50 items-center gap-0.5 rounded-xl border border-border bg-muted p-0.5 text-muted-foreground shadow-lg motion-safe:transition-opacity"
@@ -41,6 +44,7 @@
             <x-vellum::docs.search-trigger variant="icon" />
         @endif
     </div>
+    @endif
 
     <div
         data-vellum-sidebar-hotzone
@@ -62,6 +66,7 @@
     @else
         <div
             data-vellum-mobile-bar
+            data-vellum-sticky-bar
             class="sticky top-0 z-40 flex h-14 shrink-0 items-center justify-between gap-2 border-b border-border bg-background/95 px-4 backdrop-blur md:hidden"
         >
             <x-vellum::docs.brand />
