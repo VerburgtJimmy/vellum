@@ -14,14 +14,15 @@ describe('steps following the reader', () => {
     ])
   })
 
-  it('fills the line under a step down to the reading line', () => {
-    expect(states(60)[0]).toEqual({ fill: 32, reached: true, current: true })
+  // Each line is 72px long: 100 from one step to the next, less the 28px number.
+  it('fills the line under a step down to the reading line, as a share of its length', () => {
+    expect(states(60)[0]).toEqual({ fill: 32 / 72, reached: true, current: true })
     expect(states(60)[1]).toEqual({ fill: 0, reached: false, current: false })
   })
 
-  it('fills a passed step\'s line to the next step, and marks the next as current', () => {
-    expect(states(150)[0].fill).toBe(72)
-    expect(states(150)[1]).toEqual({ fill: 22, reached: true, current: true })
+  it('fills a passed step\'s line whole, and marks the next as current', () => {
+    expect(states(150)[0].fill).toBe(1)
+    expect(states(150)[1]).toEqual({ fill: 22 / 72, reached: true, current: true })
     expect(states(150)[0].current).toBe(false)
   })
 

@@ -903,7 +903,7 @@
   height: 0.875rem;
 }
 
-/* GitHub Light / GitHub Dark — the Fumadocs Shiki default. */
+/* GitHub Light and GitHub Dark, the Fumadocs Shiki default. */
 .hl-keyword,
 .hl-operator { color: #cf222e; }
 .hl-property,
@@ -1218,14 +1218,17 @@
 }
 
 /* Fills down to where the reader is; set by steps.js. */
+/* Scaled, not resized: a transform costs no layout while the reader scrolls. */
 .vellum-step:not(:last-child)::after {
   content: '';
   position: absolute;
   left: 0.8125rem;
   top: 1.75rem;
+  bottom: -1.25rem;
   width: 1px;
-  height: var(--vellum-step-fill, 0px);
   background: var(--primary);
+  transform: scaleY(var(--vellum-step-fill, 0));
+  transform-origin: top;
 }
 
 /*
@@ -2022,12 +2025,14 @@ html[data-vellum-nav-marker] [data-vellum-sidebar-wrap] [data-vellum-nav-link]:h
   background: var(--primary);
 }
 
+/* Scaled, not resized: a transform costs no layout while the reader scrolls. */
 .vellum-nav-marker::after {
   content: '';
   position: absolute;
-  inset: 0 auto 0 0;
-  width: calc(var(--vellum-read, 0) * 100%);
+  inset: 0;
   background: color-mix(in oklab, var(--primary) 12%, transparent);
+  transform: scaleX(var(--vellum-read, 0));
+  transform-origin: left;
 }
 
 /* Inside a folder the group's guide line already marks the section. */

@@ -198,9 +198,15 @@ export function initSidebar() {
   }).observe(nav)
 
   // Reading progress: the marker fills as the reader moves down the page.
+  let shown = ''
   const read = () => {
     const max = document.documentElement.scrollHeight - window.innerHeight
-    marker.style.setProperty('--vellum-read', String(max > 0 ? Math.min(1, window.scrollY / max) : 1))
+    const progress = (max > 0 ? Math.min(1, window.scrollY / max) : 1).toFixed(3)
+
+    if (progress !== shown) {
+      shown = progress
+      marker.style.setProperty('--vellum-read', progress)
+    }
   }
   window.addEventListener('scroll', read, { passive: true })
   read()

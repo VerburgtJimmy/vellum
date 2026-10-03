@@ -16,7 +16,8 @@ const READING_LINE = 1 / 3
  * Where the reader is in one steps block.
  *
  * The line under a step runs from the bottom of its number to the top of the
- * next step, so it fills by how far the reading line has passed that span.
+ * next step, so it fills by how far the reading line has passed that span,
+ * from 0 to 1.
  *
  * @param {number[]} tops  each step's top, in viewport pixels
  * @param {number} end  the bottom of the last step
@@ -27,10 +28,10 @@ const READING_LINE = 1 / 3
 export function stepStates(tops, end, circle, line) {
   return tops.map((top, i) => {
     const next = tops[i + 1] ?? end
-    const last = i === tops.length - 1
+    const span = next - top - circle
 
     return {
-      fill: last ? 0 : Math.max(0, Math.min(next - top - circle, line - top - circle)),
+      fill: i === tops.length - 1 || span <= 0 ? 0 : Math.max(0, Math.min(1, (line - top - circle) / span)),
       reached: line >= top + circle / 2,
       current: line >= top && line < next,
     }
@@ -66,7 +67,14 @@ export function initSteps() {
 
       stepStates(tops, end, steps[0].number?.offsetHeight ?? 0, line).forEach((state, i) => {
         const { step, entries } = steps[i]
-        step.style.setProperty('--vellum-step-fill', `${state.fill}px`)
+        const fill = state.fill.toFixed(3)
+
+        // Written only when it changed, so an idle block costs nothing per frame.
+        if (step.dataset.vellumStepFill !== fill) {
+          step.dataset.vellumStepFill = fill
+          step.style.setProperty('--vellum-step-fill', fill)
+        }
+
         step.toggleAttribute('data-vellum-step-reached', state.reached)
         step.toggleAttribute('data-vellum-step-current', state.current)
         entries.forEach((entry) => entry.toggleAttribute('data-vellum-toc-step-reached', state.reached))
