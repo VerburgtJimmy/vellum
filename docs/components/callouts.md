@@ -83,8 +83,8 @@ The body is ordinary Markdown and can hold lists, links, code, tables and other
 directives.
 
 :::note[A callout with a block in it]
-Surfaces are layered, so a code block inside a callout sits one level deeper than the
-callout around it:
+A callout has no background of its own, so a code block inside it looks the same as one in
+the text around it:
 
 ```bash
 php artisan vellum:build

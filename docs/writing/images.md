@@ -70,7 +70,7 @@ name. `assets/800x600.png` works and `assets/chart-800x600.png` does not.
 a screenshot with the same background as the page still has an edge, and a tall image is
 held to a readable height. When an image is shown smaller than it is, the reader can open
 it at full size with a click, or with Enter when it has focus, and close it with Escape. An
-image inside a line of text is left as it is.
+image inside a line of text is left as it is, and an image that is a link keeps its link and does not zoom.
 
 ## Captions
 

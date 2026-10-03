@@ -29,10 +29,10 @@ components](/docs/extending), and allowlisted [value tags](/docs/value-tags).
 A table is written as a GFM pipe table and needs no options:
 
 - Code in the first column, such as a config key, is never broken across lines.
-- The header row stays at the top of the window while the reader scrolls through a long
-  table.
-- A table too wide for the page scrolls sideways inside its own frame, and the page keeps
-  its width.
+- The header row of a table that fits the page stays at the top of the window while the
+  reader scrolls through it.
+- A table too wide for the page scrolls sideways inside its own frame instead, without a
+  pinned header, and the page keeps its width.
 - On a phone each row becomes a block: the first cell in bold, then every other value under
   its column's heading. Nothing scrolls sideways.
 

@@ -158,7 +158,7 @@ cannot expose a path from elsewhere on disk.
 
 ## Changing them
 
-The row has no config option. To change it, override the view. Vellum registers its
+The actions have no config option. To change them, override the view. Vellum registers its
 views under the `vellum` namespace, so a file at the matching path in your app takes
 precedence:
 
@@ -166,8 +166,10 @@ precedence:
 resources/views/vendor/vellum/components/docs/page-actions.blade.php
 ```
 
-Creating that file replaces the shipped view, and an empty file removes the row. You do
-not need to publish anything first. The same works for every other Vellum view.
+Creating that file replaces the shipped view, and an empty file removes the actions and
+leaves the date beside them. To change or remove the whole line, override
+`components/docs/page-meta.blade.php` the same way. You do not need to publish anything
+first. The same works for every other Vellum view.
 
 :::warning
 Views are not frozen the way config keys and frontmatter are. An override is a copy and

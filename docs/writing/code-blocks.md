@@ -27,8 +27,11 @@ plain text.
 
 A block without a title has no header. Its language and a copy button sit in the top
 corner, and the label makes way for the button when the pointer is over the block. A block
-with a [title](#title) gets a header naming the file, and a shell block without one is
-shown as a [terminal](#terminal-commands).
+with no language shows only the button.
+
+Two kinds of block do have a header: a block with a [title](#title), whose header names the
+file, and a shell block without a title, which is shown as a
+[terminal](#terminal-commands) under a header reading "Terminal".
 
 The languages below are recognised for the label and the file glyph in a titled block's
 header, and an alias is labelled with the main name. `php` and `blade` use the general
@@ -49,7 +52,8 @@ code-file glyph; the others have one of their own.
 | `python` | `py` |
 | `rust` | `rs` |
 | `cpp` | `c++`, `cxx`, `cc` |
-| `sql`, `c`, `md` | `markdown` |
+| `md` | `markdown` |
+| `sql`, `c` | |
 
 Any other language gets the general code-file glyph. Highlighting depends on what Tempest
 supports, so a language it does not know (Rust, C and C++ among them) renders as plain
@@ -74,7 +78,7 @@ or double quotes both work.
 
 ## Terminal commands
 
-A shell block without a title is shown as a terminal, with a `$` before each command:
+A shell block without a title is shown as a terminal: a header reading "Terminal", and a `$` before each command:
 
 ````md
 ```bash

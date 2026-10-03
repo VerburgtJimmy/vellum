@@ -9,49 +9,48 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- The sidebar remembers its scroll position between pages and scrolls the current page into view when it is hidden
-- A dot in the sidebar on pages that changed since the reader last opened them. What a reader has opened is kept in their browser
-- The highlight on the current page slides over from the page the reader came from, and fills as they read down the page. Moving the pointer over the sidebar moves a lighter highlight with it. Both sit under the text and respect reduced-motion settings
-- Folders in the sidebar have a guide line, shown in the accent colour for the folder holding the current page
-- A new table of contents style, `window`, now the default: one highlight behind every entry whose section is on screen, whose edges hold on to whole entries and spring to the next one as sections come and go. Nested entries hang from a guide line, and a lighter highlight follows the pointer. `layout.toc` (or `VELLUM_LAYOUT_TOC`) set to `line` keeps the line style
-- Steps from a `:::steps` block show their number in the table of contents, filled while the step is on screen. In the line style the numbers sit on the line
-- A line under each page's title says when the page last changed, as "3 days ago" for the last month, and how long it takes to read for pages of three minutes or more. When the page changed since the reader last opened it, the line says so, with the sidebar's dot. The page's actions sit on the same line
-- A shell block without a title is shown as a terminal, with a `$` before each command. Blank lines, `#` comments and continuations of a line ending in `\` get none, and the `$` is never selected or copied. `console` is accepted as a shell language
-- Copying a code block sweeps a light wash down the code that was copied
-- A page of any version but the latest starts with a notice saying it is an older or an unreleased version, with a link to the same page in the latest. A version listed before `latest` in `versions.list` counts as unreleased
-- The version switcher tags the latest and unreleased versions, and says when the page being read is not in a version, where choosing it opens that version's start page
-- The previous and next links are labelled, and name the neighbouring page's folder when it differs from the current page's, as in "Next · Components". `adjacent()` returns that folder as `section`
-- A table's header row stays at the top of the window while the reader scrolls a long table, and on a phone each row becomes a block with every value under its column's heading instead of a table that scrolls sideways
-- An image shown smaller than it is can be opened at full size with a click or Enter, and closed with Escape
-- Cards can have a description: any text after the link on a `::card` line. `:::cards describe="pages"` gives cards without one the linked page's own frontmatter description, filled in from the navigation when the page is shown, so it never goes stale and a gated page's description is only shown to readers who may open it. A card linking outside the docs shows the site's domain
-- Tab groups that share a `persist` key follow each other at once on the page, not only on the next page load, and the group the reader clicked stays where it is on screen while the others change height
-- Every callout names its type, "Note", "Warning" and so on, on its first line, or says it to screen readers before an author's title. Before, the type was shown only by colour and a glyph screen readers skip
-- The search dialog groups results by page, with each page named once and its sections under it, and lists the last five results the reader opened before they type. The recent list stays in the reader's browser. A footer shows the keys, and the arrow keys scroll the active result into view
-- Steps follow the reader: the line between the numbers fills as they read, each number fills once its step is reached, and the table of contents keeps those numbers filled too. The number of the step being read stays in view, and clicking it goes back to the start of the step
-- `layout.toc` in `config/vellum.php`
 - `jimmyverburgt/vellum-core`, the content engine as a package of its own: pages, navigation, versions, gating, Markdown, the compiled cache, search and the changelog, with no routes, layout or assets. `jimmyverburgt/vellum` includes it, so installing Vellum is unchanged. See Core on its own in the docs
 - `ContentRepository::render()`, which returns a page's HTML with its components rendered
 - An app can replace the markup of a built-in component, for both the `:::` and the `<x-vellum::…>` form, by publishing its view to `resources/views/vendor/vellum/components/`. Before, `:::` blocks ignored a published copy
+- The sidebar remembers its scroll position between pages and scrolls the current page into view when it is hidden
+- A dot in the sidebar on pages that changed since the reader last opened them. What a reader has opened is kept in their browser
+- The highlight on the current page slides over from the page the reader came from, and fills as they read down the page. Moving the pointer over the sidebar moves a lighter highlight with it. Both sit under the text and respect reduced-motion settings
+- Folders in the sidebar have a guide line, shown in the primary colour for the folder holding the current page
+- A new table of contents style, `window`, now the default: one highlight behind every entry whose section is on screen, whose edges hold on to whole entries and spring to the next one as sections come and go. Nested entries hang from a guide line, and a lighter highlight follows the pointer. The new `layout.toc` key (or `VELLUM_LAYOUT_TOC`) set to `line` keeps the line style
+- Steps from a `:::steps` block show their number in the table of contents, filled while the step is on screen. In the line style the numbers sit on the line
+- A line under each page's title says when the page last changed, as "3 days ago" for the last month, and how long it takes to read for pages of three minutes or more. When the page changed since the reader last opened it, the line says so, with the sidebar's dot. The page's actions sit on the same line
+- Steps follow the reader: the line between the numbers fills as they read, each number fills once its step is reached, and the table of contents keeps those numbers filled too. The number of the step being read stays in view, and clicking it goes back to the start of the step
+- A shell block without a title is shown as a terminal, with a `$` before each command. Blank lines, `#` comments and continuations of a line ending in `\` get none, and the `$` is never selected or copied. `console` is accepted as a shell language
+- Copying a code block sweeps a light wash down the code that was copied
+- Every callout names its type, "Note", "Warning" and so on, on its first line, or says it to screen readers before an author's title. Before, the type was shown only by colour and a glyph screen readers skip
+- Tab groups that share a `persist` key follow each other at once on the page, not only on the next page load, and the group the reader clicked stays where it is on screen while the others change height
+- Cards can have a description: any text after the link on a `::card` line. `:::cards describe="pages"` gives cards without one the linked page's own frontmatter description, filled in from the navigation when the page is shown, so it never goes stale and a gated page's description is only shown to readers who may open it. A card linking outside the docs shows the site's domain
+- The header row of a table that fits the page stays at the top of the window while the reader scrolls it, and on a phone each row becomes a block with every value under its column's heading instead of a table that scrolls sideways
+- An image shown smaller than it is can be opened at full size with a click or Enter, and closed with Escape
+- The search dialog groups results by page, with each page named once and its sections under it, and lists the last five results the reader opened before they type. The recent list stays in the reader's browser. A footer shows the keys, and the arrow keys scroll the active result into view
+- The previous and next links are labelled, and name the neighbouring page's folder when it differs from the current page's, as in "Next · Components". `adjacent()` returns that folder as `section`
+- A page of any version but the latest starts with a notice saying it is an older or an unreleased version, with a link to the same page in the latest. A version listed before `latest` in `versions.list` counts as unreleased, and `VersionLabel::kind()` says which a version is
+- The version switcher tags the latest and unreleased versions, and says when the page being read is not in a version, where choosing it opens that version's start page
 
 ### Changed
 
+- Classes that only the site uses moved namespace: `Vellum\Support\Theme`, `Color`, `Assets`, `Cn` and `NavTree` are now in `Vellum\View`, and `Vellum\Support\LlmsTxt`, `Vellum\Support\Sitemap` and `Vellum\Changelog\ChangelogFeed` are in `Vellum\Http`. This affects code that used these classes, and views copied from 0.7 into `resources/views/vendor/vellum/`: the sidebar, the layout and the `ui` views name them. The upgrade guide lists what to change
+- Errors in the docs, such as an unknown directive, implement `Vellum\Exceptions\ContentError`. The site renders these as its error page; with core alone, Laravel handles them like any other exception
+- The copy buttons on code blocks and headings are marked with `data-vellum-copy-code` and `data-vellum-heading-copy`, and one script handles every button, instead of an Alpine component on each. Rendered Markdown no longer contains Alpine attributes, apart from tabs
+- Every rounded corner now follows `theme.radius`, as the theming docs promised: code blocks, tab groups, tables, images and the floated sidebar were fixed at their own values. Surfaces are rounded 4px past `radius`, and anything inset in one, such as a tab panel, is rounded to nest evenly inside it
+- The table of contents marks the active entry with colour instead of a heavier weight, which made entries shift sideways, and the line style no longer has a dot
+- The last-updated date moved from the breadcrumb row to the line under the title, now labelled "Updated" and with a valid `datetime`, which was empty. The rule under the page actions is gone
 - Step titles in a `:::steps` block are rendered one heading level below the section the block sits in, and headings inside a step move with them. Steps under a `## Setup` heading are now `h3`, so they nest under that section in the table of contents and the page outline. A steps block before any section heading is unchanged. Authors still start each step with `##`; only CSS that targets step headings by tag, rather than by Vellum's classes, is affected
-- A code block without a title no longer has a header: its language and copy button sit in its corner. A titled block's header is drawn as an editor tab. Highlighted lines have a solid bar in the primary colour, and their line numbers are no longer faded. Code blocks carry `data-vellum-code-kind` (`file`, `terminal` or `snippet`)
-- The version switcher sits above the search field in the sidebar, at the same size, instead of beside the site name. The latest version is shown by its slug or label with a "Latest" tag, not as "Latest" alone, and `VersionLabel::for()` returns the slug for it
-- With `layout.search` set to `header`, the button that collapses the sidebar is in the header beside the site name, and reopens it too. The sidebar no longer keeps an empty row for it
-- At the foot of a page, Next is a wide card with the page's description on up to two lines, and Previous is a plain link beside it without one. Before, both were equal boxes with one cut-off line
+- A code block without a title no longer has a header, unless it is a shell block: its language and copy button sit in its corner. A titled block's header is drawn as an editor tab. Highlighted lines have a solid bar in the primary colour, and their line numbers are no longer faded. Code blocks carry `data-vellum-code-kind` (`file`, `terminal` or `snippet`)
+- Callouts are no longer boxes: a bar in the type's colour runs down the left edge and the glyph sits on the first line, inside the text column. Warnings and dangers keep a light tint so they stand out from notes and tips
+- Every tab group now looks like code tabs: one card with an underlined row of labels, the underline sliding to the selected label, and the panel inset in the card
+- Cards have an arrow that moves on hover, and the hover highlight glides from card to card like the sidebar's. Cards in a row are as tall as the tallest
 - Code in a table's first column, such as a config key, is no longer broken across lines; a table too wide for the page scrolls sideways. Table cells align to the top, column heads are smaller, and the row under the pointer is highlighted
 - An image on a line of its own sits on a bordered mat and is held to a readable height, with its caption inside the frame
-- Cards have an arrow that moves on hover, and the hover highlight glides from card to card like the sidebar's. Cards in a row are as tall as the tallest
-- Every rounded corner now follows `theme.radius`, as the theming docs promised: code blocks, tab groups, tables, images and the floated sidebar were fixed at their own values. Surfaces are rounded 4px past `radius`, and anything inset in one, such as a tab panel, is rounded to nest evenly inside it
-- Every tab group now looks like code tabs: one card with an underlined row of labels, the underline sliding to the selected label, and the panel inset in the card
-- Callouts are no longer boxes: a bar in the type's colour runs down the left edge and the glyph sits on the first line, inside the text column. Warnings and dangers keep a light tint so they stand out from notes and tips
 - The reader's words in a search result are marked with a bold underline in the primary colour instead of a yellow fill, and the browser's own clear button no longer shows in the search field. The results scroll with the sidebar's thin scrollbar
-- The last-updated date moved from the breadcrumb row to the line under the title, now labelled "Updated" and with a valid `datetime`, which was empty. The rule under the page actions is gone
-- The table of contents marks the active entry with colour instead of a heavier weight, which made entries shift sideways, and the line style no longer has a dot
-- The copy buttons on code blocks and headings are marked with `data-vellum-copy-code` and `data-vellum-heading-copy`, and one script handles every button, instead of an Alpine component on each. Rendered Markdown no longer contains Alpine attributes, apart from tabs
-- Classes that only the site uses moved namespace: `Vellum\Support\Theme`, `Color`, `Assets`, `Cn` and `NavTree` are now in `Vellum\View`, and `Vellum\Support\LlmsTxt`, `Vellum\Support\Sitemap` and `Vellum\Changelog\ChangelogFeed` are in `Vellum\Http`. Only code that used these classes directly is affected
-- Errors in the docs, such as an unknown directive, implement `Vellum\Exceptions\ContentError`. The site renders these as its error page; with core alone, Laravel handles them like any other exception
+- At the foot of a page, Next is a wide card with the page's description on up to two lines, and Previous is a plain link beside it without one. Before, both were equal boxes with one cut-off line
+- The version switcher sits above the search field in the sidebar, at the same size, instead of beside the site name. The latest version is shown by its slug or label with a "Latest" tag, not as "Latest" alone, and `VersionLabel::for()` returns the slug for it
+- With `layout.search` set to `header`, the button that collapses the sidebar is in the header beside the site name, and reopens it too. The sidebar no longer keeps an empty row for it
 
 ### Removed
 

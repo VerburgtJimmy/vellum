@@ -49,7 +49,8 @@ return [
     | the others at /docs/{version}/...; /docs/{latest}/... redirects to the
     | unprefixed URL. The order of "list" is the switcher order. "labels"
     | only changes the switcher text; folders and URLs use the list slug.
-    | The latest version is shown as "Latest" unless it has a label.
+    | Versions listed before "latest" are tagged as unreleased, and the
+    | latest is tagged "Latest".
     |
     */
     'versions' => [

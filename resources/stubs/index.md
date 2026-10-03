@@ -26,7 +26,7 @@ composer require jimmyverburgt/vellum
 ```json showLineNumbers
 {
     "require": {
-        "jimmyverburgt/vellum": "^0.7"
+        "jimmyverburgt/vellum": "^0.8"
     }
 }
 ```

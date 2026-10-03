@@ -29,9 +29,10 @@ Each card is a single line:
 ::card[Title](href) Description
 ```
 
-The title and the description are plain text, and the description is optional. The href
-can be a docs path, an app path or an external URL. Unlike an external link in prose, a card
-with an external URL opens in the same tab and has no outward arrow.
+The title and the description are plain text, and the description is optional. A long
+description is cut off after three lines. The href can be a docs path, an app path or an
+external URL. Unlike an external link in prose, a card with an external URL opens in the
+same tab, with the same arrow as every other card.
 
 A card needs both a title and an href. `::card[Title]` without an href is not turned into
 a card. It appears on the page as the literal text you typed, which shows that the line

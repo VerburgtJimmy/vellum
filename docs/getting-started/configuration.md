@@ -17,7 +17,7 @@ description: Every config key and frontmatter field, all frozen since 0.5.
 | `repo` | `null` | Base URL for the "Edit on GitHub" link |
 | `logo` | `null` | Path to an SVG file, or a Blade view name, for the site logo |
 | `links` | `[]` | Extra links, each with `label`, `href` and an optional `icon: github`. Shown in the sidebar footer, or in the header when `layout.search` is `header` |
-| `layout.search` | `sidebar` | Where the search field sits: `sidebar` or `header` |
+| `layout.search` | `env('VELLUM_LAYOUT_SEARCH', 'sidebar')` | Where the search field sits: `sidebar` or `header`. See [Theming](/docs/theming#where-search-sits) |
 | `layout.toc` | `env('VELLUM_LAYOUT_TOC', 'window')` | How the table of contents marks what is on screen: `window` or `line`. See [Theming](/docs/theming#table-of-contents) |
 | `fonts` | `null` | HTML added to the layout's head, such as a font stylesheet link |
 | `checks.references` | `true` | Warn during `vellum:build` about links and images that point at nothing |

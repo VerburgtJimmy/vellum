@@ -9,7 +9,7 @@ The requirements have been PHP 8.4+ and Laravel 11, 12, or 13 since 0.2.
 
 ## 0.7 to 0.8
 
-No changes to your config or content are required. Update the package and rebuild:
+No changes to your content are required. Update the package and rebuild:
 
 ```bash
 composer update jimmyverburgt/vellum
@@ -18,14 +18,58 @@ php artisan vellum:build
 
 The update also installs `jimmyverburgt/vellum-core`, which now holds the engine Vellum runs on. Nothing changes in how you install or use the full package. See [Core on its own](/docs/core) for what core is.
 
-Run `vellum:build` even outside a deploy. Compiled pages keep the HTML they were built with, and the copy buttons on code blocks and headings have new markup. On pages compiled by 0.7, the heading buttons stop copying links and the code buttons lose their check mark until the pages are rebuilt.
+Run `vellum:build` even outside a deploy. Compiled pages keep the HTML they were built with, and most components have new markup. On pages compiled by 0.7, the heading buttons stop copying links, the code buttons lose their check mark, and callouts, tabs and cards do not match the new stylesheet until the pages are rebuilt.
 
-A few things only matter if your app reached into Vellum's internals:
+### What readers will notice
 
-- These classes moved: `Vellum\Support\Theme`, `Color`, `Assets`, `Cn` and `NavTree` are now in `Vellum\View`, and `Vellum\Support\LlmsTxt`, `Vellum\Support\Sitemap` and `Vellum\Changelog\ChangelogFeed` are in `Vellum\Http`.
+0.8 redesigns the details of every page, with no change to how you write them. The ones most likely to surprise:
+
+- A shell block without a title is shown as a terminal with a `$` before each command. If you typed `$` yourself, it now shows twice, so remove yours. See [Terminal commands](/docs/writing/code-blocks#terminal-commands).
+- Callouts are no longer boxes, and each names its type on its first line.
+- The table of contents has a new default style, `window`. See [Table of contents](/docs/theming#table-of-contents) to keep `line`.
+- With versions on, the switcher shows the latest version by its slug with a "Latest" tag, where it used to say "Latest" alone. Give the version a name in `versions.labels` if the slug is not what readers should see. Pages of any other version start with a notice. See [Versions](/docs/versions).
+- Corners that ignored `theme.radius` now follow it, so a radius you changed also changes code blocks, tables, tabs and images.
+
+### Config
+
+`layout.toc` is new. A config file published before 0.8 has a `layout` array without it, and a published array replaces the package's whole, so `VELLUM_LAYOUT_TOC` is ignored until the key is in your file. Add it, or republish the config:
+
+```php
+'layout' => [
+    'search' => env('VELLUM_LAYOUT_SEARCH', 'sidebar'),
+    'toc' => env('VELLUM_LAYOUT_TOC', 'window'),
+],
+```
+
+`vellum:build` no longer warns about a colour preset removed in 0.5. The site still falls back to `neutral`.
+
+### Views you overrode
+
+A view you copied from 0.7 into `resources/views/vendor/vellum/` and changed needs attention:
+
+- The sidebar, the layout and every `ui` view named a class that has moved, so a 0.7 copy fails with "Class not found". Change the namespace in your copy, or copy the 0.8 view again. `Vellum\Support\Theme`, `Color`, `Assets`, `Cn` and `NavTree` are now in `Vellum\View`.
+- A copy of the `callout`, `card`, `step` or `tabs` view has the old markup and will not match the new stylesheet. Copy it again from 0.8.
 - A component view you published to `resources/views/vendor/vellum/components/` now also applies to the `:::` form of that component, not only the `<x-vellum::…>` tag. See [Change a built-in's markup](/docs/extending#change-a-built-ins-markup).
-- The copy buttons are marked `data-vellum-copy-code` and `data-vellum-heading-copy`, without Alpine attributes. Update any CSS or script of yours that targeted the old attributes.
-- Step titles in a `:::steps` block that sits under a section heading are now one level below it, so a step under `## Setup` is an `h3`. CSS that styled step headings by tag may need updating.
+- The page actions moved into the line under the title. An override of `components/docs/page-actions.blade.php` still works, and `components/docs/page-meta.blade.php` is the view for the whole line.
+
+### CSS and scripts that target Vellum's markup
+
+- **Callouts:** the glyph is inside `.vellum-callout-title`, which is now always present. The border and background are gone, apart from a tint on warnings and dangers.
+- **Tabs:** every group is a bordered card. The label row has a `.vellum-tabs-underline` element, and the group a `data-vellum-tabs-sliding` attribute once its script runs.
+- **Code blocks:** a block without a title, other than a shell block, has no `.vellum-code-header`. Its language is in `.vellum-code-actions > .vellum-code-lang`. Select a kind with `data-vellum-code-kind`, which is `file`, `terminal` or `snippet`.
+- **Copy buttons:** they are marked `data-vellum-copy-code` and `data-vellum-heading-copy`, without Alpine attributes.
+- **Cards:** a card is a grid, with a `.vellum-card-arrow` and, when it has one, a `.vellum-card-description`.
+- **Tables:** cells carry `data-label`. Below 40rem the table, its rows and its cells are `display: block`, and the header row is visually hidden.
+- **Images:** an image on a line of its own has `data-vellum-image-block`, and its paragraph or figure is a padded, bordered mat.
+- **Steps:** a step title under a section heading is one level below it, so a step under `## Setup` is an `h3`. The step's number is an `<a>`.
+- **Previous and next:** the classes are `.vellum-pagination`, `-prev`, `-next`, `-label`, `-title` and `-description`. Previous has no box and no description.
+- **Last updated:** the `<time>` moved from the breadcrumb row into `[data-vellum-page-meta]`.
+
+### PHP that uses Vellum's classes
+
+- `Vellum\Support\Theme`, `Color`, `Assets`, `Cn` and `NavTree` are now in `Vellum\View`, and `Vellum\Support\LlmsTxt`, `Vellum\Support\Sitemap` and `Vellum\Changelog\ChangelogFeed` are in `Vellum\Http`.
+- `VersionLabel::for()` returns the slug for the latest version, not "Latest". `VersionLabel::kind()` says whether a version is the latest, older or unreleased.
+- Errors in the docs, such as an unknown directive, implement `Vellum\Exceptions\ContentError`.
 
 ## 0.6 to 0.7
 
@@ -126,7 +170,7 @@ The remaining presets were retuned to meet WCAG AA (4.5:1) for body text, second
 
 ### Version URLs
 
-When `versions.enabled` is true, the latest version is now served at `/docs/...` with no version segment, and `/docs/{latest}/...` redirects there with a 301. Older versions stay at `/docs/v1/...`. The switcher labels the latest version "Latest" unless `versions.labels` gives it another label.
+When `versions.enabled` is true, the latest version is now served at `/docs/...` with no version segment, and `/docs/{latest}/...` redirects there with a 301. Older versions stay at `/docs/v1/...`. Since 0.8 the switcher shows the latest version by its slug, or its `versions.labels` label, with a "Latest" tag. Before that it was labelled "Latest" alone.
 
 Update inbound links to use the unprefixed URLs. The changelog stays at `/docs/changelog`.
 

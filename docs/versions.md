@@ -29,7 +29,7 @@ Each version is a separate Markdown tree, so a page that exists in one version r
 
 ## The switcher
 
-With `layout.search` set to `sidebar`, the switcher sits above the search field, at the same size. With `header`, it is a compact button beside the site name. Either way its menu lists every version with its tag.
+With `layout.search` set to `sidebar`, the switcher sits above the search field, at the same size. With `header`, it is a compact button beside the site name, without the tag. Either way its menu lists every version with its tag.
 
 When the page being read does not exist in a version, that version's entry says so, and choosing it opens that version's start page instead.
 

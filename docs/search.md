@@ -20,7 +20,7 @@ The default driver is `builtin`. It needs no extra services and works on every h
 
 The browser loads its index from `/docs/_vellum/answers.json`, which holds every section of every page the reader can open. It is filtered for the current user and cached per visibility set (guest, authenticated, and each combination of gates). Responses carry an ETag and are sent with `must-revalidate`, so a browser that already has the current index gets a 304.
 
-`Ctrl+K` or `⌘K` opens search. The arrow keys move through the results, Enter opens one and Escape closes the dialog. The dialog's accessible label is "Search documentation".
+`Ctrl+K` or `⌘K` opens search. The arrow keys move through the results, Enter opens one and Escape closes the dialog. A footer in the dialog shows these keys. The dialog's accessible label is "Search documentation".
 
 Results are grouped by page: each page is named once, with its matching sections under it, in the order of the page's best match. The reader's words are marked in each passage.
 

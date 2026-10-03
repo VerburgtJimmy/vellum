@@ -39,12 +39,12 @@ Every preset uses the same three surface layers in both modes:
 | Token | Used for | Position |
 | --- | --- | --- |
 | `--background` | prose | the canvas, at the light or dark extreme |
-| `--card` | sidebar, callouts, popovers | one step toward mid-grey |
-| `--muted` | code blocks, table headers, tab strips, step markers | a second step |
+| `--card` | sidebar, tab groups, the next-page card, popovers | one step toward mid-grey |
+| `--muted` | code blocks, table headers, image mats, step markers | a second step |
 
 Each layer steps away from the canvas in one direction: darker in light mode and lighter
 in dark mode. The reading surface stays the cleanest part of the page, and nested elements
-go one step deeper, so a code block inside a callout sits below the callout. The contrast
+go one step deeper, so a code block inside a tab group sits below the group. The contrast
 test checks both the direction and the order.
 
 ## Accent
@@ -83,7 +83,7 @@ Syntax highlighting uses one palette for light mode and one for dark, shared by 
 preset. Each token colour clears 4.5:1 on every preset's code surface, so a preset changes
 the code block background and leaves the token colours alone.
 
-`tests/Support/PresetContrastTest.php` reads the shipped stylesheets and fails if a palette
+`tests/View/PresetContrastTest.php` reads the shipped stylesheets and fails if a palette
 change drops below these ratios. A custom `accent` is not covered by that test, so choose
 one that clears 4.5:1 against your page background.
 
@@ -95,9 +95,10 @@ stored in `localStorage` and takes precedence over this setting from then on.
 
 ## Radius
 
-`radius` sets the `--radius` CSS variable on the document. Every rounded corner in the
-layout is derived from it, so cards, buttons, code blocks and the search dialog change
-together. Any CSS length works.
+`radius` sets the `--radius` CSS variable on the document. The rounded corners of the
+layout are derived from it, so cards, buttons, code blocks and the search dialog change
+together. Only a few small inline details, such as inline code and task checkboxes, keep a
+fixed radius. Any CSS length works.
 
 Surfaces such as code blocks, tab groups, cards, tables and the search dialog are rounded
 4px past `radius`. Anything set inside a surface, like the panel of a tab group, follows the

@@ -29,11 +29,11 @@ Vellum is a Laravel package that turns a folder of Markdown into a documentation
 
 - **Edit in the browser.** Pages are Markdown files in your repository, changed through pull requests.
 - **Analytics or AI chat.** There is no hosted service behind Vellum.
-- **Build a custom front end.** The layout is a fixed docs theme, though you can override any of its Blade views.
+- **Design a custom front end for you.** The site's layout is a fixed docs theme, though you can override any of its Blade views. To render the docs in a front end of your own, use [core on its own](/docs/core).
 - **Run outside Laravel.** It needs a Laravel app to build in, even when you only use the static export.
 
 ## Stability
 
-The current release is 0.7. Config keys, frontmatter and the authoring syntax have been frozen since 0.5. Later releases add to them without renaming anything, and breaking changes wait for 1.0. [Upgrade](/docs/getting-started/upgrade) lists what changed between releases.
+The current release is 0.8. Config keys, frontmatter and the authoring syntax have been frozen since 0.5. Later releases add to them without renaming anything, and breaking changes wait for 1.0. [Upgrade](/docs/getting-started/upgrade) lists what changed between releases.
 
 [Installation](/docs/getting-started/installation) takes about five minutes. [Comparisons](/docs/comparisons) covers how Vellum differs from LaRecipe.

@@ -53,8 +53,8 @@ The public site is a separate Laravel app (`vellum-site`) that installs this pac
 Maintainers only.
 
 ```bash
-git tag v0.5.0
-git push origin v0.5.0
+git tag v0.8.0
+git push origin v0.8.0
 ```
 
 Packagist reads the version from the Git tag, so do not add a `version` field to
