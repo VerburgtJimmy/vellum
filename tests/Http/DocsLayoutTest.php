@@ -173,27 +173,41 @@ it('uses a sheet dialog for the mobile sidebar', function (): void {
     expect(strpos($html, 'data-vellum-brand'))->toBeLessThan(strpos($html, 'Open navigation'));
 });
 
-it('renders prev and next pagination with prefetch hooks', function (): void {
+it('makes next the described card and previous a plain link, both labelled', function (): void {
     $this->writeDoc('meta.json', json_encode(['pages' => ['index', 'a', 'b']], JSON_THROW_ON_ERROR));
     $this->writeDoc('index.md', "---\ntitle: Home\ndescription: Start here.\n---\nH");
     $this->writeDoc('a.md', "---\ntitle: Alpha\ndescription: The middle page.\n---\nA");
     $this->writeDoc('b.md', "---\ntitle: Beta\ndescription: The last page.\n---\nB");
 
-    $html = $this->get('/docs/a')
-        ->assertOk()
-        ->assertSee('data-vellum-pagination', false)
-        ->assertSee('data-vellum-pagination-prev', false)
-        ->assertSee('data-vellum-pagination-next', false)
-        ->assertSee('Home', false)
-        ->assertSee('Beta', false)
-        ->assertSee('Start here.', false)
-        ->assertSee('The last page.', false)
-        ->assertSee('vellumPrefetchHover', false)
-        ->getContent();
+    $html = (string) $this->get('/docs/a')->assertOk()->assertSee('vellumPrefetchHover', false)->getContent();
+    $pager = substr($html, (int) strpos($html, 'data-vellum-pagination'));
+    $previous = substr($pager, (int) strpos($pager, 'data-vellum-pagination-prev'), (int) strpos($pager, 'data-vellum-pagination-next') - (int) strpos($pager, 'data-vellum-pagination-prev'));
+    $next = substr($pager, (int) strpos($pager, 'data-vellum-pagination-next'));
 
-    expect($html)
-        ->not->toContain('>Previous</')
-        ->not->toContain('>Next</');
+    expect($previous)->toContain('<span class="vellum-pagination-label">Previous</span>')
+        ->and($previous)->toContain('Home')
+        ->and($previous)->not->toContain('Start here.')
+        ->and($next)->toContain('<span class="vellum-pagination-label">Next</span>')
+        ->and($next)->toContain('Beta')
+        ->and($next)->toContain('<span class="vellum-pagination-description">The last page.</span>');
+});
+
+it('names the section of a neighbouring page that is in another folder', function (): void {
+    $this->writeDoc('meta.json', json_encode(['pages' => ['index', 'guides', 'reference']], JSON_THROW_ON_ERROR));
+    $this->writeDoc('index.md', "---\ntitle: Home\n---\nH");
+    $this->writeDoc('guides/meta.json', json_encode(['title' => 'Guides', 'pages' => ['one', 'two']], JSON_THROW_ON_ERROR));
+    $this->writeDoc('guides/one.md', "---\ntitle: One\n---\n1");
+    $this->writeDoc('guides/two.md', "---\ntitle: Two\n---\n2");
+    $this->writeDoc('reference/meta.json', json_encode(['title' => 'Reference', 'pages' => ['api']], JSON_THROW_ON_ERROR));
+    $this->writeDoc('reference/api.md', "---\ntitle: API\n---\nA");
+
+    $two = (string) $this->get('/docs/guides/two')->assertOk()->getContent();
+
+    // One is in the same folder as Two, so it is just "Previous"; API is not.
+    expect($two)->toContain('<span class="vellum-pagination-label">Previous</span>')
+        ->and($two)->toContain('<span class="vellum-pagination-label">Next · Reference</span>')
+        ->and((string) $this->get('/docs')->getContent())->toContain('<span class="vellum-pagination-label">Next · Guides</span>')
+        ->and((string) $this->get('/docs/guides/one')->getContent())->toMatch('/<span class="vellum-pagination-label">Previous<\/span>/');
 });
 
 it('reserves the toc column when a page has no headings', function (): void {
@@ -213,7 +227,7 @@ MD);
         ->not->toContain('data-vellum-toc-mobile');
 });
 
-it('makes a single prev or next card full width', function (): void {
+it('shows only the link there is on the first and last page', function (): void {
     $this->writeDoc('meta.json', json_encode(['pages' => ['index', 'last']], JSON_THROW_ON_ERROR));
     $this->writeDoc('index.md', "---\ntitle: Home\n---\nH");
     $this->writeDoc('last.md', "---\ntitle: Last\n---\nL");
@@ -224,11 +238,9 @@ it('makes a single prev or next card full width', function (): void {
     expect($home)
         ->toContain('data-vellum-pagination-next')
         ->not->toContain('data-vellum-pagination-prev')
-        ->not->toContain('sm:grid-cols-2')
         ->and($last)
         ->toContain('data-vellum-pagination-prev')
-        ->not->toContain('data-vellum-pagination-next')
-        ->not->toContain('sm:grid-cols-2');
+        ->not->toContain('data-vellum-pagination-next');
 });
 
 it('hides the desktop toc when the page is full-width', function (): void {

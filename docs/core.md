@@ -39,7 +39,7 @@ $page->description;
 $page->headings;            // for a table of contents
 $docs->render($page);       // the page's HTML, components included
 $docs->navigation();        // the sidebar tree this reader may see
-$docs->adjacent($page->slug); // previous and next pages
+$docs->adjacent($page->slug); // previous and next pages, each with its section when that differs
 ```
 
 Use `render()` rather than `$page->html`. The stored HTML holds a placeholder for each Blade component in the page, and `render()` puts the rendered components in their place.

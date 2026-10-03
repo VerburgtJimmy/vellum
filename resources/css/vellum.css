@@ -1631,6 +1631,106 @@ a.vellum-step-indicator:hover {
   color: var(--muted-foreground);
 }
 
+/*
+ * The links at the foot of a page. Next is the card: a reader who reached
+ * the end is most likely going on. Previous is a plain link beside it.
+ */
+.vellum-pagination {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 4rem;
+  font-size: 0.875rem;
+}
+
+@media (min-width: 40rem) {
+  .vellum-pagination:has(.vellum-pagination-prev):has(.vellum-pagination-next) {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+  }
+}
+
+.vellum-pagination-prev,
+.vellum-pagination-next {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.25rem;
+  border-radius: var(--vellum-surface-radius);
+  text-decoration: none;
+}
+
+.vellum-pagination-prev {
+  padding: 0.5rem 0;
+}
+
+.vellum-pagination-next {
+  padding: 1.125rem 1.25rem;
+  border: 1px solid var(--border);
+  background: var(--card);
+  transition: background-color 0.15s ease;
+}
+
+.vellum-pagination-next:hover {
+  background: var(--accent);
+}
+
+.vellum-pagination :is(a):focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.vellum-pagination-label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--muted-foreground);
+}
+
+.vellum-pagination-title {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+.vellum-pagination-next .vellum-pagination-title {
+  justify-content: space-between;
+  font-size: 1.0625rem;
+}
+
+.vellum-pagination-prev:hover .vellum-pagination-title {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.vellum-pagination-title svg {
+  color: var(--muted-foreground);
+  transition: transform 200ms cubic-bezier(0.22, 0.9, 0.25, 1);
+}
+
+.vellum-pagination-next:hover svg {
+  transform: translateX(3px);
+}
+
+.vellum-pagination-prev:hover svg {
+  transform: translateX(-3px);
+}
+
+.vellum-pagination-description {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-height: 1.5;
+  color: var(--muted-foreground);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vellum-pagination-next,
+  .vellum-pagination-title svg {
+    transition: none;
+  }
+}
+
 /* The reader's words in a passage: set in the text colour, underlined in the primary. */
 .vellum-search-mark {
   background: transparent;

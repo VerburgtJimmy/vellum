@@ -12,7 +12,7 @@ use Vellum\Support\VersionUrl;
 /**
  * Builds the sidebar navigation tree from folders, meta.json, and documents.
  *
- * @phpstan-type NavPage array{type: 'page', slug: string|null, title: string, description: string|null, icon: string|null, href: string, access: string, requires?: list<string>, updated?: string|null}
+ * @phpstan-type NavPage array{type: 'page', slug: string|null, title: string, description: string|null, icon: string|null, href: string, access: string, requires?: list<string>, updated?: string|null, section?: string}
  * @phpstan-type NavSeparator array{type: 'separator', title: string}
  * @phpstan-type NavNode array<string, mixed>
  * @phpstan-type NavTree list<array<string, mixed>>
@@ -101,10 +101,49 @@ final class NavigationBuilder
             return ['previous' => null, 'next' => null];
         }
 
-        return [
-            'previous' => $pages[$index - 1] ?? null,
-            'next' => $pages[$index + 1] ?? null,
-        ];
+        $sections = $this->sections($tree);
+        $here = $sections[$slug] ?? null;
+        $adjacent = ['previous' => $pages[$index - 1] ?? null, 'next' => $pages[$index + 1] ?? null];
+
+        // A neighbour in another folder says which, so stepping out of a
+        // section is not a surprise.
+        foreach ($adjacent as $side => $page) {
+            $there = $page === null ? null : ($sections[$page['slug']] ?? null);
+
+            if ($page !== null && $there !== null && $there !== $here) {
+                $adjacent[$side] = [...$page, 'section' => $there];
+            }
+        }
+
+        return $adjacent;
+    }
+
+    /**
+     * The title of the folder each page sits in, by slug. Pages at the root
+     * are left out.
+     *
+     * @param  NavTree  $tree
+     * @return array<string, string>
+     */
+    private function sections(array $tree, ?string $folder = null): array
+    {
+        $sections = [];
+
+        foreach ($tree as $node) {
+            if (($node['type'] ?? null) === 'page' && is_string($node['slug'] ?? null) && $folder !== null) {
+                $sections[$node['slug']] = $folder;
+            }
+
+            if (($node['type'] ?? null) === 'folder' && isset($node['children']) && is_array($node['children'])) {
+                /** @var NavTree $children */
+                $children = array_values($node['children']);
+                $title = is_string($node['title'] ?? null) ? $node['title'] : $folder;
+                // array_replace, not a spread: a slug made of digits is an integer key.
+                $sections = array_replace($sections, $this->sections($children, $title));
+            }
+        }
+
+        return $sections;
     }
 
     /**

@@ -3,28 +3,24 @@
     'next' => null,
 ])
 
-@php
-    $both = $previous && $next;
-@endphp
-
+{{-- Next is where a reader at the end of a page is heading, so it is the card.
+     Previous is a link beside it. Either names its section when that differs
+     from this page's. --}}
 @if ($previous || $next)
-    <nav data-vellum-pagination aria-label="Page" class="mt-16 grid grid-cols-1 gap-3 {{ $both ? 'sm:grid-cols-2' : '' }}">
+    <nav data-vellum-pagination aria-label="Page" class="vellum-pagination">
         @if ($previous)
             <a
                 href="{{ $previous['href'] }}"
                 data-vellum-pagination-prev
                 x-data="vellumPrefetchHover"
                 x-on:pointerenter="onEnter()"
-                class="group flex flex-col gap-2 rounded-lg border border-border p-4 text-sm transition-colors hover:bg-accent/50"
+                class="vellum-pagination-prev"
             >
-                <span class="inline-flex items-center gap-1.5 font-semibold text-foreground">
-                    <span class="sr-only">Previous:</span>
-                    {!! \Vellum\Support\Icons::caretLeft(['class' => 'h-4 w-4 shrink-0 -mx-1']) !!}
+                <span class="vellum-pagination-label">Previous{{ ! empty($previous['section']) ? ' · '.$previous['section'] : '' }}</span>
+                <span class="vellum-pagination-title">
+                    {!! \Vellum\Support\Icons::caretLeft(['class' => 'h-4 w-4 shrink-0']) !!}
                     {{ $previous['title'] }}
                 </span>
-                @if (! empty($previous['description']))
-                    <span class="truncate text-muted-foreground">{{ $previous['description'] }}</span>
-                @endif
             </a>
         @endif
 
@@ -34,15 +30,15 @@
                 data-vellum-pagination-next
                 x-data="vellumPrefetchHover"
                 x-on:pointerenter="onEnter()"
-                class="group flex flex-col gap-2 rounded-lg border border-border p-4 text-end text-sm transition-colors hover:bg-accent/50"
+                class="vellum-pagination-next"
             >
-                <span class="inline-flex flex-row-reverse items-center gap-1.5 font-semibold text-foreground">
-                    <span class="sr-only">Next:</span>
-                    {!! \Vellum\Support\Icons::caretRight(['class' => 'h-4 w-4 shrink-0 -mx-1']) !!}
+                <span class="vellum-pagination-label">Next{{ ! empty($next['section']) ? ' · '.$next['section'] : '' }}</span>
+                <span class="vellum-pagination-title">
                     {{ $next['title'] }}
+                    {!! \Vellum\Support\Icons::caretRight(['class' => 'h-4 w-4 shrink-0']) !!}
                 </span>
                 @if (! empty($next['description']))
-                    <span class="truncate text-muted-foreground">{{ $next['description'] }}</span>
+                    <span class="vellum-pagination-description">{{ $next['description'] }}</span>
                 @endif
             </a>
         @endif

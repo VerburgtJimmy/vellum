@@ -107,7 +107,7 @@ Pages accept these frontmatter keys, which are also frozen:
 | Key | Purpose |
 | --- | --- |
 | `title` | Page title. Falls back to the first heading, then the file name |
-| `description` | Meta description, also shown on the prev/next cards |
+| `description` | Meta description, also shown on the next-page card and on cards that ask for it |
 | `slug` | Overrides the URL slug |
 | `order` | Position among sibling pages when `meta.json` does not list them |
 | `full` | Hides the table of contents column |

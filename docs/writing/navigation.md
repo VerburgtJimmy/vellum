@@ -142,6 +142,14 @@ The sidebar keeps its scroll position as a reader moves between pages, and scrol
 
 A dot marks a page that changed since the reader last opened it, based on its `updated` date or last git commit. What each reader has opened is stored in their own browser, so nothing is sent to the server, and a reader who has never opened a page sees no dot on it. The page itself says so as well, in the line under its title.
 
+## Previous and next
+
+Each page ends with links to the pages before and after it in sidebar order. Next is a card
+with the page's title and description, since a reader who reached the end is most likely
+going on, and Previous is a plain link beside it. When the neighbouring page is in another
+folder, its label names that folder, as in "Next · Components", so leaving a section is not
+a surprise. Links from `meta.json` to somewhere outside the docs are skipped.
+
 ## Two files, one URL
 
 `billing.md` and `billing/index.md` both resolve to `/docs/billing`, and so do two pages
