@@ -736,14 +736,18 @@
 }
 
 /* A block without a title has no header: its language and copy sit in the corner. */
+/* A line long enough to reach the corner passes under the controls, which
+   carry the block's own background, faded in from the left. */
 .vellum-code-actions {
   position: absolute;
   top: 0.45rem;
-  right: 0.4rem;
+  right: 0;
   z-index: 2;
   display: flex;
   align-items: center;
   gap: 0.25rem;
+  padding: 0 0.4rem 0 1.5rem;
+  background: linear-gradient(to right, transparent, var(--muted) 1.25rem);
   font-size: 0.6875rem;
   color: var(--muted-foreground);
 }
