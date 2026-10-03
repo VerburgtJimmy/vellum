@@ -4,6 +4,7 @@
     'versions' => [],
     'currentVersion' => null,
     'versionHrefs' => [],
+    'versionPages' => null,
 ])
 
 @php
@@ -25,6 +26,7 @@
                 :versions="$versions"
                 :current-version="$currentVersion"
                 :version-hrefs="$versionHrefs"
+                :version-pages="$versionPages"
             />
         @endif
     </div>

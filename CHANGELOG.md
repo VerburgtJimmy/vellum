@@ -18,6 +18,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - A line under each page's title says when the page last changed, as "3 days ago" for the last month, and how long it takes to read for pages of three minutes or more. When the page changed since the reader last opened it, the line says so, with the sidebar's dot. The page's actions sit on the same line
 - A shell block without a title is shown as a terminal, with a `$` before each command. Blank lines, `#` comments and continuations of a line ending in `\` get none, and the `$` is never selected or copied. `console` is accepted as a shell language
 - Copying a code block sweeps a light wash down the code that was copied
+- A page of any version but the latest starts with a notice saying it is an older or an unreleased version, with a link to the same page in the latest. A version listed before `latest` in `versions.list` counts as unreleased
+- The version switcher tags the latest and unreleased versions, and says when the page being read is not in a version, where choosing it opens that version's start page
 - The previous and next links are labelled, and name the neighbouring page's folder when it differs from the current page's, as in "Next · Components". `adjacent()` returns that folder as `section`
 - A table's header row stays at the top of the window while the reader scrolls a long table, and on a phone each row becomes a block with every value under its column's heading instead of a table that scrolls sideways
 - An image shown smaller than it is can be opened at full size with a click or Enter, and closed with Escape
@@ -35,6 +37,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Step titles in a `:::steps` block are rendered one heading level below the section the block sits in, and headings inside a step move with them. Steps under a `## Setup` heading are now `h3`, so they nest under that section in the table of contents and the page outline. A steps block before any section heading is unchanged. Authors still start each step with `##`; only CSS that targets step headings by tag, rather than by Vellum's classes, is affected
 - A code block without a title no longer has a header: its language and copy button sit in its corner. A titled block's header is drawn as an editor tab. Highlighted lines have a solid bar in the primary colour, and their line numbers are no longer faded. Code blocks carry `data-vellum-code-kind` (`file`, `terminal` or `snippet`)
+- The version switcher sits above the search field in the sidebar, at the same size, instead of beside the site name. The latest version is shown by its slug or label with a "Latest" tag, not as "Latest" alone, and `VersionLabel::for()` returns the slug for it
 - At the foot of a page, Next is a wide card with the page's description on up to two lines, and Previous is a plain link beside it without one. Before, both were equal boxes with one cut-off line
 - Code in a table's first column, such as a config key, is no longer broken across lines; a table too wide for the page scrolls sideways. Table cells align to the top, column heads are smaller, and the row under the pointer is highlighted
 - An image on a line of its own sits on a bordered mat and is held to a readable height, with its caption inside the frame

@@ -5,6 +5,7 @@
     'versions' => [],
     'currentVersion' => null,
     'versionHrefs' => [],
+    'versionPages' => null,
 ])
 
 <div data-vellum-mobile-sidebar class="contents">
@@ -42,6 +43,7 @@
                                 :versions="$versions"
                                 :current-version="$currentVersion"
                                 :version-hrefs="$versionHrefs"
+                                :version-pages="$versionPages"
                             />
                         @endif
                         <x-vellum::docs.theme-toggle variant="pair" />

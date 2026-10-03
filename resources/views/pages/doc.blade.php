@@ -16,6 +16,7 @@
         :versions="$versions ?? []"
         :current-version="$currentVersion ?? null"
         :version-hrefs="$versionHrefs ?? []"
+        :version-pages="$versionPages ?? null"
         :search-placement="$searchPlacement"
         :static-export="$staticExport ?? false"
     >
@@ -24,6 +25,12 @@
 
             <div data-vellum-page-row class="flex min-w-0 flex-1 gap-8 px-4 py-8 md:px-6 xl:px-8">
             <main id="vellum-content" class="flex min-h-0 w-full min-w-0 max-w-[860px] flex-1 flex-col">
+                <x-vellum::docs.version-notice
+                    :versions="$versions ?? []"
+                    :current-version="$currentVersion ?? null"
+                    :version-hrefs="$versionHrefs ?? []"
+                    :version-pages="$versionPages ?? null"
+                />
                 <x-vellum::docs.breadcrumb :breadcrumbs="$breadcrumbs" />
 
                 <article data-vellum-article>

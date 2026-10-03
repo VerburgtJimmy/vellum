@@ -5,6 +5,7 @@
     'versions' => [],
     'currentVersion' => null,
     'versionHrefs' => [],
+    'versionPages' => null,
     'showBrand' => false,
     'chrome' => true,
 ])
@@ -57,13 +58,6 @@
         @else
             <div class="min-w-0 flex-1"></div>
         @endif
-        @if ($searchInSidebar && config('vellum.versions.enabled'))
-            <x-vellum::docs.version-switcher
-                :versions="$versions"
-                :current-version="$currentVersion"
-                :version-hrefs="$versionHrefs"
-            />
-        @endif
         <button
             type="button"
             data-vellum-sidebar-collapse
@@ -75,6 +69,18 @@
             {!! \Vellum\Support\Icons::sidebar(['class' => 'h-4 w-4']) !!}
         </button>
     </div>
+    @endif
+
+    @if ($chrome && $searchInSidebar && config('vellum.versions.enabled'))
+        <div class="px-3 pb-2">
+            <x-vellum::docs.version-switcher
+                variant="wide"
+                :versions="$versions"
+                :current-version="$currentVersion"
+                :version-hrefs="$versionHrefs"
+                :version-pages="$versionPages"
+            />
+        </div>
     @endif
 
     @if ($chrome && $searchInSidebar && config('vellum.search.enabled'))

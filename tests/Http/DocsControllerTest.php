@@ -94,7 +94,48 @@ it('renders configured version labels in the switcher', function (): void {
         ->assertSee('data-vellum-version-switcher', false)
         ->assertSee('1.x (LTS)', false)
         ->assertSee('Next', false)
-        ->assertDontSee('>Latest</', false);
+        ->assertSee('<span class="vellum-version-tag" data-kind="latest">Latest</span>', false)
+        ->assertSee('<span class="vellum-version-tag" data-kind="unreleased">Unreleased</span>', false);
+});
+
+it('tells a reader of an older or unreleased version so, with a way to the latest', function (): void {
+    config()->set('vellum.versions.enabled', true);
+    config()->set('vellum.versions.latest', 'v2');
+    config()->set('vellum.versions.list', ['next', 'v2', 'v1']);
+
+    foreach (['next', 'v2', 'v1'] as $version) {
+        $this->writeDoc($version.'/index.md', "---\ntitle: Home\n---\nHome");
+        $this->writeDoc($version.'/guide.md', "---\ntitle: Guide\n---\nGuide");
+    }
+    $this->writeDoc('v1/legacy.md', "---\ntitle: Legacy\n---\nOnly in v1");
+
+    $old = (string) $this->get('/docs/v1/guide')->assertOk()->getContent();
+    $legacy = (string) $this->get('/docs/v1/legacy')->assertOk()->getContent();
+    $next = (string) $this->get('/docs/next/guide')->assertOk()->getContent();
+
+    expect($old)->toContain('data-vellum-version-notice="older"')
+        ->and($old)->toContain('You are reading the docs for <strong>v1</strong>, an older version.')
+        ->and($old)->toContain('<a href="/docs/guide">Read this page in v2</a>')
+        ->and($legacy)->toContain('<a href="/docs">Go to v2</a>')
+        ->and($legacy)->toContain('This page is not in v2. Opens its start page.')
+        ->and($next)->toContain('data-vellum-version-notice="unreleased"')
+        ->and($next)->toContain('which is not released yet')
+        ->and((string) $this->get('/docs/guide')->assertOk()->getContent())->not->toContain('data-vellum-version-notice');
+});
+
+it('puts the version switcher above the search field in the sidebar, at its width', function (): void {
+    config()->set('vellum.versions.enabled', true);
+    config()->set('vellum.versions.latest', 'v2');
+    config()->set('vellum.versions.list', ['v2', 'v1']);
+
+    $this->writeDoc('v2/index.md', "---\ntitle: Home\n---\nV2");
+    $this->writeDoc('v1/index.md', "---\ntitle: Home\n---\nV1");
+
+    $html = (string) $this->get('/docs')->assertOk()->getContent();
+    $sidebar = substr($html, (int) strpos($html, 'data-vellum-sidebar-wrap'));
+
+    expect(strpos($sidebar, 'data-vellum-version-switcher-variant="wide"'))->toBeLessThan(strpos($sidebar, 'data-vellum-search-trigger-variant="sidebar"'))
+        ->and($sidebar)->toMatch('/data-vellum-version-switcher-variant="wide".*?class="[^"]*h-9 w-full[^"]*"/s');
 });
 
 it('compiles on demand when the cache is cold', function (): void {

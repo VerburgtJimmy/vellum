@@ -10,7 +10,8 @@ namespace Vellum\Support;
 final class VersionLabel
 {
     /**
-     * Label for one version folder: config override, else "Latest" for the latest slug, else the slug.
+     * Label for one version folder: the config override, else the slug. That
+     * a version is the latest is said by kind(), not by its name.
      */
     public static function for(string $version): string
     {
@@ -28,9 +29,29 @@ final class VersionLabel
             }
         }
 
+        return $version;
+    }
+
+    /**
+     * Where a version stands: `latest`, `unreleased` or `older`. The list
+     * runs newest first, so a version before the latest is not released yet.
+     *
+     * @return 'latest'|'unreleased'|'older'
+     */
+    public static function kind(string $version): string
+    {
         $latest = config('vellum.versions.latest');
 
-        return $version === $latest ? 'Latest' : $version;
+        if ($version === $latest) {
+            return 'latest';
+        }
+
+        /** @var list<string> $list */
+        $list = array_values(array_filter((array) config('vellum.versions.list', []), 'is_string'));
+        $position = array_search($version, $list, true);
+        $latestPosition = array_search($latest, $list, true);
+
+        return $position !== false && $latestPosition !== false && $position < $latestPosition ? 'unreleased' : 'older';
     }
 
     /**

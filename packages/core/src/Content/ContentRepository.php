@@ -475,7 +475,7 @@ final class ContentRepository
     /**
      * Version switcher payload for the docs chrome.
      *
-     * @return array{versions: list<string>, currentVersion: string|null, versionHrefs: array<string, string>}
+     * @return array{versions: list<string>, currentVersion: string|null, versionHrefs: array<string, string>, versionPages: list<string>}
      */
     public function versionSwitcherData(?string $documentSlug, ?string $currentVersion): array
     {
@@ -484,25 +484,31 @@ final class ContentRepository
                 'versions' => [],
                 'currentVersion' => null,
                 'versionHrefs' => [],
+                'versionPages' => [],
             ];
         }
 
         $slug = trim((string) $documentSlug, '/');
         $hrefs = [];
+        $pages = [];
 
         foreach ($this->versions as $version) {
-            $targetSlug = $this->store->exists($slug, $version)
-                || (! $this->servesBuildOnly($version) && $this->resolveSourcePath($slug, $version) !== null)
-                ? $slug
-                : '';
+            $exists = $this->store->exists($slug, $version)
+                || (! $this->servesBuildOnly($version) && $this->resolveSourcePath($slug, $version) !== null);
 
-            $hrefs[$version] = $this->hrefFor($targetSlug, $version);
+            // A version without this page links to its start page instead.
+            $hrefs[$version] = $this->hrefFor($exists ? $slug : '', $version);
+
+            if ($exists || $slug === '') {
+                $pages[] = $version;
+            }
         }
 
         return [
             'versions' => $this->versions,
             'currentVersion' => $currentVersion ?? $this->latestVersion,
             'versionHrefs' => $hrefs,
+            'versionPages' => $pages,
         ];
     }
 

@@ -9,6 +9,7 @@
         :versions="$versions ?? []"
         :current-version="$currentVersion ?? null"
         :version-hrefs="$versionHrefs ?? []"
+        :version-pages="$versionPages ?? null"
         :search-placement="$searchPlacement ?? 'sidebar'"
         :static-export="$staticExport ?? false"
     >

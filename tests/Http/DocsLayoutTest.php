@@ -416,6 +416,18 @@ it('falls back to neutral for an unknown colour preset', function (): void {
     expect($html)->toContain('data-vellum-preset="neutral"');
 });
 
+it('marks only the header bar itself as the header, since the scrollspy measures that element', function (): void {
+    config()->set('vellum.layout.search', 'header');
+    $this->writeDoc('index.md', "---\ntitle: Home\n---\n## One\n\nText.\n");
+
+    $html = (string) $this->get('/docs')->assertOk()->getContent();
+
+    // Anything else carrying this attribute, such as the page wrapper, would
+    // be taken for a header as tall as the page, hiding every heading.
+    expect(preg_match_all('/\sdata-vellum-header(?=[\s>])/', $html))->toBe(1)
+        ->and($html)->toMatch('/<header\s[^>]*data-vellum-header/');
+});
+
 it('exposes accessible version switcher markup', function (): void {
     config()->set('vellum.versions.enabled', true);
     config()->set('vellum.versions.latest', 'v2');
@@ -428,13 +440,13 @@ it('exposes accessible version switcher markup', function (): void {
 
     expect($html)
         ->toContain('data-vellum-version-switcher')
-        ->toContain('aria-label="Select documentation version"')
+        ->toContain('aria-label="Documentation version: v2"')
         ->toContain('aria-haspopup="menu"')
         ->toContain('aria-controls=')
         ->toContain('role="menu"')
         ->toContain('role="menuitem"')
-        ->toContain("event.key === 'Home'")
-        ->toContain("event.key === 'End'");
+        ->toContain('Home: 0')
+        ->toContain('End: this.count - 1');
 });
 
 it('keeps tab persist in the shared Alpine helper', function (): void {
