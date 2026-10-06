@@ -5,6 +5,12 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.2] - 2026-10-06
+
+### Changed
+
+- On a wide screen the page sits in the middle of the space beside the sidebar, with the table of contents to its right, where it used to sit against the sidebar. The gap to the table of contents widens from 1536px up. On a narrower screen nothing moves
+
 ## [0.8.1] - 2026-10-06
 
 ### Fixed

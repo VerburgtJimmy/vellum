@@ -1856,6 +1856,37 @@ html {
   --vellum-sidebar-ease: cubic-bezier(0.32, 0.72, 0, 1);
 }
 
+/* From the width where the table of contents shows, the page sits in the
+   middle of the space beside the sidebar: an empty column on the left mirrors
+   the table of contents on the right. When there is no room for both, the
+   empty column gives way first, so the page never loses width to it. */
+@media (min-width: 1024px) {
+  div[data-vellum-page-row] {
+    --vellum-toc-gap: 2rem;
+    display: grid;
+    grid-template-columns:
+      minmax(0, 1fr)
+      minmax(0, 860px)
+      minmax(calc(220px + var(--vellum-toc-gap)), 1fr);
+    column-gap: 0;
+  }
+
+  div[data-vellum-page-row] > main {
+    grid-column: 2;
+  }
+
+  div[data-vellum-page-row] > :is([data-vellum-toc], [data-vellum-toc-placeholder]) {
+    grid-column: 3;
+    margin-left: var(--vellum-toc-gap);
+  }
+}
+
+@media (min-width: 1536px) {
+  div[data-vellum-page-row] {
+    --vellum-toc-gap: 3rem;
+  }
+}
+
 @media (max-width: 767px) {
   html:has([data-vellum-mobile-bar]),
   html:has([data-vellum-header]) {

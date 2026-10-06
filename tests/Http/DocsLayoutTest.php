@@ -380,7 +380,9 @@ it('keeps line-number gutters unselectable in css', function (): void {
         ->and($css)->toContain('vellum-toc-link')
         ->and($css)->toContain('.vellum-toc-link.is-active')
         ->and($css)->toContain('data-vellum-sidebar-peek')
-        ->and($css)->not->toMatch('/\[data-vellum-page-row\]\{[^}]*justify-content:\s*center/')
+        // The page is centred by an empty column that mirrors the table of
+        // contents, and that column is the one that gives way.
+        ->and($css)->toMatch('/div\[data-vellum-page-row\]\{[^}]*grid-template-columns:minmax\(0,1fr\) minmax\(0,860px\) minmax\(calc\(220px \+ var\(--vellum-toc-gap\)\),1fr\)/')
         ->and($css)->toContain('data-vellum-sidebar-hotzone')
         ->and($css)->toMatch('/data-vellum-preset[=]["\']?ocean/')
         ->and($css)->toMatch('/data-vellum-preset[=]["\']?laravel/')
