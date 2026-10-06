@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Vellum\OpenApi;
 
 use Illuminate\Support\Facades\Artisan;
-use Symfony\Component\Console\Command\Command;
 use Vellum\Exceptions\InvalidSpecException;
 
 /**
@@ -107,7 +106,7 @@ final class SpecSource
 
         $status = Artisan::call(self::EXPORT_COMMAND, ['--path' => $target]);
 
-        if ($status !== Command::SUCCESS || ! is_file($target)) {
+        if ($status !== 0 || ! is_file($target)) {
             $this->warnings[] = 'scramble:export did not produce a spec. Run it by hand to see why.';
 
             return null;
