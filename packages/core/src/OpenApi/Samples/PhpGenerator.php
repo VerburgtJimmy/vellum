@@ -23,7 +23,7 @@ final class PhpGenerator implements SampleGenerator
 
         // withToken() reads better than the header it produces.
         if (preg_match('/^Bearer\s+(.+)$/i', $headers['Authorization'] ?? '', $match) === 1) {
-            $chain = ['Http::withToken(\''.$match[1].'\')'];
+            $chain = ['Http::withToken('.$this->quote($match[1]).')'];
             unset($headers['Authorization']);
         }
 
@@ -33,14 +33,14 @@ final class PhpGenerator implements SampleGenerator
             $pairs = [];
 
             foreach ($headers as $name => $value) {
-                $pairs[] = "        '{$name}' => '{$value}',";
+                $pairs[] = '        '.$this->quote($name).' => '.$this->quote($value).',';
             }
 
             $chain[] = ($chain[0] === 'Http::' ? '' : '    ')."->withHeaders([\n".implode("\n", $pairs)."\n    ])";
         }
 
         $method = strtolower($request->method);
-        $arguments = "'".$request->fullUrl()."'";
+        $arguments = $this->quote($request->fullUrl());
 
         if ($request->hasBody()) {
             $arguments .= ', '.$this->phpArray($request->body, 1);
@@ -65,7 +65,7 @@ final class PhpGenerator implements SampleGenerator
         $lines = [];
 
         foreach ($value as $key => $item) {
-            $prefix = $isList ? '' : "'".$key."' => ";
+            $prefix = $isList ? '' : $this->quote((string) $key).' => ';
             $lines[] = $pad.$prefix.$this->phpArray($item, $indent + 1).',';
         }
 
@@ -78,7 +78,17 @@ final class PhpGenerator implements SampleGenerator
             is_bool($value) => $value ? 'true' : 'false',
             $value === null => 'null',
             is_int($value), is_float($value) => (string) $value,
-            default => "'".str_replace("'", "\\'", (string) $value)."'",
+            default => $this->quote((string) $value),
         };
+    }
+
+    /**
+     * A single-quoted PHP string holding exactly this value. The values come
+     * from a spec, so a quote or a trailing backslash in one must not end the
+     * string early in code a reader is about to run.
+     */
+    private function quote(string $value): string
+    {
+        return "'".strtr($value, ['\\' => '\\\\', "'" => "\\'"])."'";
     }
 }

@@ -18,13 +18,13 @@ final class JavaScriptGenerator implements SampleGenerator
 
     public function generate(SampleRequest $request): string
     {
-        $options = ["  method: '".$request->method."'"];
+        $options = ['  method: '.$this->quote($request->method)];
 
         if ($request->headers !== []) {
             $pairs = [];
 
             foreach ($request->headers as $name => $value) {
-                $pairs[] = "    '{$name}': '{$value}',";
+                $pairs[] = '    '.$this->quote($name).': '.$this->quote($value).',';
             }
 
             $options[] = "  headers: {\n".implode("\n", $pairs)."\n  }";
@@ -35,7 +35,7 @@ final class JavaScriptGenerator implements SampleGenerator
             $options[] = '  body: JSON.stringify('.$json.')';
         }
 
-        return "const response = await fetch('".$request->fullUrl()."', {\n"
+        return 'const response = await fetch('.$this->quote($request->fullUrl()).", {\n"
             .implode(",\n", $options)
             ."\n})";
     }
@@ -51,5 +51,21 @@ final class JavaScriptGenerator implements SampleGenerator
         }
 
         return implode("\n", $lines);
+    }
+
+    /**
+     * A single-quoted JavaScript string holding exactly this value, for the
+     * same reason the other languages quote theirs: it comes from a spec.
+     */
+    private function quote(string $value): string
+    {
+        return "'".strtr($value, [
+            '\\' => '\\\\',
+            "'" => "\\'",
+            "\n" => '\\n',
+            "\r" => '\\r',
+            "\u{2028}" => '\\u2028',
+            "\u{2029}" => '\\u2029',
+        ])."'";
     }
 }
