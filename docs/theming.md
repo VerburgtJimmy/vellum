@@ -151,12 +151,12 @@ so it shows how much of the page you are looking at. As you scroll, its edges ho
 whole entries and spring to the next one when a section leaves the screen or a new one
 comes onto it. Nested entries hang from a guide line.
 
-![The window style: one highlight behind the sections on screen](screenshots/toc-window.png)
+![The window style: one highlight behind the sections on screen](images/toc-window.png)
 
 `line` draws a line beside the entries and lights the part next to the sections on
 screen, bending in and out with nested entries.
 
-![The line style: a line lit beside the sections on screen](screenshots/toc-line.png)
+![The line style: a line lit beside the sections on screen](images/toc-line.png)
 
 In both styles, a step from a [steps](/docs/components/steps) block shows its number, filled
 while the step is on screen. In the line style the numbers sit on the line.
