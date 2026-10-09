@@ -8,6 +8,7 @@ use Vellum\Http\Controllers\ChangelogController;
 use Vellum\Http\Controllers\ContentFileController;
 use Vellum\Http\Controllers\DocsController;
 use Vellum\Http\Controllers\LlmsTxtController;
+use Vellum\Http\Controllers\PlaygroundProxyController;
 use Vellum\Http\Controllers\RawMarkdownController;
 use Vellum\Http\Controllers\SearchIndexController;
 use Vellum\Http\Controllers\SitemapController;
@@ -26,6 +27,12 @@ Route::get('/_vellum/files/{path}', ContentFileController::class)
 Route::get('/_vellum/raw/{slug}.md', RawMarkdownController::class)
     ->where('slug', '.+')
     ->name('vellum.raw');
+
+// Answers only when openapi.proxy is on. Limited per reader, since every
+// call makes this app send a request of its own.
+Route::post('/_vellum/playground', PlaygroundProxyController::class)
+    ->middleware('throttle:60,1')
+    ->name('vellum.playground.proxy');
 
 if (app()->environment('local')) {
     Route::view('/_vellum/demo', 'vellum::pages.ui-demo')->name('vellum.ui-demo');

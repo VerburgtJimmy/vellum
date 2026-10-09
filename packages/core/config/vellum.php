@@ -281,6 +281,10 @@ return [
     | playground: lets a reader send an operation's request from its page
     | and see the response. Requests go from the reader's browser.
     |
+    | proxy: sends a playground request to another origin through this app,
+    | for an API that does not let a browser on the docs' origin read its
+    | answers. Only the servers the spec names can be reached.
+    |
     | access: who may read the reference, as for a page's access frontmatter.
     |
     */
@@ -297,6 +301,7 @@ return [
         'samples' => ['curl', 'php', 'javascript'],
         'base_url' => null,
         'playground' => true,
+        'proxy' => env('VELLUM_OPENAPI_PROXY', false),
         'access' => 'guest',
     ],
 

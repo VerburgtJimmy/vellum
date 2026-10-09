@@ -116,7 +116,7 @@ describe('toCurl', () => {
       [
         `curl -X POST 'https://api.test/$(id)' \\`,
         `  -H 'X-Note: it'\\''s "fine"' \\`,
-        `  -d '{"name":"O'\\''Brien"}'`,
+        `  --data-raw '{"name":"O'\\''Brien"}'`,
       ].join('\n'),
     )
   })
@@ -124,8 +124,50 @@ describe('toCurl', () => {
   it('writes a file field by its name', () => {
     const curl = toCurl({ method: 'POST', url: '/upload', headers: {}, body: null, files: { title: 'Mars', image: { name: 'mars.png' } } })
 
-    expect(curl).toContain(`-F 'title=Mars'`)
-    expect(curl).toContain(`-F 'image=@mars.png'`)
+    expect(curl).toContain(`--form-string 'title=Mars'`)
+    expect(curl).toContain(`-F 'image=@"mars.png"'`)
+  })
+})
+
+describe('what curl itself would read into an argument', () => {
+  it('never lets a value name a file for curl to send', () => {
+    const curl = toCurl({
+      method: 'POST',
+      url: 'https://api.test/upload',
+      headers: {},
+      body: '@/etc/passwd',
+      files: { note: '@/etc/passwd', 'a=b;type': '<~/.ssh/id_rsa', image: { name: 'x";type=text/html' } },
+    })
+
+    // --data-raw and --form-string take what follows as it is written.
+    expect(curl).toContain(`--data-raw '@/etc/passwd'`)
+    expect(curl).toContain(`--form-string 'note=@/etc/passwd'`)
+    expect(curl).toContain(`--form-string 'a_b_type=<~/.ssh/id_rsa'`)
+    expect(curl).toContain(`-F 'image=@"x\\";type=text/html"'`)
+    expect(curl).not.toMatch(/ -d /)
+  })
+
+  it('does not let an address be read as an option', () => {
+    expect(toCurl({ method: 'GET', url: '-o /tmp/x', headers: {}, body: null, files: null })).toBe(`curl -X GET --url '-o /tmp/x'`)
+  })
+
+  it('sends no header whose name is not a header name', () => {
+    const request = buildRequest({ method: 'get', path: '/' }, '', { header: { '@/etc/passwd': 'x', 'X Bad': 'y', 'X-Good': 'z' } }, [
+      { type: 'apiKey', in: 'header', name: '@secrets', value: 'k' },
+    ])
+
+    expect(Object.keys(request.headers)).toEqual(['Accept', 'X-Good'])
+  })
+})
+
+describe('names from a spec as keys', () => {
+  it('treats __proto__ as a name like any other', () => {
+    const values = { query: JSON.parse('{"__proto__": "q", "constructor": "c"}'), header: JSON.parse('{"__proto__": "h"}') }
+    const request = buildRequest({ method: 'get', path: '/' }, '', values)
+
+    expect(request.url).toBe('/?__proto__=q&constructor=c')
+    expect({}.q).toBeUndefined()
+    expect(Object.getPrototypeOf(request.headers)).toBeNull()
   })
 })
 

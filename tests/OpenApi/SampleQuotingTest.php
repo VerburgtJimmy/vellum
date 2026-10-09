@@ -101,3 +101,13 @@ it('writes JavaScript in which a quote or backslash stays inside its string', fu
     expect($sample)->toContain("fetch('https://api.test/\\'+alert(1)+\\'', {")
         ->toContain("'X-Note': 'a\\\\\\', b: evil(), c: \\'\\nnext',");
 });
+
+it('writes nothing curl would read as an option or as a file to send', function (): void {
+    $sample = (new CurlGenerator)->generate(new SampleRequest(
+        method: 'GET',
+        url: '-o /tmp/x',
+        headers: ['@/etc/passwd' => 'x', 'X-Good' => 'y'],
+    ));
+
+    expect($sample)->toBe("curl -X GET --url '-o /tmp/x' \\\n  -H 'X-Good: y'");
+});

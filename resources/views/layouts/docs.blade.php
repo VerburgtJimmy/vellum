@@ -22,6 +22,9 @@
     data-vellum-focus="{{ Assets::focusJsUrl() }}"
     @if (config('vellum.openapi.enabled') && config('vellum.openapi.playground', true))
         data-vellum-playground-src="{{ Assets::playgroundJsUrl() }}"
+        @if (config('vellum.openapi.proxy') && ! ($staticExport ?? false))
+            data-vellum-playground-proxy="{{ route('vellum.playground.proxy', [], false) }}"
+        @endif
     @endif
 >
 <head>

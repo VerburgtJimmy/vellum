@@ -115,6 +115,7 @@ final class PageBuilder
             markdown: $this->rendition->overview($title, $spec, $groups, $link),
             spec: $spec,
             version: $version,
+            extra: ['openapi_servers' => $this->servers($spec)],
         );
     }
 
@@ -348,6 +349,31 @@ final class PageBuilder
         }
 
         return $spec->serverUrl();
+    }
+
+    /**
+     * Every server the spec names with a full address, for whatever needs to
+     * know where this API lives without reading the spec again.
+     *
+     * @return list<string>
+     */
+    private function servers(Spec $spec): array
+    {
+        $configured = config('vellum.openapi.base_url');
+        $urls = is_string($configured) && $configured !== '' ? [$configured] : [];
+
+        foreach ([$spec->servers(), ...array_map(static fn (Operation $operation): array => $operation->servers, $spec->operations)] as $servers) {
+            foreach ($servers as $server) {
+                if (is_string($server['url'] ?? null)) {
+                    $urls[] = $server['url'];
+                }
+            }
+        }
+
+        return array_values(array_unique(array_filter(
+            array_map(static fn (string $url): string => rtrim($url, '/'), $urls),
+            static fn (string $url): bool => preg_match('#^https?://[^/{}]+#i', $url) === 1,
+        )));
     }
 
     /**

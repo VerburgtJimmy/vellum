@@ -100,6 +100,24 @@ The request goes from the reader's own browser, which decides two things:
 - When the API is on the same origin as the docs, which is the usual case for docs served by the app they describe, it goes as the reader. A reader who is signed in to the app is signed in to the request, and Laravel's CSRF token is sent with it.
 - When the API is on another origin, nothing of the reader's is sent, and the API has to allow the docs' origin to read its answers ([CORS](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS)). Otherwise the browser shows no response and the playground says so.
 
+### An API on another origin
+
+When the API does not allow the docs' origin, turn on the forwarding route, and the playground sends such requests through your app instead:
+
+```php
+'proxy' => env('VELLUM_OPENAPI_PROXY', false),
+```
+
+It is off by default, because it makes your app send requests on a reader's behalf. With it on:
+
+- Only the servers the spec names can be reached, and `base_url` when you set it. A server written as a path, such as `/api`, is your own origin and needs no forwarding.
+- A redirect is shown as the answer and is not followed.
+- Nothing of the reader's session with your app is forwarded: no cookies, and only the headers the reader filled in. Their credentials for the API do pass through your server on the way.
+- It answers only a reader who may open the reference, behind the docs' [middleware](/docs/getting-started/configuration), and one reader can send 60 requests a minute.
+- A file upload is not forwarded, and a response is read up to 2 MB.
+
+A static export has no app to forward through, so there the playground reaches only an API that allows its origin.
+
 :::warning
 A request from the playground is a real request. On a production API, **Try it** on a delete operation deletes.
 :::
@@ -143,4 +161,5 @@ A reader who may not open the reference is not shown the way to it.
 | `openapi.samples` | `curl`, `php`, `javascript` | Languages of the request samples, in tab order. |
 | `openapi.base_url` | `null` | Used in the samples in place of the spec's first server. |
 | `openapi.playground` | `true` | Whether a reader can send a request from an operation's page. |
+| `openapi.proxy` | `false` | Sends playground requests to another origin through your app. |
 | `openapi.access` | `guest` | Who may read the reference. |

@@ -84,6 +84,25 @@ describe('a body as a form', () => {
   })
 })
 
+describe('names from a spec as keys', () => {
+  it('keeps a field called __proto__ as a field', () => {
+    const schema = { type: 'object', properties: JSON.parse('{"__proto__": {"type": "object"}, "name": {"type": "string"}}') }
+    const body = formToBody(schema, JSON.parse('{"__proto__": "{\\"polluted\\": true}", "name": "x"}'))
+
+    expect(Object.keys(body)).toEqual(['__proto__', 'name'])
+    expect(JSON.stringify(body)).toBe('{"__proto__":{"polluted":true},"name":"x"}')
+    expect({}.polluted).toBeUndefined()
+    expect(Object.getPrototypeOf(bodyToForm(schema, {}))).toBeNull()
+  })
+
+  it('opens with nothing inherited for a parameter of that name', () => {
+    const values = initial({ parameters: [{ in: 'query', name: '__proto__', required: false, schema: { type: 'string' } }] })
+
+    expect(Object.keys(values.query)).toEqual(['__proto__'])
+    expect(Object.getPrototypeOf(values.query)).toBeNull()
+  })
+})
+
 describe('initial', () => {
   it('fills in the example of a required parameter and leaves an optional one empty', () => {
     const values = initial({
@@ -94,7 +113,7 @@ describe('initial', () => {
       ],
     })
 
-    expect(values).toEqual({ path: { shipId: '42' }, query: { limit: '' }, header: { 'X-Trace': '' }, cookie: {} })
+    expect(JSON.parse(JSON.stringify(values))).toEqual({ path: { shipId: '42' }, query: { limit: '' }, header: { 'X-Trace': '' }, cookie: {} })
   })
 })
 

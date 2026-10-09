@@ -11,6 +11,15 @@
 
 const unset = (value) => value === undefined || value === null || value === ''
 
+/**
+ * An object to keep values in by a name that comes from a spec. It has no
+ * prototype, so a parameter called __proto__ is one more key and nothing else.
+ */
+export const bag = () => Object.create(null)
+
+/** A header name is a token. Anything else is not sent, and not written into a command. */
+const headerName = (name) => /^[A-Za-z0-9!#$%&'*+.^_`|~-]+$/.test(name)
+
 /** Fills {name} in a path. A missing value stays as written, so it is visible. */
 export function fillPath(path, values = {}) {
   return path.replace(/\{([^}]+)\}/g, (whole, name) =>
@@ -53,7 +62,7 @@ function applyAuth(auth, headers, query) {
     } else if (entry.type === 'apiKey' && !unset(entry.value) && entry.name) {
       if (entry.in === 'query') {
         query[entry.name] = entry.value
-      } else if (entry.in !== 'cookie') {
+      } else if (entry.in !== 'cookie' && headerName(entry.name)) {
         // A page cannot set a cookie on a request. A cookie key is sent by
         // the browser itself when the reader is signed in on that origin.
         headers[entry.name] = entry.value
@@ -83,11 +92,11 @@ function encodeBody(contentType, body) {
  * @returns {{ method: string, url: string, headers: Record<string, string>, body: string | null, files: Record<string, unknown> | null }}
  */
 export function buildRequest(operation, server, values = {}, auth = []) {
-  const headers = { Accept: 'application/json' }
-  const query = { ...(values.query ?? {}) }
+  const headers = Object.assign(bag(), { Accept: 'application/json' })
+  const query = Object.assign(bag(), values.query ?? {})
 
   for (const [name, value] of Object.entries(values.header ?? {})) {
-    if (!unset(value)) {
+    if (!unset(value) && headerName(name)) {
       headers[name] = String(value)
     }
   }
@@ -122,21 +131,37 @@ export function buildRequest(operation, server, values = {}, auth = []) {
 /** Inside single quotes a shell expands nothing, so only the quote itself needs care. */
 const shellQuote = (value) => `'${String(value).replace(/'/g, `'\\''`)}'`
 
-/** The same request as a curl command. Matches the PHP generator's quoting. */
+/**
+ * The same request as a curl command. Matches the PHP generator's quoting.
+ *
+ * Quoting keeps the shell out of it. curl reads its arguments too: a leading
+ * @ in a body or a form field means "the contents of this file", and an
+ * address that starts with a dash is an option. So the body goes in with
+ * --data-raw, a field with --form-string, and such an address after --url.
+ * Only a file the reader chose is written with @.
+ */
 export function toCurl(request) {
-  const lines = [`curl -X ${request.method.replace(/[^A-Z]/g, '')} ${shellQuote(request.url)}`]
+  const url = request.url.startsWith('-') ? `--url ${shellQuote(request.url)}` : shellQuote(request.url)
+  const lines = [`curl -X ${request.method.replace(/[^A-Z]/g, '')} ${url}`]
 
   for (const [name, value] of Object.entries(request.headers)) {
     lines.push(`  -H ${shellQuote(`${name}: ${value}`)}`)
   }
 
   if (request.body !== null) {
-    lines.push(`  -d ${shellQuote(request.body)}`)
+    lines.push(`  --data-raw ${shellQuote(request.body)}`)
   }
 
   for (const [name, value] of Object.entries(request.files ?? {})) {
     const isFile = typeof value === 'object' && value !== null && 'name' in value
-    lines.push(`  -F ${shellQuote(isFile ? `${name}=@${value.name}` : `${name}=${value}`)}`)
+    const field = String(name).replace(/[=;]/g, '_')
+
+    lines.push(
+      isFile
+        ? // In double quotes, so a ; or , in the file's name is part of the name.
+          `  -F ${shellQuote(`${field}=@"${String(value.name).replace(/[\\"]/g, '\\$&')}"`)}`
+        : `  --form-string ${shellQuote(`${field}=${typeof value === 'object' ? JSON.stringify(value) : value}`)}`,
+    )
   }
 
   return lines.join(' \\\n')

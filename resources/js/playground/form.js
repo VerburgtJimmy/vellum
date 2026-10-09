@@ -5,6 +5,8 @@
  * Like request.js, nothing here touches the page.
  */
 
+import { bag } from './request.js'
+
 const blank = (value) => value === undefined || value === null || value === ''
 
 /** The control a schema is edited with. */
@@ -108,7 +110,7 @@ export function hasForm(body) {
 
 /** The body a form's texts make: each field that was filled in, as its schema's type. */
 export function formToBody(schema, texts) {
-  const body = {}
+  const body = bag()
 
   for (const field of fields(schema)) {
     const value = coerce(field.schema, texts[field.name])
@@ -123,10 +125,10 @@ export function formToBody(schema, texts) {
 
 /** The texts a form shows for a body. */
 export function bodyToForm(schema, body) {
-  const texts = {}
+  const texts = bag()
 
   for (const field of fields(schema)) {
-    texts[field.name] = display(field.schema, body?.[field.name])
+    texts[field.name] = display(field.schema, body && Object.hasOwn(body, field.name) ? body[field.name] : undefined)
   }
 
   return texts
@@ -134,7 +136,7 @@ export function bodyToForm(schema, body) {
 
 /** The values a playground opens with: every parameter and the body, from their examples. */
 export function initial(operation) {
-  const values = { path: {}, query: {}, header: {}, cookie: {} }
+  const values = { path: bag(), query: bag(), header: bag(), cookie: bag() }
 
   for (const parameter of operation.parameters ?? []) {
     if (values[parameter.in]) {

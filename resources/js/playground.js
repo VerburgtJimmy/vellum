@@ -6,7 +6,7 @@
  * lives in playground/request.js and playground/form.js; this file is the
  * dialog around them.
  */
-import { buildRequest, reach, toCurl, xsrfToken } from './playground/request.js'
+import { bag, buildRequest, reach, toCurl, xsrfToken } from './playground/request.js'
 import { bodyToForm, coerce, control, display, failure, fields, formToBody, hasForm, initial, pretty, size } from './playground/form.js'
 
 const STORE = 'vellum-playground'
@@ -49,7 +49,7 @@ function remembered() {
 function remember(state) {
   try {
     // For this tab only, and gone when it closes: these are credentials.
-    sessionStorage.setItem(STORE, JSON.stringify({ auth: state.auth, server: state.server }))
+    sessionStorage.setItem(STORE, JSON.stringify({ auth: state.auth, servers: state.servers }))
   } catch {
     // Private mode, or storage is full. The playground works without it.
   }
@@ -98,6 +98,87 @@ function input(schema, text, { id, onInput, required = false, label }) {
   })
 }
 
+/** Sends the request from this browser, and reads back what it may. */
+async function direct(built, where, token, signal) {
+  const headers = { ...built.headers }
+
+  // Laravel refuses a state-changing request from a signed-in browser
+  // without this, and the reader on the app's own origin is exactly that.
+  if (where === 'direct' && token && !['GET', 'HEAD'].includes(built.method)) {
+    headers['X-XSRF-TOKEN'] = token
+  }
+
+  let body = built.body
+
+  if (built.files) {
+    body = new FormData()
+
+    for (const [name, value] of Object.entries(built.files)) {
+      body.append(name, value instanceof Blob ? value : typeof value === 'object' ? JSON.stringify(value) : String(value))
+    }
+  }
+
+  const started = performance.now()
+  const response = await fetch(built.url, {
+    method: built.method,
+    headers,
+    body,
+    // The reader's own session on the app's own origin, and nothing of
+    // theirs anywhere else.
+    credentials: where === 'direct' ? 'same-origin' : 'omit',
+    cache: 'no-store',
+    signal,
+  })
+
+  const type = response.headers.get('content-type') ?? ''
+  const blob = await response.blob()
+
+  return {
+    status: response.status,
+    statusText: response.statusText,
+    headers: [...response.headers],
+    type,
+    text: type === '' || /^text\/|json|xml|javascript|x-www-form-urlencoded|csv|yaml/i.test(type) ? await blob.text() : null,
+    size: blob.size,
+    elapsed: Math.round(performance.now() - started),
+    truncated: false,
+  }
+}
+
+/** Has this site's server send the request, and reads its account of the answer. */
+async function forwarded(proxy, built, token, signal) {
+  const response = await fetch(proxy, {
+    method: 'POST',
+    headers: { Accept: 'application/json', 'Content-Type': 'application/json', ...(token ? { 'X-XSRF-TOKEN': token } : {}) },
+    body: JSON.stringify({ method: built.method, url: built.url, headers: built.headers, body: built.body }),
+    credentials: 'same-origin',
+    cache: 'no-store',
+    signal,
+  })
+
+  const data = await response.json().catch(() => null)
+
+  if (!response.ok || !data || typeof data.status !== 'number') {
+    const reasons = {
+      419: 'This page has been open too long to send from. Reload it and try again.',
+      429: 'Too many requests from here for now. Wait a minute and try again.',
+    }
+
+    return { error: data?.error ?? reasons[response.status] ?? 'This site could not send the request.' }
+  }
+
+  return {
+    status: data.status,
+    statusText: String(data.statusText ?? ''),
+    headers: Array.isArray(data.headers) ? data.headers.filter((pair) => Array.isArray(pair)).map(([name, value]) => [String(name), String(value)]) : [],
+    type: String(data.type ?? ''),
+    text: typeof data.body === 'string' ? data.body : null,
+    size: Number(data.size) || 0,
+    elapsed: Number(data.elapsed) || 0,
+    truncated: data.truncated === true,
+  }
+}
+
 let fieldCount = 0
 
 /** A labelled row: the name and type on one side, the control on the other. */
@@ -141,15 +222,36 @@ export function open(button) {
 
   const saved = remembered()
   const bodies = operation.bodies ?? []
+  const first = operation.servers[0] ?? window.location.origin
+
+  // Everything kept by a name from the spec is kept in an object without a
+  // prototype. What was saved is copied in key by key for the same reason.
+  const auth = bag()
+  const servers = bag()
+
+  for (const [name, value] of Object.entries(saved.auth ?? {})) {
+    if (value && typeof value === 'object') {
+      auth[name] = Object.assign(bag(), value)
+    }
+  }
+
+  for (const [name, value] of Object.entries(saved.servers ?? {})) {
+    if (typeof value === 'string') {
+      servers[name] = value
+    }
+  }
+
   const state = {
-    server: operation.servers.includes(saved.server) ? saved.server : (operation.servers[0] ?? window.location.origin),
+    // The server last used in place of the spec's first, whatever it was.
+    server: servers[first] ?? first,
+    servers,
     texts: initial(operation),
-    auth: saved.auth ?? {},
+    auth,
     body: 0,
-    mode: {},
+    mode: [],
     form: bodies.map((body) => bodyToForm(body.schema, body.example)),
     json: bodies.map((body) => display({ type: 'json' }, body.example)),
-    files: bodies.map(() => ({})),
+    files: bodies.map(() => bag()),
   }
 
   bodies.forEach((body, index) => {
@@ -161,7 +263,7 @@ export function open(button) {
 
   /** The request as it stands, from everything typed so far. */
   const request = () => {
-    const values = { path: {}, query: {}, header: {} }
+    const values = { path: bag(), query: bag(), header: bag() }
 
     for (const parameter of operation.parameters) {
       if (values[parameter.in]) {
@@ -221,6 +323,7 @@ export function open(button) {
       size: Math.max(12, state.server.length),
       oninput: (event) => {
         state.server = event.target.value.trim()
+        state.servers[first] = state.server
         event.target.size = Math.max(12, state.server.length)
         remember(state)
         refresh()
@@ -238,7 +341,7 @@ export function open(button) {
       section(
         'Authorization',
         operation.security.map((scheme) => {
-          const stored = (state.auth[scheme.name] ??= {})
+          const stored = (state.auth[scheme.name] ??= bag())
           const field = (key, label, secret) =>
             row({
               name: label,
@@ -360,7 +463,7 @@ export function open(button) {
                     state.json[index] = display({ type: 'json' }, formToBody(body.schema, state.form[index]))
                   } else {
                     const parsed = coerce({ type: 'json' }, state.json[index])
-                    state.form[index] = bodyToForm(body.schema, typeof parsed === 'object' ? parsed : {})
+                    state.form[index] = bodyToForm(body.schema, parsed && typeof parsed === 'object' ? parsed : {})
                   }
 
                   state.mode[index] = name
@@ -445,75 +548,62 @@ export function open(button) {
       return
     }
 
-    const headers = { ...built.headers }
-    const token = where === 'direct' ? xsrfToken(document.cookie) : null
+    // Another origin goes through this site's own server when it offers to,
+    // and only that way: a request the browser sent and could not read back
+    // has still been sent, and sending it twice is not a retry.
+    const proxy = where === 'cross' ? document.documentElement.dataset.vellumPlaygroundProxy : null
+    const token = xsrfToken(document.cookie)
 
-    // Laravel refuses a state-changing request from a signed-in browser
-    // without this, and the reader on the app's own origin is exactly that.
-    if (token && !['GET', 'HEAD'].includes(built.method)) {
-      headers['X-XSRF-TOKEN'] = token
-    }
+    if (proxy && built.files) {
+      show(h('p', { class: 'vellum-playground-error', text: 'A file cannot be sent to another origin through this site. Use the command above.' }))
 
-    let body = built.body
-
-    if (built.files) {
-      body = new FormData()
-
-      for (const [name, value] of Object.entries(built.files)) {
-        body.append(name, value instanceof Blob ? value : typeof value === 'object' ? JSON.stringify(value) : String(value))
-      }
+      return
     }
 
     controller = new AbortController()
     const timer = setTimeout(() => controller?.abort(), TIMEOUT)
-    const started = performance.now()
 
     send.firstChild.textContent = 'Stop'
     form.setAttribute('aria-busy', 'true')
     show(h('p', { class: 'vellum-playground-empty', text: 'Sending.' }))
 
     try {
-      const response = await fetch(built.url, {
-        method: built.method,
-        headers,
-        body,
-        // The reader's own session on the app's own origin, and nothing of
-        // theirs anywhere else.
-        credentials: where === 'direct' ? 'same-origin' : 'omit',
-        cache: 'no-store',
-        signal: controller.signal,
-      })
+      const answer = proxy ? await forwarded(proxy, built, token, controller.signal) : await direct(built, where, token, controller.signal)
 
-      const type = response.headers.get('content-type') ?? ''
-      const textual = type === '' || /^text\/|json|xml|javascript|x-www-form-urlencoded|csv|yaml/i.test(type)
-      const blob = await response.blob()
-      const elapsed = Math.round(performance.now() - started)
-      const text = textual ? await blob.text() : ''
-      const kind = response.status >= 500 ? '5xx' : response.status >= 400 ? '4xx' : response.status >= 300 ? '3xx' : '2xx'
+      if (answer.error) {
+        show(h('p', { class: 'vellum-playground-error', text: answer.error }))
+
+        return
+      }
+
+      const kind = answer.status >= 500 ? '5xx' : answer.status >= 400 ? '4xx' : answer.status >= 300 ? '3xx' : '2xx'
 
       show(
         h(
           'p',
           { class: 'vellum-playground-status' },
-          h('span', { class: 'vellum-api-status', 'data-status': kind, text: `${response.status} ${response.statusText}`.trim() }),
-          h('span', { text: `${elapsed} ms` }),
-          h('span', { text: size(blob.size) }),
+          h('span', { class: 'vellum-api-status', 'data-status': kind, text: `${answer.status} ${answer.statusText}`.trim() }),
+          h('span', { text: `${answer.elapsed} ms` }),
+          h('span', { text: size(answer.size) }),
+          proxy ? h('span', { class: 'vellum-playground-via', text: 'Sent through this site' }) : null,
         ),
         // As text, always. A response is someone else's content, and this
         // page is not the place it gets to run.
-        textual
-          ? h('pre', { class: 'vellum-playground-output', tabindex: '0' }, h('code', { text: pretty(text, type).slice(0, SHOWN) }))
-          : h('p', { class: 'vellum-playground-empty', text: `${type || 'A response'} that is not text, so it is not shown.` }),
-        text.length > SHOWN ? h('p', { class: 'vellum-playground-empty', text: 'Only the start of the response is shown.' }) : null,
+        answer.text !== null
+          ? h('pre', { class: 'vellum-playground-output', tabindex: '0' }, h('code', { text: pretty(answer.text, answer.type).slice(0, SHOWN) }))
+          : h('p', { class: 'vellum-playground-empty', text: `${answer.type || 'A response'} that is not text, so it is not shown.` }),
+        answer.truncated || (answer.text ?? '').length > SHOWN
+          ? h('p', { class: 'vellum-playground-empty', text: 'Only the start of the response is shown.' })
+          : null,
         h(
           'details',
           { class: 'vellum-playground-headers' },
           h('summary', { text: 'Response headers' }),
-          h('pre', {}, h('code', { text: [...response.headers].map(([name, value]) => `${name}: ${value}`).join('\n') || 'None the browser may show.' })),
+          h('pre', {}, h('code', { text: answer.headers.map(([name, value]) => `${name}: ${value}`).join('\n') || 'None the browser may show.' })),
         ),
       )
     } catch (error) {
-      show(h('p', { class: 'vellum-playground-error', text: failure(error, where) }))
+      show(h('p', { class: 'vellum-playground-error', text: failure(error, proxy ? 'direct' : where) }))
     } finally {
       clearTimeout(timer)
       controller = null

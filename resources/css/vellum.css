@@ -3015,6 +3015,10 @@ textarea.vellum-playground-control {
   font-size: 0.75rem;
 }
 
+.vellum-playground-via {
+  margin-left: auto;
+}
+
 .vellum-playground-status .vellum-api-status {
   color: var(--foreground);
 }
