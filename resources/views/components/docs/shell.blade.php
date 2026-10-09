@@ -1,6 +1,7 @@
 @props([
     'document' => null,
     'navigation' => [],
+    'sections' => [],
     'versions' => [],
     'currentVersion' => null,
     'versionHrefs' => [],
@@ -58,6 +59,7 @@
         <x-vellum::docs.header
             :document="$document"
             :navigation="$navigation"
+            :sections="$sections"
             :versions="$versions"
             :current-version="$currentVersion"
             :version-hrefs="$versionHrefs"
@@ -76,6 +78,7 @@
                 @endif
                 <x-vellum::docs.mobile-sidebar
                     :navigation="$navigation"
+                    :sections="$sections"
                     :document="$document"
                     :search-in-sidebar="$searchInSidebar"
                     :versions="$versions"
@@ -96,6 +99,7 @@
         >
             <x-vellum::docs.sidebar
                 :navigation="$navigation"
+                :sections="$sections"
                 :document="$document"
                 :search-in-sidebar="$searchInSidebar"
                 :versions="$versions"

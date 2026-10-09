@@ -115,6 +115,8 @@ final class OpenApiPages
 
         return [
             'type' => 'folder',
+            // Marks the folder, so the reference can be given a sidebar of its own.
+            'section' => 'api',
             'title' => is_string($title) && trim($title) !== '' ? $title : 'API reference',
             'icon' => null,
             'defaultOpen' => false,

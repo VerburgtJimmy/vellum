@@ -263,7 +263,11 @@ return [
     | development the reference is built again when one of them changes.
     | Null watches app/ and routes/.
     |
-    | title: the name of the sidebar folder and of the overview page.
+    | sidebar: separate gives the reference a sidebar of its own, with a
+    | switch between it and the docs at the top of both. docs lists it as one
+    | more folder at the end of the docs' sidebar.
+    |
+    | title: the name of the reference in the sidebar, and of its overview.
     |
     | group_by: tag, or path to group by the first segment of the path.
     |
@@ -283,6 +287,7 @@ return [
         'scramble' => true,
         'watch' => null,
         'prefix' => 'api',
+        'sidebar' => 'separate',
         'title' => 'API reference',
         'group_by' => 'tag',
         'untagged_label' => 'Other',

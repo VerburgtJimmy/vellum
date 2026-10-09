@@ -1,6 +1,7 @@
 @props([
     'document' => null,
     'navigation' => [],
+    'sections' => [],
     'versions' => [],
     'currentVersion' => null,
     'versionHrefs' => [],
@@ -96,7 +97,7 @@
         @endif
 
         <div class="md:hidden">
-            <x-vellum::docs.mobile-sidebar :navigation="$navigation" :document="$document" />
+            <x-vellum::docs.mobile-sidebar :navigation="$navigation" :sections="$sections" :document="$document" />
         </div>
     </div>
 </header>

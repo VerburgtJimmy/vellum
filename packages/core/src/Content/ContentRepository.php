@@ -186,6 +186,109 @@ final class ContentRepository
     }
 
     /**
+     * The tree for the sidebar of one page. That is navigation(), unless the
+     * API reference has a sidebar to itself: then a reference page gets the
+     * reference alone, and every other page gets the docs without it.
+     *
+     * @return list<array<string, mixed>>
+     */
+    public function sidebar(?string $slug, ?string $version = null): array
+    {
+        $tree = $this->navigation($version);
+        $index = $this->referenceIndex($tree);
+
+        if ($index === null) {
+            return $tree;
+        }
+
+        if ($this->holdsPage($tree[$index], $slug)) {
+            /** @var list<array<string, mixed>> $children */
+            $children = $tree[$index]['children'];
+
+            return $children;
+        }
+
+        unset($tree[$index]);
+
+        return array_values($tree);
+    }
+
+    /**
+     * The sidebars a reader can switch between, with the one this page is in
+     * marked. Empty when there is only one.
+     *
+     * @return list<array{key: string, title: string, href: string, current: bool}>
+     */
+    public function sections(?string $slug, ?string $version = null): array
+    {
+        $tree = $this->navigation($version);
+        $index = $this->referenceIndex($tree);
+
+        if ($index === null) {
+            return [];
+        }
+
+        $reference = $tree[$index];
+        $first = $this->navigationBuilder()->flattenPages([$reference])[0] ?? null;
+
+        if ($first === null) {
+            return [];
+        }
+
+        $inReference = $this->holdsPage($reference, $slug);
+        $title = $reference['title'] ?? null;
+
+        return [
+            ['key' => 'docs', 'title' => 'Docs', 'href' => $this->hrefFor('', $version), 'current' => ! $inReference],
+            [
+                'key' => 'api',
+                'title' => is_string($title) && $title !== '' ? $title : 'API reference',
+                'href' => $first['href'],
+                'current' => $inReference,
+            ],
+        ];
+    }
+
+    /**
+     * Where the reference's folder sits in a tree, when it is to have a
+     * sidebar of its own and this reader may see it.
+     *
+     * @param  list<array<string, mixed>>  $tree
+     */
+    private function referenceIndex(array $tree): ?int
+    {
+        if ($this->openApi === null || ! Mount::separate()) {
+            return null;
+        }
+
+        foreach ($tree as $index => $node) {
+            if (($node['section'] ?? null) === 'api' && is_array($node['children'] ?? null)) {
+                return $index;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * @param  array<string, mixed>  $folder
+     */
+    private function holdsPage(array $folder, ?string $slug): bool
+    {
+        if ($slug === null) {
+            return false;
+        }
+
+        foreach ($this->navigationBuilder()->flattenPages([$folder]) as $page) {
+            if ($page['slug'] === $slug) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * The whole tree, before access is applied. Production trusts the one the
      * build wrote; only local walks the directory to notice a changed file.
      *
@@ -222,7 +325,9 @@ final class ContentRepository
      */
     public function adjacent(string $slug, ?string $version = null): array
     {
-        return $this->navigationBuilder()->adjacent($this->navigation($version), $slug);
+        // Within the sidebar the page is in, so the last page of the docs
+        // does not lead into the reference when the two are kept apart.
+        return $this->navigationBuilder()->adjacent($this->sidebar($slug, $version), $slug);
     }
 
     public function allows(Document $document): bool

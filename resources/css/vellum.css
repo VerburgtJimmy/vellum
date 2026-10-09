@@ -2326,3 +2326,43 @@ html[data-vellum-nav-marker] [data-vellum-sidebar-wrap] [data-vellum-nav-link]:h
   color: var(--muted-foreground);
   font-size: 0.75rem;
 }
+
+/* The switch between the docs and the API reference, at the top of the
+   sidebar: one track, the current section raised on it. */
+.vellum-sections {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  gap: var(--vellum-inset);
+  padding: var(--vellum-inset);
+  border-radius: var(--vellum-surface-radius);
+  background: var(--muted);
+}
+
+.vellum-section {
+  overflow: hidden;
+  padding: 0.3125rem 0.5rem;
+  border-radius: var(--vellum-inset-radius);
+  color: var(--muted-foreground);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1.25rem;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.vellum-section:hover {
+  color: var(--foreground);
+}
+
+.vellum-section[aria-current] {
+  background: var(--background);
+  color: var(--foreground);
+  box-shadow: 0 1px 2px oklch(0 0 0 / 0.08);
+}
+
+.vellum-section:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 1px;
+}

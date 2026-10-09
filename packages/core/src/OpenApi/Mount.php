@@ -36,4 +36,13 @@ final class Mount
 
         return $slug === $prefix || str_starts_with($slug, $prefix.'/');
     }
+
+    /**
+     * Whether the reference has a sidebar to itself. Otherwise it is one more
+     * folder at the end of the docs' own.
+     */
+    public static function separate(): bool
+    {
+        return config('vellum.openapi.sidebar', 'separate') !== 'docs';
+    }
 }

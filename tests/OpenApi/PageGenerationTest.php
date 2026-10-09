@@ -364,3 +364,54 @@ it('describes a page by the opening paragraph of its description', function (): 
 
     expect($page->description)->toBe('Adds a pet to the store.');
 });
+
+it('gives the reference a sidebar of its own, and a way between the two', function (): void {
+    enableOpenApi($this->cachePath(), apiSpec());
+    $this->writeDoc('guide.md', "---\ntitle: Guide\n---\nRead me.");
+
+    $repository = ContentRepository::fromConfig();
+    $repository->buildAll();
+
+    expect(array_column($repository->sidebar('guide'), 'title'))->toBe(['Guide', 'Home'])
+        ->and(array_column($repository->sidebar('api/pets/list-pets'), 'title'))->toBe(['Overview', 'Pets', 'Orders', 'Other'])
+        ->and($repository->sections('api/pets/list-pets'))->toBe([
+            ['key' => 'docs', 'title' => 'Docs', 'href' => '/docs', 'current' => false],
+            ['key' => 'api', 'title' => 'API reference', 'href' => '/docs/api', 'current' => true],
+        ])
+        // The last page of the docs does not lead into the reference.
+        ->and($repository->adjacent('')['next'])->toBeNull()
+        ->and($repository->adjacent('api')['previous'])->toBeNull()
+        ->and($repository->adjacent('api')['next']['slug'])->toBe('api/pets/list-pets');
+
+    $docsPage = (string) $this->get('/docs/guide')->assertOk()->getContent();
+    $apiPage = (string) $this->get('/docs/api/pets/list-pets')->assertOk()->getContent();
+
+    expect($docsPage)->toContain('data-vellum-sections')
+        ->toMatch('/<a\s+href="\/docs"\s+class="vellum-section"\s+aria-current="true"\s*>Docs<\/a>/')
+        ->not->toContain('vellum-nav-method')
+        ->and($apiPage)->toMatch('/<a\s+href="\/docs\/api"\s+class="vellum-section"\s+aria-current="true"\s*>API reference<\/a>/')
+        ->toContain('vellum-nav-method')
+        ->not->toContain('href="/docs/guide"');
+});
+
+it('lists the reference as a folder of the docs when asked', function (): void {
+    enableOpenApi($this->cachePath(), apiSpec(), ['sidebar' => 'docs']);
+
+    $repository = ContentRepository::fromConfig();
+    $repository->buildAll();
+
+    expect(array_column($repository->sidebar('api/pets/list-pets'), 'title'))->toBe(['Home', 'API reference'])
+        ->and($repository->sections('api/pets/list-pets'))->toBe([])
+        ->and($repository->adjacent('api')['previous']['slug'])->toBe('');
+
+    expect((string) $this->get('/docs')->assertOk()->getContent())
+        ->not->toContain('data-vellum-sections')
+        ->toContain('vellum-nav-method');
+});
+
+it('offers no way to a reference the reader may not open', function (): void {
+    enableOpenApi($this->cachePath(), apiSpec(), ['access' => 'auth']);
+    ContentRepository::fromConfig()->buildAll();
+
+    expect((string) $this->get('/docs')->assertOk()->getContent())->not->toContain('data-vellum-sections');
+});

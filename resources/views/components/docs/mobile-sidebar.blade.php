@@ -1,5 +1,6 @@
 @props([
     'navigation' => [],
+    'sections' => [],
     'document' => null,
     'searchInSidebar' => false,
     'versions' => [],
@@ -52,6 +53,7 @@
 
                 <x-vellum::docs.sidebar
                     :navigation="$navigation"
+                    :sections="$sections"
                     :document="$document"
                     :search-in-sidebar="false"
                     :chrome="false"
