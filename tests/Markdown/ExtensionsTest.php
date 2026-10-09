@@ -364,6 +364,29 @@ MD);
         ->and($commands)->toBe([false, true, false, false, true]);
 });
 
+it('does not mark the lines of a quoted argument as commands', function (): void {
+    $html = (new MarkdownRenderer)->render(<<<'MD'
+```bash
+curl -X POST 'https://api.test/pets' \
+  -d '{
+    "name": "O'\''Brien"
+}'
+echo "two
+lines" # don't stop here
+# it's a comment
+php artisan about
+```
+MD);
+
+    preg_match_all('/<span class="(vellum-code-line[^"]*)">/', $html, $lines);
+    $commands = array_map(
+        static fn (string $classes): bool => str_contains($classes, 'vellum-code-command'),
+        $lines[1],
+    );
+
+    expect($commands)->toBe([true, false, false, false, true, false, false, true]);
+});
+
 it('treats a titled shell block as a file, a script rather than commands to run', function (): void {
     $html = (new MarkdownRenderer)->render("```bash title=\"deploy.sh\"\nphp artisan vellum:build\n```");
 

@@ -92,7 +92,8 @@ final class CodeBlockRenderer implements NodeRendererInterface
     /**
      * Wraps each line in a span, marking highlighted lines and, in a terminal
      * block, the lines that are commands: not blank, not a # comment, and not
-     * the continuation of a line ending in a backslash.
+     * the continuation of a line that ends in a backslash or leaves a quote
+     * open, as a JSON body passed to curl does.
      *
      * @param  list<int>  $highlightLines
      */
@@ -111,6 +112,7 @@ final class CodeBlockRenderer implements NodeRendererInterface
         $highlightLookup = array_fill_keys($highlightLines, true);
         $wrapped = [];
         $continues = false;
+        $quote = null;
 
         foreach ($lines as $index => $line) {
             $lineNumber = $index + 1;
@@ -123,9 +125,11 @@ final class CodeBlockRenderer implements NodeRendererInterface
             if ($commands) {
                 $text = trim(html_entity_decode(strip_tags($line), ENT_QUOTES | ENT_HTML5));
 
-                if (! $continues && $text !== '' && ! str_starts_with($text, '#')) {
+                if (! $continues && $quote === null && $text !== '' && ! str_starts_with($text, '#')) {
                     $classes[] = 'vellum-code-command';
                 }
+
+                $quote = self::openQuote($text, $quote);
 
                 $continues = str_ends_with($text, '\\');
             }
@@ -134,6 +138,36 @@ final class CodeBlockRenderer implements NodeRendererInterface
         }
 
         return implode('', $wrapped);
+    }
+
+    /**
+     * The quote a shell would still be inside after this line, given the one
+     * it was inside before it. Single quotes take everything literally;
+     * inside double quotes, and outside any, a backslash escapes what follows,
+     * and outside any a # begins a comment.
+     */
+    private static function openQuote(string $line, ?string $quote): ?string
+    {
+        $length = strlen($line);
+
+        for ($i = 0; $i < $length; $i++) {
+            $character = $line[$i];
+
+            if ($quote === "'") {
+                $quote = $character === "'" ? null : $quote;
+            } elseif ($character === '\\') {
+                $i++;
+            } elseif ($quote === '"') {
+                $quote = $character === '"' ? null : $quote;
+            } elseif ($character === "'" || $character === '"') {
+                $quote = $character;
+            } elseif ($character === '#' && ($i === 0 || ctype_space($line[$i - 1]))) {
+                // The rest is a comment, and an apostrophe in one opens nothing.
+                break;
+            }
+        }
+
+        return $quote;
     }
 
     private function copyButton(): HtmlElement
