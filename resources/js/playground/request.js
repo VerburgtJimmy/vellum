@@ -17,6 +17,16 @@ const unset = (value) => value === undefined || value === null || value === ''
  */
 export const bag = () => Object.create(null)
 
+/** A header's value is one line. A line break in one would begin a header of its own. */
+const oneLine = (value) => String(value).replace(/[\r\n\0]+/g, ' ')
+
+/**
+ * Whether a multipart field is a file the reader picked. Only that is ever
+ * written into a command as a file: a field whose value merely looks like one,
+ * an object with a name in it say, is a value.
+ */
+const pickedFile = (value) => typeof Blob !== 'undefined' && value instanceof Blob && typeof value.name === 'string'
+
 /** A header name is a token. Anything else is not sent, and not written into a command. */
 const headerName = (name) => /^[A-Za-z0-9!#$%&'*+.^_`|~-]+$/.test(name)
 
@@ -56,7 +66,7 @@ function base64(text) {
 function applyAuth(auth, headers, query) {
   for (const entry of auth) {
     if (entry.type === 'bearer' && !unset(entry.value)) {
-      headers.Authorization = `Bearer ${entry.value}`
+      headers.Authorization = oneLine(`Bearer ${entry.value}`)
     } else if (entry.type === 'basic' && !unset(entry.username)) {
       headers.Authorization = `Basic ${base64(`${entry.username}:${entry.password ?? ''}`)}`
     } else if (entry.type === 'apiKey' && !unset(entry.value) && entry.name) {
@@ -65,7 +75,7 @@ function applyAuth(auth, headers, query) {
       } else if (entry.in !== 'cookie' && headerName(entry.name)) {
         // A page cannot set a cookie on a request. A cookie key is sent by
         // the browser itself when the reader is signed in on that origin.
-        headers[entry.name] = entry.value
+        headers[entry.name] = oneLine(entry.value)
       }
     }
   }
@@ -97,7 +107,7 @@ export function buildRequest(operation, server, values = {}, auth = []) {
 
   for (const [name, value] of Object.entries(values.header ?? {})) {
     if (!unset(value) && headerName(name)) {
-      headers[name] = String(value)
+      headers[name] = oneLine(value)
     }
   }
 
@@ -153,7 +163,7 @@ export function toCurl(request) {
   }
 
   for (const [name, value] of Object.entries(request.files ?? {})) {
-    const isFile = typeof value === 'object' && value !== null && 'name' in value
+    const isFile = pickedFile(value)
     const field = String(name).replace(/[=;]/g, '_')
 
     lines.push(

@@ -69,7 +69,7 @@ describe('buildRequest', () => {
   })
 
   it('leaves a multipart body and its content type to the browser', () => {
-    const fields = { title: 'Mars', image: { name: 'mars.png' } }
+    const fields = { title: 'Mars', image: new File(['x'], 'mars.png') }
     const request = buildRequest({ method: 'post', path: '/upload', body: { contentType: 'multipart/form-data' } }, '', { body: fields })
 
     expect(request.body).toBeNull()
@@ -122,7 +122,7 @@ describe('toCurl', () => {
   })
 
   it('writes a file field by its name', () => {
-    const curl = toCurl({ method: 'POST', url: '/upload', headers: {}, body: null, files: { title: 'Mars', image: { name: 'mars.png' } } })
+    const curl = toCurl({ method: 'POST', url: '/upload', headers: {}, body: null, files: { title: 'Mars', image: new File(['x'], 'mars.png') } })
 
     expect(curl).toContain(`--form-string 'title=Mars'`)
     expect(curl).toContain(`-F 'image=@"mars.png"'`)
@@ -136,7 +136,13 @@ describe('what curl itself would read into an argument', () => {
       url: 'https://api.test/upload',
       headers: {},
       body: '@/etc/passwd',
-      files: { note: '@/etc/passwd', 'a=b;type': '<~/.ssh/id_rsa', image: { name: 'x";type=text/html' } },
+      files: {
+        note: '@/etc/passwd',
+        'a=b;type': '<~/.ssh/id_rsa',
+        image: new File(['x'], 'x";type=text/html'),
+        // A value that has a name in it is still a value, not a file to send.
+        owner: { name: '/etc/passwd' },
+      },
     })
 
     // --data-raw and --form-string take what follows as it is written.
@@ -144,6 +150,8 @@ describe('what curl itself would read into an argument', () => {
     expect(curl).toContain(`--form-string 'note=@/etc/passwd'`)
     expect(curl).toContain(`--form-string 'a_b_type=<~/.ssh/id_rsa'`)
     expect(curl).toContain(`-F 'image=@"x\\";type=text/html"'`)
+    expect(curl).toContain(`--form-string 'owner={"name":"/etc/passwd"}'`)
+    expect(curl.match(/@"/g)).toHaveLength(1)
     expect(curl).not.toMatch(/ -d /)
   })
 
@@ -157,6 +165,20 @@ describe('what curl itself would read into an argument', () => {
     ])
 
     expect(Object.keys(request.headers)).toEqual(['Accept', 'X-Good'])
+  })
+})
+
+describe('a header value', () => {
+  it('stays on one line, so it cannot begin a header of its own', () => {
+    const request = buildRequest({ method: 'get', path: '/' }, '', { header: { 'X-Note': 'a\r\nX-Admin: 1' } }, [
+      { type: 'bearer', value: 't\nX-Admin: 1' },
+      { type: 'apiKey', in: 'header', name: 'X-Key', value: 'k\r\nX-Admin: 1' },
+    ])
+
+    expect(request.headers['X-Note']).toBe('a X-Admin: 1')
+    expect(request.headers.Authorization).toBe('Bearer t X-Admin: 1')
+    expect(request.headers['X-Key']).toBe('k X-Admin: 1')
+    expect(toCurl(request)).not.toMatch(/\n(?!  -)/)
   })
 })
 

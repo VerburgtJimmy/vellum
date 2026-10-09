@@ -21,27 +21,41 @@ final class PlaygroundProxy
 
     public const MAX_RESPONSE = 2 * 1024 * 1024;
 
+    /** Headers every request may carry, whatever the spec declares. */
+    private const ALWAYS = ['accept', 'content-type', 'authorization'];
+
     /**
-     * Headers that describe the reader's connection to this app, or that the
-     * HTTP client must write itself. None of them is the reader's to forward.
+     * Headers that are never forwarded, even if a spec declares one: they
+     * describe a connection, which here is this app's and not the reader's,
+     * or say who a request is from, which the API would take from this app's
+     * address on trust.
      */
     private const WITHHELD = [
         'host', 'cookie', 'content-length', 'connection', 'transfer-encoding', 'keep-alive', 'upgrade', 'te', 'trailer',
-        'origin', 'referer', 'forwarded', 'via', 'x-xsrf-token', 'x-csrf-token', 'x-real-ip', 'expect',
+        'origin', 'referer', 'forwarded', 'via', 'expect', 'x-xsrf-token', 'x-csrf-token',
+        'x-real-ip', 'client-ip', 'true-client-ip', 'x-client-ip', 'x-cluster-client-ip', 'x-host', 'x-rewrite-url',
+        'x-http-method-override', 'x-http-method', 'x-method-override',
     ];
 
+    private const WITHHELD_PREFIXES = ['proxy-', 'sec-', 'x-forwarded-', 'x-original-', 'cf-', 'fastly-', 'x-envoy-', 'x-amzn-'];
+
     /**
-     * Whether a request may go to this address: under one of the servers the
-     * spec names, on the same scheme, host and port.
+     * The address a request may go to, or null when it may not go there: it
+     * has to be under one of the servers the spec names, on the same scheme,
+     * host and port.
+     *
+     * What comes back is the address written out again from the parts that
+     * were checked, and that is what must be requested. The string a reader
+     * sent may be read differently by the HTTP client than it was here.
      *
      * @param  list<string>  $servers
      */
-    public static function allows(string $url, array $servers): bool
+    public static function target(string $url, array $servers): ?string
     {
         $target = self::parts($url);
 
         if ($target === null) {
-            return false;
+            return null;
         }
 
         foreach ($servers as $server) {
@@ -52,20 +66,24 @@ final class PlaygroundProxy
             }
 
             if ($base['path'] === '' || $target['path'] === $base['path'] || str_starts_with($target['path'], $base['path'].'/')) {
-                return true;
+                return $target['address'].$target['rest'];
             }
         }
 
-        return false;
+        return null;
     }
 
     /**
-     * The headers to forward.
+     * The headers to forward: those the spec declares for some operation,
+     * and the three any request may carry. A reader's browser can send the
+     * API any header it likes. This app cannot, because the API may trust
+     * what arrives from this app's address.
      *
      * @param  array<array-key, mixed>  $headers
+     * @param  list<string>  $declared  Header names from the spec, in lower case.
      * @return array<string, string>
      */
-    public static function headers(array $headers): array
+    public static function headers(array $headers, array $declared = []): array
     {
         $out = [];
 
@@ -76,8 +94,18 @@ final class PlaygroundProxy
 
             $lower = strtolower($name);
 
-            if (in_array($lower, self::WITHHELD, true) || str_starts_with($lower, 'proxy-') || str_starts_with($lower, 'sec-') || str_starts_with($lower, 'x-forwarded-')) {
+            if (! in_array($lower, self::ALWAYS, true) && ! in_array($lower, $declared, true)) {
                 continue;
+            }
+
+            if (in_array($lower, self::WITHHELD, true)) {
+                continue;
+            }
+
+            foreach (self::WITHHELD_PREFIXES as $prefix) {
+                if (str_starts_with($lower, $prefix)) {
+                    continue 2;
+                }
             }
 
             // A line break in a value would start a header of its own.
@@ -105,7 +133,7 @@ final class PlaygroundProxy
      * one this route will go to: not http or https, carrying a username, or
      * with a path that climbs out of itself.
      *
-     * @return array{origin: string, path: string}|null
+     * @return array{origin: string, address: string, path: string, rest: string}|null
      */
     private static function parts(string $url): ?array
     {
@@ -120,8 +148,15 @@ final class PlaygroundProxy
         }
 
         $scheme = strtolower($parts['scheme']);
+        $host = strtolower($parts['host']);
 
         if ($scheme !== 'http' && $scheme !== 'https') {
+            return null;
+        }
+
+        // A name, an IPv4 address or a bracketed IPv6 one, in plain ASCII.
+        // Anything else is a character some client may read as a separator.
+        if (preg_match('/^(?:[a-z0-9](?:[a-z0-9.-]*[a-z0-9])?|\[[0-9a-f:.]+\])$/', $host) !== 1) {
             return null;
         }
 
@@ -141,9 +176,24 @@ final class PlaygroundProxy
 
         $port = $parts['port'] ?? ($scheme === 'https' ? 443 : 80);
 
+        if (preg_match('#^(?:/[A-Za-z0-9._~!$&\'()*+,;=:@%-]*)*$#', $path) !== 1) {
+            return null;
+        }
+
+        $query = $parts['query'] ?? null;
+
+        if ($query !== null && preg_match('#^[A-Za-z0-9._~!$&\'()*+,;=:@%/?\[\]-]*$#', $query) !== 1) {
+            return null;
+        }
+
         return [
-            'origin' => $scheme.'://'.strtolower($parts['host']).':'.$port,
+            // With the port always written, so :443 and no port compare equal.
+            'origin' => $scheme.'://'.$host.':'.$port,
+            // As it is requested: the port only where the address gave one.
+            'address' => $scheme.'://'.$host.(isset($parts['port']) ? ':'.$parts['port'] : ''),
             'path' => rtrim($path, '/'),
+            // The fragment is left behind: it is never sent to a server.
+            'rest' => $path.($query === null ? '' : '?'.$query),
         ];
     }
 }

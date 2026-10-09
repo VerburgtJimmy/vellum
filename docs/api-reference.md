@@ -112,7 +112,7 @@ It is off by default, because it makes your app send requests on a reader's beha
 
 - Only the servers the spec names can be reached, and `base_url` when you set it. A server written as a path, such as `/api`, is your own origin and needs no forwarding.
 - A redirect is shown as the answer and is not followed.
-- Nothing of the reader's session with your app is forwarded: no cookies, and only the headers the reader filled in. Their credentials for the API do pass through your server on the way.
+- Nothing of the reader's session with your app is forwarded. No cookies go along, and the only headers that do are `Accept`, `Content-Type`, `Authorization` and those the spec declares as a header parameter or an API key. A header that says where a request came from, such as `X-Forwarded-For`, is never forwarded. The reader's credentials for the API do pass through your server on the way.
 - It answers only a reader who may open the reference, behind the docs' [middleware](/docs/getting-started/configuration), and one reader can send 60 requests a minute.
 - A file upload is not forwarded, and a response is read up to 2 MB.
 

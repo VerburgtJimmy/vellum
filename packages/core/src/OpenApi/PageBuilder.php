@@ -115,7 +115,7 @@ final class PageBuilder
             markdown: $this->rendition->overview($title, $spec, $groups, $link),
             spec: $spec,
             version: $version,
-            extra: ['openapi_servers' => $this->servers($spec)],
+            extra: ['openapi_servers' => $this->servers($spec), 'openapi_headers' => $this->headerNames($spec)],
         );
     }
 
@@ -374,6 +374,33 @@ final class PageBuilder
             array_map(static fn (string $url): string => rtrim($url, '/'), $urls),
             static fn (string $url): bool => preg_match('#^https?://[^/{}]+#i', $url) === 1,
         )));
+    }
+
+    /**
+     * Every header the spec says a request can carry: its header parameters,
+     * and the header an API key travels in. In lower case, to compare by.
+     *
+     * @return list<string>
+     */
+    private function headerNames(Spec $spec): array
+    {
+        $names = [];
+
+        foreach ($spec->operations as $operation) {
+            foreach ($operation->parametersByLocation()['header'] ?? [] as $parameter) {
+                if (is_string($parameter['name'] ?? null)) {
+                    $names[] = strtolower($parameter['name']);
+                }
+            }
+        }
+
+        foreach ($spec->securitySchemes() as $scheme) {
+            if (($scheme['type'] ?? null) === 'apiKey' && ($scheme['in'] ?? 'header') === 'header' && is_string($scheme['name'] ?? null)) {
+                $names[] = strtolower($scheme['name']);
+            }
+        }
+
+        return array_values(array_unique($names));
     }
 
     /**

@@ -63,19 +63,24 @@ final class PlaygroundProxyController extends Controller
         /** @var list<string> $servers */
         $servers = array_values(array_filter((array) ($overview->frontmatter['openapi_servers'] ?? []), is_string(...)));
 
-        if (! PlaygroundProxy::allows($url, $servers)) {
+        $target = PlaygroundProxy::target($url, $servers);
+
+        if ($target === null) {
             return $this->refuse('That address is not one of the servers this API reference names.', 422);
         }
+
+        /** @var list<string> $declared */
+        $declared = array_values(array_filter((array) ($overview->frontmatter['openapi_headers'] ?? []), is_string(...)));
 
         if (! class_exists(Client::class)) {
             return $this->refuse('This site cannot send requests: its HTTP client is not installed.', 501);
         }
 
-        $forward = PlaygroundProxy::headers($headers);
+        $forward = PlaygroundProxy::headers($headers, $declared);
         $started = microtime(true);
 
         try {
-            $pending = Http::withHeaders($forward)
+            $pending = Http::withHeaders(['User-Agent' => 'Vellum-Playground', ...$forward])
                 ->timeout(self::TIMEOUT)
                 ->connectTimeout(5)
                 // A redirect is an answer to show, not an address to follow:
@@ -86,7 +91,8 @@ final class PlaygroundProxyController extends Controller
                 $pending = $pending->withBody($body, $this->contentType($forward));
             }
 
-            $response = $pending->send($method, $url);
+            // The address as it was checked, not as it was sent in.
+            $response = $pending->send($method, $target);
         } catch (ConnectionException) {
             return $this->refuse('No response. The server may be down, or the address wrong.', 502);
         }

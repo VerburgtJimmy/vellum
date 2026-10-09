@@ -113,7 +113,13 @@ it('sends the request and gives back an account of the answer', function (): voi
 });
 
 it('forwards nothing of the reader that the reader did not put in the request', function (): void {
-    proxyReady($this->cachePath());
+    proxyReady($this->cachePath(), [], ['paths' => ['/pets' => ['get' => ['parameters' => [
+        ['name' => 'X-Fine', 'in' => 'header', 'schema' => ['type' => 'string']],
+        ['name' => 'X-Break', 'in' => 'header', 'schema' => ['type' => 'string']],
+        // Declared, and still not this app's to send: it says who is asking.
+        ['name' => 'X-Forwarded-For', 'in' => 'header', 'schema' => ['type' => 'string']],
+        ['name' => 'True-Client-IP', 'in' => 'header', 'schema' => ['type' => 'string']],
+    ]]]]]);
     Http::fake(['*' => Http::response('ok')]);
 
     $this->withoutMiddleware(ValidateCsrfToken::class)
@@ -127,7 +133,11 @@ it('forwards nothing of the reader that the reader did not put in the request', 
                 'Host' => 'internal',
                 'X-XSRF-TOKEN' => 't',
                 'X-Forwarded-For' => '127.0.0.1',
+                'True-Client-IP' => '127.0.0.1',
                 'Proxy-Authorization' => 'x',
+                // Not declared by the spec, so not a header this API takes.
+                'X-Internal-Admin' => '1',
+                'X-Original-URL' => '/admin',
                 "X-Split\r\nInjected" => 'x',
                 'X-Break' => "a\r\nInjected: yes",
                 'X-Fine' => 'kept',
@@ -138,7 +148,11 @@ it('forwards nothing of the reader that the reader did not put in the request', 
         $names = array_map(strtolower(...), array_keys($request->headers()));
 
         return in_array('x-fine', $names, true)
-            && array_intersect($names, ['cookie', 'x-xsrf-token', 'x-forwarded-for', 'proxy-authorization', 'referer', 'x-break', 'injected']) === []
+            && array_intersect($names, [
+                'cookie', 'x-xsrf-token', 'x-forwarded-for', 'true-client-ip', 'proxy-authorization', 'referer',
+                'x-break', 'injected', 'x-internal-admin', 'x-original-url',
+            ]) === []
+            && $request->header('User-Agent') === ['Vellum-Playground']
             && ! str_contains(json_encode($request->headers()), 'the-readers-session')
             && ! str_contains(json_encode($request->headers()), 'internal');
     });
@@ -167,6 +181,11 @@ it('goes only to the servers the spec names', function (string $url): void {
     'a climb that is encoded' => ['https://api.example.com/v2/%2e%2e/admin'],
     'a climb that is encoded twice' => ['https://api.example.com/v2/%252e%252e/admin'],
     'a backslash' => ['https://api.example.com\\@evil.test/v2/pets'],
+    'a host with a character that is not plain' => ['https://api.example.com／.evil.test/v2/pets'],
+    'a space in it' => ['https://api.example.com/v2/pets x'],
+    'a tab in it' => ["https://api.example.com/v2/\tpets"],
+    'a line break in it' => ["https://api.example.com/v2/pets\r\nHost: evil.test"],
+    'the host only in the fragment' => ['https://evil.test/#https://api.example.com/v2/pets'],
     'a file' => ['file:///etc/passwd'],
     'not an address' => ['pets'],
 ]);
@@ -181,6 +200,15 @@ it('reaches what is under a server the spec names', function (string $url): void
     ['https://API.example.com/v2/pets/7?x=../y'],
     ['https://api.example.com:443/v2/pets%20and%20more'],
 ]);
+
+it('requests the address it checked, written out again from its parts', function (): void {
+    proxyReady($this->cachePath(), [], ['servers' => [['url' => 'https://api.example.com/v2']]]);
+    Http::fake(['*' => Http::response('ok')]);
+
+    ($this->forward)(['method' => 'GET', 'url' => 'HTTPS://API.Example.com/v2/pets?a=1#@evil.test/'])->assertOk();
+
+    Http::assertSent(fn (Request $request): bool => $request->url() === 'https://api.example.com/v2/pets?a=1');
+});
 
 it('counts an operation of its own server, and the configured one, among them', function (): void {
     proxyReady($this->cachePath(), ['base_url' => 'https://staging.example.com'], [
