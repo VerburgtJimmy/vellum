@@ -12,7 +12,7 @@
     <div class="vellum-api-variants">
         @foreach ($variants as $index => $variant)
             <details class="vellum-api-variant" @if ($index === 0) open @endif>
-                <summary>{{ $variant['label'] }}</summary>
+                <summary class="vellum-api-toggle">{{ $variant['label'] }}</summary>
                 @include('vellum::openapi.schema', ['schema' => $variant['schema'], 'depth' => $depth + 1])
             </details>
         @endforeach

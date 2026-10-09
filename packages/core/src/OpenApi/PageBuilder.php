@@ -85,6 +85,7 @@ final class PageBuilder
             'spec' => $spec,
             'groups' => $groups,
             'markdown' => $this->markdown(...),
+            'intro' => $this->afterOpening($spec->description()),
             'href' => $link,
         ])->render();
 
@@ -136,6 +137,7 @@ final class PageBuilder
         $html = $this->view->make('vellum::openapi.operation', [
             ...$page,
             'markdown' => $this->markdown(...),
+            'body' => $this->afterOpening($operation->description),
             'path' => $this->highlightPath(...),
             'sampleTabs' => $this->codeTabs(
                 array_map(static fn (array $sample): array => [
@@ -429,6 +431,17 @@ final class PageBuilder
         $httpScheme = is_string($scheme['scheme'] ?? null) ? ucfirst($scheme['scheme']) : 'Bearer';
 
         return 'Authorization: '.$httpScheme.' <token>';
+    }
+
+    /**
+     * A description without its opening paragraph, rendered. The page shows
+     * that paragraph under the title already, as the page's description.
+     */
+    private function afterOpening(?string $markdown): string
+    {
+        $rest = preg_split('/\R\s*\R/', trim((string) $markdown), 2)[1] ?? '';
+
+        return trim($rest) === '' ? '' : $this->markdown($rest);
     }
 
     /**

@@ -10,7 +10,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - An API reference generated from an OpenAPI 3.0 or 3.1 spec, turned on with `openapi.enabled`. Each operation is a page of its own in a sidebar folder per tag, with the method beside its title, and the reference has an overview page. The pages are ordinary pages to the rest of Vellum: they are searched, exported, listed in `llms.txt` and the sitemap, and gated with `openapi.access`. Their raw Markdown is written for them, with fields as tables and samples as fenced blocks. Request samples are generated for curl, the Laravel HTTP client and fetch. With `dedoc/scramble` installed and no `openapi.spec` set, the spec comes from Scramble, and in local development the reference follows the app's code without a build
+- An operation's page opens with its request line, tinted with its method's colour, and sets each section in a panel: authorization, parameters, the request body and each response. Request samples and response examples are code tabs beside the documentation on a wide screen, where they stay in view and take the place of the table of contents
 - The reference has a sidebar of its own, with a switch between it and the docs at the top of both. `openapi.sidebar` set to `docs` lists it as a folder of the docs' sidebar instead. `ContentRepository::sidebar()` returns the tree for one page and `sections()` the sidebars a reader can switch between
+
+### Fixed
+
+- A terminal code block showed a prompt before every line of a quoted argument that ran over several lines, such as a JSON body passed to curl. It shows one, before the command
 
 ## [0.8.2] - 2026-10-06
 

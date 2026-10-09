@@ -2133,51 +2133,59 @@ html[data-vellum-nav-marker] [data-vellum-sidebar-wrap] [data-vellum-nav-link]:h
   }
 }
 
-/* API reference. A plain baseline for pages generated from an OpenAPI spec:
-   one column, fields as rows divided by hairlines, nothing in a box but code. */
+/* API reference: pages generated from an OpenAPI spec.
+
+   An operation is documentation and examples. On a wide screen the two sit
+   side by side and the examples stay in view, so they take the place of the
+   table of contents. Each section of the documentation is one panel. */
 :root {
-  --vellum-method-get: oklch(0.55 0.14 150);
-  --vellum-method-post: oklch(0.55 0.16 255);
-  --vellum-method-put: oklch(0.6 0.14 70);
-  --vellum-method-patch: oklch(0.58 0.15 300);
-  --vellum-method-delete: oklch(0.57 0.19 25);
+  --vellum-method-get: oklch(0.5 0.13 150);
+  --vellum-method-post: oklch(0.5 0.16 255);
+  --vellum-method-put: oklch(0.52 0.12 70);
+  --vellum-method-patch: oklch(0.52 0.16 300);
+  --vellum-method-delete: oklch(0.53 0.19 25);
 }
 
 .dark {
-  --vellum-method-get: oklch(0.76 0.15 150);
-  --vellum-method-post: oklch(0.74 0.13 255);
-  --vellum-method-put: oklch(0.8 0.13 80);
-  --vellum-method-patch: oklch(0.76 0.13 300);
-  --vellum-method-delete: oklch(0.72 0.17 25);
+  --vellum-method-get: oklch(0.78 0.15 150);
+  --vellum-method-post: oklch(0.76 0.12 255);
+  --vellum-method-put: oklch(0.82 0.13 80);
+  --vellum-method-patch: oklch(0.78 0.12 300);
+  --vellum-method-delete: oklch(0.74 0.16 25);
+}
+
+.vellum-nav-method,
+.vellum-api-method,
+.vellum-api-endpoint {
+  --vellum-method: var(--muted-foreground);
+}
+
+:is(.vellum-nav-method, .vellum-api-method, .vellum-api-endpoint)[data-method='get'] {
+  --vellum-method: var(--vellum-method-get);
+}
+
+:is(.vellum-nav-method, .vellum-api-method, .vellum-api-endpoint)[data-method='post'] {
+  --vellum-method: var(--vellum-method-post);
+}
+
+:is(.vellum-nav-method, .vellum-api-method, .vellum-api-endpoint)[data-method='put'] {
+  --vellum-method: var(--vellum-method-put);
+}
+
+:is(.vellum-nav-method, .vellum-api-method, .vellum-api-endpoint)[data-method='patch'] {
+  --vellum-method: var(--vellum-method-patch);
+}
+
+:is(.vellum-nav-method, .vellum-api-method, .vellum-api-endpoint)[data-method='delete'] {
+  --vellum-method: var(--vellum-method-delete);
 }
 
 .vellum-nav-method,
 .vellum-api-method {
-  --vellum-method: var(--muted-foreground);
   color: var(--vellum-method);
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   font-weight: 600;
   letter-spacing: 0.02em;
-}
-
-:is(.vellum-nav-method, .vellum-api-method)[data-method='get'] {
-  --vellum-method: var(--vellum-method-get);
-}
-
-:is(.vellum-nav-method, .vellum-api-method)[data-method='post'] {
-  --vellum-method: var(--vellum-method-post);
-}
-
-:is(.vellum-nav-method, .vellum-api-method)[data-method='put'] {
-  --vellum-method: var(--vellum-method-put);
-}
-
-:is(.vellum-nav-method, .vellum-api-method)[data-method='patch'] {
-  --vellum-method: var(--vellum-method-patch);
-}
-
-:is(.vellum-nav-method, .vellum-api-method)[data-method='delete'] {
-  --vellum-method: var(--vellum-method-delete);
 }
 
 .vellum-nav-method {
@@ -2191,15 +2199,35 @@ html[data-vellum-nav-marker] [data-vellum-sidebar-wrap] [data-vellum-nav-link]:h
   text-decoration: line-through;
 }
 
+/* The request line, tinted with its method's colour. */
 .vellum-api-endpoint {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: 0.625rem;
-  margin-top: 1.25rem;
-  font-size: 0.875rem;
+  min-height: 2.75rem;
+  margin-top: 0.5rem;
+  padding: var(--vellum-inset) 0.75rem var(--vellum-inset) var(--vellum-inset);
+  border: 1px solid color-mix(in oklab, var(--vellum-method) 30%, var(--border));
+  border-radius: var(--vellum-surface-radius);
+  background: color-mix(in oklab, var(--vellum-method) 7%, var(--background));
 }
 
-.vellum-api-path {
+.vellum-api-endpoint .vellum-api-method {
+  flex: none;
+  padding: 0.375rem 0.625rem;
+  border-radius: var(--vellum-inset-radius);
+  background: var(--vellum-method);
+  color: var(--background);
+  font-size: 0.75rem;
+  line-height: 1.25rem;
+}
+
+.vellum-prose .vellum-api-path {
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  font-size: 0.8125rem;
   overflow-wrap: anywhere;
 }
 
@@ -2208,18 +2236,110 @@ html[data-vellum-nav-marker] [data-vellum-sidebar-wrap] [data-vellum-nav-link]:h
 }
 
 .vellum-api-deprecated {
+  flex: none;
   margin-left: auto;
+  padding: 0.0625rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--background);
+  color: var(--muted-foreground);
+  font-size: 0.6875rem;
+  line-height: 1.25rem;
+}
+
+.vellum-prose .vellum-api-section {
+  margin-top: 2.5rem;
+  margin-bottom: 0.875rem;
+  font-size: 1.25rem;
+}
+
+.vellum-prose .vellum-api-lede {
+  margin: 0 0 0.875rem;
+  color: var(--muted-foreground);
+  font-size: 0.875rem;
+}
+
+/* A panel: one section's fields, or one response. */
+.vellum-api-panel {
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--vellum-surface-radius);
+  background: var(--card);
+}
+
+.vellum-api-panel + .vellum-api-panel {
+  margin-top: 0.75rem;
+}
+
+.vellum-api-panel-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem 0.75rem;
+  padding: 0.5rem 1rem;
+  background: var(--muted);
+  font-size: 0.8125rem;
+}
+
+.vellum-api-panel-head:not(:last-child) {
+  border-bottom: 1px solid var(--border);
+}
+
+.vellum-api-panel-title {
+  min-width: 0;
+  color: var(--foreground);
+}
+
+.vellum-api-panel-head .vellum-api-media:not(:first-child),
+.vellum-api-panel-note {
+  margin-left: auto;
+}
+
+.vellum-api-panel-note {
   color: var(--muted-foreground);
   font-size: 0.75rem;
 }
 
-.vellum-api-fields {
-  border-top: 1px solid var(--border);
+.vellum-api-status {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-weight: 600;
 }
 
+.vellum-api-status::before {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: var(--muted-foreground);
+  content: '';
+}
+
+.vellum-api-status[data-status='2xx']::before {
+  background: var(--vellum-method-get);
+}
+
+.vellum-api-status[data-status='3xx']::before {
+  background: var(--vellum-method-post);
+}
+
+.vellum-api-status[data-status='4xx']::before {
+  background: var(--vellum-method-put);
+}
+
+.vellum-api-status[data-status='5xx']::before {
+  background: var(--vellum-method-delete);
+}
+
+/* Fields: a name, its type, what it means. */
 .vellum-api-field {
-  padding-block: 0.75rem;
-  border-bottom: 1px solid var(--border);
+  padding: 0.75rem 1rem;
+}
+
+.vellum-api-field + .vellum-api-field {
+  border-top: 1px solid var(--border);
 }
 
 .vellum-api-field-head {
@@ -2229,7 +2349,11 @@ html[data-vellum-nav-marker] [data-vellum-sidebar-wrap] [data-vellum-nav-link]:h
   gap: 0.25rem 0.625rem;
 }
 
-.vellum-api-field-name {
+.vellum-prose .vellum-api-field-name {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--primary);
   font-size: 0.8125rem;
   font-weight: 600;
 }
@@ -2244,16 +2368,31 @@ html[data-vellum-nav-marker] [data-vellum-sidebar-wrap] [data-vellum-nav-link]:h
 }
 
 .vellum-api-field-type,
-.vellum-api-field-meta,
-.vellum-api-media {
+.vellum-prose .vellum-api-media {
+  padding: 0;
+  border: 0;
+  background: none;
   color: var(--muted-foreground);
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   font-size: 0.75rem;
 }
 
-.vellum-prose :is(.vellum-api-field-description, .vellum-api-chips, .vellum-api-enum, .vellum-api-field-meta, .vellum-api-lede) {
+.vellum-prose :is(.vellum-api-field-description, .vellum-api-chips, .vellum-api-enum, .vellum-api-field-meta) {
   margin: 0.375rem 0 0;
   font-size: 0.875rem;
+}
+
+.vellum-prose .vellum-api-panel > .vellum-api-field-meta {
+  margin: 0;
+  padding: 0.75rem 1rem;
+  color: var(--muted-foreground);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.75rem;
+}
+
+.vellum-prose .vellum-api-recursive {
+  color: var(--muted-foreground);
+  font-size: 0.8125rem;
 }
 
 .vellum-api-chips,
@@ -2270,61 +2409,194 @@ html[data-vellum-nav-marker] [data-vellum-sidebar-wrap] [data-vellum-nav-link]:h
   font-size: 0.75rem;
 }
 
-.vellum-api-nested,
-.vellum-api-variant {
+.vellum-prose :is(.vellum-api-chip, .vellum-api-enum) code {
+  font-size: 0.6875rem;
+}
+
+/* What opens: an object's properties, one alternative of several. */
+:is(.vellum-api-nested, .vellum-api-variant) {
   margin-top: 0.5rem;
 }
 
-:is(.vellum-api-nested, .vellum-api-variant) > summary {
+.vellum-api-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.125rem 0.625rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
   color: var(--muted-foreground);
   cursor: pointer;
-  font-size: 0.8125rem;
-}
-
-:is(.vellum-api-nested, .vellum-api-variant) > .vellum-api-fields {
-  margin: 0.5rem 0 0 0.75rem;
-  border-top: 0;
-  border-left: 1px solid var(--border);
-  padding-left: 0.875rem;
-}
-
-:is(.vellum-api-nested, .vellum-api-variant) > .vellum-api-fields > .vellum-api-field:last-child {
-  border-bottom: 0;
-}
-
-.vellum-api-response-heading {
-  display: flex;
-  align-items: baseline;
-  gap: 0.625rem;
-}
-
-.vellum-api-examples {
-  margin-top: 2rem;
-}
-
-.vellum-api-index {
-  padding: 0;
+  font-size: 0.75rem;
+  line-height: 1.25rem;
   list-style: none;
 }
 
-.vellum-prose .vellum-api-index a {
+.vellum-api-toggle::-webkit-details-marker {
+  display: none;
+}
+
+.vellum-api-toggle::before {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  content: '+';
+}
+
+[open] > .vellum-api-toggle::before {
+  content: '\2212';
+}
+
+.vellum-api-toggle:hover {
+  color: var(--foreground);
+}
+
+.vellum-api-toggle:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 1px;
+}
+
+:is(.vellum-api-nested, .vellum-api-variant) > .vellum-api-fields {
+  margin: 0.5rem 0 0 0.25rem;
+  border-left: 1px solid var(--border);
+}
+
+:is(.vellum-api-nested, .vellum-api-variant) > .vellum-api-fields > .vellum-api-field {
+  padding-right: 0;
+}
+
+:is(.vellum-api-nested, .vellum-api-variant) > .vellum-api-fields > .vellum-api-field:last-child {
+  padding-bottom: 0.25rem;
+}
+
+.vellum-api-variants {
+  padding: 0.25rem 1rem 0.75rem;
+}
+
+/* Examples: the request to send and what comes back. */
+.vellum-api-examples {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1rem;
+  margin-top: 2.5rem;
+}
+
+.vellum-prose .vellum-api-example-label {
+  margin: 0 0 0.375rem;
+  color: var(--muted-foreground);
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.vellum-prose .vellum-api-example .vellum-tabs {
+  margin-block: 0;
+}
+
+@media (min-width: 1180px) {
+  div[data-vellum-page-row]:has(.vellum-api-operation) {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1240px) minmax(0, 1fr);
+  }
+
+  div[data-vellum-page-row]:has(.vellum-api-operation) > main {
+    max-width: 1240px;
+  }
+
+  /* The examples are what stays beside the page here. */
+  div[data-vellum-page-row]:has(.vellum-api-operation) > :is([data-vellum-toc], [data-vellum-toc-placeholder]) {
+    display: none;
+  }
+
+  [data-vellum-article]:has(.vellum-api-operation) > :is(h1, h1 + p) {
+    max-width: 46rem;
+  }
+
+  .vellum-api-operation {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 27rem);
+    gap: 3rem;
+    align-items: start;
+  }
+
+  .vellum-api-examples {
+    position: sticky;
+    top: calc(var(--vellum-mobile-chrome, 0px) + 1.5rem);
+    max-height: calc(100vh - var(--vellum-mobile-chrome, 0px) - 3rem);
+    margin-top: 0.5rem;
+    overflow-y: auto;
+    scrollbar-width: thin;
+  }
+
+  .vellum-api-example pre {
+    max-height: 22rem;
+  }
+}
+
+/* Names, paths and media types are code, but not the chips prose makes of
+   inline code. The selector repeats the prose rule's own exclusions so that
+   it outranks it. */
+.vellum-prose :is(.vellum-api-path, .vellum-api-field-name, .vellum-api-media, .vellum-api-index-path):not(pre code):not(.vellum-code code) {
+  padding: 0;
+  border: 0;
+  background: none;
+}
+
+/* The overview: every operation, by group. */
+.vellum-prose .vellum-api-version {
+  color: var(--muted-foreground);
+  font-size: 0.875rem;
+}
+
+.vellum-prose .vellum-api-index {
+  overflow: hidden;
+  margin: 0.875rem 0 0;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--vellum-surface-radius);
+  background: var(--card);
+  list-style: none;
+}
+
+.vellum-prose .vellum-api-index > li {
+  margin: 0;
+  padding: 0;
+}
+
+.vellum-prose .vellum-api-index > li + li {
+  border-top: 1px solid var(--border);
+}
+
+.vellum-prose .vellum-api-index .vellum-api-index-link {
   display: flex;
   align-items: baseline;
-  gap: 0.625rem;
-  padding-block: 0.375rem;
+  gap: 0.75rem;
+  padding: 0.5rem 1rem;
+  color: var(--foreground);
+  font-weight: 400;
   text-decoration: none;
+}
+
+.vellum-prose .vellum-api-index .vellum-api-index-link:hover {
+  text-decoration: none;
+  background: var(--muted);
 }
 
 .vellum-api-index .vellum-api-method {
   flex: none;
-  width: 3.5rem;
+  width: 3.25rem;
   font-size: 0.6875rem;
 }
 
-.vellum-api-index-path {
+.vellum-api-index-title {
+  min-width: 0;
+  font-size: 0.875rem;
+}
+
+.vellum-prose .vellum-api-index-path {
   margin-left: auto;
+  padding: 0;
+  border: 0;
+  background: none;
   color: var(--muted-foreground);
   font-size: 0.75rem;
+  font-weight: 400;
 }
 
 /* The switch between the docs and the API reference, at the top of the

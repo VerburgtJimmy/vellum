@@ -40,7 +40,7 @@
         <p class="vellum-api-field-meta vellum-api-recursive">Repeats {{ SchemaView::name(SchemaView::body($schema)) ?? SchemaView::name($schema) ?? 'the schema above' }}</p>
     @elseif (SchemaView::expandable($schema))
         <details class="vellum-api-nested" @if (($depth ?? 0) < 1) open @endif>
-            <summary>Properties</summary>
+            <summary class="vellum-api-toggle">Properties</summary>
             @include('vellum::openapi.schema', ['schema' => SchemaView::body($schema), 'depth' => ($depth ?? 0) + 1])
         </details>
     @endif

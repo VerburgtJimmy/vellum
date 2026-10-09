@@ -196,8 +196,11 @@ final class SchemaView
                     continue;
                 }
 
+                $title = is_string($member['title'] ?? null) && trim($member['title']) !== '' ? trim($member['title']) : null;
+
                 $variants[] = [
-                    'label' => self::name($member) ?? (self::type($member) ?: 'Option '.($index + 1)),
+                    // What the author called it, then the schema's name, then its type.
+                    'label' => $title ?? self::name($member) ?? (self::type($member) ?: 'Option '.($index + 1)),
                     'schema' => $member,
                 ];
             }

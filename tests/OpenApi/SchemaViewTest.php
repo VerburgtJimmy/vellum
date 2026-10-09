@@ -160,3 +160,12 @@ it('renders values a reader can see', function (): void {
         ->and(SchemaView::literal('draft'))->toBe('draft')
         ->and(SchemaView::literal(['a']))->toBe('["a"]');
 });
+
+it('names an alternative by its title when it has one', function (): void {
+    $schema = resolvedSchema([], ['oneOf' => [
+        ['title' => 'By ship', 'type' => 'object', 'properties' => ['shipId' => ['type' => 'integer']]],
+        ['type' => 'object', 'properties' => ['reason' => ['type' => 'string']]],
+    ]]);
+
+    expect(array_column(SchemaView::variants($schema), 'label'))->toBe(['By ship', 'object']);
+});

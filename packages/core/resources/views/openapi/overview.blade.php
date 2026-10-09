@@ -1,5 +1,5 @@
-@if ($spec->description() !== null)
-    <div class="vellum-api-intro">{!! $markdown($spec->description()) !!}</div>
+@if ($intro !== '')
+    <div class="vellum-api-intro">{!! $intro !!}</div>
 @endif
 
 @if ($spec->apiVersion() !== null)
@@ -7,36 +7,44 @@
 @endif
 
 @if ($spec->servers() !== [])
-    <h2 id="servers" class="vellum-heading">Servers</h2>
-    <ul class="vellum-api-servers">
-        @foreach ($spec->servers() as $server)
-            <li>
-                <code>{{ is_string($server['url'] ?? null) ? $server['url'] : '' }}</code>
-                @if (is_string($server['description'] ?? null) && $server['description'] !== '')
-                    <span>{{ $server['description'] }}</span>
-                @endif
-            </li>
-        @endforeach
-    </ul>
+    <h2 id="servers" class="vellum-heading vellum-api-section">Servers</h2>
+    <div class="vellum-api-panel">
+        <div class="vellum-api-fields">
+            @foreach ($spec->servers() as $server)
+                <div class="vellum-api-field">
+                    <div class="vellum-api-field-head">
+                        <code class="vellum-api-field-name">{{ is_string($server['url'] ?? null) ? $server['url'] : '' }}</code>
+                    </div>
+                    @if (is_string($server['description'] ?? null) && $server['description'] !== '')
+                        <p class="vellum-api-field-description">{{ $server['description'] }}</p>
+                    @endif
+                </div>
+            @endforeach
+        </div>
+    </div>
 @endif
 
 @if ($spec->securitySchemes() !== [])
-    <h2 id="authentication" class="vellum-heading">Authentication</h2>
-    <ul class="vellum-api-schemes">
-        @foreach ($spec->securitySchemes() as $name => $scheme)
-            <li>
-                <code>{{ $name }}</code>
-                <span>{{ is_string($scheme['type'] ?? null) ? $scheme['type'] : 'unknown' }}@if (is_string($scheme['scheme'] ?? null)) ({{ $scheme['scheme'] }})@endif</span>
-                @if (is_string($scheme['description'] ?? null) && $scheme['description'] !== '')
-                    <span>{{ $scheme['description'] }}</span>
-                @endif
-            </li>
-        @endforeach
-    </ul>
+    <h2 id="authentication" class="vellum-heading vellum-api-section">Authentication</h2>
+    <div class="vellum-api-panel">
+        <div class="vellum-api-fields">
+            @foreach ($spec->securitySchemes() as $name => $scheme)
+                <div class="vellum-api-field">
+                    <div class="vellum-api-field-head">
+                        <code class="vellum-api-field-name">{{ $name }}</code>
+                        <span class="vellum-api-field-type">{{ is_string($scheme['type'] ?? null) ? $scheme['type'] : 'unknown' }}@if (is_string($scheme['scheme'] ?? null)) ({{ $scheme['scheme'] }})@endif</span>
+                    </div>
+                    @if (is_string($scheme['description'] ?? null) && $scheme['description'] !== '')
+                        <p class="vellum-api-field-description">{{ $scheme['description'] }}</p>
+                    @endif
+                </div>
+            @endforeach
+        </div>
+    </div>
 @endif
 
 @foreach ($groups as $group)
-    <h2 id="group-{{ $group->slug }}" class="vellum-heading">{{ $group->name }}</h2>
+    <h2 id="group-{{ $group->slug }}" class="vellum-heading vellum-api-section">{{ $group->name }}</h2>
 
     @if ($group->description !== null)
         <div class="vellum-api-group-description">{!! $markdown($group->description) !!}</div>
@@ -45,7 +53,7 @@
     <ul class="vellum-api-index">
         @foreach ($group->operations as $operation)
             <li>
-                <a href="{{ $href($group, $operation) }}">
+                <a class="vellum-api-index-link" href="{{ $href($group, $operation) }}">
                     <span class="vellum-api-method" data-method="{{ strtolower($operation->method) }}">{{ $operation->method }}</span>
                     <span class="vellum-api-index-title">{{ $operation->title() }}</span>
                     <code class="vellum-api-index-path">{{ $operation->path }}</code>

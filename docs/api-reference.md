@@ -14,6 +14,14 @@ Vellum can turn an OpenAPI 3.0 or 3.1 spec into reference pages. Each operation 
 
 The pages live under `/docs/api`. They are ordinary pages to the rest of Vellum: search finds them, `vellum:export` writes them, and they are listed in `llms.txt` and the sitemap. Their [raw Markdown](/docs/page-actions#raw-markdown) is written for them, with fields as tables and samples as fenced code.
 
+## What a page looks like
+
+An operation's page opens with its request line, the method and the path. Under it, each part of the operation is a panel: authorization, the parameters by where they go, the request body and one panel per response. A nested object opens in place.
+
+Beside the documentation are the request samples and an example of each response, as [code tabs](/docs/components/tabs#code-tabs). On a wide screen they stay in view while the reader scrolls and take the place of the table of contents. On a narrower one they follow the documentation.
+
+The page's description is the opening paragraph of the operation's `description` in the spec. The rest of the description follows the request line.
+
 ## Where the spec comes from
 
 ### A file
