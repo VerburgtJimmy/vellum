@@ -15,6 +15,7 @@ const limits = {
 const reported = [
   'resources/dist/vellum-anchor.js',
   'resources/dist/vellum-focus.js',
+  'resources/dist/vellum-playground.js',
 ]
 
 let failed = false

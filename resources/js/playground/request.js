@@ -75,7 +75,8 @@ function encodeBody(contentType, body) {
     return queryString(body)
   }
 
-  return JSON.stringify(body)
+  // Set out over lines, as the command shows it: what is sent is what is shown.
+  return JSON.stringify(body, null, 2)
 }
 
 /**

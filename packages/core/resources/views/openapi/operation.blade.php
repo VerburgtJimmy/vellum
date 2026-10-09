@@ -21,6 +21,11 @@
             @if ($operation->deprecated)
                 <span class="vellum-api-deprecated">Deprecated</span>
             @endif
+            {{-- Hidden until a script says it can open something. The data
+                 is everything a playground needs to build the request. --}}
+            @if ($playground !== null)
+                <button type="button" class="vellum-api-try" data-vellum-playground="{{ $playground }}" hidden>Try it</button>
+            @endif
         </div>
 
         @if ($body !== '')

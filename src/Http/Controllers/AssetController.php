@@ -39,6 +39,11 @@ final class AssetController extends Controller
         return $this->file($request, Assets::focusJsPath(), 'text/javascript; charset=UTF-8');
     }
 
+    public function playground(Request $request): Response
+    {
+        return $this->file($request, Assets::playgroundJsPath(), 'text/javascript; charset=UTF-8');
+    }
+
     private function file(Request $request, string $path, string $contentType): Response
     {
         if (! is_file($path)) {

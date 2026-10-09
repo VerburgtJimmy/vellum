@@ -2160,23 +2160,23 @@ html[data-vellum-nav-marker] [data-vellum-sidebar-wrap] [data-vellum-nav-link]:h
   --vellum-method: var(--muted-foreground);
 }
 
-:is(.vellum-nav-method, .vellum-api-method, .vellum-api-endpoint)[data-method='get'] {
+:is(.vellum-nav-method, .vellum-api-method, .vellum-api-endpoint, .vellum-playground-bar)[data-method='get'] {
   --vellum-method: var(--vellum-method-get);
 }
 
-:is(.vellum-nav-method, .vellum-api-method, .vellum-api-endpoint)[data-method='post'] {
+:is(.vellum-nav-method, .vellum-api-method, .vellum-api-endpoint, .vellum-playground-bar)[data-method='post'] {
   --vellum-method: var(--vellum-method-post);
 }
 
-:is(.vellum-nav-method, .vellum-api-method, .vellum-api-endpoint)[data-method='put'] {
+:is(.vellum-nav-method, .vellum-api-method, .vellum-api-endpoint, .vellum-playground-bar)[data-method='put'] {
   --vellum-method: var(--vellum-method-put);
 }
 
-:is(.vellum-nav-method, .vellum-api-method, .vellum-api-endpoint)[data-method='patch'] {
+:is(.vellum-nav-method, .vellum-api-method, .vellum-api-endpoint, .vellum-playground-bar)[data-method='patch'] {
   --vellum-method: var(--vellum-method-patch);
 }
 
-:is(.vellum-nav-method, .vellum-api-method, .vellum-api-endpoint)[data-method='delete'] {
+:is(.vellum-nav-method, .vellum-api-method, .vellum-api-endpoint, .vellum-playground-bar)[data-method='delete'] {
   --vellum-method: var(--vellum-method-delete);
 }
 
@@ -2637,4 +2637,455 @@ html[data-vellum-nav-marker] [data-vellum-sidebar-wrap] [data-vellum-nav-link]:h
 .vellum-section:focus-visible {
   outline: 2px solid var(--ring);
   outline-offset: 1px;
+}
+
+/* The button that opens the playground, at the end of the request line. */
+.vellum-api-try {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 0.375rem;
+  height: 2rem;
+  margin-left: auto;
+  padding: 0 0.75rem;
+  border-radius: var(--vellum-inset-radius);
+  background: var(--primary);
+  color: var(--primary-foreground);
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+.vellum-api-try[hidden] {
+  display: none;
+}
+
+.vellum-api-try::before {
+  border-block: 0.3125rem solid transparent;
+  border-left: 0.5rem solid currentColor;
+  content: '';
+}
+
+.vellum-api-try:hover {
+  opacity: 0.9;
+}
+
+.vellum-api-try:focus-visible,
+.vellum-playground :is(button, summary):focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.vellum-api-deprecated + .vellum-api-try {
+  margin-left: 0;
+}
+
+/* The playground: a request to fill in on one side, the command it makes
+   and the response on the other. */
+.vellum-playground {
+  width: min(72rem, calc(100vw - 2rem));
+  max-width: none;
+  height: min(46rem, calc(100vh - 2rem));
+  max-height: none;
+  margin: auto;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: calc(var(--vellum-surface-radius) + 0.25rem);
+  background: var(--background);
+  color: var(--foreground);
+  box-shadow: 0 24px 60px -12px oklch(0 0 0 / 0.35);
+}
+
+.vellum-playground::backdrop {
+  background: oklch(0 0 0 / 0.45);
+}
+
+.vellum-playground-panel,
+.vellum-playground-form {
+  display: flex;
+  min-height: 0;
+  flex-direction: column;
+}
+
+.vellum-playground-panel {
+  height: 100%;
+}
+
+.vellum-playground-form {
+  flex: 1;
+  gap: 0.75rem;
+  padding: 0 1rem 1rem;
+}
+
+.vellum-playground-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 0.75rem 0.75rem 1rem;
+}
+
+.vellum-playground-title {
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.vellum-playground-close {
+  width: 2rem;
+  height: 2rem;
+  border-radius: var(--vellum-inset-radius);
+  color: var(--muted-foreground);
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.vellum-playground-close:hover {
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
+.vellum-playground-bar {
+  --vellum-method: var(--muted-foreground);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: var(--vellum-inset);
+  border: 1px solid var(--border);
+  border-radius: var(--vellum-surface-radius);
+  background: var(--muted);
+}
+
+.vellum-playground-bar .vellum-api-method {
+  flex: none;
+  padding: 0.375rem 0.625rem;
+  border-radius: var(--vellum-inset-radius);
+  background: var(--vellum-method);
+  color: var(--background);
+  font-size: 0.75rem;
+  line-height: 1.25rem;
+}
+
+.vellum-playground-server {
+  min-width: 6rem;
+  max-width: 50%;
+  flex: 0 1 auto;
+  height: 2rem;
+  padding: 0 0.5rem;
+  border: 1px solid transparent;
+  border-radius: var(--vellum-inset-radius);
+  background: transparent;
+  color: var(--muted-foreground);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.8125rem;
+}
+
+.vellum-playground-server:hover,
+.vellum-playground-server:focus {
+  border-color: var(--border);
+  background: var(--background);
+  color: var(--foreground);
+}
+
+.vellum-playground-path {
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.8125rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.vellum-playground-send {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 0.5rem;
+  height: 2rem;
+  padding: 0 0.75rem;
+  border-radius: var(--vellum-inset-radius);
+  background: var(--primary);
+  color: var(--primary-foreground);
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+.vellum-playground-send kbd {
+  font-family: inherit;
+  font-size: 0.6875rem;
+  opacity: 0.7;
+}
+
+.vellum-playground-columns {
+  display: grid;
+  min-height: 0;
+  flex: 1;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--vellum-surface-radius);
+}
+
+.vellum-playground-request,
+.vellum-playground-result {
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.vellum-playground-request {
+  border-right: 1px solid var(--border);
+}
+
+.vellum-playground-result {
+  display: flex;
+  flex-direction: column;
+  background: var(--card);
+}
+
+.vellum-playground-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 2.25rem;
+  padding: 0 0.75rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.vellum-playground-curl + .vellum-playground-heading {
+  border-top: 1px solid var(--border);
+}
+
+.vellum-playground-server {
+  field-sizing: content;
+}
+
+.vellum-playground-heading > :nth-child(2) {
+  margin-left: auto;
+}
+
+.vellum-playground-row {
+  display: grid;
+  grid-template-columns: minmax(0, 11rem) minmax(0, 1fr);
+  border-bottom: 1px solid var(--border);
+}
+
+.vellum-playground-name {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  align-content: start;
+  gap: 0 0.25rem;
+  padding: 0.5rem 0.75rem;
+  border-right: 1px solid var(--border);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.75rem;
+  line-height: 1.25rem;
+  overflow-wrap: anywhere;
+}
+
+.vellum-playground-required {
+  color: var(--vellum-method-delete);
+}
+
+.vellum-playground-type {
+  width: 100%;
+  color: var(--muted-foreground);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.6875rem;
+  font-weight: 400;
+}
+
+.vellum-playground-heading .vellum-playground-type {
+  width: auto;
+}
+
+.vellum-playground-control {
+  width: 100%;
+  min-height: 2.25rem;
+  padding: 0.5rem 0.75rem;
+  border: 0;
+  background: transparent;
+  color: var(--foreground);
+  font-size: 0.8125rem;
+  line-height: 1.25rem;
+}
+
+textarea.vellum-playground-control {
+  display: block;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.75rem;
+  resize: vertical;
+}
+
+.vellum-playground-control::placeholder {
+  color: var(--muted-foreground);
+  opacity: 0.7;
+}
+
+.vellum-playground-control:focus {
+  background: var(--muted);
+  outline: 2px solid var(--ring);
+  outline-offset: -2px;
+}
+
+.vellum-playground-heading .vellum-playground-control {
+  width: auto;
+  min-height: 0;
+  padding: 0.125rem 0.25rem;
+  font-size: 0.6875rem;
+  font-weight: 400;
+}
+
+.vellum-playground-modes {
+  display: flex;
+  gap: 0.125rem;
+  padding: 0.125rem;
+  border-radius: var(--vellum-inset-radius);
+  background: var(--background);
+}
+
+.vellum-playground-modes:empty {
+  display: none;
+}
+
+.vellum-playground-mode {
+  padding: 0.0625rem 0.5rem;
+  border-radius: calc(var(--vellum-inset-radius) - 2px);
+  color: var(--muted-foreground);
+  font-size: 0.6875rem;
+  font-weight: 500;
+}
+
+.vellum-playground-mode[aria-pressed='true'] {
+  background: var(--muted);
+  color: var(--foreground);
+}
+
+.vellum-playground-copy {
+  color: var(--muted-foreground);
+  font-size: 0.6875rem;
+  font-weight: 500;
+}
+
+.vellum-playground-copy:hover {
+  color: var(--foreground);
+}
+
+.vellum-playground pre {
+  margin: 0;
+  padding: 0.75rem;
+  overflow: auto;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.75rem;
+  line-height: 1.6;
+  scrollbar-width: thin;
+  white-space: pre;
+}
+
+.vellum-playground-curl pre {
+  max-height: 12rem;
+}
+
+.vellum-playground-response {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+}
+
+.vellum-playground-output {
+  flex: 1;
+}
+
+.vellum-playground-status {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--border);
+  color: var(--muted-foreground);
+  font-size: 0.75rem;
+}
+
+.vellum-playground-status .vellum-api-status {
+  color: var(--foreground);
+}
+
+.vellum-playground-empty,
+.vellum-playground-error {
+  padding: 0.75rem;
+  color: var(--muted-foreground);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+}
+
+.vellum-playground-error {
+  color: var(--vellum-method-delete);
+}
+
+.vellum-playground-headers {
+  border-top: 1px solid var(--border);
+}
+
+.vellum-playground-headers > summary {
+  padding: 0.5rem 0.75rem;
+  color: var(--muted-foreground);
+  cursor: pointer;
+  font-size: 0.75rem;
+}
+
+.vellum-playground-headers pre {
+  max-height: 10rem;
+  padding-top: 0;
+  color: var(--muted-foreground);
+}
+
+@media (max-width: 760px) {
+  .vellum-playground {
+    width: 100vw;
+    height: 100vh;
+    border: 0;
+    border-radius: 0;
+  }
+
+  .vellum-playground-columns {
+    display: block;
+    overflow-y: auto;
+  }
+
+  .vellum-playground-request,
+  .vellum-playground-result {
+    overflow: visible;
+  }
+
+  .vellum-playground-request {
+    border-right: 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .vellum-playground-bar {
+    flex-wrap: wrap;
+  }
+
+  .vellum-playground-server {
+    flex: 1 1 8rem;
+  }
+
+  .vellum-playground-path {
+    flex-basis: 100%;
+    order: 3;
+    padding: 0 0.5rem 0.25rem;
+  }
+
+  .vellum-playground-row {
+    grid-template-columns: minmax(0, 7.5rem) minmax(0, 1fr);
+  }
 }

@@ -278,6 +278,9 @@ return [
     |
     | base_url: used in the samples in place of the spec's first server.
     |
+    | playground: lets a reader send an operation's request from its page
+    | and see the response. Requests go from the reader's browser.
+    |
     | access: who may read the reference, as for a page's access frontmatter.
     |
     */
@@ -293,6 +296,7 @@ return [
         'untagged_label' => 'Other',
         'samples' => ['curl', 'php', 'javascript'],
         'base_url' => null,
+        'playground' => true,
         'access' => 'guest',
     ],
 

@@ -100,12 +100,13 @@ final class Sections
 
     /**
      * The words of some HTML. A callout's type label ("Warning") is left out:
-     * it names the kind of box, not what the section is about.
+     * it names the kind of box, not what the section is about. So is a
+     * button's label, which says what the button does.
      */
     public static function text(string $html): string
     {
         $html = (string) preg_replace(
-            '/<p class="vellum-callout-title" data-vellum-callout-label>.*?<\/p>|<span class="vellum-callout-kind">.*?<\/span>/s',
+            '/<p class="vellum-callout-title" data-vellum-callout-label>.*?<\/p>|<span class="vellum-callout-kind">.*?<\/span>|<button\b[^>]*>.*?<\/button>/s',
             '',
             $html,
         );

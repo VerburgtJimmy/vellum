@@ -777,6 +777,21 @@ if (!window.Alpine) {
   initPageMeta()
   initSteps()
 
+  // "Try it" on an API reference page. The playground is a script of its
+  // own, fetched when a reader first asks for it.
+  const playground = document.documentElement.dataset.vellumPlaygroundSrc
+
+  if (playground) {
+    document.querySelectorAll('[data-vellum-playground]').forEach((button) => (button.hidden = false))
+    document.addEventListener('click', (event) => {
+      const button = event.target.closest?.('[data-vellum-playground]')
+
+      if (button) {
+        import(/* @vite-ignore */ playground).then((module) => module.open(button))
+      }
+    })
+  }
+
   function warmupLazyChunksOnce() {
     const warmup = () => {
       window.removeEventListener('pointerdown', warmup, true)

@@ -58,6 +58,7 @@ it('still ships everything the package needs at runtime', function () use ($arch
         'src/VellumServiceProvider.php',
         'resources/dist/vellum.css',
         'resources/dist/vellum.js',
+        'resources/dist/vellum-playground.js',
         'resources/views/layouts/docs.blade.php',
         'resources/stubs/index.md',
         'docs/index.md',

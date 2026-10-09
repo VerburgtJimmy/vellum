@@ -20,6 +20,9 @@
     data-vellum-search="{{ Assets::searchJsUrl() }}"
     data-vellum-anchor="{{ Assets::anchorJsUrl() }}"
     data-vellum-focus="{{ Assets::focusJsUrl() }}"
+    @if (config('vellum.openapi.enabled') && config('vellum.openapi.playground', true))
+        data-vellum-playground-src="{{ Assets::playgroundJsUrl() }}"
+    @endif
 >
 <head>
     <meta charset="utf-8">

@@ -34,6 +34,11 @@ final class Assets
         return dirname(__DIR__, 2).'/resources/dist/vellum-focus.js';
     }
 
+    public static function playgroundJsPath(): string
+    {
+        return dirname(__DIR__, 2).'/resources/dist/vellum-playground.js';
+    }
+
     public static function cssUrl(): string
     {
         return route('vellum.assets.css', ['v' => self::hash(self::cssPath())]);
@@ -57,6 +62,11 @@ final class Assets
     public static function focusJsUrl(): string
     {
         return route('vellum.assets.focus', ['v' => self::hash(self::focusJsPath())]);
+    }
+
+    public static function playgroundJsUrl(): string
+    {
+        return route('vellum.assets.playground', ['v' => self::hash(self::playgroundJsPath())]);
     }
 
     private static function hash(string $path): string

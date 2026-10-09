@@ -45,7 +45,7 @@ describe('buildRequest', () => {
         Authorization: 'Bearer secret',
         'Content-Type': 'application/json',
       },
-      body: '{"text":"Hi"}',
+      body: '{\n  "text": "Hi"\n}',
       files: null,
     })
   })

@@ -22,6 +22,7 @@
 /vite.anchor.config.js  export-ignore
 /vite.config.js         export-ignore
 /vite.focus.config.js   export-ignore
+/vite.playground.config.js export-ignore
 /vite.search.config.js  export-ignore
 /docs/screenshots       export-ignore
 /CONTRIBUTING.md        export-ignore

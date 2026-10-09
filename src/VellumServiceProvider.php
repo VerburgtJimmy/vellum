@@ -109,6 +109,8 @@ final class VellumServiceProvider extends ServiceProvider
             ->name('vellum.assets.anchor');
         Route::get('/vendor/vellum/vellum-focus.js', [AssetController::class, 'focus'])
             ->name('vellum.assets.focus');
+        Route::get('/vendor/vellum/vellum-playground.js', [AssetController::class, 'playground'])
+            ->name('vellum.assets.playground');
     }
 
     private function registerRoutes(): void

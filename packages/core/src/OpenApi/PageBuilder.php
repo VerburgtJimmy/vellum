@@ -43,6 +43,7 @@ final class PageBuilder
         private readonly MarkdownRenderer $prose = new MarkdownRenderer,
         private readonly SampleBuilder $samples = new SampleBuilder,
         private readonly MarkdownRendition $rendition = new MarkdownRendition,
+        private readonly Playground $playground = new Playground,
     ) {}
 
     /**
@@ -138,6 +139,12 @@ final class PageBuilder
             ...$page,
             'markdown' => $this->markdown(...),
             'body' => $this->afterOpening($operation->description),
+            'playground' => Playground::enabled()
+                ? (string) json_encode(
+                    $this->playground->data($operation, $spec, $server),
+                    JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE,
+                )
+                : null,
             'path' => $this->highlightPath(...),
             'sampleTabs' => $this->codeTabs(
                 array_map(static fn (array $sample): array => [

@@ -86,6 +86,30 @@ Either way the operations are grouped in a folder per tag, in the order of the s
 
 Every operation has a request sample per language in `samples`. `curl`, `php` (the Laravel HTTP client) and `javascript` (fetch) are built in. The samples use the spec's first server, or `base_url` when you set it.
 
+## The playground
+
+Every operation's page has a **Try it** button on its request line. It opens a dialog in which a reader fills in the request, sends it and reads the response.
+
+- The parameters and the body are a form made from the spec. A JSON body can be written field by field or as JSON, and what is written carries over when the reader switches.
+- The command the request makes is shown as curl and follows what is typed.
+- Bearer tokens, basic credentials and API keys are supported. For OAuth 2 and OpenID Connect the reader pastes a token. Credentials are kept for the browser tab and are gone when it closes.
+- The response is shown as text, with its status, time, size and headers. It is never rendered as a page.
+
+The request goes from the reader's own browser, which decides two things:
+
+- When the API is on the same origin as the docs, which is the usual case for docs served by the app they describe, it goes as the reader. A reader who is signed in to the app is signed in to the request, and Laravel's CSRF token is sent with it.
+- When the API is on another origin, nothing of the reader's is sent, and the API has to allow the docs' origin to read its answers ([CORS](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS)). Otherwise the browser shows no response and the playground says so.
+
+:::warning
+A request from the playground is a real request. On a production API, **Try it** on a delete operation deletes.
+:::
+
+To leave the playground out:
+
+```php
+'playground' => false,
+```
+
 ## Who may read it
 
 `access` gates the whole reference, with the same values as a page's [`access` frontmatter](/docs/gating):
@@ -118,4 +142,5 @@ A reader who may not open the reference is not shown the way to it.
 | `openapi.untagged_label` | `Other` | The folder for operations without a tag. |
 | `openapi.samples` | `curl`, `php`, `javascript` | Languages of the request samples, in tab order. |
 | `openapi.base_url` | `null` | Used in the samples in place of the spec's first server. |
+| `openapi.playground` | `true` | Whether a reader can send a request from an operation's page. |
 | `openapi.access` | `guest` | Who may read the reference. |
