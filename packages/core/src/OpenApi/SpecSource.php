@@ -60,6 +60,72 @@ final class SpecSource
     }
 
     /**
+     * A cheap answer to "has what the pages are built from changed", worked
+     * out without reading or exporting a spec.
+     *
+     * A spec file answers with its modification time. A spec Scramble writes
+     * has no file to ask until it is exported, and exporting on every request
+     * is the cost this exists to avoid, so the answer comes from the code
+     * Scramble reads: the newest change under the watched directories.
+     */
+    public function signature(): ?string
+    {
+        if (! self::enabled()) {
+            return null;
+        }
+
+        $configured = config('vellum.openapi.spec');
+
+        if (is_string($configured) && $configured !== '') {
+            return is_file($configured)
+                ? 'file:'.$configured.':'.filemtime($configured).':'.filesize($configured)
+                : 'file:'.$configured.':missing';
+        }
+
+        if ((bool) config('vellum.openapi.scramble', true) && self::scrambleAvailable()) {
+            return 'scramble:'.$this->watchedState();
+        }
+
+        return null;
+    }
+
+    /**
+     * Newest modification time and file count under the watched directories.
+     * The count catches a deleted controller, which changes no file's time.
+     */
+    private function watchedState(): string
+    {
+        $newest = 0;
+        $count = 0;
+
+        foreach (self::watched() as $directory) {
+            $files = new \RecursiveIteratorIterator(
+                new \RecursiveDirectoryIterator($directory, \FilesystemIterator::SKIP_DOTS),
+            );
+
+            foreach ($files as $file) {
+                if ($file instanceof \SplFileInfo && $file->isFile() && $file->getExtension() === 'php') {
+                    $newest = max($newest, (int) $file->getMTime());
+                    $count++;
+                }
+            }
+        }
+
+        return $newest.':'.$count;
+    }
+
+    /**
+     * @return list<string>
+     */
+    private static function watched(): array
+    {
+        $configured = config('vellum.openapi.watch');
+        $paths = is_array($configured) ? $configured : [base_path('app'), base_path('routes')];
+
+        return array_values(array_filter($paths, static fn (mixed $path): bool => is_string($path) && is_dir($path)));
+    }
+
+    /**
      * @return list<string>
      */
     public function warnings(): array

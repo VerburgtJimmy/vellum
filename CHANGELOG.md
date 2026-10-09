@@ -5,6 +5,12 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- An API reference generated from an OpenAPI 3.0 or 3.1 spec, turned on with `openapi.enabled`. Each operation is a page of its own in a sidebar folder per tag, with the method beside its title, and the reference has an overview page. The pages are ordinary pages to the rest of Vellum: they are searched, exported, listed in `llms.txt` and the sitemap, and gated with `openapi.access`. Their raw Markdown is written for them, with fields as tables and samples as fenced blocks. Request samples are generated for curl, the Laravel HTTP client and fetch. With `dedoc/scramble` installed and no `openapi.spec` set, the spec comes from Scramble, and in local development the reference follows the app's code without a build
+
 ## [0.8.2] - 2026-10-06
 
 ### Changed

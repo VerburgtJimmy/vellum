@@ -62,7 +62,7 @@ final class RawMarkdown
      */
     public static function visible(ContentRepository $repository, ?Document $document): bool
     {
-        return $document !== null && is_file($document->path) && $repository->allows($document);
+        return $document !== null && ($document->generated() || is_file($document->path)) && $repository->allows($document);
     }
 
     /**

@@ -19,6 +19,8 @@ final readonly class Document
      * @param  FrontMatter  $frontmatter
      * @param  list<Island>  $islands
      * @param  string|null  $updated  YYYY-MM-DD or ISO 8601, from frontmatter or git. Never the file mtime.
+     * @param  string|null  $markdown  The page as Markdown, for a page generated from something
+     *                                 other than a Markdown file. Null means: read $path.
      */
     public function __construct(
         public string $slug,
@@ -34,7 +36,31 @@ final readonly class Document
         public ?string $icon = null,
         public array $islands = [],
         public ?string $updated = null,
+        public ?string $markdown = null,
     ) {}
+
+    /**
+     * Whether this page was generated, from an OpenAPI spec for one, rather
+     * than written. $path is then the file it came from, not its Markdown.
+     */
+    public function generated(): bool
+    {
+        return $this->markdown !== null;
+    }
+
+    /**
+     * The page's Markdown: the file as written, or the generated rendition.
+     */
+    public function source(): string
+    {
+        if ($this->markdown !== null) {
+            return $this->markdown;
+        }
+
+        $contents = is_file($this->path) ? file_get_contents($this->path) : false;
+
+        return $contents === false ? '' : $contents;
+    }
 
     /**
      * @return array{
@@ -50,7 +76,8 @@ final readonly class Document
      *     full: bool,
      *     icon: string|null,
      *     islands: list<array<string, mixed>>,
-     *     updated: string|null
+     *     updated: string|null,
+     *     markdown: string|null
      * }
      */
     public function toArray(): array
@@ -69,6 +96,7 @@ final readonly class Document
             'icon' => $this->icon,
             'islands' => array_map(static fn (Island $island): array => $island->toArray(), $this->islands),
             'updated' => $this->updated,
+            'markdown' => $this->markdown,
         ];
     }
 
@@ -86,7 +114,8 @@ final readonly class Document
      *     full?: bool,
      *     icon?: string|null,
      *     islands?: list<array<string, mixed>>,
-     *     updated?: string|null
+     *     updated?: string|null,
+     *     markdown?: string|null
      * }  $data
      */
     public static function fromArray(array $data): self
@@ -105,6 +134,7 @@ final readonly class Document
             icon: $data['icon'] ?? null,
             islands: Island::listFromArray($data['islands'] ?? []),
             updated: $data['updated'] ?? null,
+            markdown: $data['markdown'] ?? null,
         );
     }
 

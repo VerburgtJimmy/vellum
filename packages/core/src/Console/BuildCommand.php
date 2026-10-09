@@ -36,6 +36,10 @@ final class BuildCommand extends Command
 
         $documents = $repository->buildAll($version);
 
+        foreach ($repository->generatedWarnings() as $warning) {
+            $this->warn('OpenAPI: '.$warning);
+        }
+
         $this->warnAboutShadowedSlugs($documents);
         $this->warnAboutInvalidDates($documents);
 

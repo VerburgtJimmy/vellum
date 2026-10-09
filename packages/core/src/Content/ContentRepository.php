@@ -11,6 +11,9 @@ use Vellum\Exceptions\UnknownDirectiveException;
 use Vellum\Markdown\Islands\IslandRenderer;
 use Vellum\Markdown\Islands\MarkdownPipeline;
 use Vellum\Markdown\MarkdownRenderer;
+use Vellum\OpenApi\Mount;
+use Vellum\OpenApi\OpenApiPages;
+use Vellum\OpenApi\SpecSource;
 use Vellum\Search\SearchVisibility;
 use Vellum\Support\Slug;
 use Vellum\Support\Str;
@@ -35,6 +38,7 @@ final class ContentRepository
         private readonly Access $access = new Access,
         private readonly SearchVisibility $visibility = new SearchVisibility,
         private readonly ImageReport $imageReport = new ImageReport,
+        private readonly ?OpenApiPages $openApi = null,
     ) {}
 
     /**
@@ -78,6 +82,7 @@ final class ContentRepository
             isLocal: app()->environment('local'),
             routePrefix: (string) config('vellum.route.prefix', 'docs'),
             imageReport: $imageReport,
+            openApi: SpecSource::enabled() ? new OpenApiPages : null,
         );
     }
 
@@ -152,6 +157,15 @@ final class ContentRepository
             $documents[] = $this->compileFile($source['path'], $source['slug'], $source['version']);
         }
 
+        foreach ($this->generated($version) as $document) {
+            if (isset($seen[$document->slug])) {
+                throw DuplicateSlugException::forPaths($document->slug, $seen[$document->slug], $document->path);
+            }
+
+            $seen[$document->slug] = $document->path;
+            $documents[] = $document;
+        }
+
         $this->store->prunePages(array_map('strval', array_keys($seen)), $version);
         $this->rebuildNavigation($documents, $version);
 
@@ -187,7 +201,12 @@ final class ContentRepository
 
         $manifest = $this->store->getManifest($version);
 
-        if ($stored !== null && $manifest !== null && $manifest['directory_hash'] === $this->navigationBuilder()->directoryHash($version)) {
+        if (
+            $stored !== null
+            && $manifest !== null
+            && $manifest['directory_hash'] === $this->navigationBuilder()->directoryHash($version)
+            && ($manifest['openapi'] ?? null) === $this->generatedSignature($version)
+        ) {
             return $stored;
         }
 
@@ -238,7 +257,27 @@ final class ContentRepository
     private function rebuildNavigation(array $documents, ?string $version, bool $complete = true): void
     {
         $navBuilder = $this->navigationBuilder();
-        $tree = $navBuilder->build($documents, $version);
+
+        // Written pages make the tree. Generated ones have no folders or
+        // meta.json to read an order from, so they bring a group of their own.
+        $tree = $navBuilder->build(
+            array_values(array_filter($documents, static fn (Document $document): bool => ! $document->generated())),
+            $version,
+        );
+
+        // A generated page has no source file that find() could compile it
+        // from later, so it is written here, wherever the tree is rebuilt.
+        foreach ($this->generated($version) as $document) {
+            $this->store->put($document);
+        }
+
+        $group = $this->generated($version) === []
+            ? null
+            : $this->openApi?->navGroup($version, fn (string $slug): string => $this->hrefFor($slug, $version));
+
+        if ($group !== null) {
+            $tree[] = $group;
+        }
 
         $this->store->putNav($tree, $version);
         unset($this->navigationTrees[$version ?? '']);
@@ -247,7 +286,62 @@ final class ContentRepository
             'version' => $version,
             // Every page compiled, so production can serve only these.
             'complete' => $complete,
+            'openapi' => $this->generatedSignature($version),
         ], $version);
+    }
+
+    /**
+     * Pages generated from an OpenAPI spec. The spec is not versioned, so
+     * they belong to the latest version only and are not copied into the
+     * others.
+     *
+     * @return list<Document>
+     */
+    private function generated(?string $version): array
+    {
+        if ($this->openApi === null || ! $this->carriesGenerated($version)) {
+            return [];
+        }
+
+        return $this->openApi->documents($version, fn (string $slug): string => $this->hrefFor($slug, $version));
+    }
+
+    /**
+     * What the spec reader had to work around: a reference it could not
+     * follow, a spec it could not find. For the build to print.
+     *
+     * @return list<string>
+     */
+    public function generatedWarnings(): array
+    {
+        return $this->openApi?->warnings() ?? [];
+    }
+
+    private function generatedSignature(?string $version): ?string
+    {
+        return $this->openApi !== null && $this->carriesGenerated($version) ? $this->openApi->signature() : null;
+    }
+
+    private function carriesGenerated(?string $version): bool
+    {
+        return ! $this->versionsEnabled || $version === null || $version === $this->latestVersion;
+    }
+
+    /**
+     * Whether a generated page in the store is still one the spec describes.
+     * Production serves what the build wrote. Local compares the page with
+     * the spec as the sidebar last saw it, so an endpoint that was removed
+     * stops answering.
+     */
+    private function generatedIsCurrent(Document $document, ?string $version): bool
+    {
+        if (! $this->isLocal) {
+            return true;
+        }
+
+        $signature = $this->generatedSignature($version);
+
+        return $signature !== null && ($document->frontmatter['openapi_signature'] ?? null) === $signature;
     }
 
     /**
@@ -345,6 +439,22 @@ final class ContentRepository
         $version = $this->resolveVersion($version);
 
         $compiled = $this->store->get($slug, $version);
+
+        // Nothing compiles a generated page on its own: the pages of a spec
+        // are built together, where the sidebar is. So bring that up to date
+        // and look again.
+        if (
+            $this->openApi !== null
+            && Mount::owns($slug)
+            && ($this->isLocal || ($compiled === null && ! $this->servesBuildOnly($version)))
+        ) {
+            $this->navigation($version);
+            $compiled = $this->store->get($slug, $version);
+        }
+
+        if ($compiled !== null && $compiled->generated()) {
+            return $this->generatedIsCurrent($compiled, $version) ? $compiled : null;
+        }
 
         if ($compiled !== null && ! $this->shouldRecompile($compiled)) {
             return $compiled;

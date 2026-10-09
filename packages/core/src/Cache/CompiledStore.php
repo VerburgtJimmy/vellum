@@ -15,7 +15,8 @@ use Vellum\Support\Slug;
  * @phpstan-type Manifest array{
  *     directory_hash: string,
  *     version: string|null,
- *     complete?: bool
+ *     complete?: bool,
+ *     openapi?: string|null
  * }
  */
 final class CompiledStore
@@ -167,6 +168,7 @@ final class CompiledStore
             icon: isset($data['icon']) && is_string($data['icon']) ? $data['icon'] : null,
             islands: Island::listFromArray($data['islands'] ?? []),
             updated: isset($data['updated']) && is_string($data['updated']) ? $data['updated'] : null,
+            markdown: isset($data['markdown']) && is_string($data['markdown']) ? $data['markdown'] : null,
         );
     }
 
@@ -245,6 +247,7 @@ final class CompiledStore
             'directory_hash' => $data['directory_hash'],
             'version' => isset($data['version']) && is_string($data['version']) ? $data['version'] : null,
             'complete' => ($data['complete'] ?? false) === true,
+            'openapi' => isset($data['openapi']) && is_string($data['openapi']) ? $data['openapi'] : null,
         ];
     }
 

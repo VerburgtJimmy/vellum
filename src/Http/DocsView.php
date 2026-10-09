@@ -207,20 +207,15 @@ final class DocsView
 
     public static function source(Document $document): string
     {
-        if (! is_file($document->path)) {
-            return '';
-        }
-
-        $contents = file_get_contents($document->path);
-
-        return $contents === false ? '' : $contents;
+        return $document->source();
     }
 
     public static function editUrl(Document $document): ?string
     {
         $repo = config('vellum.repo');
 
-        if (! is_string($repo) || $repo === '') {
+        // A generated page has no file of its own to edit.
+        if (! is_string($repo) || $repo === '' || $document->generated()) {
             return null;
         }
 

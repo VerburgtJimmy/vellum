@@ -301,7 +301,7 @@ final class LlmsTxt
 
         $document = $repository->find($page['slug'], $version);
 
-        if ($document === null || Access::normalize($document->access()) !== 'guest' || ! is_file($document->path)) {
+        if ($document === null || Access::normalize($document->access()) !== 'guest' || ! ($document->generated() || is_file($document->path))) {
             return null;
         }
 

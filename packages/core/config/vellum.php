@@ -248,6 +248,51 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | API reference
+    |--------------------------------------------------------------------------
+    |
+    | Reference pages generated from an OpenAPI 3.0 or 3.1 spec: one page per
+    | operation, in a sidebar folder per tag, under {route.prefix}/{prefix}.
+    |
+    | spec: path to a JSON or YAML file. Leave it null to have Scramble write
+    | one, when dedoc/scramble is installed.
+    |
+    | scramble: set to false to never ask Scramble.
+    |
+    | watch: the directories whose PHP files Scramble reads. In local
+    | development the reference is built again when one of them changes.
+    | Null watches app/ and routes/.
+    |
+    | title: the name of the sidebar folder and of the overview page.
+    |
+    | group_by: tag, or path to group by the first segment of the path.
+    |
+    | untagged_label: the folder for operations without a tag.
+    |
+    | samples: languages of the request samples, in tab order. curl, php and
+    | javascript are built in.
+    |
+    | base_url: used in the samples in place of the spec's first server.
+    |
+    | access: who may read the reference, as for a page's access frontmatter.
+    |
+    */
+    'openapi' => [
+        'enabled' => env('VELLUM_OPENAPI', false),
+        'spec' => env('VELLUM_OPENAPI_SPEC'),
+        'scramble' => true,
+        'watch' => null,
+        'prefix' => 'api',
+        'title' => 'API reference',
+        'group_by' => 'tag',
+        'untagged_label' => 'Other',
+        'samples' => ['curl', 'php', 'javascript'],
+        'base_url' => null,
+        'access' => 'guest',
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Changelog
     |--------------------------------------------------------------------------
     |

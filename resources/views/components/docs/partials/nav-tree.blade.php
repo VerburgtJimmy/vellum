@@ -30,7 +30,7 @@
             x-on:pointerenter="onEnter()"
             class="{{ $itemClass }} {{ $isActive ? 'bg-accent font-medium text-accent-foreground' : 'text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground' }}"
             @if ($isActive) aria-current="page" @endif
-        >{{ $node['title'] ?? 'Untitled' }}</a>
+        >{{ $node['title'] ?? 'Untitled' }}@if (is_string($node['method'] ?? null))<span class="vellum-nav-method" data-method="{{ strtolower($node['method']) }}" @if (! empty($node['deprecated'])) data-deprecated @endif>{{ $node['method'] }}</span>@endif</a>
     @elseif ($type === 'folder')
         @php
             $open = (bool) ($node['defaultOpen'] ?? false) || $containsActive($node);
