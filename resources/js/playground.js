@@ -526,21 +526,34 @@ export function open(button) {
 
   const output = h('div', { class: 'vellum-playground-result' }, h('div', { class: 'vellum-playground-heading' }, tabs, copy), command, result)
 
+  // Made once and kept: a tab that is drawn again would cut its own entrance short.
+  const choices = ['curl', 'response'].map((name) =>
+    h('button', {
+      type: 'button',
+      class: 'vellum-playground-mode',
+      'data-tab': name,
+      text: name === 'curl' ? 'cURL' : 'Response',
+      onclick: () => {
+        tab = name
+        drawTabs()
+      },
+    }),
+  )
+
+  tabs.append(...choices)
+
   const drawTabs = () => {
-    tabs.replaceChildren(
-      ...(answered ? ['curl', 'response'] : ['curl']).map((name) =>
-        h('button', {
-          type: 'button',
-          class: 'vellum-playground-mode',
-          'aria-pressed': String(tab === name),
-          text: name === 'curl' ? 'cURL' : 'Response',
-          onclick: () => {
-            tab = name
-            drawTabs()
-          },
-        }),
-      ),
-    )
+    for (const choice of choices) {
+      const name = choice.dataset.tab
+
+      // The Response tab jumps in the once, when the first answer brings it.
+      if (name === 'response' && answered && choice.hidden) {
+        choice.classList.add('vellum-playground-mode-arriving')
+      }
+
+      choice.hidden = name === 'response' && !answered
+      choice.setAttribute('aria-pressed', String(tab === name))
+    }
 
     command.hidden = tab !== 'curl'
     result.hidden = tab !== 'response'

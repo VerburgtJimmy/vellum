@@ -3048,6 +3048,47 @@ textarea.vellum-playground-control {
   color: var(--foreground);
 }
 
+/* The Response tab's entrance: it drops in from above, lands past its size
+   and settles, with a ring that spreads from it as it does. */
+.vellum-playground-mode-arriving {
+  animation:
+    vellum-playground-tab-in 0.55s linear(0, 0.35 8%, 0.82 18%, 1.09 28%, 1.16 34%, 1.12 42%, 0.99 58%, 0.97 66%, 1 82%, 1) both,
+    vellum-playground-tab-ring 0.7s 0.12s ease-out both;
+  transform-origin: 50% 100%;
+}
+
+@keyframes vellum-playground-tab-in {
+  from {
+    opacity: 0;
+    transform: translateY(-0.75rem) scale(0.4);
+  }
+
+  30% {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes vellum-playground-tab-ring {
+  from {
+    box-shadow: 0 0 0 0 color-mix(in oklch, var(--foreground) 35%, transparent);
+  }
+
+  to {
+    box-shadow: 0 0 0 0.5rem transparent;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vellum-playground-mode-arriving {
+    animation: none;
+  }
+}
+
 .vellum-playground-copy {
   color: var(--muted-foreground);
   font-size: 0.6875rem;
