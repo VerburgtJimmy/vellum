@@ -2681,6 +2681,13 @@ html[data-vellum-nav-marker] [data-vellum-sidebar-wrap] [data-vellum-nav-link]:h
 
 /* The playground: a request to fill in on one side, the command it makes
    and the response on the other. */
+/* The page behind the drawer stays where it is. The gutter is kept, so the
+   page does not shift sideways as its scrollbar goes. */
+html:has(.vellum-playground[open]) {
+  overflow: hidden;
+  scrollbar-gutter: stable;
+}
+
 /* A drawer on the right, so the operation it sends stays in view beside it. */
 .vellum-playground {
   --vellum-playground-ease: cubic-bezier(0.32, 0.72, 0, 1);
@@ -2920,10 +2927,6 @@ html[data-vellum-nav-marker] [data-vellum-sidebar-wrap] [data-vellum-nav-link]:h
   background: var(--muted);
   font-size: 0.75rem;
   font-weight: 600;
-}
-
-.vellum-playground-curl + .vellum-playground-heading {
-  border-top: 1px solid var(--border);
 }
 
 .vellum-playground-server {

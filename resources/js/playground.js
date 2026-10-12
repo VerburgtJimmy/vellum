@@ -297,7 +297,6 @@ export function open(button) {
 
   const curl = h('code', {})
   const result = h('div', { class: 'vellum-playground-response', 'aria-live': 'polite' })
-  const answered = h('div', { class: 'vellum-playground-heading' }, h('span', { text: 'Response' }))
   const send = h('button', { type: 'submit', class: 'vellum-playground-send' }, h('span', { text: 'Send' }), h('kbd', { text: '⌘↵', 'aria-hidden': 'true' }))
 
   const refresh = () => {
@@ -505,32 +504,62 @@ export function open(button) {
     sections.push(h('p', { class: 'vellum-playground-empty', text: 'This request takes nothing. Send it as it is.' }))
   }
 
+  // The command and the response share one place, a tab each. There is no
+  // Response tab until there is something to put under it.
+  let tab = 'curl'
+  let answered = false
+  const command = h('pre', {}, curl)
+  const tabs = h('div', { class: 'vellum-playground-modes' })
+  const shown = () => (tab === 'curl' ? curl : result.querySelector('.vellum-playground-output'))
+
   const copy = h('button', {
     type: 'button',
     class: 'vellum-playground-copy',
     text: 'Copy',
     onclick: () => {
-      navigator.clipboard?.writeText(curl.textContent).then(() => {
+      navigator.clipboard?.writeText(shown()?.textContent ?? '').then(() => {
         copy.textContent = 'Copied'
         setTimeout(() => (copy.textContent = 'Copy'), 1500)
       })
     },
   })
 
-  let opened = false
-  const calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  const output = h('div', { class: 'vellum-playground-result' }, h('div', { class: 'vellum-playground-heading' }, tabs, copy), command, result)
 
-  // The response sits under the request in one scroll, so an answer is
-  // brought into view rather than left for the reader to find.
-  const show = (...nodes) => {
-    result.replaceChildren(...nodes.filter(Boolean))
+  const drawTabs = () => {
+    tabs.replaceChildren(
+      ...(answered ? ['curl', 'response'] : ['curl']).map((name) =>
+        h('button', {
+          type: 'button',
+          class: 'vellum-playground-mode',
+          'aria-pressed': String(tab === name),
+          text: name === 'curl' ? 'cURL' : 'Response',
+          onclick: () => {
+            tab = name
+            drawTabs()
+          },
+        }),
+      ),
+    )
 
-    if (opened) {
-      answered.scrollIntoView({ block: 'start', behavior: calm ? 'auto' : 'smooth' })
-    }
+    command.hidden = tab !== 'curl'
+    result.hidden = tab !== 'response'
+    copy.hidden = !shown()
   }
 
-  show(h('p', { class: 'vellum-playground-empty', text: 'The response shows here once you send the request.' }))
+  const calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
+  // An answer takes the tab and is brought into view, rather than left for
+  // the reader to find under a long form.
+  const show = (...nodes) => {
+    result.replaceChildren(...nodes.filter(Boolean))
+    answered = true
+    tab = 'response'
+    drawTabs()
+    output.scrollIntoView({ block: 'nearest', behavior: calm ? 'auto' : 'smooth' })
+  }
+
+  drawTabs()
 
   const submit = async (event) => {
     event.preventDefault()
@@ -633,13 +662,7 @@ export function open(button) {
       'div',
       { class: 'vellum-playground-columns' },
       h('div', { class: 'vellum-playground-request' }, ...sections),
-      h(
-        'div',
-        { class: 'vellum-playground-result' },
-        h('div', { class: 'vellum-playground-curl' }, h('div', { class: 'vellum-playground-heading' }, h('span', { text: 'cURL' }), copy), h('pre', {}, curl)),
-        answered,
-        result,
-      ),
+      output,
     ),
   )
 
@@ -678,7 +701,6 @@ export function open(button) {
   refresh()
   document.body.append(dialog)
   dialog.showModal()
-  opened = true
 
   // Start where the reader starts: the first thing to fill in, or Send.
   ;(form.querySelector('.vellum-playground-request .vellum-playground-control') ?? send).focus()
