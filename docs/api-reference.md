@@ -99,7 +99,7 @@ Every operation has a request sample per language in `samples`. `curl`, `php` (t
 
 ## The playground
 
-Every operation's page has a **Try it** button on its request line. It opens a dialog in which a reader fills in the request, sends it and reads the response.
+Every operation's page has a **Try it** button on its request line. It opens a drawer beside the page, so the operation stays in view while a reader fills in the request, sends it and reads the response.
 
 - The parameters and the body are a form made from the spec. A JSON body can be written field by field or as JSON, and what is written carries over when the reader switches. An object inside the body has a field for each of its own, named with the path to it, such as `author.name`. A list of objects is written as JSON.
 - The command the request makes is shown as curl and follows what is typed.

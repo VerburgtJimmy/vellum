@@ -2681,23 +2681,61 @@ html[data-vellum-nav-marker] [data-vellum-sidebar-wrap] [data-vellum-nav-link]:h
 
 /* The playground: a request to fill in on one side, the command it makes
    and the response on the other. */
+/* A drawer on the right, so the operation it sends stays in view beside it. */
 .vellum-playground {
-  width: min(72rem, calc(100vw - 2rem));
+  --vellum-playground-ease: cubic-bezier(0.32, 0.72, 0, 1);
+  --vellum-playground-time: 0.36s;
+  width: min(38rem, 100vw);
   max-width: none;
-  height: min(46rem, calc(100vh - 2rem));
+  height: 100dvh;
   max-height: none;
-  margin: auto;
+  margin: 0 0 0 auto;
   padding: 0;
   overflow: hidden;
-  border: 1px solid var(--border);
-  border-radius: calc(var(--vellum-surface-radius) + 0.25rem);
+  border: 0;
+  border-left: 1px solid var(--border);
   background: var(--background);
   color: var(--foreground);
-  box-shadow: 0 24px 60px -12px oklch(0 0 0 / 0.35);
+  box-shadow: -24px 0 60px -24px oklch(0 0 0 / 0.3);
+  transform: translateX(100%);
+  /* overlay and display are held until it has slid out, so closing is seen. */
+  transition:
+    transform var(--vellum-playground-time) var(--vellum-playground-ease),
+    overlay var(--vellum-playground-time) allow-discrete,
+    display var(--vellum-playground-time) allow-discrete;
+}
+
+.vellum-playground[open] {
+  transform: none;
 }
 
 .vellum-playground::backdrop {
-  background: oklch(0 0 0 / 0.45);
+  background: oklch(0 0 0 / 0);
+  transition:
+    background-color var(--vellum-playground-time) ease,
+    overlay var(--vellum-playground-time) allow-discrete,
+    display var(--vellum-playground-time) allow-discrete;
+}
+
+.vellum-playground[open]::backdrop {
+  background: oklch(0 0 0 / 0.3);
+}
+
+@starting-style {
+  .vellum-playground[open] {
+    transform: translateX(100%);
+  }
+
+  .vellum-playground[open]::backdrop {
+    background: oklch(0 0 0 / 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vellum-playground,
+  .vellum-playground::backdrop {
+    transition: none;
+  }
 }
 
 .vellum-playground-panel,
@@ -2751,8 +2789,9 @@ html[data-vellum-nav-marker] [data-vellum-sidebar-wrap] [data-vellum-nav-link]:h
 .vellum-playground-bar {
   --vellum-method: var(--muted-foreground);
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.25rem 0.5rem;
   padding: var(--vellum-inset);
   border: 1px solid var(--border);
   border-radius: var(--vellum-surface-radius);
@@ -2769,11 +2808,13 @@ html[data-vellum-nav-marker] [data-vellum-sidebar-wrap] [data-vellum-nav-link]:h
   line-height: 1.25rem;
 }
 
+/* The request line reads as it does on the page: method, path, send. The
+   server it goes to sits under it. */
 .vellum-playground-server {
-  min-width: 6rem;
-  max-width: 50%;
-  flex: 0 1 auto;
-  height: 2rem;
+  order: 1;
+  min-width: 0;
+  flex: 1 1 100%;
+  height: 1.75rem;
   padding: 0 0.5rem;
   border: 1px solid transparent;
   border-radius: var(--vellum-inset-radius);
@@ -2820,30 +2861,52 @@ html[data-vellum-nav-marker] [data-vellum-sidebar-wrap] [data-vellum-nav-link]:h
   opacity: 0.7;
 }
 
+/* The one thing in the drawer that scrolls. It reaches the drawer's edge, so
+   its scrollbar sits there and not inside the padding. */
 .vellum-playground-columns {
-  display: grid;
+  display: flex;
   min-height: 0;
   flex: 1;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  flex-direction: column;
+  gap: 0.75rem;
+  margin: 0 -1rem -1rem;
+  padding: 0 1rem 1rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+.vellum-playground-columns::-webkit-scrollbar {
+  width: 8px;
+}
+
+.vellum-playground-columns::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.vellum-playground-columns::-webkit-scrollbar-thumb {
+  border-radius: 9999px;
+  background-color: var(--border);
+}
+
+.vellum-playground-request,
+.vellum-playground-result {
+  flex: none;
   overflow: hidden;
   border: 1px solid var(--border);
   border-radius: var(--vellum-surface-radius);
 }
 
-.vellum-playground-request,
-.vellum-playground-result {
-  min-height: 0;
-  overflow-y: auto;
-  scrollbar-width: thin;
+.vellum-playground-request:empty {
+  display: none;
 }
 
-.vellum-playground-request {
-  border-right: 1px solid var(--border);
+.vellum-playground-request > :last-child .vellum-playground-row:last-child {
+  border-bottom: 0;
 }
 
 .vellum-playground-result {
-  display: flex;
-  flex-direction: column;
   background: var(--card);
 }
 
@@ -2922,8 +2985,17 @@ html[data-vellum-nav-marker] [data-vellum-sidebar-wrap] [data-vellum-nav-link]:h
   line-height: 1.25rem;
 }
 
+/* Keeps the arrow a browser draws off the drawer's edge. */
+select.vellum-playground-control {
+  border-right: 0.5rem solid transparent;
+}
+
 textarea.vellum-playground-control {
   display: block;
+  /* As tall as what is written in it, so it has no scrollbar of its own. */
+  field-sizing: content;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   font-size: 0.75rem;
   resize: vertical;
@@ -2986,27 +3058,12 @@ textarea.vellum-playground-control {
 .vellum-playground pre {
   margin: 0;
   padding: 0.75rem;
-  overflow: auto;
+  /* Long lines wrap and nothing is cut short: the drawer scrolls, not this. */
+  overflow-wrap: anywhere;
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   font-size: 0.75rem;
   line-height: 1.6;
-  scrollbar-width: thin;
-  white-space: pre;
-}
-
-.vellum-playground-curl pre {
-  max-height: 12rem;
-}
-
-.vellum-playground-response {
-  display: flex;
-  min-height: 0;
-  flex: 1;
-  flex-direction: column;
-}
-
-.vellum-playground-output {
-  flex: 1;
+  white-space: pre-wrap;
 }
 
 .vellum-playground-status {
@@ -3051,46 +3108,13 @@ textarea.vellum-playground-control {
 }
 
 .vellum-playground-headers pre {
-  max-height: 10rem;
   padding-top: 0;
   color: var(--muted-foreground);
 }
 
 @media (max-width: 760px) {
   .vellum-playground {
-    width: 100vw;
-    height: 100vh;
-    border: 0;
-    border-radius: 0;
-  }
-
-  .vellum-playground-columns {
-    display: block;
-    overflow-y: auto;
-  }
-
-  .vellum-playground-request,
-  .vellum-playground-result {
-    overflow: visible;
-  }
-
-  .vellum-playground-request {
-    border-right: 0;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .vellum-playground-bar {
-    flex-wrap: wrap;
-  }
-
-  .vellum-playground-server {
-    flex: 1 1 8rem;
-  }
-
-  .vellum-playground-path {
-    flex-basis: 100%;
-    order: 3;
-    padding: 0 0.5rem 0.25rem;
+    border-left: 0;
   }
 
   .vellum-playground-row {

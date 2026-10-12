@@ -297,6 +297,7 @@ export function open(button) {
 
   const curl = h('code', {})
   const result = h('div', { class: 'vellum-playground-response', 'aria-live': 'polite' })
+  const answered = h('div', { class: 'vellum-playground-heading' }, h('span', { text: 'Response' }))
   const send = h('button', { type: 'submit', class: 'vellum-playground-send' }, h('span', { text: 'Send' }), h('kbd', { text: '⌘↵', 'aria-hidden': 'true' }))
 
   const refresh = () => {
@@ -516,7 +517,18 @@ export function open(button) {
     },
   })
 
-  const show = (...nodes) => result.replaceChildren(...nodes.filter(Boolean))
+  let opened = false
+  const calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
+  // The response sits under the request in one scroll, so an answer is
+  // brought into view rather than left for the reader to find.
+  const show = (...nodes) => {
+    result.replaceChildren(...nodes.filter(Boolean))
+
+    if (opened) {
+      answered.scrollIntoView({ block: 'start', behavior: calm ? 'auto' : 'smooth' })
+    }
+  }
 
   show(h('p', { class: 'vellum-playground-empty', text: 'The response shows here once you send the request.' }))
 
@@ -591,7 +603,7 @@ export function open(button) {
         // As text, always. A response is someone else's content, and this
         // page is not the place it gets to run.
         answer.text !== null
-          ? h('pre', { class: 'vellum-playground-output', tabindex: '0' }, h('code', { text: pretty(answer.text, answer.type).slice(0, SHOWN) }))
+          ? h('pre', { class: 'vellum-playground-output' }, h('code', { text: pretty(answer.text, answer.type).slice(0, SHOWN) }))
           : h('p', { class: 'vellum-playground-empty', text: `${answer.type || 'A response'} that is not text, so it is not shown.` }),
         answer.truncated || (answer.text ?? '').length > SHOWN
           ? h('p', { class: 'vellum-playground-empty', text: 'Only the start of the response is shown.' })
@@ -624,8 +636,8 @@ export function open(button) {
       h(
         'div',
         { class: 'vellum-playground-result' },
-        h('div', { class: 'vellum-playground-curl' }, h('div', { class: 'vellum-playground-heading' }, h('span', { text: 'cURL' }), copy), h('pre', { tabindex: '0' }, curl)),
-        h('div', { class: 'vellum-playground-heading' }, h('span', { text: 'Response' })),
+        h('div', { class: 'vellum-playground-curl' }, h('div', { class: 'vellum-playground-heading' }, h('span', { text: 'cURL' }), copy), h('pre', {}, curl)),
+        answered,
         result,
       ),
     ),
@@ -638,7 +650,8 @@ export function open(button) {
       'aria-label': `Try ${operation.title}`,
       onclose: () => {
         controller?.abort()
-        dialog.remove()
+        // Gone once it has slid out of view, not before.
+        Promise.allSettled(dialog.getAnimations().map((animation) => animation.finished)).then(() => dialog.remove())
       },
       // A press on the backdrop lands on the dialog itself.
       onclick: (event) => event.target === dialog && dialog.close(),
@@ -665,6 +678,7 @@ export function open(button) {
   refresh()
   document.body.append(dialog)
   dialog.showModal()
+  opened = true
 
   // Start where the reader starts: the first thing to fill in, or Send.
   ;(form.querySelector('.vellum-playground-request .vellum-playground-control') ?? send).focus()
