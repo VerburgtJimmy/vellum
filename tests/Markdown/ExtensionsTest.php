@@ -94,6 +94,14 @@ it('keeps inline Markdown in a panel written straight under its ::tab line', fun
         ->and(substr_count($html, 'role="tabpanel"'))->toBe(2);
 });
 
+it('keeps the indent of code written inside a directive', function (): void {
+    $html = (new MarkdownRenderer)->render(":::note\n```text\nservices:\n  app:\n   image: one\n```\n:::\n\n:::tabs\n::tab[One]\n```text\na\n  b\n```\n:::");
+
+    expect($html)->toContain("  app:\n")
+        ->and($html)->toContain("   image: one\n")
+        ->and($html)->toContain("  b\n");
+});
+
 it('renders tabs with persist key in markup', function (): void {
     $html = (new MarkdownRenderer)->render(<<<'MD'
 :::tabs persist="pkg-manager"

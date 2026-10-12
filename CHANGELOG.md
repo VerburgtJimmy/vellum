@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - A terminal code block showed a prompt before every line of a quoted argument that ran over several lines, such as a JSON body passed to curl. It shows one, before the command
+- A code block inside a directive, such as a tab or a callout, lost an indent of one to three spaces from each of its lines, so YAML or JSON indented by two came out flat. The indent is kept
 
 ## [0.8.2] - 2026-10-06
 
