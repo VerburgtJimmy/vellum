@@ -108,16 +108,60 @@ export function hasForm(body) {
   return body?.schema?.type === 'object' && Object.keys(body.schema.properties ?? {}).length > 0
 }
 
-/** The body a form's texts make: each field that was filled in, as its schema's type. */
-export function formToBody(schema, texts) {
+// How far down an object is opened into fields of its own. Past this it is
+// written as JSON, like anything else a form has no control for.
+const DEPTH = 4
+
+const opens = (schema, depth) => depth < DEPTH && schema?.type === 'object' && Object.keys(schema.properties ?? {}).length > 0
+
+/**
+ * Every control a form shows for an object schema. An object inside it gives
+ * its own fields in its place, each under the path that leads to it, so
+ * "author.name" is typed into rather than written as JSON.
+ *
+ * A field is marked required only when leaving it out is always an error:
+ * one inside an optional object is not, since the object can be left out.
+ */
+export function leaves(schema = {}, path = [], required = true, taken = new Set()) {
+  return fields(schema).flatMap((field) => {
+    const here = [...path, field.name]
+    const needed = required && field.required
+
+    if (opens(field.schema, here.length)) {
+      return leaves(field.schema, here, needed, taken)
+    }
+
+    // A property that is itself named "a.b" would share a key with b inside a.
+    let key = here.join('.')
+    key = taken.has(key) ? JSON.stringify(here) : key
+    taken.add(key)
+
+    return [{ key, name: field.name, path: here, schema: field.schema, required: needed }]
+  })
+}
+
+/**
+ * The body a form's texts make: each field that was filled in, as its
+ * schema's type. An object none of whose fields were filled in is left out.
+ * A file picked for a field stands in for its text.
+ */
+export function formToBody(schema, texts, files) {
   const body = bag()
 
-  for (const field of fields(schema)) {
-    const value = coerce(field.schema, texts[field.name])
+  for (const leaf of leaves(schema)) {
+    const value = files && leaf.key in files ? files[leaf.key] : coerce(leaf.schema, texts[leaf.key])
 
-    if (value !== undefined) {
-      body[field.name] = value
+    if (value === undefined) {
+      continue
     }
+
+    let at = body
+
+    for (const name of leaf.path.slice(0, -1)) {
+      at = Object.hasOwn(at, name) ? at[name] : (at[name] = bag())
+    }
+
+    at[leaf.path.at(-1)] = value
   }
 
   return body
@@ -127,8 +171,14 @@ export function formToBody(schema, texts) {
 export function bodyToForm(schema, body) {
   const texts = bag()
 
-  for (const field of fields(schema)) {
-    texts[field.name] = display(field.schema, body && Object.hasOwn(body, field.name) ? body[field.name] : undefined)
+  for (const leaf of leaves(schema)) {
+    let value = body
+
+    for (const name of leaf.path) {
+      value = value && typeof value === 'object' && Object.hasOwn(value, name) ? value[name] : undefined
+    }
+
+    texts[leaf.key] = display(leaf.schema, value)
   }
 
   return texts

@@ -37,6 +37,9 @@ final readonly class Group
      * "updatepet" are one file on a Mac and two on the deploy target, and
      * this project has already been bitten by that once. camelCase is broken
      * on its humps first, so lowercasing does not run the words together.
+     * Whatever else separates the words becomes a hyphen for the same reason:
+     * Scramble names an operation "note.index", and a slash in an id would
+     * otherwise read as a folder.
      */
     public function slugFor(Operation $operation): string
     {
@@ -48,6 +51,8 @@ final readonly class Group
 
     private function kebab(string $value): string
     {
+        $value = (string) preg_replace('/[^A-Za-z0-9]+/', '-', $value);
+
         return (string) preg_replace('/(?<=[a-z0-9])(?=[A-Z])/', '-', $value);
     }
 }

@@ -143,6 +143,20 @@ it('gives colliding group names distinct slugs', function (): void {
     expect(apiSlugs(ContentRepository::fromConfig()))->toBe(['api', 'api/pet-store/get-a', 'api/pet-store-2/get-b']);
 });
 
+it('keeps the words of an operation id apart, however they are joined', function (): void {
+    enableOpenApi($this->cachePath(), [
+        'openapi' => '3.0.0',
+        'info' => ['title' => 'Notes'],
+        'paths' => [
+            // Scramble names an operation after its route.
+            '/a' => ['get' => ['tags' => ['Note'], 'operationId' => 'note.index']],
+            '/b' => ['get' => ['tags' => ['Note'], 'operationId' => 'notes/show:one']],
+        ],
+    ]);
+
+    expect(apiSlugs(ContentRepository::fromConfig()))->toBe(['api', 'api/note/note-index', 'api/note/notes-show-one']);
+});
+
 it('renames the untagged group', function (): void {
     enableOpenApi($this->cachePath(), apiSpec(), ['untagged_label' => 'General']);
 

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { bodyToForm, coerce, control, display, failure, fields, formToBody, hasForm, initial, pretty, size } from '../../resources/js/playground/form.js'
+import { bodyToForm, coerce, control, display, failure, fields, formToBody, hasForm, initial, leaves, pretty, size } from '../../resources/js/playground/form.js'
 
 describe('control', () => {
   it('picks a control by what the schema allows', () => {
@@ -135,5 +135,76 @@ describe('what a response shows', () => {
     expect(failure(new TypeError('Failed to fetch'), 'cross')).toContain('CORS')
     expect(failure(new TypeError('Failed to fetch'), 'direct')).not.toContain('CORS')
     expect(failure({ name: 'AbortError' }, 'direct')).toContain('too long')
+  })
+})
+
+describe('an object inside the body', () => {
+  const note = {
+    type: 'object',
+    required: ['title', 'author'],
+    properties: {
+      title: { type: 'string' },
+      author: {
+        type: 'object',
+        required: ['name'],
+        properties: { name: { type: 'string' }, age: { type: 'integer' } },
+      },
+      editor: {
+        type: 'object',
+        required: ['name'],
+        properties: { name: { type: 'string' } },
+      },
+      meta: { type: 'object' },
+    },
+  }
+
+  it('gives its fields in its place, under the path that leads to them', () => {
+    expect(leaves(note).map((leaf) => [leaf.key, leaf.required])).toEqual([
+      ['title', true],
+      ['author.name', true],
+      ['author.age', false],
+      // Required inside an object that can itself be left out.
+      ['editor.name', false],
+      ['meta', false],
+    ])
+  })
+
+  it('is built from what was typed into them, and left out when nothing was', () => {
+    expect(formToBody(note, { title: 'A', 'author.name': 'Ada', 'author.age': '36', 'editor.name': '' })).toEqual({
+      title: 'A',
+      author: { name: 'Ada', age: 36 },
+    })
+  })
+
+  it('comes back as the same texts', () => {
+    const body = { title: 'A', author: { name: 'Ada', age: 36 }, meta: { a: 1 } }
+
+    expect(formToBody(note, bodyToForm(note, body))).toEqual(body)
+    expect(bodyToForm(note, { author: 'not an object' })['author.name']).toBe('')
+  })
+
+  it('is written as JSON once it is nested too deep to lay out', () => {
+    const wrap = (inner) => ({ type: 'object', properties: { in: inner } })
+    const deep = wrap(wrap(wrap(wrap(wrap({ type: 'string' })))))
+
+    expect(leaves(deep).map((leaf) => [leaf.key, control(leaf.schema)])).toEqual([['in.in.in.in', 'json']])
+  })
+
+  it('keeps a field named with a dot apart from the one it would be mistaken for', () => {
+    const schema = {
+      type: 'object',
+      properties: { a: { type: 'object', properties: { b: { type: 'string' } } }, 'a.b': { type: 'string' } },
+    }
+    const keys = leaves(schema).map((leaf) => leaf.key)
+
+    expect(new Set(keys).size).toBe(2)
+    expect(formToBody(schema, { [keys[0]]: 'in', [keys[1]]: 'out' })).toEqual({ a: { b: 'in' }, 'a.b': 'out' })
+  })
+
+  it('puts a picked file where its field is', () => {
+    const schema = { type: 'object', properties: { doc: { type: 'object', properties: { scan: { type: 'string', format: 'binary' } } } } }
+    const file = { name: 'scan.png' }
+
+    expect(formToBody(schema, {}, { 'doc.scan': file })).toEqual({ doc: { scan: file } })
   })
 })

@@ -2891,6 +2891,10 @@ html[data-vellum-nav-marker] [data-vellum-sidebar-wrap] [data-vellum-nav-link]:h
   overflow-wrap: anywhere;
 }
 
+.vellum-playground-within {
+  color: var(--muted-foreground);
+}
+
 .vellum-playground-required {
   color: var(--vellum-method-delete);
 }

@@ -52,6 +52,17 @@ In local development the reference is built again when a PHP file under `app/` o
 
 Set `scramble` to `false` to never ask Scramble, even when it is installed.
 
+Scramble has a viewer of its own at `/docs/api`, which is also where the reference lives when Vellum is served under `/docs`. Vellum's pages answer there. To keep Scramble's viewer as well, give it another address in a service provider:
+
+```php
+use Dedoc\Scramble\Scramble;
+
+Scramble::registerUiRoute('scramble');
+Scramble::registerJsonSpecificationRoute('scramble.json');
+```
+
+The servers in the spec come from `APP_URL`, so the playground and the samples send requests to the address set there.
+
 ### Scramble, in another project
 
 When the docs are a project of their own, export the spec where the API lives and bring the file over. In the API's project:
@@ -90,7 +101,7 @@ Every operation has a request sample per language in `samples`. `curl`, `php` (t
 
 Every operation's page has a **Try it** button on its request line. It opens a dialog in which a reader fills in the request, sends it and reads the response.
 
-- The parameters and the body are a form made from the spec. A JSON body can be written field by field or as JSON, and what is written carries over when the reader switches.
+- The parameters and the body are a form made from the spec. A JSON body can be written field by field or as JSON, and what is written carries over when the reader switches. An object inside the body has a field for each of its own, named with the path to it, such as `author.name`. A list of objects is written as JSON.
 - The command the request makes is shown as curl and follows what is typed.
 - Bearer tokens, basic credentials and API keys are supported. For OAuth 2 and OpenID Connect the reader pastes a token. Credentials are kept for the browser tab and are gone when it closes.
 - The response is shown as text, with its status, time, size and headers. It is never rendered as a page.

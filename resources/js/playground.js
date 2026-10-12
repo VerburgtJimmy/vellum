@@ -7,7 +7,7 @@
  * dialog around them.
  */
 import { bag, buildRequest, reach, toCurl, xsrfToken } from './playground/request.js'
-import { bodyToForm, coerce, control, display, failure, fields, formToBody, hasForm, initial, pretty, size } from './playground/form.js'
+import { bodyToForm, coerce, control, display, failure, formToBody, hasForm, initial, leaves, pretty, size } from './playground/form.js'
 
 const STORE = 'vellum-playground'
 const TIMEOUT = 30000
@@ -182,7 +182,7 @@ async function forwarded(proxy, built, token, signal) {
 let fieldCount = 0
 
 /** A labelled row: the name and type on one side, the control on the other. */
-function row({ name, type, required, description, child }) {
+function row({ name, within = [], type, required, description, child }) {
   const id = `vellum-playground-field-${++fieldCount}`
 
   return h(
@@ -191,7 +191,8 @@ function row({ name, type, required, description, child }) {
     h(
       'label',
       { class: 'vellum-playground-name', for: id, title: description || null },
-      h('span', { text: name }),
+      // The objects a field sits in, said before its name: author.name
+      h('span', {}, within.length > 0 ? h('span', { class: 'vellum-playground-within', text: `${within.join('.')}.` }) : null, name),
       required ? h('span', { class: 'vellum-playground-required', 'aria-hidden': 'true', text: '*' }) : null,
       h('span', { class: 'vellum-playground-type', text: type }),
     ),
@@ -277,8 +278,7 @@ export function open(button) {
       const multipart = body.contentType === 'multipart/form-data'
 
       if (state.mode[state.body] === 'form') {
-        const filled = formToBody(body.schema, state.form[state.body])
-        Object.assign(filled, multipart ? state.files[state.body] : {})
+        const filled = formToBody(body.schema, state.form[state.body], multipart ? state.files[state.body] : undefined)
         values.body = Object.keys(filled).length > 0 ? filled : undefined
       } else {
         values.body = state.mode[state.body] === 'json' ? coerce({ type: 'json' }, state.json[state.body]) : state.json[state.body]
@@ -421,21 +421,22 @@ export function open(button) {
         })
 
       const byField = () =>
-        fields(body.schema).map((field) =>
+        leaves(body.schema).map((leaf) =>
           row({
-            name: field.name,
-            type: field.schema.format === 'binary' ? 'file' : typeName(field.schema),
-            required: field.required,
-            description: field.schema.description,
+            name: leaf.name,
+            within: leaf.path.slice(0, -1),
+            type: leaf.schema.format === 'binary' ? 'file' : typeName(leaf.schema),
+            required: leaf.required,
+            description: leaf.schema.description,
             child: (id) =>
-              input(field.schema, state.form[index][field.name] ?? '', {
+              input(leaf.schema, state.form[index][leaf.key] ?? '', {
                 id,
-                required: field.required,
+                required: leaf.required,
                 onInput: edit((value) => {
-                  if (control(field.schema) === 'file') {
-                    value ? (state.files[index][field.name] = value) : delete state.files[index][field.name]
+                  if (control(leaf.schema) === 'file') {
+                    value ? (state.files[index][leaf.key] = value) : delete state.files[index][leaf.key]
                   } else {
-                    state.form[index][field.name] = value
+                    state.form[index][leaf.key] = value
                   }
                 }),
               }),
