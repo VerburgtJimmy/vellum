@@ -283,7 +283,8 @@ return [
     |
     | proxy: sends a playground request to another origin through this app,
     | for an API that does not let a browser on the docs' origin read its
-    | answers. Only the servers the spec names can be reached.
+    | answers. Only the servers the spec names can be reached, and only at
+    | a public address unless proxy_private allows a private network.
     |
     | access: who may read the reference, as for a page's access frontmatter.
     |
@@ -302,6 +303,7 @@ return [
         'base_url' => null,
         'playground' => true,
         'proxy' => env('VELLUM_OPENAPI_PROXY', false),
+        'proxy_private' => env('VELLUM_OPENAPI_PROXY_PRIVATE', false),
         'access' => 'guest',
     ],
 

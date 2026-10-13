@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Vellum\Http\Controllers;
 
 use GuzzleHttp\Client;
+use GuzzleHttp\Psr7\FnStream;
+use GuzzleHttp\Psr7\Utils;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -40,10 +42,11 @@ final class PlaygroundProxyController extends Controller
             abort(404);
         }
 
-        // JSON only. Another site can make a visitor's browser post a form
-        // here, but not JSON without this app's leave, so this holds even
-        // where the docs' middleware has been set without CSRF protection.
-        if (! $request->isJson()) {
+        // JSON only, named as exactly that. Another site can make a visitor's
+        // browser post a form or plain text here, but not this content type
+        // without this app's leave, so this holds even where the docs'
+        // middleware has been set without CSRF protection.
+        if (! str_starts_with(strtolower(trim((string) $request->header('Content-Type'))), 'application/json')) {
             return $this->refuse('The request is not one the playground sends.', 415);
         }
 
@@ -72,9 +75,31 @@ final class PlaygroundProxyController extends Controller
         /** @var list<string> $declared */
         $declared = array_values(array_filter((array) ($overview->frontmatter['openapi_headers'] ?? []), is_string(...)));
 
-        if (! class_exists(Client::class)) {
+        if (! class_exists(Client::class) || ! extension_loaded('curl')) {
             return $this->refuse('This site cannot send requests: its HTTP client is not installed.', 501);
         }
+
+        $host = (string) parse_url($target, PHP_URL_HOST);
+        $port = parse_url($target, PHP_URL_PORT) ?? (str_starts_with($target, 'https://') ? 443 : 80);
+        $addresses = PlaygroundProxy::addresses($host, (bool) config('vellum.openapi.proxy_private', false));
+
+        if ($addresses === null) {
+            return $this->refuse('That server is not one this site will send a request to: it is not at a public address.', 422);
+        }
+
+        // Kept to what will be shown. The rest of a longer answer is read and dropped.
+        $truncated = false;
+        $kept = Utils::streamFor('');
+        $sink = FnStream::decorate($kept, ['write' => function (string $bytes) use ($kept, &$truncated): int {
+            $room = PlaygroundProxy::MAX_RESPONSE - (int) $kept->getSize();
+            $truncated = $truncated || strlen($bytes) > $room;
+
+            if ($room > 0) {
+                $kept->write(substr($bytes, 0, $room));
+            }
+
+            return strlen($bytes);
+        }]);
 
         $forward = PlaygroundProxy::headers($headers, $declared);
         $started = microtime(true);
@@ -85,7 +110,13 @@ final class PlaygroundProxyController extends Controller
                 ->connectTimeout(5)
                 // A redirect is an answer to show, not an address to follow:
                 // it could lead anywhere, the servers the spec names or not.
-                ->withOptions(['allow_redirects' => false, 'http_errors' => false, 'stream' => true]);
+                ->withOptions([
+                    'allow_redirects' => false,
+                    'http_errors' => false,
+                    'sink' => $sink,
+                    // To the address that was checked, whatever the name means by now.
+                    'curl' => [CURLOPT_RESOLVE => [trim($host, '[]').':'.$port.':'.implode(',', $addresses)]],
+                ]);
 
             if ($body !== null && ! in_array($method, ['GET', 'HEAD'], true)) {
                 $pending = $pending->withBody($body, $this->contentType($forward));
@@ -97,15 +128,9 @@ final class PlaygroundProxyController extends Controller
             return $this->refuse('No response. The server may be down, or the address wrong.', 502);
         }
 
-        $stream = $response->toPsrResponse()->getBody();
-        $content = '';
-
-        while (! $stream->eof() && strlen($content) <= PlaygroundProxy::MAX_RESPONSE) {
-            $content .= $stream->read(65536);
-        }
-
-        $truncated = strlen($content) > PlaygroundProxy::MAX_RESPONSE;
-        $content = $truncated ? substr($content, 0, PlaygroundProxy::MAX_RESPONSE) : $content;
+        $content = $response->body();
+        $truncated = $truncated || strlen($content) > PlaygroundProxy::MAX_RESPONSE;
+        $content = substr($content, 0, PlaygroundProxy::MAX_RESPONSE);
         $type = $response->header('Content-Type');
         $textual = PlaygroundProxy::textual($type);
         $answered = [];

@@ -21,11 +21,15 @@ function proxyReady(string $cachePath, array $config = [], array $spec = []): vo
 beforeEach(function (): void {
     $this->writeDoc('index.md', "---\ntitle: Home\n---\nHi");
     Http::preventStrayRequests();
+    // No test here asks the network what a name means.
+    PlaygroundProxy::lookupUsing(fn (string $host): array => ['93.184.216.34']);
 
     $this->forward = fn (array $payload) => $this
         ->withoutMiddleware(ValidateCsrfToken::class)
         ->postJson('/docs/_vellum/playground', $payload);
 });
+
+afterEach(fn () => PlaygroundProxy::lookupUsing(null));
 
 it('is not there unless it was turned on', function (): void {
     enableOpenApi($this->cachePath(), apiSpec());
@@ -77,7 +81,59 @@ it('takes JSON only, which another site cannot post from a visitor\'s browser', 
         ->post('/docs/_vellum/playground', ['method' => 'GET', 'url' => 'https://api.example.com/pets'])
         ->assertStatus(415);
 
+    // Plain text is a type another site may post, whatever it is dressed as.
+    $this->withoutMiddleware(ValidateCsrfToken::class)
+        ->call('POST', '/docs/_vellum/playground', [], [], [], ['CONTENT_TYPE' => 'text/plain; x=/json'], '{"method":"GET","url":"https://api.example.com/pets"}')
+        ->assertStatus(415);
+
     Http::assertNothingSent();
+});
+
+it('does not reach a server at an address that is not public', function (string $server, array $addresses): void {
+    proxyReady($this->cachePath(), [], ['servers' => [['url' => $server]]]);
+    PlaygroundProxy::lookupUsing(fn (string $host): array => $addresses);
+    Http::fake();
+
+    ($this->forward)(['method' => 'GET', 'url' => rtrim($server, '/').'/latest/meta-data/'])
+        ->assertStatus(422)
+        ->assertJsonPath('error', 'That server is not one this site will send a request to: it is not at a public address.');
+
+    Http::assertNothingSent();
+})->with([
+    'cloud metadata' => ['http://169.254.169.254', []],
+    'this machine' => ['http://127.0.0.1:8080', []],
+    'this machine, in IPv6' => ['http://[::1]', []],
+    'this machine, as IPv4 inside IPv6' => ['http://[::ffff:127.0.0.1]', []],
+    'a private network' => ['http://10.0.0.5', []],
+    'a number some clients read as an address' => ['http://2130706433', []],
+    'a name that means this machine' => ['https://internal.example.com', ['127.0.0.1']],
+    'a name with one address of each kind' => ['https://rebind.example.com', ['93.184.216.34', '192.168.1.1']],
+    'a name behind carrier NAT' => ['https://nat.example.com', ['100.64.0.1']],
+    'a name that means nothing' => ['https://nowhere.example.com', []],
+]);
+
+it('reaches a private address when told it may', function (): void {
+    proxyReady($this->cachePath(), ['proxy_private' => true], ['servers' => [['url' => 'http://127.0.0.1:8080']]]);
+    Http::fake(['*' => Http::response('ok')]);
+
+    ($this->forward)(['method' => 'GET', 'url' => 'http://127.0.0.1:8080/pets'])->assertOk()->assertJsonPath('body', 'ok');
+});
+
+it('goes to the address it checked, whatever the name means by then', function (): void {
+    proxyReady($this->cachePath());
+    Http::fake(['*' => Http::response('ok')]);
+
+    ($this->forward)(['method' => 'GET', 'url' => 'https://api.example.com/pets'])->assertOk();
+
+    Http::assertSent(fn (Request $request, $response): bool => true);
+    expect(Http::recorded()->first()[0]->toPsrRequest()->getUri()->getHost())->toBe('api.example.com');
+});
+
+it('withholds what a metadata service asks for, even where a spec declares it', function (): void {
+    expect(PlaygroundProxy::headers(
+        ['Metadata-Flavor' => 'Google', 'Metadata' => 'true', 'X-aws-ec2-metadata-token-ttl-seconds' => '60', 'X-Api-Key' => 'k'],
+        ['metadata-flavor', 'metadata', 'x-aws-ec2-metadata-token-ttl-seconds', 'x-api-key'],
+    ))->toBe(['X-Api-Key' => 'k']);
 });
 
 it('sends the request and gives back an account of the answer', function (): void {
@@ -178,6 +234,7 @@ it('goes only to the servers the spec names', function (string $url): void {
     'a path beside the base' => ['https://api.example.com/v20/pets'],
     'a path above the base' => ['https://api.example.com/admin'],
     'a path that climbs out' => ['https://api.example.com/v2/../admin'],
+    'a climb some servers read past a semicolon' => ['https://api.example.com/v2/..;/admin'],
     'a climb that is encoded' => ['https://api.example.com/v2/%2e%2e/admin'],
     'a climb that is encoded twice' => ['https://api.example.com/v2/%252e%252e/admin'],
     'a backslash' => ['https://api.example.com\\@evil.test/v2/pets'],

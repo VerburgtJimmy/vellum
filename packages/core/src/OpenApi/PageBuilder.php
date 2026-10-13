@@ -288,7 +288,9 @@ final class PageBuilder
 
         foreach ($blocks as $block) {
             $fence = str_repeat('`', max(3, self::longestFence($block['code']) + 1));
-            $label = trim(str_replace(['[', ']', "\n"], '', $block['label']));
+            // A label is a status or a language. A spec is free to make a
+            // status of anything, and this goes on to be read as Markdown.
+            $label = trim((string) preg_replace('/[^\w .+-]+/u', '', $block['label'])) ?: 'Example';
             $markdown .= '::tab['.$label."]\n".$fence.$block['language']."\n".$block['code']."\n".$fence."\n";
         }
 

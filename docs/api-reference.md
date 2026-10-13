@@ -122,10 +122,19 @@ When the API does not allow the docs' origin, turn on the forwarding route, and 
 It is off by default, because it makes your app send requests on a reader's behalf. With it on:
 
 - Only the servers the spec names can be reached, and `base_url` when you set it. A server written as a path, such as `/api`, is your own origin and needs no forwarding.
+- A server is reached only at a public address. One on this machine or a private network, such as `localhost`, `10.0.0.5` or a cloud's metadata service, is refused, whether the spec gives the address or a name that leads to it. The request goes to the address that was checked.
 - A redirect is shown as the answer and is not followed.
 - Nothing of the reader's session with your app is forwarded. No cookies go along, and the only headers that do are `Accept`, `Content-Type`, `Authorization` and those the spec declares as a header parameter or an API key. A header that says where a request came from, such as `X-Forwarded-For`, is never forwarded. The reader's credentials for the API do pass through your server on the way.
 - It answers only a reader who may open the reference, behind the docs' [middleware](/docs/getting-started/configuration), and one reader can send 60 requests a minute.
-- A file upload is not forwarded, and a response is read up to 2 MB.
+- A file upload is not forwarded. A response is kept up to 2 MB and is given 30 seconds to arrive.
+
+To forward to an API on a private network, as in local development against `http://localhost:8000`, allow it:
+
+```php
+'proxy_private' => env('VELLUM_OPENAPI_PROXY_PRIVATE', false),
+```
+
+Leave it off in production unless the API really is internal. With it on, anything the spec names on your network is reachable by every reader who may open the reference.
 
 A static export has no app to forward through, so there the playground reaches only an API that allows its origin.
 
@@ -173,4 +182,5 @@ A reader who may not open the reference is not shown the way to it.
 | `openapi.base_url` | `null` | Used in the samples in place of the spec's first server. |
 | `openapi.playground` | `true` | Whether a reader can send a request from an operation's page. |
 | `openapi.proxy` | `false` | Sends playground requests to another origin through your app. |
+| `openapi.proxy_private` | `false` | Lets the forwarding route reach a server on this machine or a private network. |
 | `openapi.access` | `guest` | Who may read the reference. |

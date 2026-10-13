@@ -35,9 +35,14 @@ final class PlaygroundProxy
         'origin', 'referer', 'forwarded', 'via', 'expect', 'x-xsrf-token', 'x-csrf-token',
         'x-real-ip', 'client-ip', 'true-client-ip', 'x-client-ip', 'x-cluster-client-ip', 'x-host', 'x-rewrite-url',
         'x-http-method-override', 'x-http-method', 'x-method-override',
+        // What a cloud's metadata service asks for before it hands out credentials.
+        'metadata', 'metadata-flavor',
     ];
 
-    private const WITHHELD_PREFIXES = ['proxy-', 'sec-', 'x-forwarded-', 'x-original-', 'cf-', 'fastly-', 'x-envoy-', 'x-amzn-'];
+    private const WITHHELD_PREFIXES = ['proxy-', 'sec-', 'x-forwarded-', 'x-original-', 'cf-', 'fastly-', 'x-envoy-', 'x-amzn-', 'x-aws-ec2-metadata-'];
+
+    /** @var (\Closure(string): list<string>)|null */
+    private static ?\Closure $lookup = null;
 
     /**
      * The address a request may go to, or null when it may not go there: it
@@ -71,6 +76,86 @@ final class PlaygroundProxy
         }
 
         return null;
+    }
+
+    /**
+     * The addresses a host is reached at, or null when it may not be reached.
+     *
+     * A spec names a server by what it is called, and a name can be made to
+     * mean the machine this app runs on or one beside it: a metadata service,
+     * a database's admin page. So the name is looked up here, every address
+     * it has must be a public one, and the request then goes to the address
+     * that was checked and not to whatever the name means a moment later.
+     *
+     * @param  bool  $private  Whether an address on a private network is allowed.
+     * @return list<string>|null
+     */
+    public static function addresses(string $host, bool $private = false): ?array
+    {
+        $host = strtolower(trim($host, '[]'));
+
+        if (filter_var($host, FILTER_VALIDATE_IP) !== false) {
+            $addresses = [$host];
+        } elseif (preg_match('/^[0-9a-fx.]+$/', $host) === 1) {
+            // 2130706433 and 0x7f.1 are addresses to some clients and names
+            // to others. Neither reading is one to rely on.
+            return null;
+        } else {
+            $addresses = (self::$lookup ?? self::lookup(...))($host);
+        }
+
+        if ($addresses === []) {
+            return null;
+        }
+
+        foreach ($addresses as $address) {
+            if (! $private && ! self::isPublic($address)) {
+                return null;
+            }
+        }
+
+        return $addresses;
+    }
+
+    /**
+     * Whether an address is one out on the internet: not this machine, not a
+     * private network, not link-local, and not set aside for anything else.
+     */
+    public static function isPublic(string $address): bool
+    {
+        // An IPv4 address written as an IPv6 one is judged as what it is.
+        if (preg_match('/^(?:::ffff:|64:ff9b::)(\d+\.\d+\.\d+\.\d+)$/i', $address, $match) === 1) {
+            $address = $match[1];
+        }
+
+        return filter_var($address, FILTER_VALIDATE_IP, FILTER_FLAG_GLOBAL_RANGE) !== false;
+    }
+
+    /**
+     * Replaces the lookup of a name's addresses, for a test that must not
+     * depend on the network. Null puts the real one back.
+     *
+     * @param  (\Closure(string): list<string>)|null  $lookup
+     */
+    public static function lookupUsing(?\Closure $lookup): void
+    {
+        self::$lookup = $lookup;
+    }
+
+    /**
+     * @return list<string>
+     */
+    private static function lookup(string $host): array
+    {
+        $addresses = gethostbynamel($host) ?: [];
+
+        foreach (@dns_get_record($host, DNS_AAAA) ?: [] as $record) {
+            if (is_string($record['ipv6'] ?? null)) {
+                $addresses[] = $record['ipv6'];
+            }
+        }
+
+        return array_values(array_unique($addresses));
     }
 
     /**
@@ -164,7 +249,11 @@ final class PlaygroundProxy
         $decoded = rawurldecode($path);
 
         foreach (explode('/', $decoded) as $segment) {
-            if ($segment === '..' || $segment === '.') {
+            // Some servers drop what follows a semicolon before they read the
+            // segment, so "..;x" climbs for them as ".." does.
+            $name = explode(';', $segment)[0];
+
+            if ($name === '..' || $name === '.') {
                 return null;
             }
         }

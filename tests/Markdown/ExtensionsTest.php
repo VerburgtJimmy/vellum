@@ -102,6 +102,14 @@ it('keeps the indent of code written inside a directive', function (): void {
         ->and($html)->toContain("  b\n");
 });
 
+it('takes a directive fence inside a code block for a line of code', function (): void {
+    $html = (new MarkdownRenderer)->render(":::note\n```text\nbefore\n:::\nafter\n```\nStill inside.\n:::");
+
+    expect($html)->toContain("after\n")
+        ->and(substr_count($html, 'vellum-callout'))->toBeGreaterThan(0)
+        ->and(strpos($html, 'Still inside.'))->toBeLessThan(strrpos($html, '</div>'));
+});
+
 it('renders tabs with persist key in markup', function (): void {
     $html = (new MarkdownRenderer)->render(<<<'MD'
 :::tabs persist="pkg-manager"

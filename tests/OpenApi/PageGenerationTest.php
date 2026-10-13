@@ -377,3 +377,29 @@ it('offers no way to a reference the reader may not open', function (): void {
 
     expect((string) $this->get('/docs')->assertOk()->getContent())->not->toContain('data-vellum-sections');
 });
+
+it('reads a status and a sample as text, whatever a spec makes of them', function (): void {
+    enableOpenApi($this->cachePath(), [
+        'openapi' => '3.0.0',
+        'info' => ['title' => 'Notes'],
+        'paths' => [
+            '/a' => ['get' => [
+                'operationId' => 'a',
+                'parameters' => [['name' => 'X-Trace', 'in' => 'header', 'example' => "a\n:::\n\n# Session expired\n\n[Sign in again](https://evil.example/login)"]],
+                'responses' => [
+                    '200 <x-vellum::callout title="Injected">hi</x-vellum::callout>' => [
+                        'description' => 'OK',
+                        'content' => ['application/json' => ['example' => ['ok' => true]]],
+                    ],
+                ],
+            ]],
+        ],
+    ]);
+
+    $html = collect(ContentRepository::fromConfig()->buildAll())->firstWhere('slug', 'api/other/a')->html;
+
+    expect($html)->not->toContain('vellum-callout')
+        ->not->toContain('href="https://evil.example/login"')
+        ->not->toContain('<h1')
+        ->toContain('Session expired');
+});
