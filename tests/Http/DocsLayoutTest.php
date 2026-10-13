@@ -599,3 +599,14 @@ it('numbers step titles in the table of contents and joins consecutive steps', f
         ->and($html)->not->toMatch('/data-vellum-toc-id="configure"[^>]*data-vellum-toc-joined/s')
         ->and($html)->toContain('<span class="vellum-toc-step" aria-hidden="true">1</span>Install');
 });
+
+it('sets the page actions beside the title when there is no line under it for them', function (): void {
+    $this->writeDoc('index.md', "---\ntitle: Home\ndescription: The start.\n---\nHi");
+
+    $html = $this->get('/docs')->assertOk()->getContent();
+
+    expect($html)->not->toContain('data-vellum-page-meta')
+        ->and(substr_count($html, 'data-vellum-page-actions'))->toBe(1)
+        ->and(strpos($html, 'data-vellum-title-actions'))->toBeLessThan(strpos($html, 'data-vellum-page-actions'))
+        ->and(strpos($html, 'data-vellum-page-actions'))->toBeLessThan(strpos($html, 'The start.</p>'));
+});

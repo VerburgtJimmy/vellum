@@ -35,19 +35,38 @@
                 <x-vellum::docs.breadcrumb :breadcrumbs="$breadcrumbs" />
 
                 <article data-vellum-article>
-                    <h1 class="mb-2 text-3xl font-semibold tracking-tight text-foreground md:text-4xl">
-                        {{ $document->title }}
-                    </h1>
-                    @if ($document->description)
-                        <p class="text-lg text-muted-foreground">{{ $document->description }}</p>
+                    @php
+                        // With no date and no reading time the actions would have a
+                        // row to themselves, so they sit beside the title instead.
+                        $facts = ($updated ?? null) !== null || ($readingMinutes ?? 0) >= 3;
+                    @endphp
+                    <header @class(['grid gap-x-4', 'mb-9 sm:grid-cols-[minmax(0,1fr)_auto]' => ! $facts])>
+                        <h1 class="mb-2 min-w-0 text-3xl font-semibold tracking-tight text-foreground md:text-4xl">
+                            {{ $document->title }}
+                        </h1>
+                        @unless ($facts)
+                            {{-- Beside the title where there is room, under the description where there is not. --}}
+                            <div data-vellum-title-actions class="row-start-3 -ml-2 mt-2 justify-self-start sm:row-start-1 sm:col-start-2 sm:ml-0 sm:mt-0.5 sm:justify-self-end md:mt-1">
+                                <x-vellum::docs.page-actions
+                                    :markdown-source="$markdownSource ?? ''"
+                                    :raw-url="$rawUrl ?? ''"
+                                    :edit-url="$editUrl ?? null"
+                                />
+                            </div>
+                        @endunless
+                        @if ($document->description)
+                            <p @class(['text-lg text-muted-foreground', 'sm:col-span-2' => ! $facts])>{{ $document->description }}</p>
+                        @endif
+                    </header>
+                    @if ($facts)
+                        <x-vellum::docs.page-meta :updated="$updated ?? null" :reading-minutes="$readingMinutes ?? 0">
+                            <x-vellum::docs.page-actions
+                                :markdown-source="$markdownSource ?? ''"
+                                :raw-url="$rawUrl ?? ''"
+                                :edit-url="$editUrl ?? null"
+                            />
+                        </x-vellum::docs.page-meta>
                     @endif
-                    <x-vellum::docs.page-meta :updated="$updated ?? null" :reading-minutes="$readingMinutes ?? 0">
-                        <x-vellum::docs.page-actions
-                            :markdown-source="$markdownSource ?? ''"
-                            :raw-url="$rawUrl ?? ''"
-                            :edit-url="$editUrl ?? null"
-                        />
-                    </x-vellum::docs.page-meta>
                     <div class="vellum-prose">
                         {!! $html ?? $document->html !!}
                     </div>
