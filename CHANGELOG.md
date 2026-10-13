@@ -21,6 +21,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - A code block inside a directive, such as a tab or a callout, lost an indent of one to three spaces from each of its lines, so YAML or JSON indented by two came out flat. The indent is kept
 - A line of `:::` inside a fenced code block closed the directive the block was in. It is a line of code
 
+### Security
+
+- `league/commonmark` 2.10.2 or later is required. Earlier versions let a table take a very long time to parse and let a disallowed HTML tag through in one case
+
 ## [0.8.2] - 2026-10-06
 
 ### Changed
