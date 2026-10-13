@@ -2654,7 +2654,9 @@ html[data-vellum-nav-marker] [data-vellum-sidebar-wrap] [data-vellum-nav-link]:h
   align-items: center;
   gap: 0.375rem;
   height: 2rem;
-  margin-left: auto;
+  /* As far from the right edge as the method is from the left. The line's
+     own padding there is wider, for a path that ends without a button. */
+  margin: 0 calc(var(--vellum-inset) - 0.75rem) 0 auto;
   padding: 0 0.75rem;
   border-radius: var(--vellum-inset-radius);
   background: var(--primary);
