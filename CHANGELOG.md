@@ -5,6 +5,12 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- On an operation's page, the examples beside the documentation showed a scrollbar laid over the edge of their panels on a screen too short for both. The samples are now sized to the screen so the request and the response fit together, and the column has no bar of its own
+
 ## [0.9.0] - 2026-10-13
 
 ### Added

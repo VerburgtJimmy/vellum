@@ -2520,12 +2520,20 @@ html[data-vellum-nav-marker] [data-vellum-sidebar-wrap] [data-vellum-nav-link]:h
     top: calc(var(--vellum-mobile-chrome, 0px) + 1.5rem);
     max-height: calc(100vh - var(--vellum-mobile-chrome, 0px) - 3rem);
     margin-top: 0.5rem;
+    /* Still scrolls on a screen too short for it, without a bar laid over
+       the edge of the panels. The samples below are sized so it rarely has to. */
     overflow-y: auto;
-    scrollbar-width: thin;
+    scrollbar-width: none;
   }
 
+  .vellum-api-examples::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Each sample takes half of what the screen leaves after the labels and
+     tab rows, so the request and the response are both in view at once. */
   .vellum-api-example pre {
-    max-height: 22rem;
+    max-height: clamp(8rem, calc((100vh - var(--vellum-mobile-chrome, 0px) - 16rem) / 2), 22rem);
   }
 }
 
