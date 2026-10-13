@@ -1,11 +1,33 @@
 ---
 title: Upgrade
-description: Upgrading from 0.7 to 0.8, from 0.6 to 0.7, within 0.6, from 0.5 to 0.6, and from 0.2 to the 0.5 freeze.
+description: Upgrading from 0.8 to 0.9, from 0.7 to 0.8, from 0.6 to 0.7, within 0.6, from 0.5 to 0.6, and from 0.2 to the 0.5 freeze.
 ---
 
 0.5 froze the keys in `config/vellum.php` and the page frontmatter names. Later releases add keys without renaming any, and no key will be removed before 1.0.
 
 The requirements have been PHP 8.4+ and Laravel 11, 12, or 13 since 0.2.
+
+## 0.8 to 0.9
+
+No changes to your content or config are required. Update the package and rebuild:
+
+```bash
+composer update jimmyverburgt/vellum
+php artisan vellum:build
+```
+
+0.9 adds the [API reference](/docs/api-reference). It is off until you set `openapi.enabled`, and a site that leaves it off is served as before.
+
+Two fixes change what existing pages look like after the rebuild:
+
+- A code block inside a tab, a callout or a step keeps an indent of one to three spaces, which was dropped before. YAML or JSON indented by two now shows as written.
+- A line of `:::` inside a fenced code block is a line of code. It used to close the directive around the block.
+
+### If you turn the reference on
+
+A config file published before 0.9 has no `openapi` array. The package's defaults apply until you add one, so `VELLUM_OPENAPI=true` in `.env` is enough to start.
+
+The reference adds a switch between the docs and the reference to the sidebar. If you have published the `sidebar`, `mobile-sidebar`, `header` or `shell` component, or the `doc`, `changelog` or `404` page, your copy does not pass it along and the two sidebars have no way from one to the other. Copy those views again from 0.9, or set `openapi.sidebar` to `docs` to list the reference as a folder of the docs' sidebar instead.
 
 ## 0.7 to 0.8
 
