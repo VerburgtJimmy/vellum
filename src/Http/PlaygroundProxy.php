@@ -128,7 +128,7 @@ final class PlaygroundProxy
             $address = $match[1];
         }
 
-        return filter_var($address, FILTER_VALIDATE_IP, FILTER_FLAG_GLOBAL_RANGE) !== false;
+        return (bool) filter_var($address, FILTER_VALIDATE_IP, FILTER_FLAG_GLOBAL_RANGE);
     }
 
     /**

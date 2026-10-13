@@ -191,7 +191,7 @@ final class SpecSource
     private function targetPath(): string
     {
         $cache = config('vellum.cache.path');
-        $directory = is_string($cache) && $cache !== '' ? $cache : storage_path('framework/vellum');
+        $directory = is_string($cache) && $cache !== '' ? $cache : app()->storagePath('framework/vellum');
 
         return rtrim($directory, DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR.'openapi.json';
     }
