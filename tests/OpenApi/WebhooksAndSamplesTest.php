@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use Vellum\Content\ContentRepository;
 use Vellum\Content\Document;
+use Vellum\Content\LinkChecker;
 use Vellum\OpenApi\Samples\PythonGenerator;
 use Vellum\OpenApi\Samples\SampleRequest;
 
@@ -128,4 +129,15 @@ it('writes a Python sample whose every value is one string and nothing else', fu
 it('writes a Python request for a method requests has no function for', function (): void {
     expect((new PythonGenerator)->generate(new SampleRequest(method: 'QUERY', url: 'https://api.test/s')))
         ->toContain("requests.request(\n    'QUERY',\n    'https://api.test/s',\n)");
+});
+
+it('lets a link land on a field, which is not a heading', function (): void {
+    enableOpenApi($this->cachePath(), harbor());
+    $this->writeDoc('guide.md', "---\ntitle: Guide\n---\nSee [the name](/docs/api/ships/register-ship#body-name) and [nothing](/docs/api/ships/register-ship#body-nope).");
+
+    $repository = ContentRepository::fromConfig();
+    $findings = (new LinkChecker)->check($repository->buildAll(), $repository);
+    $anchors = array_column(array_filter($findings, fn (array $finding): bool => $finding['kind'] === 'anchor'), 'target');
+
+    expect($anchors)->toBe(['/docs/api/ships/register-ship#body-nope']);
 });

@@ -15,6 +15,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - A Python sample, with requests, is generated alongside curl, PHP and JavaScript. `openapi.samples` lists `python` by default; a published config keeps its own list
 - Every field in a parameter list or schema has an address made of the names that lead to it, such as `#body-captain-name`, and its name links to it
 
+### Changed
+
+- The build's link check lets a `#fragment` land on anything on the page with that id, not only a heading, so links to a field of the reference or to a footnote pass
+
 ## [0.9.1] - 2026-10-15
 
 ### Added

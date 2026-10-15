@@ -40,7 +40,7 @@ final class LinkChecker
 
         foreach ($documents as $document) {
             $here = $repository->hrefFor($document->slug, $document->version);
-            $anchors = array_column($document->headings, 'id');
+            $anchors = $this->targets($document);
 
             foreach ($this->hrefs($document->html) as $href) {
                 $finding = $this->checkHref($href, $here, $anchors, $known, $prefix);
@@ -109,18 +109,34 @@ final class LinkChecker
     }
 
     /**
+     * What a link into a page can land on: its headings, and anything else
+     * on it with an id, such as a field of an API reference or a footnote.
+     *
+     * @return list<string>
+     */
+    private function targets(Document $document): array
+    {
+        $ids = array_values(array_filter(array_column($document->headings, 'id'), is_string(...)));
+
+        preg_match_all('/\sid="([^"]+)"/', $document->html, $matches);
+
+        foreach ($matches[1] as $id) {
+            $ids[] = html_entity_decode($id, ENT_QUOTES | ENT_HTML5);
+        }
+
+        return array_values(array_unique($ids));
+    }
+
+    /**
      * @param  list<Document>  $documents
-     * @return array<string, list<string>> href => heading ids on that page
+     * @return array<string, list<string>> href => what a link can land on there
      */
     private function knownPages(array $documents, ContentRepository $repository): array
     {
         $known = [];
 
         foreach ($documents as $document) {
-            $known[$repository->hrefFor($document->slug, $document->version)] = array_values(array_filter(
-                array_column($document->headings, 'id'),
-                is_string(...),
-            ));
+            $known[$repository->hrefFor($document->slug, $document->version)] = $this->targets($document);
         }
 
         // The changelog is a route rather than a file, so nothing above lists it.
@@ -155,7 +171,7 @@ final class LinkChecker
 
             return $fragment === '' || in_array($fragment, $anchors, true)
                 ? null
-                : ['kind' => 'anchor', 'target' => $href, 'message' => 'no heading with this id on the page', 'severity' => 'error'];
+                : ['kind' => 'anchor', 'target' => $href, 'message' => 'nothing on the page has this id', 'severity' => 'error'];
         }
 
         [$path, $fragment] = $this->split($href);
@@ -174,7 +190,7 @@ final class LinkChecker
         }
 
         if ($fragment !== null && $fragment !== '' && ! in_array($fragment, $known[$path], true)) {
-            return ['kind' => 'anchor', 'target' => $href, 'message' => 'the page exists, but has no heading with this id', 'severity' => 'error'];
+            return ['kind' => 'anchor', 'target' => $href, 'message' => 'the page exists, but nothing on it has this id', 'severity' => 'error'];
         }
 
         return null;
