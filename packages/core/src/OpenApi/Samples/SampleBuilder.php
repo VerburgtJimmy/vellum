@@ -114,13 +114,8 @@ final class SampleBuilder
      */
     private function parameterValue(array $parameter): string
     {
-        if (array_key_exists('example', $parameter)) {
-            return (string) $this->stringify($parameter['example']);
-        }
-
-        $schema = is_array($parameter['schema'] ?? null) ? $parameter['schema'] : [];
-
-        return (string) $this->stringify(ExampleGenerator::fromSchema($schema));
+        // A parameter gives its examples as a media type does.
+        return $this->stringify(ExampleGenerator::forMedia($parameter));
     }
 
     private function stringify(mixed $value): string

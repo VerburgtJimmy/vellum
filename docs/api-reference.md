@@ -3,7 +3,7 @@ title: API reference
 description: Reference pages generated from an OpenAPI spec, from a file or from Scramble.
 ---
 
-Vellum can turn an OpenAPI 3.0 or 3.1 spec into reference pages. Each operation gets a page of its own with its parameters, request body, responses and request samples, and the reference has an overview page that lists them all.
+Vellum can turn an OpenAPI 3.0, 3.1 or 3.2 spec into reference pages. Each operation gets a page of its own with its parameters, request body, responses and request samples, and the reference has an overview page that lists them all.
 
 ```php
 'openapi' => [
@@ -93,6 +93,23 @@ To list the reference as one more folder at the end of the docs' sidebar instead
 
 Either way the operations are grouped in a folder per tag, in the order of the spec's `tags` list, with the method beside each title. Set `group_by` to `path` to group by the first segment of the path instead. Operations with no tag go in a folder named by `untagged_label`.
 
+A tag can sit inside another, and its folder then sits inside the other's, on the overview page as well as in the sidebar:
+
+```yaml
+tags:
+  - name: fleet
+    summary: Fleet
+  - name: ships
+    summary: Ships
+    parent: fleet
+```
+
+- `summary` is the name a reader sees. Without it the tag's `name` is used.
+- `parent` names the tag it sits in. A parent with no operations of its own is listed when a tag inside it has some.
+- A tag whose `kind` is anything but `nav`, such as `badge`, says something about an operation but is not where it is listed. The operation goes in its first tag that is for navigation.
+
+`summary`, `parent` and `kind` are OpenAPI 3.2. A spec written for Redoc gets the same from `x-displayName` and `x-tagGroups`.
+
 ## Request samples
 
 Every operation has a request sample per language in `samples`. `curl`, `php` (the Laravel HTTP client) and `javascript` (fetch) are built in. The samples use the spec's first server, or `base_url` when you set it.
@@ -162,6 +179,8 @@ A reader who may not open the reference is not shown the way to it.
 
 - A description in the spec is Markdown, and Vellum's own directives work in it, a [callout](/docs/components/callouts) for one. Blade components do not: a spec is often someone else's text.
 - A `$ref` to another file or a URL is not followed. `vellum:build` warns about each one.
+- An operation with the `QUERY` method, or one of the API's own under `additionalOperations`, gets a page like any other. A query string described as one `querystring` parameter is listed as the query parameters it is made of when it is form-encoded.
+- Webhooks and callbacks are not documented yet, and the playground cannot read a streamed response, such as server-sent events.
 - With [versions](/docs/versions) on, the reference belongs to the latest version only. A spec describes the API as it is.
 - A page you wrote yourself under `api/` is still served. A spec whose page would take the same address as one of yours stops the build.
 

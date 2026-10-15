@@ -18,19 +18,34 @@ final class ExampleGenerator
      */
     public static function forMedia(array $media): mixed
     {
-        if (array_key_exists('example', $media)) {
-            return $media['example'];
+        return self::declared($media) ?? self::fromSchema(is_array($media['schema'] ?? null) ? $media['schema'] : []);
+    }
+
+    /**
+     * The example a media type or a parameter gives for itself, or null when
+     * it gives none: its example, or the first of its named examples.
+     *
+     * @param  array<string, mixed>  $object
+     */
+    public static function declared(array $object): mixed
+    {
+        if (array_key_exists('example', $object)) {
+            return $object['example'];
         }
 
-        if (is_array($media['examples'] ?? null)) {
-            foreach ($media['examples'] as $example) {
-                if (is_array($example) && array_key_exists('value', $example)) {
-                    return $example['value'];
-                }
+        foreach (is_array($object['examples'] ?? null) ? $object['examples'] : [] as $example) {
+            // dataValue is OpenAPI 3.2's name for the value as data, beside
+            // serializedValue for it as sent, which a sample does not need.
+            if (is_array($example) && array_key_exists('dataValue', $example)) {
+                return $example['dataValue'];
+            }
+
+            if (is_array($example) && array_key_exists('value', $example)) {
+                return $example['value'];
             }
         }
 
-        return self::fromSchema(is_array($media['schema'] ?? null) ? $media['schema'] : []);
+        return null;
     }
 
     /**

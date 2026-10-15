@@ -91,6 +91,11 @@ final class OpenApiPages
             $children[] = $this->pageNode($bySlug[$prefix], 'Overview', $href, null);
         }
 
+        // A folder per group, each inside its parent's, so a tag hierarchy
+        // reads as one in the sidebar.
+        $folders = [];
+        $inside = [];
+
         foreach ((new Grouper)->group($spec, PageBuilder::groupBy()) as $group) {
             $pages = [];
 
@@ -102,14 +107,24 @@ final class OpenApiPages
                 }
             }
 
-            $children[] = [
+            $folders[$group->name] = [
                 'type' => 'folder',
-                'title' => $group->name,
+                'title' => $group->label(),
                 'icon' => null,
                 'defaultOpen' => false,
                 'children' => $pages,
             ];
+            $inside[$group->parent ?? ''][] = $group->name;
         }
+
+        $nest = function (string $parent) use (&$nest, $folders, $inside): array {
+            return array_map(
+                static fn (string $name): array => [...$folders[$name], 'children' => [...$folders[$name]['children'], ...$nest($name)]],
+                $inside[$parent] ?? [],
+            );
+        };
+
+        array_push($children, ...$nest(''));
 
         $title = config('vellum.openapi.title');
 

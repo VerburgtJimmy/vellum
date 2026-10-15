@@ -2144,6 +2144,7 @@ html[data-vellum-nav-marker] [data-vellum-sidebar-wrap] [data-vellum-nav-link]:h
   --vellum-method-put: oklch(0.52 0.12 70);
   --vellum-method-patch: oklch(0.52 0.16 300);
   --vellum-method-delete: oklch(0.53 0.19 25);
+  --vellum-method-query: oklch(0.5 0.1 200);
 }
 
 .dark {
@@ -2152,6 +2153,7 @@ html[data-vellum-nav-marker] [data-vellum-sidebar-wrap] [data-vellum-nav-link]:h
   --vellum-method-put: oklch(0.82 0.13 80);
   --vellum-method-patch: oklch(0.78 0.12 300);
   --vellum-method-delete: oklch(0.74 0.16 25);
+  --vellum-method-query: oklch(0.8 0.11 200);
 }
 
 .vellum-nav-method,
@@ -2178,6 +2180,10 @@ html[data-vellum-nav-marker] [data-vellum-sidebar-wrap] [data-vellum-nav-link]:h
 
 :is(.vellum-nav-method, .vellum-api-method, .vellum-api-endpoint, .vellum-playground-bar)[data-method='delete'] {
   --vellum-method: var(--vellum-method-delete);
+}
+
+:is(.vellum-nav-method, .vellum-api-method, .vellum-api-endpoint, .vellum-playground-bar)[data-method='query'] {
+  --vellum-method: var(--vellum-method-query);
 }
 
 .vellum-nav-method,

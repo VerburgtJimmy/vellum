@@ -48,10 +48,14 @@ final class MarkdownRendition
         }
 
         foreach ($groups as $group) {
-            $out[] = '## '.self::line($group->name);
+            $out[] = str_repeat('#', min(2 + $group->depth, 4)).' '.self::line($group->label());
 
             if ($group->description !== null) {
                 $out[] = trim($group->description);
+            }
+
+            if ($group->operations === []) {
+                continue;
             }
 
             $out[] = implode("\n", array_map(

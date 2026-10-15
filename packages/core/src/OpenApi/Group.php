@@ -8,6 +8,9 @@ use Vellum\Support\Slug;
 
 /**
  * A page's worth of operations: one tag, or one first path segment.
+ *
+ * A tag may sit inside another (OpenAPI 3.2's parent, or a Redoc tag group),
+ * and a parent may have no operations of its own, only the tags inside it.
  */
 final readonly class Group
 {
@@ -19,7 +22,19 @@ final readonly class Group
         public string $slug,
         public array $operations,
         public ?string $description = null,
+        public ?string $title = null,
+        public ?string $parent = null,
+        public int $depth = 0,
     ) {}
+
+    /**
+     * What the group is called where a reader sees it: the tag's summary when
+     * it has one, its name otherwise. The name stays what operations refer to.
+     */
+    public function label(): string
+    {
+        return $this->title ?? $this->name;
+    }
 
     public function methodCount(): int
     {

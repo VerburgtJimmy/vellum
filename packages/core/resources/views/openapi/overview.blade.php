@@ -14,6 +14,9 @@
                 <div class="vellum-api-field">
                     <div class="vellum-api-field-head">
                         <code class="vellum-api-field-name">{{ is_string($server['url'] ?? null) ? $server['url'] : '' }}</code>
+                        @if (is_string($server['name'] ?? null) && $server['name'] !== '')
+                            <span class="vellum-api-field-type">{{ $server['name'] }}</span>
+                        @endif
                     </div>
                     @if (is_string($server['description'] ?? null) && $server['description'] !== '')
                         <p class="vellum-api-field-description">{{ $server['description'] }}</p>
@@ -33,6 +36,9 @@
                     <div class="vellum-api-field-head">
                         <code class="vellum-api-field-name">{{ $name }}</code>
                         <span class="vellum-api-field-type">{{ is_string($scheme['type'] ?? null) ? $scheme['type'] : 'unknown' }}@if (is_string($scheme['scheme'] ?? null)) ({{ $scheme['scheme'] }})@endif</span>
+                        @if ((bool) ($scheme['deprecated'] ?? false))
+                            <span class="vellum-api-deprecated">Deprecated</span>
+                        @endif
                     </div>
                     @if (is_string($scheme['description'] ?? null) && $scheme['description'] !== '')
                         <p class="vellum-api-field-description">{{ $scheme['description'] }}</p>
@@ -44,12 +50,15 @@
 @endif
 
 @foreach ($groups as $group)
-    <h2 id="group-{{ $group->slug }}" class="vellum-heading vellum-api-section">{{ $group->name }}</h2>
+    {{-- A tag inside another is a level further down, as it is in the sidebar. --}}
+    @php($level = min(2 + $group->depth, 4))
+    <h{{ $level }} id="group-{{ $group->slug }}" class="vellum-heading vellum-api-section">{{ $group->label() }}</h{{ $level }}>
 
     @if ($group->description !== null)
         <div class="vellum-api-group-description">{!! $markdown($group->description) !!}</div>
     @endif
 
+    @if ($group->operations !== [])
     <ul class="vellum-api-index">
         @foreach ($group->operations as $operation)
             <li>
@@ -61,4 +70,5 @@
             </li>
         @endforeach
     </ul>
+    @endif
 @endforeach

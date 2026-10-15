@@ -9,7 +9,7 @@ use Symfony\Component\Yaml\Yaml;
 use Vellum\Exceptions\InvalidSpecException;
 
 /**
- * Reads an OpenAPI 3.0 or 3.1 document from disk into a resolved Spec.
+ * Reads an OpenAPI 3.0, 3.1 or 3.2 document from disk into a resolved Spec.
  *
  * Format comes from the file extension, falling back to sniffing the first
  * non-blank character, because generated specs are not always named well.
@@ -20,7 +20,7 @@ final class SpecParser
      * Methods a path item may define. Anything else at that level is a
      * sibling like summary, parameters or servers.
      */
-    private const METHODS = ['get', 'put', 'post', 'delete', 'options', 'head', 'patch', 'trace'];
+    private const METHODS = ['get', 'put', 'post', 'delete', 'options', 'head', 'patch', 'trace', 'query'];
 
     public function parseFile(string $path): Spec
     {
@@ -47,7 +47,9 @@ final class SpecParser
             throw InvalidSpecException::missing($path, 'an "openapi" version string');
         }
 
-        if (! str_starts_with($version, '3.0') && ! str_starts_with($version, '3.1')) {
+        // 3.2 only adds to 3.1, so a reader of 3.1 reads it; what it adds is
+        // read where it is understood and passed over where it is not.
+        if (! str_starts_with($version, '3.0') && ! str_starts_with($version, '3.1') && ! str_starts_with($version, '3.2')) {
             throw InvalidSpecException::unsupportedVersion($path, $version);
         }
 
@@ -150,6 +152,19 @@ final class SpecParser
 
                 $operations[] = $this->operation($method, $path, $item[$method], $shared, $sharedServers);
             }
+
+            // Methods of the API's own, keyed as they are sent. One that
+            // repeats a method with a field of its own is the spec's mistake,
+            // and the field wins.
+            foreach (is_array($item['additionalOperations'] ?? null) ? $item['additionalOperations'] : [] as $method => $operation) {
+                $method = (string) $method;
+
+                if (! is_array($operation) || preg_match('/^[A-Za-z0-9!#$%&\'*+.^_`|~-]+$/', $method) !== 1 || in_array(strtolower($method), self::METHODS, true)) {
+                    continue;
+                }
+
+                $operations[] = $this->operation($method, $path, $operation, $shared, $sharedServers);
+            }
         }
 
         return $operations;
@@ -171,14 +186,16 @@ final class SpecParser
         $servers = is_array($operation['servers'] ?? null) ? array_values($operation['servers']) : $sharedServers;
 
         return new Operation(
-            method: strtoupper($method),
+            // The fixed methods in capitals, as they are sent. One of the API's
+            // own is sent as the spec spells it.
+            method: in_array($method, self::METHODS, true) ? strtoupper($method) : $method,
             path: $path,
             operationId: is_string($operation['operationId'] ?? null) ? $operation['operationId'] : null,
             summary: is_string($operation['summary'] ?? null) ? $operation['summary'] : null,
             description: is_string($operation['description'] ?? null) ? $operation['description'] : null,
             tags: $this->strings($operation['tags'] ?? []),
             deprecated: (bool) ($operation['deprecated'] ?? false),
-            parameters: $this->mergeParameters($sharedParameters, $own),
+            parameters: $this->queryString($this->mergeParameters($sharedParameters, $own)),
             requestBody: is_array($operation['requestBody'] ?? null) ? $operation['requestBody'] : null,
             responses: is_array($operation['responses'] ?? null) ? $operation['responses'] : [],
             security: is_array($operation['security'] ?? null)
@@ -213,6 +230,55 @@ final class SpecParser
         }
 
         return array_values($merged);
+    }
+
+    /**
+     * OpenAPI 3.2 can describe the whole query string as one parameter, with
+     * a schema under a media type. Where that is a form-encoded object, its
+     * properties are what a reader fills in and what a sample writes, so it
+     * is read as a query parameter for each of them. Otherwise it stays one
+     * parameter, typed by its schema, in with the query parameters.
+     *
+     * @param  list<array<string, mixed>>  $parameters
+     * @return list<array<string, mixed>>
+     */
+    private function queryString(array $parameters): array
+    {
+        $out = [];
+
+        foreach ($parameters as $parameter) {
+            if (($parameter['in'] ?? null) !== 'querystring') {
+                $out[] = $parameter;
+
+                continue;
+            }
+
+            $content = is_array($parameter['content'] ?? null) ? $parameter['content'] : [];
+            $type = array_key_first($content);
+            $media = $type === null ? [] : $content[$type];
+            $schema = is_array($media['schema'] ?? null) ? $media['schema'] : [];
+            $properties = is_array($schema['properties'] ?? null) ? $schema['properties'] : [];
+
+            if (is_string($type) && str_contains(strtolower($type), 'x-www-form-urlencoded') && $properties !== []) {
+                $required = is_array($schema['required'] ?? null) ? $schema['required'] : [];
+
+                foreach ($properties as $name => $property) {
+                    $out[] = array_filter([
+                        'name' => (string) $name,
+                        'in' => 'query',
+                        'required' => in_array($name, $required, true),
+                        'description' => is_array($property) && is_string($property['description'] ?? null) ? $property['description'] : null,
+                        'schema' => is_array($property) ? $property : [],
+                    ], static fn (mixed $value): bool => $value !== null);
+                }
+
+                continue;
+            }
+
+            $out[] = [...$parameter, 'in' => 'query', 'schema' => $schema];
+        }
+
+        return $out;
     }
 
     /**

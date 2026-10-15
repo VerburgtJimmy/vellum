@@ -34,7 +34,7 @@ final class InvalidSpecException extends RuntimeException implements ContentErro
 
     public static function unsupportedVersion(string $path, string $version): self
     {
-        return self::at($path, "OpenAPI spec at [{$path}] declares version [{$version}]. Vellum supports 3.0 and 3.1.");
+        return self::at($path, "OpenAPI spec at [{$path}] declares version [{$version}]. Vellum supports 3.0, 3.1 and 3.2.");
     }
 
     public static function unresolvableRef(string $path, string $ref): self

@@ -41,6 +41,9 @@
                             <div class="vellum-api-field-head">
                                 <code class="vellum-api-field-name">{{ $scheme['name'] }}</code>
                                 <span class="vellum-api-field-type">{{ $scheme['detail'] }}</span>
+                                @if ($scheme['deprecated'] ?? false)
+                                    <span class="vellum-api-deprecated">Deprecated</span>
+                                @endif
                             </div>
                             <p class="vellum-api-field-description">{{ $scheme['hint'] }}</p>
                         </div>

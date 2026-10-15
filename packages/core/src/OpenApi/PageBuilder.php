@@ -23,7 +23,7 @@ use Vellum\OpenApi\Samples\SampleBuilder;
  * search, breadcrumbs, previous and next, the compiled store and the static
  * export are written against Document and need no case for this.
  *
- * @phpstan-type Security list<array{name: string, hint: string, detail: string}>
+ * @phpstan-type Security list<array{name: string, hint: string, detail: string, deprecated: bool}>
  * @phpstan-type Page array{
  *     operation: Operation,
  *     security: Security,
@@ -101,7 +101,7 @@ final class PageBuilder
         }
 
         foreach ($groups as $group) {
-            $headings[] = ['id' => 'group-'.$group->slug, 'text' => $group->name, 'level' => 2];
+            $headings[] = ['id' => 'group-'.$group->slug, 'text' => $group->label(), 'level' => min(2 + $group->depth, 4)];
         }
 
         $title = $this->title($spec);
@@ -445,6 +445,8 @@ final class PageBuilder
                     'name' => $name,
                     'hint' => $this->securityHint($scheme),
                     'detail' => $this->securityDetail($scheme),
+                    // OpenAPI 3.2: a scheme on its way out, still accepted.
+                    'deprecated' => (bool) ($scheme['deprecated'] ?? false),
                 ];
             }
         }

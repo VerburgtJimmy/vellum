@@ -379,7 +379,7 @@ it('rejects a spec that is not usable', function (string $contents, string $expe
         ->toThrow(InvalidSpecException::class, $expected);
 })->with([
     'no version' => ['{"paths":{}}', 'missing an "openapi" version string'],
-    'swagger 2' => ['{"swagger":"2.0","openapi":"2.0","paths":{}}', 'Vellum supports 3.0 and 3.1'],
+    'swagger 2' => ['{"swagger":"2.0","openapi":"2.0","paths":{}}', 'Vellum supports 3.0, 3.1 and 3.2'],
     'no paths' => ['{"openapi":"3.0.0","info":{"title":"X"}}', 'missing a "paths" object'],
     'paths not an object' => ['{"openapi":"3.0.0","paths":"nope"}', 'missing a "paths" object'],
     'empty file' => ['', 'the file is empty'],

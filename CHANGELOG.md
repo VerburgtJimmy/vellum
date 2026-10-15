@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- OpenAPI 3.2 specs are read. A tag's `summary` names its folder, `parent` puts it inside another tag's on the overview and in the sidebar, and a tag whose `kind` is not `nav` no longer becomes a folder. A Redoc spec gets the same from `x-displayName` and `x-tagGroups`
+- An operation with the `QUERY` method, or one of the API's own under `additionalOperations`, gets a page, a colour of its own for QUERY, samples and the playground. The PHP sample sends such a method with `send()`
+- A form-encoded `querystring` parameter is listed, sampled and filled in as the query parameters it is made of
+- A server's `name` is shown on the overview, and a security scheme marked `deprecated` says so where it is listed
+- An example given as `dataValue` is used, and a parameter's named `examples` now give its value in samples and the playground
+
 ### Fixed
 
 - On an operation's page, the examples beside the documentation showed a scrollbar laid over the edge of their panels on a screen too short for both. The samples are now sized to the screen so the request and the response fit together, and the column has no bar of its own

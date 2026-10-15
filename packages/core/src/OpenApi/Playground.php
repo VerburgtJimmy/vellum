@@ -46,7 +46,7 @@ final class Playground
                     'required' => ! empty($parameter['required']),
                     'description' => is_string($parameter['description'] ?? null) ? $parameter['description'] : null,
                     'schema' => self::slim($schema, 0),
-                    'example' => $parameter['example'] ?? $schema['example'] ?? $schema['default'] ?? null,
+                    'example' => ExampleGenerator::declared($parameter) ?? $schema['example'] ?? $schema['default'] ?? null,
                 ];
             }
         }

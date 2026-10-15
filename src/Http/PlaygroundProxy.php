@@ -14,7 +14,7 @@ namespace Vellum\Http;
  */
 final class PlaygroundProxy
 {
-    public const METHODS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'];
+    public const METHODS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS', 'QUERY'];
 
     /** Largest request body forwarded, and largest response read, in bytes. */
     public const MAX_REQUEST = 1024 * 1024;

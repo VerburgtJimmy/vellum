@@ -42,11 +42,16 @@ final class PhpGenerator implements SampleGenerator
         $method = strtolower($request->method);
         $arguments = $this->quote($request->fullUrl());
 
-        if ($request->hasBody()) {
-            $arguments .= ', '.$this->phpArray($request->body, 1);
+        // The client has a method of its own for the common verbs. Any other,
+        // QUERY or one the API made up, goes through send().
+        if (in_array($method, ['get', 'post', 'put', 'patch', 'delete', 'head'], true)) {
+            $arguments .= $request->hasBody() ? ', '.$this->phpArray($request->body, 1) : '';
+            $call = '->'.$method.'('.$arguments.')';
+        } else {
+            $options = $request->hasBody() ? ', [\'json\' => '.$this->phpArray($request->body, 1).']' : '';
+            $call = '->send('.$this->quote($request->method).', '.$arguments.$options.')';
         }
 
-        $call = '->'.$method.'('.$arguments.')';
         $head = array_shift($chain);
         $body = $chain === [] ? '' : "\n".implode("\n", $chain);
 
