@@ -5,7 +5,7 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.9.1] - 2026-10-15
 
 ### Added
 
@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - On an operation's page, the examples beside the documentation showed a scrollbar laid over the edge of their panels on a screen too short for both. The samples are now sized to the screen so the request and the response fit together, and the column has no bar of its own
 - On a page with no date and no reading time, **Copy Markdown** and **Open** had a row to themselves under the description. They sit beside the title, and under the description on a narrow screen
+- **Try it** sat further from the right end of the request line than the method from its left end. Both ends match
 
 ## [0.9.0] - 2026-10-13
 
