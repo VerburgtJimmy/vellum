@@ -52,6 +52,12 @@ final class Grouper
             );
         }
 
+        // Webhooks are requests the API sends, so they are read apart from
+        // the ones it answers, after them.
+        if ($spec->webhooks !== []) {
+            $groups[] = new Group(name: 'Webhooks', slug: $this->uniqueSlug('webhooks', $slugs), operations: $spec->webhooks);
+        }
+
         return $groups;
     }
 

@@ -19,6 +19,7 @@ final class SampleBuilder
         'curl' => CurlGenerator::class,
         'php' => PhpGenerator::class,
         'javascript' => JavaScriptGenerator::class,
+        'python' => PythonGenerator::class,
     ];
 
     /**
@@ -29,8 +30,27 @@ final class SampleBuilder
     {
         $request = $this->request($operation, $serverUrl, $security);
         $samples = [];
+        $written = [];
+
+        // What the API's authors wrote comes first, and stands in for the
+        // generated sample in the same language: they know their API better.
+        foreach ($operation->codeSamples as $index => $sample) {
+            $language = self::language($sample['lang']);
+            $written[$language['key'] ?? 'spec-'.$index] = true;
+
+            $samples[] = [
+                'key' => $language['key'] ?? 'spec-'.$index,
+                'label' => $sample['label'],
+                'highlight' => $language['highlight'],
+                'code' => $sample['source'],
+            ];
+        }
 
         foreach ($this->generators() as $key => $generator) {
+            if (isset($written[$key])) {
+                continue;
+            }
+
             $samples[] = [
                 'key' => $key,
                 'label' => $generator->label(),
@@ -125,6 +145,27 @@ final class SampleBuilder
             is_array($value) => (string) json_encode($value),
             $value === null => '',
             default => (string) $value,
+        };
+    }
+
+    /**
+     * The generated sample a written one stands in for, and how to highlight
+     * it, from the language its author named.
+     *
+     * @return array{key: string|null, highlight: string}
+     */
+    private static function language(string $lang): array
+    {
+        $lang = strtolower($lang);
+
+        return match (true) {
+            in_array($lang, ['curl', 'shell', 'bash', 'sh', 'console'], true) => ['key' => 'curl', 'highlight' => 'bash'],
+            in_array($lang, ['php', 'laravel'], true) => ['key' => 'php', 'highlight' => 'php'],
+            in_array($lang, ['javascript', 'js', 'node', 'node.js', 'nodejs'], true) => ['key' => 'javascript', 'highlight' => 'js'],
+            in_array($lang, ['python', 'py', 'python3'], true) => ['key' => 'python', 'highlight' => 'python'],
+            in_array($lang, ['typescript', 'ts'], true) => ['key' => null, 'highlight' => 'ts'],
+            in_array($lang, ['c#', 'csharp', 'cs'], true) => ['key' => null, 'highlight' => 'csharp'],
+            default => ['key' => null, 'highlight' => preg_match('/^[a-z0-9+#-]+$/', $lang) === 1 ? $lang : 'text'],
         };
     }
 

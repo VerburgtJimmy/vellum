@@ -22,6 +22,14 @@ final readonly class Operation
      *                                                        valid spec, but the document is
      *                                                        JSON and may say otherwise.
      * @param  list<array<string, mixed>>  $servers
+     * @param  list<array{lang: string, label: string, source: string}>  $codeSamples  Written by
+     *                                                                                 the API's authors,
+     *                                                                                 in x-codeSamples.
+     * @param  string|null  $webhook  The webhook's name, for a request the API sends rather
+     *                                than one it answers. Its path is then that name.
+     * @param  list<array{name: string, operation: Operation}>  $callbacks  Requests the API
+     *                                                                      sends back once this
+     *                                                                      one is made.
      */
     public function __construct(
         public string $method,
@@ -36,6 +44,9 @@ final readonly class Operation
         public array $responses = [],
         public ?array $security = null,
         public array $servers = [],
+        public array $codeSamples = [],
+        public ?string $webhook = null,
+        public array $callbacks = [],
     ) {}
 
     /**

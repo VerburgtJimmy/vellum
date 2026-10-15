@@ -104,7 +104,7 @@ it('builds an API reference from a spec with the views core ships', function ():
     $html = $repository->render($page);
 
     expect($html)->toContain('<span class="vellum-api-method" data-method="post">POST</span>')
-        ->toContain('class="vellum-api-field-name">name<span')
+        ->toContain('class="vellum-api-field-name"><a class="vellum-api-field-link" href="#body-name">name</a><span')
         // The samples are the docs' own code tabs.
         ->toContain('vellum-tabs-code')
         ->toContain('https://api.example.com/pets')

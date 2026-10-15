@@ -51,7 +51,9 @@
 
 @foreach ($groups as $group)
     {{-- A tag inside another is a level further down, as it is in the sidebar. --}}
-    @php($level = min(2 + $group->depth, 4))
+    @php
+        $level = min(2 + $group->depth, 4);
+    @endphp
     <h{{ $level }} id="group-{{ $group->slug }}" class="vellum-heading vellum-api-section">{{ $group->label() }}</h{{ $level }}>
 
     @if ($group->description !== null)

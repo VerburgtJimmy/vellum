@@ -273,8 +273,8 @@ return [
     |
     | untagged_label: the folder for operations without a tag.
     |
-    | samples: languages of the request samples, in tab order. curl, php and
-    | javascript are built in.
+    | samples: languages of the request samples, in tab order. curl, php,
+    | javascript and python are built in.
     |
     | base_url: used in the samples in place of the spec's first server.
     |
@@ -299,7 +299,7 @@ return [
         'title' => 'API reference',
         'group_by' => 'tag',
         'untagged_label' => 'Other',
-        'samples' => ['curl', 'php', 'javascript'],
+        'samples' => ['curl', 'php', 'javascript', 'python'],
         'base_url' => null,
         'playground' => true,
         'proxy' => env('VELLUM_OPENAPI_PROXY', false),

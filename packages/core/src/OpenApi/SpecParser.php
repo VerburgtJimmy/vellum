@@ -70,6 +70,7 @@ final class SpecParser
             document: $document,
             operations: $this->operations($document),
             warnings: $resolver->warnings(),
+            webhooks: $this->webhooks($document),
         );
     }
 
@@ -171,6 +172,82 @@ final class SpecParser
     }
 
     /**
+     * OpenAPI 3.1's webhooks: requests the API sends to a URL the reader
+     * gives it. Each is named, not addressed, and the name stands in for a path.
+     *
+     * @param  array<string, mixed>  $document
+     * @return list<Operation>
+     */
+    private function webhooks(array $document): array
+    {
+        $webhooks = [];
+
+        foreach (is_array($document['webhooks'] ?? null) ? $document['webhooks'] : [] as $name => $item) {
+            foreach (is_array($item) ? $this->methods($item) : [] as $method => $operation) {
+                $webhooks[] = $this->operation($method, (string) $name, $operation, $this->shared($item), [], webhook: (string) $name);
+            }
+        }
+
+        return $webhooks;
+    }
+
+    /**
+     * Callbacks: requests the API sends back once an operation is made, to
+     * an address worked out from it. They are read one level deep: a
+     * callback of a callback is not something a reader can act on here.
+     *
+     * @param  array<string, mixed>  $operation
+     * @return list<array{name: string, operation: Operation}>
+     */
+    private function callbacks(array $operation): array
+    {
+        $callbacks = [];
+
+        foreach (is_array($operation['callbacks'] ?? null) ? $operation['callbacks'] : [] as $name => $expressions) {
+            foreach (is_array($expressions) ? $expressions : [] as $expression => $item) {
+                foreach (is_array($item) ? $this->methods($item) : [] as $method => $callback) {
+                    unset($callback['callbacks']);
+
+                    $callbacks[] = [
+                        'name' => (string) $name,
+                        'operation' => $this->operation($method, (string) $expression, $callback, $this->shared($item), []),
+                    ];
+                }
+            }
+        }
+
+        return $callbacks;
+    }
+
+    /**
+     * The operations of a path item, by method.
+     *
+     * @param  array<array-key, mixed>  $item
+     * @return array<string, array<string, mixed>>
+     */
+    private function methods(array $item): array
+    {
+        $out = [];
+
+        foreach (self::METHODS as $method) {
+            if (is_array($item[$method] ?? null)) {
+                $out[$method] = $item[$method];
+            }
+        }
+
+        return $out;
+    }
+
+    /**
+     * @param  array<array-key, mixed>  $item
+     * @return list<mixed>
+     */
+    private function shared(array $item): array
+    {
+        return is_array($item['parameters'] ?? null) ? array_values($item['parameters']) : [];
+    }
+
+    /**
      * @param  array<string, mixed>  $operation
      * @param  list<mixed>  $sharedParameters
      * @param  list<mixed>  $sharedServers
@@ -181,6 +258,7 @@ final class SpecParser
         array $operation,
         array $sharedParameters,
         array $sharedServers,
+        ?string $webhook = null,
     ): Operation {
         $own = is_array($operation['parameters'] ?? null) ? array_values($operation['parameters']) : [];
         $servers = is_array($operation['servers'] ?? null) ? array_values($operation['servers']) : $sharedServers;
@@ -202,6 +280,9 @@ final class SpecParser
                 ? array_values(array_filter($operation['security'], is_array(...)))
                 : null,
             servers: array_values(array_filter($servers, is_array(...))),
+            codeSamples: $this->codeSamples($operation['x-codeSamples'] ?? $operation['x-code-samples'] ?? []),
+            webhook: $webhook,
+            callbacks: $this->callbacks($operation),
         );
     }
 
@@ -276,6 +357,30 @@ final class SpecParser
             }
 
             $out[] = [...$parameter, 'in' => 'query', 'schema' => $schema];
+        }
+
+        return $out;
+    }
+
+    /**
+     * Samples the API's authors wrote themselves, as Redoc reads them: a list
+     * of a language, an optional label and the code.
+     *
+     * @return list<array{lang: string, label: string, source: string}>
+     */
+    private function codeSamples(mixed $value): array
+    {
+        $out = [];
+
+        foreach (is_array($value) ? $value : [] as $sample) {
+            if (! is_array($sample) || ! is_string($sample['source'] ?? null) || trim($sample['source']) === '') {
+                continue;
+            }
+
+            $lang = is_string($sample['lang'] ?? null) ? trim($sample['lang']) : '';
+            $label = is_string($sample['label'] ?? null) && trim($sample['label']) !== '' ? trim($sample['label']) : $lang;
+
+            $out[] = ['lang' => $lang, 'label' => $label === '' ? 'Example' : $label, 'source' => rtrim($sample['source'])];
         }
 
         return $out;

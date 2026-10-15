@@ -18,6 +18,7 @@ final readonly class Spec
      * @param  array<string, mixed>  $document
      * @param  list<Operation>  $operations
      * @param  list<string>  $warnings
+     * @param  list<Operation>  $webhooks  Requests the API sends, not ones it answers.
      */
     public function __construct(
         public string $path,
@@ -25,6 +26,7 @@ final readonly class Spec
         public array $document,
         public array $operations,
         public array $warnings = [],
+        public array $webhooks = [],
     ) {}
 
     public function title(): string
@@ -127,21 +129,5 @@ final readonly class Spec
         }
 
         return array_values(array_filter($security, is_array(...)));
-    }
-
-    /**
-     * Webhooks and callbacks are listed by name only in 0.6.
-     *
-     * @return list<string>
-     */
-    public function webhookNames(): array
-    {
-        $webhooks = $this->document['webhooks'] ?? [];
-
-        if (! is_array($webhooks)) {
-            return [];
-        }
-
-        return array_values(array_filter(array_keys($webhooks), is_string(...)));
     }
 }

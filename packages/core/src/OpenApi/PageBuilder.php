@@ -129,18 +129,24 @@ final class PageBuilder
         $security = $this->security($operation, $spec);
         $server = $this->serverUrl($spec, $operation);
 
+        $webhook = $operation->webhook !== null;
+
         $page = [
             'operation' => $operation,
             'security' => $security,
-            'samples' => $this->samples->build($operation, $server, $security),
+            // A webhook is sent by the API, so there is no request to write
+            // for the reader. What they need is what will arrive.
+            'samples' => $webhook ? [] : $this->samples->build($operation, $server, $security),
             'responseExamples' => $this->responseExamples($operation),
         ];
+        $payload = $webhook ? $this->payloadExample($operation) : null;
 
         $html = $this->view->make('vellum::openapi.operation', [
             ...$page,
             'markdown' => $this->markdown(...),
             'body' => $this->afterOpening($operation->description),
-            'playground' => Playground::enabled()
+            'payloadTabs' => $payload === null ? '' : $this->codeTabs([['label' => 'JSON', 'language' => 'json', 'code' => $payload]], null),
+            'playground' => Playground::enabled() && ! $webhook
                 ? (string) json_encode(
                     $this->playground->data($operation, $spec, $server),
                     JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE,
@@ -180,11 +186,17 @@ final class PageBuilder
         }
 
         if (is_array($operation->requestBody['content'] ?? null)) {
-            $headings[] = ['id' => 'request-body', 'text' => 'Request body', 'level' => 2];
+            $headings[] = $webhook
+                ? ['id' => 'payload', 'text' => 'Payload', 'level' => 2]
+                : ['id' => 'request-body', 'text' => 'Request body', 'level' => 2];
         }
 
         if ($operation->responses !== []) {
             $headings[] = ['id' => 'responses', 'text' => 'Responses', 'level' => 2];
+        }
+
+        if ($operation->callbacks !== []) {
+            $headings[] = ['id' => 'callbacks', 'text' => 'Callbacks', 'level' => 2];
         }
 
         return $this->document(
@@ -204,6 +216,7 @@ final class PageBuilder
                 'openapi_method' => $operation->method,
                 'openapi_path' => $operation->path,
                 'openapi_deprecated' => $operation->deprecated,
+                'openapi_webhook' => $webhook,
             ],
         );
     }
@@ -302,6 +315,22 @@ final class PageBuilder
         preg_match_all('/^\s*(`+)/m', $source, $matches);
 
         return max(0, ...array_map(strlen(...), $matches[1] === [] ? [''] : $matches[1]));
+    }
+
+    /**
+     * The body a webhook arrives with, as JSON, when it has one to show.
+     */
+    private function payloadExample(Operation $operation): ?string
+    {
+        $content = is_array($operation->requestBody['content'] ?? null) ? $operation->requestBody['content'] : [];
+
+        foreach ($content as $type => $media) {
+            if (is_array($media) && str_contains(strtolower((string) $type), 'json')) {
+                return (string) json_encode(ExampleGenerator::forMedia($media), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -427,7 +456,9 @@ final class PageBuilder
      */
     private function security(Operation $operation, Spec $spec): array
     {
-        $requirements = $operation->security ?? $spec->defaultSecurity();
+        // The spec's own security is for calling the API. A webhook is the API
+        // calling the reader, so only what it declares for itself applies.
+        $requirements = $operation->security ?? ($operation->webhook !== null ? [] : $spec->defaultSecurity());
         $schemes = $spec->securitySchemes();
         $out = [];
         $seen = [];

@@ -80,7 +80,9 @@ final class MarkdownRendition
             $out[] = '**Deprecated.**';
         }
 
-        $out[] = self::code($operation->method.' '.$operation->path);
+        $out[] = $operation->webhook !== null
+            ? self::code($operation->method).' webhook '.self::code($operation->webhook).'. The API sends this request to an address you give it.'
+            : self::code($operation->method.' '.$operation->path);
 
         if ($operation->description !== null && trim($operation->description) !== '') {
             $out[] = trim($operation->description);
@@ -114,7 +116,7 @@ final class MarkdownRendition
         $content = is_array($operation->requestBody['content'] ?? null) ? $operation->requestBody['content'] : [];
 
         if ($content !== []) {
-            $out[] = '## Request body';
+            $out[] = $operation->webhook !== null ? '## Payload' : '## Request body';
 
             foreach ($content as $type => $media) {
                 $out[] = self::code((string) $type);
@@ -134,6 +136,23 @@ final class MarkdownRendition
                 }
 
                 $media = is_array($response['content'] ?? null) ? reset($response['content']) : null;
+
+                if (is_array($media) && is_array($media['schema'] ?? null)) {
+                    $out[] = $this->schema($media['schema']);
+                }
+            }
+        }
+
+        if ($operation->callbacks !== []) {
+            $out[] = '## Callbacks';
+
+            foreach ($operation->callbacks as $callback) {
+                $call = $callback['operation'];
+                $out[] = '### '.self::line($call->summary ?? $callback['name']);
+                $out[] = self::code($call->method.' '.$call->path);
+
+                $content = is_array($call->requestBody['content'] ?? null) ? $call->requestBody['content'] : [];
+                $media = $content === [] ? null : reset($content);
 
                 if (is_array($media) && is_array($media['schema'] ?? null)) {
                     $out[] = $this->schema($media['schema']);

@@ -75,8 +75,8 @@ it('puts each section in a panel of its own', function (): void {
         // A response's panel is headed by its status, what it means and its media type.
         ->toMatch('/<span class="vellum-api-status" data-status="2xx">201<\/span>\s*<span class="vellum-api-panel-title">Created\.<\/span>\s*<code class="vellum-api-media">application\/json<\/code>/')
         ->toMatch('/<span class="vellum-api-status" data-status="4xx">422<\/span>\s*<span class="vellum-api-panel-title">Invalid\.<\/span>\s*<\/div>\s*<\/div>/')
-        ->toMatch('/vellum-api-field-name">name<span\s+class="vellum-api-marker"\s+data-required="true"/')
-        ->toMatch('/vellum-api-field-name">owner<span\s+class="vellum-api-marker"\s+data-required="false"/')
+        ->toMatch('/vellum-api-field-name"><a class="vellum-api-field-link" href="#body-name">name<\/a><span\s+class="vellum-api-marker"\s+data-required="true"/')
+        ->toMatch('/vellum-api-field-name"><a class="vellum-api-field-link" href="#body-owner">owner<\/a><span\s+class="vellum-api-marker"\s+data-required="false"/')
         // A nested object opens without a script.
         ->toMatch('/<details class="vellum-api-nested"\s+open\s*>\s*<summary class="vellum-api-toggle">Properties<\/summary>/');
 });
@@ -112,4 +112,33 @@ it('sets the examples beside the documentation where there is room, in place of 
     expect($css)->toMatch('/\.vellum-api-operation\{[^}]*grid-template-columns:minmax\(0,1fr\) minmax\(0,27rem\)/')
         ->toMatch('/div\[data-vellum-page-row\]:has\(\.vellum-api-operation\)>:is\(\[data-vellum-toc\],\[data-vellum-toc-placeholder\]\)\{display:none\}/')
         ->toMatch('/\.vellum-api-examples\{[^}]*position:sticky/');
+});
+
+it('gives every field an address made of the names that lead to it', function (): void {
+    $html = operationPage($this->cachePath(), [
+        'parameters' => [['name' => 'X-Trace.Id', 'in' => 'header', 'schema' => ['type' => 'string']]],
+        'requestBody' => ['content' => ['application/json' => ['schema' => [
+            'type' => 'object',
+            'properties' => [
+                'captain' => ['type' => 'object', 'properties' => ['name' => ['type' => 'string']]],
+                'berth' => ['oneOf' => [
+                    ['type' => 'object', 'properties' => ['code' => ['type' => 'string']]],
+                    ['type' => 'object', 'properties' => ['code' => ['type' => 'integer']]],
+                ]],
+            ],
+        ]]]],
+        'responses' => ['200' => ['description' => 'OK', 'content' => ['application/json' => ['schema' => [
+            'type' => 'object', 'properties' => ['name' => ['type' => 'string']],
+        ]]]]],
+    ]);
+
+    expect($html)->toContain('id="header-x-trace-id"')
+        ->toContain('id="body-captain-name"')
+        ->toContain('href="#body-captain-name"')
+        ->toContain('id="response-200-name"');
+
+    preg_match_all('/<div class="vellum-api-field" id="([^"]+)"/', $html, $ids);
+
+    // A field in two variants of one value has an address in each.
+    expect($ids[1])->toBe(array_values(array_unique($ids[1])));
 });

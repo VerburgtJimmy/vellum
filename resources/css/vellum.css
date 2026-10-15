@@ -2306,6 +2306,58 @@ html[data-vellum-nav-marker] [data-vellum-sidebar-wrap] [data-vellum-nav-link]:h
   font-size: 0.75rem;
 }
 
+/* "Webhook" beside the name on its request line. */
+.vellum-api-kind {
+  flex: none;
+  padding: 0.0625rem 0.5rem;
+  border: 1px solid color-mix(in oklab, var(--vellum-method) 30%, var(--border));
+  border-radius: 999px;
+  color: var(--muted-foreground);
+  font-size: 0.6875rem;
+  line-height: 1.25rem;
+}
+
+.vellum-prose .vellum-api-webhook-note {
+  margin-top: 0.75rem;
+}
+
+.vellum-prose .vellum-api-callback-url:not(pre code):not(.vellum-code code) {
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  font-size: 0.75rem;
+  overflow-wrap: anywhere;
+}
+
+.vellum-api-callback-description,
+.vellum-api-callback-answers {
+  margin: 0;
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+}
+
+.vellum-api-callback-description > :first-child {
+  margin-top: 0;
+}
+
+.vellum-api-callback-description > :last-child {
+  margin-bottom: 0;
+}
+
+.vellum-api-callback-answers {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  border-top: 1px solid var(--border);
+}
+
+.vellum-api-callback .vellum-api-panel-head .vellum-api-method {
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
 .vellum-api-status {
   display: inline-flex;
   flex: none;
@@ -2342,6 +2394,47 @@ html[data-vellum-nav-marker] [data-vellum-sidebar-wrap] [data-vellum-nav-link]:h
 /* Fields: a name, its type, what it means. */
 .vellum-api-field {
   padding: 0.75rem 1rem;
+}
+
+/* A field a link points at is brought into view below the sticky header,
+   and lit for a moment so the eye finds it. */
+.vellum-api-field[id] {
+  scroll-margin-top: 5rem;
+}
+
+.vellum-api-field:target {
+  animation: vellum-api-field-found 1.6s ease-out;
+}
+
+@keyframes vellum-api-field-found {
+  from {
+    background: color-mix(in oklch, var(--primary) 9%, transparent);
+  }
+
+  to {
+    background: transparent;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vellum-api-field:target {
+    animation: none;
+    background: color-mix(in oklch, var(--primary) 6%, transparent);
+  }
+}
+
+/* As specific as the prose link rule, and after it: a field's name is a
+   link only for whoever wants its address. */
+.vellum-prose .vellum-api-field-name .vellum-api-field-link {
+  color: inherit;
+  font-weight: inherit;
+  text-decoration: none;
+}
+
+.vellum-prose .vellum-api-field-name .vellum-api-field-link:hover {
+  text-decoration: underline;
+  text-decoration-color: color-mix(in oklch, currentColor 40%, transparent);
+  text-underline-offset: 0.2em;
 }
 
 .vellum-api-field + .vellum-api-field {

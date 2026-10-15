@@ -22,6 +22,8 @@ Beside the documentation are the request samples and an example of each response
 
 The page's description is the opening paragraph of the operation's `description` in the spec. The rest of the description follows the request line.
 
+Every field has an address made of the names that lead to it, such as `#body-captain-name` or `#response-200-data-id`. Its name is the link: copy it to point someone at one field.
+
 ## Where the spec comes from
 
 ### A file
@@ -112,7 +114,26 @@ tags:
 
 ## Request samples
 
-Every operation has a request sample per language in `samples`. `curl`, `php` (the Laravel HTTP client) and `javascript` (fetch) are built in. The samples use the spec's first server, or `base_url` when you set it.
+Every operation has a request sample per language in `samples`. `curl`, `php` (the Laravel HTTP client), `javascript` (fetch) and `python` (requests) are built in. The samples use the spec's first server, or `base_url` when you set it.
+
+Samples the spec writes itself, under `x-codeSamples` as Redoc reads them, come first:
+
+```yaml
+x-codeSamples:
+  - lang: curl
+    label: cURL
+    source: curl https://api.example.com/ships --json @ship.json
+  - lang: Go
+    source: client.Ships.Register(ctx, ship)
+```
+
+A written sample in a language Vellum also generates, such as `curl`, `php`, `javascript` or `python`, takes the place of the generated one. Any other language is added as a tab of its own.
+
+## Webhooks and callbacks
+
+Each of the spec's `webhooks` gets a page in a **Webhooks** folder, after the operations. A webhook is a request the API sends to an address the reader gives it, so its page shows what arrives: the headers, the payload with an example beside it, and what to answer with. It has no request samples and no playground, and the spec's top-level `security` does not apply to it.
+
+An operation's `callbacks` are listed on its own page, under **Callbacks**: the address the API calls, what it sends and the statuses to answer with.
 
 ## The playground
 
@@ -180,7 +201,7 @@ A reader who may not open the reference is not shown the way to it.
 - A description in the spec is Markdown, and Vellum's own directives work in it, a [callout](/docs/components/callouts) for one. Blade components do not: a spec is often someone else's text.
 - A `$ref` to another file or a URL is not followed. `vellum:build` warns about each one.
 - An operation with the `QUERY` method, or one of the API's own under `additionalOperations`, gets a page like any other. A query string described as one `querystring` parameter is listed as the query parameters it is made of when it is form-encoded.
-- Webhooks and callbacks are not documented yet, and the playground cannot read a streamed response, such as server-sent events.
+- The playground cannot read a streamed response, such as server-sent events.
 - With [versions](/docs/versions) on, the reference belongs to the latest version only. A spec describes the API as it is.
 - A page you wrote yourself under `api/` is still served. A spec whose page would take the same address as one of yours stops the build.
 
@@ -197,7 +218,7 @@ A reader who may not open the reference is not shown the way to it.
 | `openapi.title` | `API reference` | The reference's name in the sidebar and on its overview. |
 | `openapi.group_by` | `tag` | `tag` or `path`. |
 | `openapi.untagged_label` | `Other` | The folder for operations without a tag. |
-| `openapi.samples` | `curl`, `php`, `javascript` | Languages of the request samples, in tab order. |
+| `openapi.samples` | `curl`, `php`, `javascript`, `python` | Languages of the request samples, in tab order. |
 | `openapi.base_url` | `null` | Used in the samples in place of the spec's first server. |
 | `openapi.playground` | `true` | Whether a reader can send a request from an operation's page. |
 | `openapi.proxy` | `false` | Sends playground requests to another origin through your app. |
