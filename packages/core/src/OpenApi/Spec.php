@@ -70,8 +70,10 @@ final readonly class Spec
     public function serverUrl(): ?string
     {
         foreach ($this->servers() as $server) {
-            if (is_string($server['url'] ?? null) && $server['url'] !== '') {
-                return rtrim($server['url'], '/');
+            $url = Servers::default($server);
+
+            if ($url !== null) {
+                return $url;
             }
         }
 

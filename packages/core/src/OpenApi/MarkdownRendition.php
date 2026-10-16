@@ -42,7 +42,12 @@ final class MarkdownRendition
             $out[] = '## Servers';
             $out[] = implode("\n", array_map(
                 fn (array $server): string => '- '.self::code(self::text($server['url'] ?? ''))
-                    .(self::text($server['description'] ?? '') === '' ? '' : ': '.self::line(self::text($server['description'] ?? ''))),
+                    .(self::text($server['description'] ?? '') === '' ? '' : ': '.self::line(self::text($server['description'] ?? '')))
+                    .implode('', array_map(
+                        static fn (array $variable): string => "\n  - ".self::code('{'.$variable['name'].'}').': '.self::code($variable['default'])
+                            .(count($variable['values']) > 1 ? ' (one of '.implode(', ', array_map(self::code(...), $variable['values'])).')' : ''),
+                        Servers::variables($server),
+                    )),
                 $spec->servers(),
             ));
         }

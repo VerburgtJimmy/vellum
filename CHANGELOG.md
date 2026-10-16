@@ -5,6 +5,15 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- A server's variables are filled in with their defaults in the samples, listed with the values they can take on the overview, and offered value by value in the playground and the forwarding route. A variable with no `enum` is only its default
+- A property marked `readOnly` is left out of a request body, its samples and the playground, and one marked `writeOnly` is left out of responses
+- A `discriminator` is shown: which property picks a variant, the value for each, and the `defaultMapping`. Examples carry that value
+- In the playground, a list of objects is filled in an item at a time, with **Add item** and **Remove**, where it was a box of JSON
+
 ## [0.9.2] - 2026-10-16
 
 ### Added

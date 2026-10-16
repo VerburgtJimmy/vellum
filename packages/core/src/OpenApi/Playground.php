@@ -72,9 +72,7 @@ final class Playground
         $urls = $preferred === null ? [] : [$preferred];
 
         foreach ([...$operation->servers, ...$spec->servers()] as $server) {
-            if (is_string($server['url'] ?? null) && $server['url'] !== '') {
-                $urls[] = rtrim($server['url'], '/');
-            }
+            array_push($urls, ...Servers::urls($server));
         }
 
         return array_values(array_unique($urls));

@@ -114,21 +114,33 @@ const DEPTH = 4
 
 const opens = (schema, depth) => depth < DEPTH && schema?.type === 'object' && Object.keys(schema.properties ?? {}).length > 0
 
+// A list of objects is filled in an item at a time, each with its fields.
+const lists = (schema, depth) => schema?.type === 'array' && opens(schema.items, depth)
+
+// More than a reader adds by hand, fewer than a page can draw.
+const MAX_ITEMS = 50
+
+const at = (value, path) => path.reduce((here, name) => (here !== null && typeof here === 'object' && Object.hasOwn(here, name) ? here[name] : undefined), value)
+
 /**
- * Every control a form shows for an object schema. An object inside it gives
- * its own fields in its place, each under the path that leads to it, so
- * "author.name" is typed into rather than written as JSON.
+ * Everything a form shows for an object schema, in order: a field for each
+ * value, and for a list of objects a heading, then each item with its own
+ * fields. An object inside gives its fields in its place, under the path
+ * that leads to them, so "author.name" is typed into rather than written as
+ * JSON. How many items a list has is kept with the texts, under "crew.#".
  *
  * A field is marked required only when leaving it out is always an error:
- * one inside an optional object is not, since the object can be left out.
+ * one inside an optional object, or in a list item, is not.
+ *
+ * `from` is a body to count a list's items by, before the texts say.
  */
-export function leaves(schema = {}, path = [], required = true, taken = new Set()) {
+export function rows(schema = {}, texts = {}, from = undefined, path = [], required = true, taken = new Set(), within = []) {
   return fields(schema).flatMap((field) => {
     const here = [...path, field.name]
     const needed = required && field.required
 
     if (opens(field.schema, here.length)) {
-      return leaves(field.schema, here, needed, taken)
+      return rows(field.schema, texts, from, here, needed, taken, [...within, field.name])
     }
 
     // A property that is itself named "a.b" would share a key with b inside a.
@@ -136,8 +148,48 @@ export function leaves(schema = {}, path = [], required = true, taken = new Set(
     key = taken.has(key) ? JSON.stringify(here) : key
     taken.add(key)
 
-    return [{ key, name: field.name, path: here, schema: field.schema, required: needed }]
+    if (lists(field.schema, here.length)) {
+      const given = Number(texts[`${key}.#`])
+      const found = at(from, here)
+      const count = Math.min(MAX_ITEMS, Math.max(0, Number.isInteger(given) && Object.hasOwn(texts, `${key}.#`) ? given : Array.isArray(found) ? found.length : 1))
+      const out = [{ kind: 'list', key, name: field.name, path: here, within, required: needed, schema: field.schema, count }]
+
+      for (let index = 0; index < count; index++) {
+        out.push({ kind: 'item', list: key, index })
+        out.push(...rows(field.schema.items, texts, from, [...here, index], false, taken, []))
+      }
+
+      return out
+    }
+
+    return [{ key, name: field.name, path: here, within, schema: field.schema, required: needed }]
   })
+}
+
+/** The fields alone, without the headings and items lists are laid out with. */
+export function leaves(schema = {}, texts = {}) {
+  return rows(schema, texts).filter((row) => row.kind === undefined)
+}
+
+// A list item none of whose fields were filled in is left out, and so is a
+// list that ends up with no items.
+const compact = (value) => {
+  if (Array.isArray(value)) {
+    const items = value.map(compact).filter((item) => item !== undefined)
+
+    return items.length > 0 ? items : undefined
+  }
+
+  if (value !== null && typeof value === 'object' && Object.getPrototypeOf(value) === null) {
+    for (const name of Object.keys(value)) {
+      const kept = compact(value[name])
+      kept === undefined ? delete value[name] : (value[name] = kept)
+    }
+
+    return Object.keys(value).length > 0 ? value : undefined
+  }
+
+  return value
 }
 
 /**
@@ -148,40 +200,73 @@ export function leaves(schema = {}, path = [], required = true, taken = new Set(
 export function formToBody(schema, texts, files) {
   const body = bag()
 
-  for (const leaf of leaves(schema)) {
+  for (const leaf of leaves(schema, texts)) {
     const value = files && leaf.key in files ? files[leaf.key] : coerce(leaf.schema, texts[leaf.key])
 
     if (value === undefined) {
       continue
     }
 
-    let at = body
+    let here = body
 
-    for (const name of leaf.path.slice(0, -1)) {
-      at = Object.hasOwn(at, name) ? at[name] : (at[name] = bag())
-    }
+    leaf.path.slice(0, -1).forEach((name, step) => {
+      if (!Object.hasOwn(here, name)) {
+        here[name] = typeof leaf.path[step + 1] === 'number' ? [] : bag()
+      }
 
-    at[leaf.path.at(-1)] = value
+      here = here[name]
+    })
+
+    here[leaf.path.at(-1)] = value
   }
 
-  return body
+  return compact(body) ?? bag()
 }
 
 /** The texts a form shows for a body. */
 export function bodyToForm(schema, body) {
   const texts = bag()
 
-  for (const leaf of leaves(schema)) {
-    let value = body
-
-    for (const name of leaf.path) {
-      value = value && typeof value === 'object' && Object.hasOwn(value, name) ? value[name] : undefined
+  for (const row of rows(schema, texts, body)) {
+    if (row.kind === 'list') {
+      texts[`${row.key}.#`] = String(row.count)
+    } else if (row.kind === undefined) {
+      texts[row.key] = display(row.schema, at(body, row.path))
     }
-
-    texts[leaf.key] = display(leaf.schema, value)
   }
 
   return texts
+}
+
+/** The texts with one more item at the end of a list. */
+export function addItem(texts, key) {
+  const next = Object.assign(bag(), texts)
+  next[`${key}.#`] = String(Math.min(MAX_ITEMS, Number(texts[`${key}.#`] ?? 0) + 1))
+
+  return next
+}
+
+/** The texts without one item of a list, the ones after it moved up. */
+export function removeItem(texts, key, index) {
+  const count = Number(texts[`${key}.#`] ?? 0)
+  const next = bag()
+  const prefix = `${key}.`
+
+  for (const [name, value] of Object.entries(texts)) {
+    const match = name.startsWith(prefix) ? /^(\d+)(\..*)$/.exec(name.slice(prefix.length)) : null
+
+    if (!match) {
+      next[name] = value
+    } else if (Number(match[1]) < index) {
+      next[name] = value
+    } else if (Number(match[1]) > index) {
+      next[`${prefix}${Number(match[1]) - 1}${match[2]}`] = value
+    }
+  }
+
+  next[`${key}.#`] = String(Math.max(0, count - 1))
+
+  return next
 }
 
 /** The values a playground opens with: every parameter and the body, from their examples. */

@@ -74,7 +74,15 @@ final class ExampleGenerator
         $variants = SchemaView::variants($schema);
 
         if ($variants !== []) {
-            return self::fromSchema($variants[0]['schema'], $depth + 1);
+            $example = self::fromSchema($variants[0]['schema'], $depth + 1);
+            $discriminator = SchemaView::discriminator($schema);
+
+            // The example says which variant it is, as a real value would.
+            if (is_array($example) && $discriminator !== null && isset($discriminator['values'][0])) {
+                $example[$discriminator['property']] = $discriminator['values'][0];
+            }
+
+            return $example;
         }
 
         return self::byType($schema, $depth);

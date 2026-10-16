@@ -374,8 +374,10 @@ final class PageBuilder
         }
 
         foreach ($operation->servers as $server) {
-            if (is_string($server['url'] ?? null) && $server['url'] !== '') {
-                return rtrim($server['url'], '/');
+            $url = Servers::default($server);
+
+            if ($url !== null) {
+                return $url;
             }
         }
 
@@ -395,9 +397,7 @@ final class PageBuilder
 
         foreach ([$spec->servers(), ...array_map(static fn (Operation $operation): array => $operation->servers, $spec->operations)] as $servers) {
             foreach ($servers as $server) {
-                if (is_string($server['url'] ?? null)) {
-                    $urls[] = $server['url'];
-                }
+                array_push($urls, ...Servers::urls($server));
             }
         }
 

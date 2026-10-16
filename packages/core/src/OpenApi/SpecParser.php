@@ -274,8 +274,8 @@ final class SpecParser
             tags: $this->strings($operation['tags'] ?? []),
             deprecated: (bool) ($operation['deprecated'] ?? false),
             parameters: $this->queryString($this->mergeParameters($sharedParameters, $own)),
-            requestBody: is_array($operation['requestBody'] ?? null) ? $operation['requestBody'] : null,
-            responses: is_array($operation['responses'] ?? null) ? $operation['responses'] : [],
+            requestBody: $this->requestBody($operation['requestBody'] ?? null),
+            responses: $this->responses($operation['responses'] ?? null),
             security: is_array($operation['security'] ?? null)
                 ? array_values(array_filter($operation['security'], is_array(...)))
                 : null,
@@ -360,6 +360,45 @@ final class SpecParser
         }
 
         return $out;
+    }
+
+    /**
+     * The request body without what only a response carries.
+     *
+     * @return array<string, mixed>|null
+     */
+    private function requestBody(mixed $body): ?array
+    {
+        if (! is_array($body)) {
+            return null;
+        }
+
+        if (is_array($body['content'] ?? null)) {
+            $body['content'] = SchemaDirection::content($body['content'], 'request');
+        }
+
+        /** @var array<string, mixed> $body */
+        return $body;
+    }
+
+    /**
+     * The responses without what only a request carries.
+     *
+     * @return array<array-key, mixed>
+     */
+    private function responses(mixed $responses): array
+    {
+        if (! is_array($responses)) {
+            return [];
+        }
+
+        foreach ($responses as $status => $response) {
+            if (is_array($response) && is_array($response['content'] ?? null)) {
+                $responses[$status]['content'] = SchemaDirection::content($response['content'], 'response');
+            }
+        }
+
+        return $responses;
     }
 
     /**

@@ -22,6 +22,10 @@ Beside the documentation are the request samples and an example of each response
 
 The page's description is the opening paragraph of the operation's `description` in the spec. The rest of the description follows the request line.
 
+Where one schema serves both the request and the response, each side shows its own part of it. A property marked `readOnly`, such as an id the server sets, is left out of the request body, its samples and the playground. One marked `writeOnly`, such as a password, is left out of the responses.
+
+A value that can be one of several schemas shows each as a tab. With a `discriminator`, the page says which property decides, the value that picks each one, and which is the `defaultMapping`, and the examples carry that value.
+
 Every field has an address made of the names that lead to it, such as `#body-captain-name` or `#response-200-data-id`. Its name is the link: copy it to point someone at one field.
 
 ## Where the spec comes from
@@ -114,7 +118,7 @@ tags:
 
 ## Request samples
 
-Every operation has a request sample per language in `samples`. `curl`, `php` (the Laravel HTTP client), `javascript` (fetch) and `python` (requests) are built in. The samples use the spec's first server, or `base_url` when you set it.
+Every operation has a request sample per language in `samples`. `curl`, `php` (the Laravel HTTP client), `javascript` (fetch) and `python` (requests) are built in. The samples use the spec's first server, or `base_url` when you set it. A server with variables, such as `https://{region}.api.example.com`, is filled in with their defaults. The playground offers each value a variable's `enum` allows, and so does the forwarding route; a variable without an `enum` is only ever its default.
 
 Samples the spec writes itself, under `x-codeSamples` as Redoc reads them, come first:
 
@@ -139,7 +143,7 @@ An operation's `callbacks` are listed on its own page, under **Callbacks**: the 
 
 Every operation's page has a **Try it** button on its request line. It opens a drawer beside the page, so the operation stays in view while a reader fills in the request, sends it and reads the response.
 
-- The parameters and the body are a form made from the spec. A JSON body can be written field by field or as JSON, and what is written carries over when the reader switches. An object inside the body has a field for each of its own, named with the path to it, such as `author.name`. A list of objects is written as JSON.
+- The parameters and the body are a form made from the spec. A JSON body can be written field by field or as JSON, and what is written carries over when the reader switches. An object inside the body has a field for each of its own, named with the path to it, such as `author.name`. A list of objects is filled in an item at a time, with **Add item** and **Remove**; an item left empty is not sent.
 - The command the request makes is shown as curl and follows what is typed.
 - Bearer tokens, basic credentials and API keys are supported. For OAuth 2 and OpenID Connect the reader pastes a token. Credentials are kept for the browser tab and are gone when it closes.
 - The response is shown as text, with its status, time, size and headers. It is never rendered as a page.

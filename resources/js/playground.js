@@ -7,7 +7,7 @@
  * dialog around them.
  */
 import { bag, buildRequest, reach, toCurl, xsrfToken } from './playground/request.js'
-import { bodyToForm, coerce, control, display, failure, formToBody, hasForm, initial, leaves, pretty, size } from './playground/form.js'
+import { addItem, bodyToForm, coerce, control, display, failure, formToBody, hasForm, initial, pretty, removeItem, rows, size } from './playground/form.js'
 
 const STORE = 'vellum-playground'
 const TIMEOUT = 30000
@@ -420,11 +420,48 @@ export function open(button) {
           },
         })
 
+      // A list of objects changes how many rows the form has, so it is drawn again.
+      const relist = (texts) => {
+        state.form[index] = texts
+        drawBody()
+        refresh()
+      }
+
       const byField = () =>
-        leaves(body.schema).map((leaf) =>
-          row({
+        rows(body.schema, state.form[index]).map((leaf) => {
+          if (leaf.kind === 'list') {
+            return h(
+              'div',
+              { class: 'vellum-playground-list' },
+              h(
+                'span',
+                { class: 'vellum-playground-name' },
+                h('span', {}, leaf.within.length > 0 ? h('span', { class: 'vellum-playground-within', text: `${leaf.within.join('.')}.` }) : null, leaf.name),
+                leaf.required ? h('span', { class: 'vellum-playground-required', 'aria-hidden': 'true', text: '*' }) : null,
+                h('span', { class: 'vellum-playground-type', text: typeName(leaf.schema) }),
+              ),
+              h('button', { type: 'button', class: 'vellum-playground-item-action', text: 'Add item', onclick: () => relist(addItem(state.form[index], leaf.key)) }),
+            )
+          }
+
+          if (leaf.kind === 'item') {
+            return h(
+              'div',
+              { class: 'vellum-playground-item' },
+              h('span', { text: `Item ${leaf.index + 1}` }),
+              h('button', {
+                type: 'button',
+                class: 'vellum-playground-item-action',
+                text: 'Remove',
+                'aria-label': `Remove item ${leaf.index + 1}`,
+                onclick: () => relist(removeItem(state.form[index], leaf.list, leaf.index)),
+              }),
+            )
+          }
+
+          return row({
             name: leaf.name,
-            within: leaf.path.slice(0, -1),
+            within: leaf.within,
             type: leaf.schema.format === 'binary' ? 'file' : typeName(leaf.schema),
             required: leaf.required,
             description: leaf.schema.description,
@@ -440,8 +477,8 @@ export function open(button) {
                   }
                 }),
               }),
-          }),
-        )
+          })
+        })
 
       holder.replaceChildren(...(mode === 'form' ? byField() : [whole()]))
 

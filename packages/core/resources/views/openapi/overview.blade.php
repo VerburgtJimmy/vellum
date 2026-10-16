@@ -21,6 +21,19 @@
                     @if (is_string($server['description'] ?? null) && $server['description'] !== '')
                         <p class="vellum-api-field-description">{{ $server['description'] }}</p>
                     @endif
+                    @foreach (\Vellum\OpenApi\Servers::variables($server) as $variable)
+                        <p class="vellum-api-enum">
+                            <span class="vellum-api-enum-label">&#123;{{ $variable['name'] }}&#125; is</span>
+                            <code>{{ $variable['default'] }}</code>
+                            @foreach (array_diff($variable['values'], [$variable['default']]) as $value)
+                                {!! $loop->first ? '<span class="vellum-api-enum-label">or</span>' : '' !!}
+                                <code>{{ $value }}</code>
+                            @endforeach
+                            @if ($variable['description'] !== null)
+                                <span class="vellum-api-server-variable">{{ $variable['description'] }}</span>
+                            @endif
+                        </p>
+                    @endforeach
                 </div>
             @endforeach
         </div>

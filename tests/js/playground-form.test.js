@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { bodyToForm, coerce, control, display, failure, fields, formToBody, hasForm, initial, leaves, pretty, size } from '../../resources/js/playground/form.js'
+import { bodyToForm, coerce, control, display, failure, fields, formToBody, hasForm, initial, leaves, pretty, size, rows, addItem, removeItem } from '../../resources/js/playground/form.js'
 
 describe('control', () => {
   it('picks a control by what the schema allows', () => {
@@ -206,5 +206,57 @@ describe('an object inside the body', () => {
     const file = { name: 'scan.png' }
 
     expect(formToBody(schema, {}, { 'doc.scan': file })).toEqual({ doc: { scan: file } })
+  })
+})
+
+describe('a list of objects in the body', () => {
+  const ship = {
+    type: 'object',
+    properties: {
+      name: { type: 'string' },
+      crew: { type: 'array', items: { type: 'object', required: ['name'], properties: { name: { type: 'string' }, age: { type: 'integer' } } } },
+      tags: { type: 'array', items: { type: 'string' } },
+    },
+  }
+
+  it('is laid out an item at a time, each with its own fields', () => {
+    const texts = bodyToForm(ship, { crew: [{ name: 'Ada', age: 36 }, { name: 'Tom' }] })
+
+    expect(rows(ship, texts).map((row) => row.kind ?? row.key)).toEqual(['name', 'list', 'item', 'crew.0.name', 'crew.0.age', 'item', 'crew.1.name', 'crew.1.age', 'tags'])
+    expect(texts['crew.#']).toBe('2')
+    expect(texts['crew.1.name']).toBe('Tom')
+  })
+
+  it('starts with one empty item when there is nothing to count', () => {
+    expect(rows(ship, {}).filter((row) => row.kind === 'item')).toHaveLength(1)
+  })
+
+  it('does not mark a field required inside an item, which can be left out', () => {
+    expect(rows(ship, {}).find((row) => row.key === 'crew.0.name').required).toBe(false)
+  })
+
+  it('is built from the items that were filled in, and left out when none were', () => {
+    const texts = { 'crew.#': '3', 'crew.0.name': 'Ada', 'crew.1.name': '', 'crew.2.name': 'Tom', 'crew.2.age': '40' }
+
+    expect(formToBody(ship, texts)).toEqual({ crew: [{ name: 'Ada' }, { name: 'Tom', age: 40 }] })
+    expect(formToBody(ship, { 'crew.#': '2', name: 'Aurora' })).toEqual({ name: 'Aurora' })
+  })
+
+  it('comes back as the same texts', () => {
+    const body = { name: 'Aurora', crew: [{ name: 'Ada', age: 36 }, { name: 'Tom' }], tags: ['a', 'b'] }
+
+    expect(formToBody(ship, bodyToForm(ship, body))).toEqual(body)
+  })
+
+  it('gains an item at the end, and loses one with the rest moving up', () => {
+    const texts = bodyToForm(ship, { crew: [{ name: 'Ada' }, { name: 'Bo' }, { name: 'Cy' }] })
+
+    expect(addItem(texts, 'crew')['crew.#']).toBe('4')
+
+    const fewer = removeItem(texts, 'crew', 1)
+
+    expect(fewer['crew.#']).toBe('2')
+    expect(formToBody(ship, fewer)).toEqual({ crew: [{ name: 'Ada' }, { name: 'Cy' }] })
+    expect(Object.getPrototypeOf(fewer)).toBeNull()
   })
 })

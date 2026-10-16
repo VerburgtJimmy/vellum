@@ -214,6 +214,61 @@ final class SchemaView
     }
 
     /**
+     * Which property says which of the variants a value is, and the value it
+     * holds for each: from the discriminator's mapping, or the variant's own
+     * schema name where the mapping leaves it out. defaultMapping, from 3.2,
+     * names the variant a value with no match is read as.
+     *
+     * @param  array<string, mixed>  $schema
+     * @return array{property: string, values: array<int, string>, default: int|null}|null
+     */
+    public static function discriminator(array $schema): ?array
+    {
+        $discriminator = $schema['discriminator'] ?? null;
+        $property = is_array($discriminator) ? ($discriminator['propertyName'] ?? null) : null;
+
+        if (! is_string($property) || $property === '') {
+            return null;
+        }
+
+        $mapping = is_array($discriminator['mapping'] ?? null) ? $discriminator['mapping'] : [];
+        $byName = [];
+
+        foreach ($mapping as $value => $ref) {
+            if (is_string($ref)) {
+                $byName[self::refName($ref)] ??= (string) $value;
+            }
+        }
+
+        $values = [];
+        $default = null;
+        $defaultName = is_string($discriminator['defaultMapping'] ?? null) ? self::refName($discriminator['defaultMapping']) : null;
+
+        foreach (self::variants($schema) as $index => $variant) {
+            $name = self::name($variant['schema']);
+
+            if ($name === null) {
+                continue;
+            }
+
+            $values[$index] = $byName[$name] ?? $name;
+
+            if ($name === $defaultName) {
+                $default = $index;
+            }
+        }
+
+        return ['property' => $property, 'values' => $values, 'default' => $default];
+    }
+
+    private static function refName(string $ref): string
+    {
+        $parts = explode('/', $ref);
+
+        return (string) end($parts);
+    }
+
+    /**
      * Whether this node has anything to show when opened.
      *
      * @param  array<string, mixed>  $schema
