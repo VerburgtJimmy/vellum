@@ -204,7 +204,7 @@ A reader who may not open the reference is not shown the way to it.
 
 - A description in the spec is Markdown, and Vellum's own directives work in it, a [callout](/docs/components/callouts) for one. Blade components do not: a spec is often someone else's text.
 - A `$ref` to another file or a URL is not followed. `vellum:build` warns about each one.
-- An operation with the `QUERY` method, or one of the API's own under `additionalOperations`, gets a page like any other. A query string described as one `querystring` parameter is listed as the query parameters it is made of when it is form-encoded.
+- An operation with the `QUERY` method, or one of the API's own under `additionalOperations`, gets a page like any other. Some proxies and CDNs turn away a method they do not know, Cloudflare among them, so a playground request with `QUERY` can get a 400 from them before it reaches the API. A query string described as one `querystring` parameter is listed as the query parameters it is made of when it is form-encoded.
 - The playground cannot read a streamed response, such as server-sent events.
 - With [versions](/docs/versions) on, the reference belongs to the latest version only. A spec describes the API as it is.
 - A page you wrote yourself under `api/` is still served. A spec whose page would take the same address as one of yours stops the build.
