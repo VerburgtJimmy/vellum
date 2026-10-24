@@ -14,6 +14,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - A `discriminator` is shown: which property picks a variant, the value for each, and the `defaultMapping`. Examples carry that value
 - In the playground, a list of objects is filled in an item at a time, with **Add item** and **Remove**, where it was a box of JSON
 
+### Fixed
+
+- In the playground, an operation signed with HTTP Basic showed "[object HTMLDivElement]" where its username and password fields belong. Both fields are there
+
 ## [0.9.2] - 2026-10-16
 
 ### Added

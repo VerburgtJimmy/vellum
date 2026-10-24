@@ -340,7 +340,7 @@ export function open(button) {
     sections.push(
       section(
         'Authorization',
-        operation.security.map((scheme) => {
+        operation.security.flatMap((scheme) => {
           const stored = (state.auth[scheme.name] ??= bag())
           const field = (key, label, secret) =>
             row({
