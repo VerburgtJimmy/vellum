@@ -105,16 +105,19 @@ final class Playground
 
     /**
      * How the reader signs the request: every scheme the operation accepts,
-     * reduced to the three ways a browser can send a credential.
+     * reduced to the three ways a browser can send a credential. OAuth 2 and
+     * OpenID Connect end in a bearer token, and carry what the playground
+     * needs to get one: the flows it can run and the scopes on offer.
      *
-     * @return list<array{name: string, type: string, in?: string, key?: string, description: string|null}>
+     * @return list<array<string, mixed>>
      */
     private function security(Operation $operation, Spec $spec): array
     {
         $schemes = $spec->securitySchemes();
         $out = [];
+        $base = $spec->serverUrl();
 
-        foreach ($operation->security ?? $spec->defaultSecurity() as $requirement) {
+        foreach ($operation->security ?? ($operation->webhook !== null ? [] : $spec->defaultSecurity()) as $requirement) {
             foreach (array_keys($requirement) as $name) {
                 if (! is_string($name) || isset($out[$name])) {
                     continue;
@@ -137,10 +140,18 @@ final class Playground
                 }
 
                 $basic = $type === 'http' && is_string($scheme['scheme'] ?? null) && strtolower($scheme['scheme']) === 'basic';
-
-                // OAuth 2 and OpenID Connect end in a token too. The reader
-                // gets one elsewhere and pastes it.
                 $out[$name] = ['name' => $name, 'type' => $basic ? 'basic' : 'bearer', 'description' => $description];
+                $scopes = array_values(array_filter(is_array($requirement[$name] ?? null) ? $requirement[$name] : [], is_string(...)));
+
+                if ($type === 'oauth2') {
+                    $flows = OAuth::flows($scheme, $base);
+
+                    if ($flows !== []) {
+                        $out[$name]['oauth'] = ['flows' => $flows, 'required' => $scopes];
+                    }
+                } elseif ($type === 'openIdConnect' && is_string($scheme['openIdConnectUrl'] ?? null)) {
+                    $out[$name]['oauth'] = ['discovery' => OAuth::absolute($scheme['openIdConnectUrl'], $base), 'required' => $scopes];
+                }
             }
         }
 

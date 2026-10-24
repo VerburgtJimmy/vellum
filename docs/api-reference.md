@@ -153,6 +153,27 @@ The request goes from the reader's own browser, which decides two things:
 - When the API is on the same origin as the docs, which is the usual case for docs served by the app they describe, it goes as the reader. A reader who is signed in to the app is signed in to the request, and Laravel's CSRF token is sent with it.
 - When the API is on another origin, nothing of the reader's is sent, and the API has to allow the docs' origin to read its answers ([CORS](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS)). Otherwise the browser shows no response and the playground says so.
 
+### Signing in with OAuth
+
+An operation secured with OAuth 2 or OpenID Connect has a panel under its token field that gets a token for the reader:
+
+- **Sign in** runs the authorization code flow with PKCE. The reader signs in with the provider in a window of its own, and the token comes back to the playground. No client secret is needed; one can be given for an app that has one.
+- **Client credentials** trades a client ID and secret the reader types for a token, for an API's machine clients.
+
+The scopes the spec lists can be ticked, and those the operation requires start ticked. An OpenID Connect scheme reads the provider's sign-in and token addresses from its discovery document.
+
+For **Sign in**, register the playground's return address with the provider as a redirect URI. It is the same for every operation, and the panel shows it:
+
+```text
+https://example.com/docs/_vellum/oauth
+```
+
+A static export has it at `/docs/_vellum/oauth/`. Signing in needs the docs served over HTTPS, or from `localhost`. The return page hands the code back with a few lines of inline script, so a Content Security Policy that forbids inline scripts has to allow that page.
+
+The token request goes from the reader's browser, so the provider's token address has to allow the docs' origin (CORS), as most do for apps that run in a browser. With [the forwarding route](#an-api-on-another-origin) on, a token address the spec names is reached through your app instead. One found through OpenID Connect discovery is always reached from the browser.
+
+The implicit and password flows are not offered: both are deprecated, and a spec that only has those gets the token field alone.
+
 ### An API on another origin
 
 When the API does not allow the docs' origin, turn on the forwarding route, and the playground sends such requests through your app instead:

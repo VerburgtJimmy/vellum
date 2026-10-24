@@ -393,7 +393,9 @@ final class PageBuilder
     private function servers(Spec $spec): array
     {
         $configured = config('vellum.openapi.base_url');
-        $urls = is_string($configured) && $configured !== '' ? [$configured] : [];
+        // The token addresses go with the servers: getting a token is part of
+        // trying a request, and the forwarding route may have to do it.
+        $urls = [...(is_string($configured) && $configured !== '' ? [$configured] : []), ...OAuth::tokenUrls($spec)];
 
         foreach ([$spec->servers(), ...array_map(static fn (Operation $operation): array => $operation->servers, $spec->operations)] as $servers) {
             foreach ($servers as $server) {

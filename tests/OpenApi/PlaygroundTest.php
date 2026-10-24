@@ -86,7 +86,7 @@ it('reduces every security scheme to a way a browser can send a credential', fun
         ['name' => 'bearer', 'type' => 'bearer', 'description' => null],
         ['name' => 'basic', 'type' => 'basic', 'description' => null],
         ['name' => 'key', 'type' => 'apiKey', 'in' => 'query', 'key' => 'api_key', 'description' => 'From your dashboard.'],
-        // The reader gets a token elsewhere and pastes it.
+        // Without a flow it can run, the reader gets a token elsewhere and pastes it.
         ['name' => 'oauth', 'type' => 'bearer', 'description' => null],
     ]);
 });
@@ -174,4 +174,49 @@ it('keeps the button out of what search reads', function (): void {
         ->and(Sections::text($page->html))->toContain('POST /pets')->not->toContain('Try it')
         ->and((new Ranker(AnswerIndex::build($documents, $repository)))->search('create a pet')[0]['record']['url'])
         ->toStartWith('/docs/api/pets/create-pet');
+});
+
+it('carries the OAuth flows it can run, with addresses a browser can go to', function (): void {
+    $data = playgroundData($this->cachePath(), apiSpec([
+        'servers' => [['url' => 'https://api.example.com/v1']],
+        'components' => ['securitySchemes' => [
+            'oauth' => ['type' => 'oauth2', 'flows' => [
+                'authorizationCode' => ['authorizationUrl' => '/oauth/authorize', 'tokenUrl' => 'https://auth.example.com/token', 'scopes' => ['pets:read' => 'Read pets', 'pets:write' => 'Change pets']],
+                'clientCredentials' => ['tokenUrl' => 'token', 'scopes' => []],
+                // Deprecated, and not offered.
+                'implicit' => ['authorizationUrl' => 'https://auth.example.com/authorize', 'scopes' => []],
+                'password' => ['tokenUrl' => 'https://auth.example.com/token', 'scopes' => []],
+            ]],
+            'oidc' => ['type' => 'openIdConnect', 'openIdConnectUrl' => 'https://id.example.com/.well-known/openid-configuration'],
+        ]],
+        'paths' => ['/pets' => ['post' => ['security' => [['oauth' => ['pets:write']], ['oidc' => ['email']]]]]],
+    ]));
+
+    expect($data['security'][0]['oauth'])->toBe([
+        'flows' => [
+            'authorizationCode' => ['authorizationUrl' => 'https://api.example.com/oauth/authorize', 'tokenUrl' => 'https://auth.example.com/token', 'scopes' => ['pets:read' => 'Read pets', 'pets:write' => 'Change pets']],
+            'clientCredentials' => ['tokenUrl' => 'https://api.example.com/v1/token', 'scopes' => []],
+        ],
+        'required' => ['pets:write'],
+    ])->and($data['security'][1]['oauth'])->toBe(['discovery' => 'https://id.example.com/.well-known/openid-configuration', 'required' => ['email']]);
+
+    // The forwarding route may reach the token addresses, and nothing else they lead to.
+    expect(ContentRepository::fromConfig()->find('api')->frontmatter['openapi_servers'])
+        ->toContain('https://auth.example.com/token')
+        ->toContain('https://api.example.com/v1/token')
+        ->not->toContain('https://api.example.com/oauth/authorize');
+});
+
+it('serves the page a provider returns a reader to, which hands the code only to its own origin', function (): void {
+    enableOpenApi($this->cachePath(), apiSpec());
+
+    $this->get('/docs/api')->assertSee('data-vellum-oauth-callback="/docs/_vellum/oauth"', false);
+
+    $response = $this->get('/docs/_vellum/oauth')->assertOk()->assertHeader('Referrer-Policy', 'no-referrer');
+
+    expect($response->getContent())->toContain('window.opener.postMessage(message, window.location.origin)')
+        ->toContain('<meta name="robots" content="noindex">');
+
+    config()->set('vellum.openapi.playground', false);
+    $this->get('/docs/_vellum/oauth')->assertNotFound();
 });

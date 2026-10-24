@@ -5,6 +5,12 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- The playground gets an OAuth token for the reader: **Sign in** runs the authorization code flow with PKCE in a window of its own, and **Client credentials** trades a client ID and secret for a token. Scopes can be picked, OpenID Connect providers are read from their discovery document, and the forwarding route reaches the token addresses a spec names. The provider returns the reader to `{prefix}/_vellum/oauth`, which a static export writes too
+
 ## [0.9.3] - 2026-10-28
 
 ### Added

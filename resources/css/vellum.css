@@ -3070,6 +3070,101 @@ html:has(.vellum-playground[open]) {
   margin-left: auto;
 }
 
+/* Getting an OAuth token: under the token field, the client, the scopes
+   and a button that runs the flow. */
+.vellum-playground-oauth {
+  display: grid;
+  gap: 0.625rem;
+  padding: 0.75rem;
+  border-bottom: 1px solid var(--border);
+  background: color-mix(in oklch, var(--muted) 50%, transparent);
+}
+
+.vellum-playground-oauth > .vellum-playground-modes {
+  justify-self: start;
+  border: 1px solid var(--border);
+}
+
+.vellum-playground-oauth-field {
+  display: grid;
+  gap: 0.25rem;
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}
+
+.vellum-playground-oauth-field .vellum-playground-control {
+  border: 1px solid var(--border);
+  border-radius: var(--vellum-inset-radius);
+  background: var(--background);
+}
+
+.vellum-playground-oauth-scopes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem 0.875rem;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: 0.75rem;
+}
+
+.vellum-playground-oauth-scopes legend {
+  margin-bottom: 0.25rem;
+  padding: 0;
+  color: var(--muted-foreground);
+}
+
+.vellum-playground-oauth-scopes label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.vellum-playground-oauth-scopes code,
+.vellum-playground-oauth-note code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.6875rem;
+}
+
+.vellum-playground-oauth-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+}
+
+.vellum-playground-oauth-go {
+  height: 1.875rem;
+  padding: 0 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--vellum-inset-radius);
+  background: var(--background);
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+.vellum-playground-oauth-go:hover {
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
+.vellum-playground-oauth-status {
+  margin: 0;
+  color: var(--muted-foreground);
+  font-size: 0.75rem;
+}
+
+.vellum-playground-oauth-status[data-failed] {
+  color: var(--vellum-method-delete);
+}
+
+.vellum-playground-oauth-note {
+  margin: 0;
+  color: var(--muted-foreground);
+  font-size: 0.6875rem;
+  overflow-wrap: anywhere;
+}
+
 /* A list of objects: its name and Add item, then each item under a slim
    line that numbers it and can remove it. */
 .vellum-playground-list,

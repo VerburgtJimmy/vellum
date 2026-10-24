@@ -17,6 +17,7 @@ use Vellum\Http\ChangelogFeed;
 use Vellum\Http\DocsView;
 use Vellum\Http\LlmsTxt;
 use Vellum\Http\Sitemap;
+use Vellum\OpenApi\Playground;
 
 /**
  * Renders the docs site to a static HTML folder for any static host.
@@ -120,6 +121,15 @@ final class ExportCommand extends Command
 
         $pages += $this->exportChangelog($repository, $prefixRoot, $out, $prefix, $baseUrl);
         $this->export404($repository, $out, $prefix, $baseUrl);
+
+        // The page an OAuth provider returns a reader to. A static host
+        // serves a folder's index.html for it.
+        if ((bool) config('vellum.openapi.enabled') && Playground::enabled()) {
+            $this->writeFile(
+                $prefixRoot.DIRECTORY_SEPARATOR.'_vellum'.DIRECTORY_SEPARATOR.'oauth'.DIRECTORY_SEPARATOR.'index.html',
+                view('vellum::pages.oauth-callback')->render(),
+            );
+        }
 
         $this->writeSitemap($repository, $out);
         $this->writeLlmsTxt($repository, $out);

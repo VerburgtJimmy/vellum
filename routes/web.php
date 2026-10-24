@@ -8,6 +8,7 @@ use Vellum\Http\Controllers\ChangelogController;
 use Vellum\Http\Controllers\ContentFileController;
 use Vellum\Http\Controllers\DocsController;
 use Vellum\Http\Controllers\LlmsTxtController;
+use Vellum\Http\Controllers\PlaygroundOAuthController;
 use Vellum\Http\Controllers\PlaygroundProxyController;
 use Vellum\Http\Controllers\RawMarkdownController;
 use Vellum\Http\Controllers\SearchIndexController;
@@ -33,6 +34,9 @@ Route::get('/_vellum/raw/{slug}.md', RawMarkdownController::class)
 Route::post('/_vellum/playground', PlaygroundProxyController::class)
     ->middleware('throttle:60,1')
     ->name('vellum.playground.proxy');
+
+// Where an OAuth provider returns a reader to the playground.
+Route::get('/_vellum/oauth', PlaygroundOAuthController::class)->name('vellum.playground.oauth');
 
 if (app()->environment('local')) {
     Route::view('/_vellum/demo', 'vellum::pages.ui-demo')->name('vellum.ui-demo');

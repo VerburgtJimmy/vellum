@@ -7,6 +7,7 @@
  * dialog around them.
  */
 import { bag, buildRequest, reach, toCurl, xsrfToken } from './playground/request.js'
+import { authorizeUrl, fromDiscovery, pkce, random, readToken, tokenRequest } from './playground/oauth.js'
 import { addItem, bodyToForm, coerce, control, display, failure, formToBody, hasForm, initial, pretty, removeItem, rows, size } from './playground/form.js'
 
 const STORE = 'vellum-playground'
@@ -145,6 +146,62 @@ async function direct(built, where, token, signal) {
   }
 }
 
+/**
+ * Sends a request the way any playground request goes: directly, or through
+ * this app when that is how it is set up. `forward` false keeps it in the
+ * browser, for an address the forwarding route was never told about.
+ */
+function dispatch(built, signal, forward = true) {
+  const where = reach(built.url, window.location.origin)
+  const proxy = where === 'cross' && forward ? document.documentElement.dataset.vellumPlaygroundProxy : null
+  const token = xsrfToken(document.cookie)
+
+  return proxy ? forwarded(proxy, built, token, signal) : direct(built, where, token, signal)
+}
+
+/**
+ * The reader signing in with the provider, in a window of its own. Resolves
+ * with the code the callback page hands back, once its state matches.
+ */
+function signIn(url, state) {
+  return new Promise((resolve, reject) => {
+    const popup = window.open(url, 'vellum-oauth', 'popup,width=520,height=720')
+
+    if (!popup) {
+      reject(new Error('The browser blocked the sign-in window. Allow pop-ups for this site and try again.'))
+
+      return
+    }
+
+    const done = (finish) => {
+      window.removeEventListener('message', listen)
+      clearInterval(watch)
+      finish()
+    }
+
+    // Only the window this opened, on this origin, with this request's state.
+    const listen = (event) => {
+      if (event.origin !== window.location.origin || event.source !== popup || event.data?.type !== 'vellum-oauth' || event.data.state !== state) {
+        return
+      }
+
+      done(() =>
+        event.data.error
+          ? reject(new Error(`${event.data.error}${event.data.description ? `: ${event.data.description}` : ''}`))
+          : resolve(String(event.data.code ?? '')),
+      )
+    }
+
+    const watch = setInterval(() => {
+      if (popup.closed) {
+        done(() => reject(new Error('The sign-in window was closed before it finished.')))
+      }
+    }, 500)
+
+    window.addEventListener('message', listen)
+  })
+}
+
 /** Has this site's server send the request, and reads its account of the answer. */
 async function forwarded(proxy, built, token, signal) {
   const response = await fetch(proxy, {
@@ -210,6 +267,173 @@ function typeName(schema = {}) {
   }
 
   return schema.type === 'json' ? 'JSON' : (schema.type ?? 'value')
+}
+
+const FLOWS = { authorizationCode: 'Sign in', clientCredentials: 'Client credentials' }
+
+/**
+ * Getting a token for an OAuth scheme: the flow, the client, the scopes,
+ * and a button that runs it. What is typed is kept for the tab, as the
+ * token is, and the token it gets goes in the field above.
+ */
+function oauth(scheme, stored, use) {
+  const kept = (stored.oauth ??= {})
+  const status = h('p', { class: 'vellum-playground-oauth-status', role: 'status' })
+  const panel = h('div', { class: 'vellum-playground-oauth' })
+  const redirect = new URL(document.documentElement.dataset.vellumOauthCallback ?? '_vellum/oauth', window.location.href).href
+  let flows = scheme.oauth.flows ?? null
+
+  const say = (text, failed = false) => {
+    status.textContent = text
+    status.toggleAttribute('data-failed', failed)
+  }
+
+  const text = (key, label, secret = false, placeholder = '') =>
+    h(
+      'label',
+      { class: 'vellum-playground-oauth-field' },
+      h('span', { text: label }),
+      h('input', {
+        class: 'vellum-playground-control',
+        type: secret ? 'password' : 'text',
+        autocomplete: 'off',
+        spellcheck: 'false',
+        placeholder,
+        value: kept[key] ?? '',
+        oninput: (event) => (kept[key] = event.target.value),
+      }),
+    )
+
+  const draw = () => {
+    const kinds = Object.keys(flows ?? { authorizationCode: true })
+    const kind = kinds.includes(kept.flow) ? kept.flow : kinds[0]
+    const flow = flows?.[kind]
+    const offered = Object.keys(flow?.scopes ?? {})
+    kept.scopes ??= [...new Set([...(scheme.oauth.required ?? []), ...(scheme.oauth.discovery ? ['openid'] : [])])]
+
+    panel.replaceChildren(
+      kinds.length > 1
+        ? h(
+            'div',
+            { class: 'vellum-playground-modes', role: 'group', 'aria-label': 'How to get a token' },
+            kinds.map((name) =>
+              h('button', {
+                type: 'button',
+                class: 'vellum-playground-mode',
+                'aria-pressed': String(name === kind),
+                text: FLOWS[name] ?? name,
+                onclick: () => ((kept.flow = name), say(''), draw()),
+              }),
+            ),
+          )
+        : null,
+      text('clientId', 'Client ID'),
+      text('clientSecret', kind === 'clientCredentials' ? 'Client secret' : 'Client secret, if the app has one', true),
+      offered.length > 0
+        ? h(
+            'fieldset',
+            { class: 'vellum-playground-oauth-scopes' },
+            h('legend', { text: 'Scopes' }),
+            offered.map((scope) =>
+              h(
+                'label',
+                { title: flow.scopes[scope] || null },
+                h('input', {
+                  type: 'checkbox',
+                  checked: kept.scopes.includes(scope),
+                  onchange: (event) => (kept.scopes = event.target.checked ? [...kept.scopes, scope] : kept.scopes.filter((name) => name !== scope)),
+                }),
+                h('code', { text: scope }),
+              ),
+            ),
+          )
+        : h(
+            'label',
+            { class: 'vellum-playground-oauth-field' },
+            h('span', { text: 'Scopes' }),
+            h('input', {
+              class: 'vellum-playground-control',
+              autocomplete: 'off',
+              spellcheck: 'false',
+              placeholder: 'read write',
+              value: kept.scopes.join(' '),
+              oninput: (event) => (kept.scopes = event.target.value.split(/\s+/).filter(Boolean)),
+            }),
+          ),
+      h(
+        'div',
+        { class: 'vellum-playground-oauth-actions' },
+        h('button', { type: 'button', class: 'vellum-playground-oauth-go', text: kind === 'clientCredentials' ? 'Get token' : 'Sign in', onclick: () => run(kind) }),
+        status,
+      ),
+      kind === 'clientCredentials'
+        ? null
+        : h('p', { class: 'vellum-playground-oauth-note' }, 'Register this address with the provider as a redirect URI: ', h('code', { text: redirect })),
+    )
+  }
+
+  const run = async (kind) => {
+    const clientId = (kept.clientId ?? '').trim()
+
+    if (clientId === '') {
+      say('Fill in the client ID first.', true)
+
+      return
+    }
+
+    try {
+      if (!flows && scheme.oauth.discovery) {
+        say('Reading the provider\'s settings…')
+        const answer = await dispatch({ method: 'GET', url: scheme.oauth.discovery, headers: { Accept: 'application/json' } }, undefined, false)
+        flows = answer.error ? null : fromDiscovery(JSON.parse(answer.text ?? 'null'))
+
+        if (!flows) {
+          throw new Error(answer.error ?? 'The provider\'s settings could not be read.')
+        }
+      }
+
+      const flow = flows[kind]
+      let request
+
+      if (kind === 'clientCredentials') {
+        request = tokenRequest(flow.tokenUrl, 'client_credentials', { clientId, clientSecret: kept.clientSecret ?? '', scopes: kept.scopes })
+      } else {
+        if (!window.isSecureContext || !crypto.subtle) {
+          throw new Error('Signing in needs the page to be served over HTTPS.')
+        }
+
+        const { verifier, challenge } = await pkce()
+        const state = random()
+        say('Waiting for you to sign in…')
+        const code = await signIn(authorizeUrl(flow, { clientId, redirectUri: redirect, scopes: kept.scopes, state, challenge }), state)
+        request = tokenRequest(flow.tokenUrl, 'authorization_code', { clientId, clientSecret: kept.clientSecret ?? '', code, verifier, redirectUri: redirect })
+      }
+
+      say('Getting the token…')
+      // A provider found through discovery names its own token address,
+      // which the forwarding route does not know, so that one stays here.
+      const answer = await dispatch(request, undefined, !scheme.oauth.discovery)
+
+      if (answer.error) {
+        throw new Error(answer.error)
+      }
+
+      const result = readToken(answer.status, answer.text)
+
+      if (result.error) {
+        throw new Error(result.error)
+      }
+
+      use(result.token)
+      say(result.expiresIn ? `Signed in. The token is good for ${Math.round(result.expiresIn / 60)} minutes.` : 'Signed in.')
+    } catch (error) {
+      say(error instanceof TypeError ? 'The provider could not be reached from this page. It may not allow it (CORS).' : error.message, true)
+    }
+  }
+
+  draw()
+
+  return panel
 }
 
 export function open(button) {
@@ -342,31 +566,36 @@ export function open(button) {
         'Authorization',
         operation.security.flatMap((scheme) => {
           const stored = (state.auth[scheme.name] ??= bag())
+          const inputs = bag()
           const field = (key, label, secret) =>
             row({
               name: label,
               type: scheme.type === 'apiKey' ? scheme.in : 'header',
               description: scheme.description,
               child: (id) =>
-                h('input', {
+                (inputs[key] = h('input', {
                   id,
                   class: 'vellum-playground-control',
                   type: secret ? 'password' : 'text',
                   autocomplete: 'off',
                   spellcheck: 'false',
-                  placeholder: scheme.type === 'bearer' ? 'Token' : '',
+                  placeholder: scheme.type === 'bearer' ? (scheme.oauth ? 'Paste one, or get one below' : 'Token') : '',
                   value: stored[key] ?? '',
                   oninput: (event) => {
                     stored[key] = event.target.value
                     remember(state)
                     refresh()
                   },
-                }),
+                })),
             })
 
-          return scheme.type === 'basic'
-            ? [field('username', 'Username', false), field('password', 'Password', true)]
-            : field('value', scheme.type === 'apiKey' ? scheme.key : scheme.name, true)
+          if (scheme.type === 'basic') {
+            return [field('username', 'Username', false), field('password', 'Password', true)]
+          }
+
+          const token = field('value', scheme.type === 'apiKey' ? scheme.key : scheme.name, true)
+
+          return scheme.oauth ? [token, oauth(scheme, stored, (value) => ((inputs.value.value = value), (stored.value = value), remember(state), refresh()))] : token
         }),
       ),
     )

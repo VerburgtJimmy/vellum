@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+require_once dirname(__DIR__).'/OpenApi/helpers.php';
+
 use Illuminate\Support\Facades\URL;
 use Vellum\Cache\FragmentCache;
 use Vellum\Content\Document;
@@ -694,4 +696,17 @@ it('points exported search at the index and pages where the export is hosted', f
         ->and($html)->toContain('static: true');
 
     $this->deleteDirectory($out);
+});
+
+it('exports the page an OAuth provider returns a reader to, where the pages say it is', function (): void {
+    $out = $this->cachePath().'/export-oauth';
+    config()->set('vellum.export.out', $out);
+    config()->set('vellum.export.base_url', '/');
+    $this->writeDoc('index.md', "---\ntitle: Home\n---\nHi");
+    enableOpenApi($this->cachePath(), apiSpec());
+
+    $this->artisan('vellum:export')->assertSuccessful();
+
+    expect(file_get_contents($out.'/docs/_vellum/oauth/index.html'))->toContain('vellum-oauth')
+        ->and(file_get_contents($out.'/docs/api/index.html'))->toContain('data-vellum-oauth-callback="../../docs/_vellum/oauth/"');
 });
