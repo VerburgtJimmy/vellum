@@ -33,9 +33,12 @@ export async function pkce() {
   return { verifier, challenge: base64url(digest) }
 }
 
-/** Where to send the reader to sign in. */
-export function authorizeUrl(flow, { clientId, redirectUri, scopes, state, challenge }) {
-  const url = new URL(flow.authorizationUrl)
+/**
+ * Where to send the reader to sign in. A spec whose server is a path gives
+ * a sign-in address on this site, which `base` resolves.
+ */
+export function authorizeUrl(flow, { clientId, redirectUri, scopes, state, challenge, base }) {
+  const url = new URL(flow.authorizationUrl, base)
 
   // The address is the spec's, often someone else's file. A window opened
   // on javascript: would run it as this page.

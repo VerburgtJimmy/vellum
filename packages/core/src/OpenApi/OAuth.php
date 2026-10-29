@@ -73,16 +73,19 @@ final class OAuth
 
     /**
      * A URL as an address the browser can go to. The spec may give one
-     * relative to the API's server.
+     * relative to the API's server. A server that is itself a path keeps
+     * the result a path, which the browser reads as on this site.
      */
     public static function absolute(string $url, ?string $base): string
     {
-        if (preg_match('#^https?://#i', $url) === 1 || $base === null || preg_match('#^https?://#i', $base) !== 1) {
+        if (preg_match('#^https?://#i', $url) === 1 || $base === null || $base === '') {
             return $url;
         }
 
-        $origin = (string) preg_replace('#^(https?://[^/]+).*$#i', '$1', $base);
+        if (str_starts_with($url, '/')) {
+            return preg_match('#^(https?://[^/]+)#i', $base, $origin) === 1 ? $origin[1].$url : $url;
+        }
 
-        return str_starts_with($url, '/') ? $origin.$url : rtrim($base, '/').'/'.$url;
+        return rtrim($base, '/').'/'.$url;
     }
 }

@@ -29,6 +29,12 @@ describe('getting an OAuth token', () => {
     })
   })
 
+  it('reads a sign-in address on this site against the page', () => {
+    const url = new URL(authorizeUrl({ ...flow, authorizationUrl: '/api/oauth/authorize' }, { clientId: 'a', redirectUri: 'https://docs.test/cb', scopes: [], state: 's', challenge: 'c', base: 'https://docs.test/docs/api' }))
+
+    expect(url.origin + url.pathname).toBe('https://docs.test/api/oauth/authorize')
+  })
+
   it('never opens a sign-in address that is not a web address', () => {
     for (const address of ['javascript:alert(1)', 'data:text/html,<script>alert(1)</script>', 'vbscript:x']) {
       expect(() => authorizeUrl({ ...flow, authorizationUrl: address }, { clientId: 'a', redirectUri: 'https://d.test/cb', scopes: [], state: 's', challenge: 'c' })).toThrow('not a web address')

@@ -162,6 +162,17 @@ An operation secured with OAuth 2 or OpenID Connect has a panel under its token 
 
 The scopes the spec lists can be ticked, and those the operation requires start ticked. An OpenID Connect scheme reads the provider's sign-in and token addresses from its discovery document.
 
+A spec can fill in the client ID for the reader, for a client made for the docs, with `x-vellum-client-id` on the scheme:
+
+```yaml
+components:
+  securitySchemes:
+    oauth:
+      type: oauth2
+      x-vellum-client-id: docs-playground
+      flows: ...
+```
+
 For **Sign in**, register the playground's return address with the provider as a redirect URI. It is the same for every operation, and the panel shows it:
 
 ```text

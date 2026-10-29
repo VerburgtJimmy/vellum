@@ -310,6 +310,7 @@ function oauth(scheme, stored, use) {
     const flow = flows?.[kind]
     const offered = Object.keys(flow?.scopes ?? {})
     kept.scopes ??= [...new Set([...(scheme.oauth.required ?? []), ...(scheme.oauth.discovery ? ['openid'] : [])])]
+    kept.clientId ??= scheme.oauth.clientId
 
     panel.replaceChildren(
       kinds.length > 1
@@ -393,10 +394,14 @@ function oauth(scheme, stored, use) {
       }
 
       const flow = flows[kind]
+      // The reader picks scopes once for every flow. Those a flow does not
+      // list are hidden while it is chosen, and are not sent with it either.
+      const offered = Object.keys(flow.scopes ?? {})
+      const scopes = offered.length > 0 ? kept.scopes.filter((scope) => offered.includes(scope)) : kept.scopes
       let request
 
       if (kind === 'clientCredentials') {
-        request = tokenRequest(flow.tokenUrl, 'client_credentials', { clientId, clientSecret: kept.clientSecret ?? '', scopes: kept.scopes })
+        request = tokenRequest(flow.tokenUrl, 'client_credentials', { clientId, clientSecret: kept.clientSecret ?? '', scopes })
       } else {
         if (!window.isSecureContext || !crypto.subtle) {
           throw new Error('Signing in needs the page to be served over HTTPS.')
@@ -405,7 +410,7 @@ function oauth(scheme, stored, use) {
         const { verifier, challenge } = await pkce()
         const state = random()
         say('Waiting for you to sign in…')
-        const code = await signIn(authorizeUrl(flow, { clientId, redirectUri: redirect, scopes: kept.scopes, state, challenge }), state)
+        const code = await signIn(authorizeUrl(flow, { clientId, redirectUri: redirect, scopes, state, challenge, base: window.location.href }), state)
         request = tokenRequest(flow.tokenUrl, 'authorization_code', { clientId, clientSecret: kept.clientSecret ?? '', code, verifier, redirectUri: redirect })
       }
 
@@ -425,7 +430,13 @@ function oauth(scheme, stored, use) {
       }
 
       use(result.token)
-      say(result.expiresIn ? `Signed in. The token is good for ${Math.round(result.expiresIn / 60)} minutes.` : 'Signed in.')
+      const minutes = result.expiresIn ? Math.round(result.expiresIn / 60) : null
+
+      if (kind === 'clientCredentials') {
+        say(minutes ? `Got a token, good for ${minutes} minutes.` : 'Got a token.')
+      } else {
+        say(minutes ? `Signed in. The token is good for ${minutes} minutes.` : 'Signed in.')
+      }
     } catch (error) {
       say(error instanceof TypeError ? 'The provider could not be reached from this page. It may not allow it (CORS).' : error.message, true)
     }

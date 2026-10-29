@@ -207,6 +207,22 @@ it('carries the OAuth flows it can run, with addresses a browser can go to', fun
         ->not->toContain('https://api.example.com/oauth/authorize');
 });
 
+it('keeps OAuth addresses on this site when the server is a path, and fills in the client the spec offers', function (): void {
+    $data = playgroundData($this->cachePath(), apiSpec([
+        'servers' => [['url' => '/api/v1']],
+        'components' => ['securitySchemes' => [
+            'oauth' => ['type' => 'oauth2', 'x-vellum-client-id' => 'docs', 'flows' => [
+                'authorizationCode' => ['authorizationUrl' => '/api/oauth/authorize', 'tokenUrl' => 'oauth/token', 'scopes' => []],
+            ]],
+        ]],
+        'paths' => ['/pets' => ['post' => ['security' => [['oauth' => []]]]]],
+    ]));
+
+    expect($data['security'][0]['oauth']['flows']['authorizationCode'])
+        ->toBe(['authorizationUrl' => '/api/oauth/authorize', 'tokenUrl' => '/api/v1/oauth/token', 'scopes' => []])
+        ->and($data['security'][0]['oauth']['clientId'])->toBe('docs');
+});
+
 it('serves the page a provider returns a reader to, which hands the code only to its own origin', function (): void {
     enableOpenApi($this->cachePath(), apiSpec());
 

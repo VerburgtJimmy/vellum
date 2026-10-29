@@ -152,6 +152,11 @@ final class Playground
                 } elseif ($type === 'openIdConnect' && is_string($scheme['openIdConnectUrl'] ?? null)) {
                     $out[$name]['oauth'] = ['discovery' => OAuth::absolute($scheme['openIdConnectUrl'], $base), 'required' => $scopes];
                 }
+
+                // A client the spec offers readers, such as one made for the docs.
+                if (isset($out[$name]['oauth']) && is_string($scheme['x-vellum-client-id'] ?? null) && $scheme['x-vellum-client-id'] !== '') {
+                    $out[$name]['oauth']['clientId'] = $scheme['x-vellum-client-id'];
+                }
             }
         }
 
