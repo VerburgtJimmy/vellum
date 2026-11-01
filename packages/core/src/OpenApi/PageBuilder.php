@@ -86,6 +86,8 @@ final class PageBuilder
             'spec' => $spec,
             'groups' => $groups,
             'markdown' => $this->markdown(...),
+            'describe' => $this->describe(...),
+            'inline' => $this->inline(...),
             'intro' => $this->afterOpening($spec->description()),
             'href' => $link,
         ])->render();
@@ -144,6 +146,8 @@ final class PageBuilder
         $html = $this->view->make('vellum::openapi.operation', [
             ...$page,
             'markdown' => $this->markdown(...),
+            'describe' => $this->describe(...),
+            'inline' => $this->inline(...),
             'body' => $this->afterOpening($operation->description),
             'payloadTabs' => $payload === null ? '' : $this->codeTabs([['label' => 'JSON', 'language' => 'json', 'code' => $payload]], null),
             'playground' => Playground::enabled() && ! $webhook
@@ -162,9 +166,9 @@ final class PageBuilder
                 'api-sample',
             ),
             'responseTabs' => $this->codeTabs(
-                array_map(static fn (string $status, string $example): array => [
+                array_map(fn (string $status, string $example): array => [
                     'label' => $status,
-                    'language' => 'json',
+                    'language' => $this->exampleLanguage($operation, $status),
                     'code' => $example,
                 ], array_map(strval(...), array_keys($page['responseExamples'])), array_values($page['responseExamples'])),
                 null,
@@ -286,6 +290,26 @@ final class PageBuilder
     }
 
     /**
+     * A description on a field or a scheme. Most are a plain sentence and a
+     * long schema has hundreds, so only the rest go through the renderer.
+     */
+    private function describe(string $text): string
+    {
+        return preg_match('/[`*_\[<&\\\\\n]|https?:/', $text) === 1
+            ? $this->markdown($text)
+            : '<p>'.htmlspecialchars($text, ENT_QUOTES).'</p>';
+    }
+
+    /**
+     * A description that sits in a line with other things: its first
+     * paragraph, without the paragraph.
+     */
+    private function inline(string $text): string
+    {
+        return (string) preg_replace('#^<p>(.*?)</p>.*$#s', '$1', trim($this->describe($text)));
+    }
+
+    /**
      * Samples as the docs' own code tabs, so they get the same card,
      * highlighting and copy button as every other block.
      *
@@ -350,6 +374,14 @@ final class PageBuilder
             }
 
             $media = reset($content);
+            $item = is_array($media) ? Stream::item((string) array_key_first($content), $media) : null;
+
+            if (is_array($media) && $item !== null) {
+                $examples[(string) $status] = Stream::example($media, $item);
+
+                continue;
+            }
+
             $example = is_array($media) ? ExampleGenerator::forMedia($media) : null;
 
             if ($example === null) {
@@ -363,6 +395,18 @@ final class PageBuilder
         }
 
         return $examples;
+    }
+
+    /**
+     * Events are not JSON, however much JSON their data holds.
+     */
+    private function exampleLanguage(Operation $operation, string $status): string
+    {
+        $content = $operation->responses[$status]['content'] ?? null;
+        $type = is_array($content) ? array_key_first($content) : null;
+        $media = $type === null ? null : $content[$type];
+
+        return is_array($media) && Stream::item((string) $type, $media) === 'event' ? 'text' : 'json';
     }
 
     private function serverUrl(Spec $spec, Operation $operation): ?string

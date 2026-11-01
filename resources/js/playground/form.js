@@ -291,6 +291,55 @@ export function size(bytes) {
   return bytes < 1024 * 1024 ? `${(bytes / 1024).toFixed(1)} KB` : `${(bytes / 1024 / 1024).toFixed(1)} MB`
 }
 
+const REASONS = {
+  200: 'OK', 201: 'Created', 202: 'Accepted', 204: 'No Content', 206: 'Partial Content',
+  301: 'Moved Permanently', 302: 'Found', 303: 'See Other', 304: 'Not Modified', 307: 'Temporary Redirect', 308: 'Permanent Redirect',
+  400: 'Bad Request', 401: 'Unauthorized', 402: 'Payment Required', 403: 'Forbidden', 404: 'Not Found', 405: 'Method Not Allowed', 406: 'Not Acceptable',
+  408: 'Request Timeout', 409: 'Conflict', 410: 'Gone', 413: 'Content Too Large', 415: 'Unsupported Media Type', 422: 'Unprocessable Content', 429: 'Too Many Requests',
+  500: 'Internal Server Error', 501: 'Not Implemented', 502: 'Bad Gateway', 503: 'Service Unavailable', 504: 'Gateway Timeout',
+}
+
+/** A status as a reader knows it. HTTP/2 sends the number and no words. */
+export function reason(status, text = '') {
+  return `${status} ${text || (REASONS[status] ?? '')}`.trim()
+}
+
+/**
+ * JSON as pieces of text, each with the highlighter's class for what it is.
+ * The same classes the docs' own code uses, so it reads the same.
+ */
+export function tokens(text) {
+  const out = []
+  const pattern = /("(?:\\.|[^"\\])*")(\s*:)?|\b(?:true|false|null)\b|-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?/g
+  let last = 0
+
+  for (const match of text.matchAll(pattern)) {
+    const [whole, string, colon] = match
+
+    if (match.index > last) {
+      out.push([null, text.slice(last, match.index)])
+    }
+
+    if (string) {
+      out.push([colon ? 'hl-property' : 'hl-value', string])
+
+      if (colon) {
+        out.push([null, colon])
+      }
+    } else {
+      out.push([/^[-\d]/.test(whole) ? 'hl-number' : 'hl-literal', whole])
+    }
+
+    last = match.index + whole.length
+  }
+
+  if (last < text.length) {
+    out.push([null, text.slice(last)])
+  }
+
+  return out
+}
+
 /** A response body as text to show: JSON set out, anything else as it came. */
 export function pretty(text, contentType = '') {
   if (/\bjson\b/i.test(contentType) || /^\s*[[{]/.test(text)) {

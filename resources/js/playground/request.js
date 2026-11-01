@@ -102,7 +102,7 @@ function encodeBody(contentType, body) {
  * @returns {{ method: string, url: string, headers: Record<string, string>, body: string | null, files: Record<string, unknown> | null }}
  */
 export function buildRequest(operation, server, values = {}, auth = []) {
-  const headers = Object.assign(bag(), { Accept: 'application/json' })
+  const headers = Object.assign(bag(), { Accept: operation.accept ?? 'application/json' })
   const query = Object.assign(bag(), values.query ?? {})
 
   for (const [name, value] of Object.entries(values.header ?? {})) {
@@ -135,6 +135,7 @@ export function buildRequest(operation, server, values = {}, auth = []) {
     headers,
     body,
     files: multipart && !unset(values.body) ? values.body : null,
+    ...(operation.accept ? { stream: true } : {}),
   }
 }
 
@@ -152,7 +153,8 @@ const shellQuote = (value) => `'${String(value).replace(/'/g, `'\\''`)}'`
  */
 export function toCurl(request) {
   const url = request.url.startsWith('-') ? `--url ${shellQuote(request.url)}` : shellQuote(request.url)
-  const lines = [`curl -X ${request.method.replace(/[^A-Z]/g, '')} ${url}`]
+  // -N shows a stream as it arrives, not when curl's buffer fills.
+  const lines = [`curl ${request.stream ? '-N ' : ''}-X ${request.method.replace(/[^A-Z]/g, '')} ${url}`]
 
   for (const [name, value] of Object.entries(request.headers)) {
     lines.push(`  -H ${shellQuote(`${name}: ${value}`)}`)

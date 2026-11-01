@@ -139,14 +139,44 @@ Each of the spec's `webhooks` gets a page in a **Webhooks** folder, after the op
 
 An operation's `callbacks` are listed on its own page, under **Callbacks**: the address the API calls, what it sends and the statuses to answer with.
 
+## Streaming responses
+
+A response can arrive a piece at a time. Vellum knows one by its media type: `text/event-stream`, `application/jsonl`, `application/x-ndjson`, `application/ndjson` and `application/json-seq`. OpenAPI 3.2's `itemSchema` describes one item, and marks any other media type as a stream too:
+
+```yaml
+responses:
+  '200':
+    description: Positions, as they come.
+    content:
+      text/event-stream:
+        itemSchema:
+          type: object
+          required: [event, data]
+          properties:
+            event: { const: position }
+            id: { type: string }
+            data:
+              type: string
+              contentMediaType: application/json
+              contentSchema:
+                $ref: '#/components/schemas/Position'
+```
+
+The page says the response is a stream and shows what one item holds, with `contentSchema` opened up in place of the string it describes. The example beside it is written the way the stream sends it, as `event:` and `data:` lines or a line of JSON each. A spec that writes out its own, with an example's `serializedValue` or a string `example`, is shown as it is. A list given as `dataValue` is one item each.
+
+The samples ask for that media type, and the curl sample adds `-N`, so curl shows the stream as it arrives. An older spec that gives a `schema` and no `itemSchema` is shown the same way, with that schema.
+
+In the playground the items are listed as they arrive, with the time each came. It keeps the last 200, and **Stop** ends the request and leaves what came on the page. A stream has no time limit there. Only an operation whose first 2xx response is a stream asks for one; where it offers JSON first, the playground asks for JSON.
+
 ## The playground
 
 Every operation's page has a **Try it** button on its request line. It opens a drawer beside the page, so the operation stays in view while a reader fills in the request, sends it and reads the response.
 
 - The parameters and the body are a form made from the spec. A JSON body can be written field by field or as JSON, and what is written carries over when the reader switches. An object inside the body has a field for each of its own, named with the path to it, such as `author.name`. A list of objects is filled in an item at a time, with **Add item** and **Remove**; an item left empty is not sent.
 - The command the request makes is shown as curl and follows what is typed.
-- Bearer tokens, basic credentials and API keys are supported. For OAuth 2 and OpenID Connect the reader pastes a token. Credentials are kept for the browser tab and are gone when it closes.
-- The response is shown as text, with its status, time, size and headers. It is never rendered as a page.
+- Bearer tokens, basic credentials and API keys are supported, and OAuth 2 and OpenID Connect can [sign in](#signing-in-with-oauth) for a token. Credentials are kept for the browser tab and are gone when it closes.
+- The response is shown as text, with its status, time, size and headers, and JSON is coloured in. It is never rendered as a page. A picture is shown, and any other file can be saved.
+- A [stream](#streaming-responses) is shown as it arrives.
 
 The request goes from the reader's own browser, which decides two things:
 
@@ -200,7 +230,7 @@ It is off by default, because it makes your app send requests on a reader's beha
 - A redirect is shown as the answer and is not followed.
 - Nothing of the reader's session with your app is forwarded. No cookies go along, and the only headers that do are `Accept`, `Content-Type`, `Authorization` and those the spec declares as a header parameter or an API key. A header that says where a request came from, such as `X-Forwarded-For`, is never forwarded. The reader's credentials for the API do pass through your server on the way.
 - It answers only a reader who may open the reference, behind the docs' [middleware](/docs/getting-started/configuration), and one reader can send 60 requests a minute.
-- A file upload is not forwarded. A response is kept up to 2 MB and is given 30 seconds to arrive.
+- A file upload is not forwarded. A response is kept up to 2 MB and is given 25 seconds to arrive. A stream cannot be shown as it comes this way: it is shown when it ends, or as far as it got after those 25 seconds.
 
 To forward to an API on a private network, as in local development against `http://localhost:8000`, allow it:
 
@@ -237,7 +267,6 @@ A reader who may not open the reference is not shown the way to it.
 - A description in the spec is Markdown, and Vellum's own directives work in it, a [callout](/docs/components/callouts) for one. Blade components do not: a spec is often someone else's text.
 - A `$ref` to another file or a URL is not followed. `vellum:build` warns about each one.
 - An operation with the `QUERY` method, or one of the API's own under `additionalOperations`, gets a page like any other. Some proxies and CDNs turn away a method they do not know, Cloudflare among them, so a playground request with `QUERY` can get a 400 from them before it reaches the API. A query string described as one `querystring` parameter is listed as the query parameters it is made of when it is form-encoded.
-- The playground cannot read a streamed response, such as server-sent events.
 - With [versions](/docs/versions) on, the reference belongs to the latest version only. A spec describes the API as it is.
 - A page you wrote yourself under `api/` is still served. A spec whose page would take the same address as one of yours stops the build.
 

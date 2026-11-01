@@ -209,3 +209,19 @@ describe('xsrfToken', () => {
     expect(xsrfToken('')).toBeNull()
   })
 })
+
+describe('asking for a stream', () => {
+  it('asks for what the operation streams, and has curl show it as it comes', () => {
+    const request = buildRequest({ method: 'get', path: '/track', accept: 'text/event-stream' }, 'https://api.test')
+
+    expect(request.headers.Accept).toBe('text/event-stream')
+    expect(toCurl(request)).toContain('curl -N -X GET')
+  })
+
+  it('asks for JSON otherwise', () => {
+    const request = buildRequest({ method: 'get', path: '/track' }, 'https://api.test')
+
+    expect(request.headers.Accept).toBe('application/json')
+    expect(toCurl(request)).toContain('curl -X GET')
+  })
+})

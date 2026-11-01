@@ -19,7 +19,7 @@
                         @endif
                     </div>
                     @if (is_string($server['description'] ?? null) && $server['description'] !== '')
-                        <p class="vellum-api-field-description">{{ $server['description'] }}</p>
+                        <div class="vellum-api-field-description">{!! $describe($server['description']) !!}</div>
                     @endif
                     @foreach (\Vellum\OpenApi\Servers::variables($server) as $variable)
                         <p class="vellum-api-enum">
@@ -54,7 +54,7 @@
                         @endif
                     </div>
                     @if (is_string($scheme['description'] ?? null) && $scheme['description'] !== '')
-                        <p class="vellum-api-field-description">{{ $scheme['description'] }}</p>
+                        <div class="vellum-api-field-description">{!! $describe($scheme['description']) !!}</div>
                     @endif
                 </div>
             @endforeach

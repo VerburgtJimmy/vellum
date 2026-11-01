@@ -23,7 +23,8 @@ final class CurlGenerator implements SampleGenerator
         // follows --url, a header that starts with @ names a file to read
         // headers from, and so does a body after -d.
         $url = $request->fullUrl();
-        $lines = ['curl -X '.preg_replace('/[^A-Z]/', '', strtoupper($request->method)).' '
+        // -N shows a stream as it arrives, not when curl's buffer fills.
+        $lines = ['curl '.($request->stream ? '-N ' : '').'-X '.preg_replace('/[^A-Z]/', '', strtoupper($request->method)).' '
             .(str_starts_with($url, '-') ? '--url ' : '').$this->quote($url)];
 
         foreach ($request->headers as $name => $value) {

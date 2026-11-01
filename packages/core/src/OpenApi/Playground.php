@@ -44,7 +44,7 @@ final class Playground
                     'in' => $location,
                     'name' => $name,
                     'required' => ! empty($parameter['required']),
-                    'description' => is_string($parameter['description'] ?? null) ? $parameter['description'] : null,
+                    'description' => is_string($parameter['description'] ?? null) ? self::plain($parameter['description']) : null,
                     'schema' => self::slim($schema, 0),
                     'example' => ExampleGenerator::declared($parameter) ?? $schema['example'] ?? $schema['default'] ?? null,
                 ];
@@ -58,8 +58,18 @@ final class Playground
             'servers' => $this->servers($operation, $spec, $server),
             'parameters' => $parameters,
             'bodies' => $this->bodies($operation),
+            'accept' => Stream::answer($operation),
             'security' => $this->security($operation, $spec),
         ];
+    }
+
+    /**
+     * A description for a tooltip, which shows what it is given, Markdown's
+     * marks and all. The page has the same words rendered.
+     */
+    private static function plain(string $text): string
+    {
+        return (string) preg_replace(['/\[([^\]]*)\]\([^)]*\)/', '/(`+)(.+?)\1/', '/(\*\*|__)(.+?)\1/'], ['$1', '$2', '$2'], $text);
     }
 
     /**
@@ -91,7 +101,7 @@ final class Playground
                 continue;
             }
 
-            $schema = is_array($media['schema'] ?? null) ? $media['schema'] : [];
+            $schema = Stream::schema($media);
 
             $bodies[] = [
                 'contentType' => $type,
@@ -125,7 +135,7 @@ final class Playground
 
                 $scheme = $schemes[$name] ?? [];
                 $type = is_string($scheme['type'] ?? null) ? $scheme['type'] : '';
-                $description = is_string($scheme['description'] ?? null) ? $scheme['description'] : null;
+                $description = is_string($scheme['description'] ?? null) ? self::plain($scheme['description']) : null;
 
                 if ($type === 'apiKey') {
                     $out[$name] = [
@@ -182,6 +192,10 @@ final class Playground
             if (array_key_exists($key, $schema) && (is_scalar($schema[$key]) || is_array($schema[$key]))) {
                 $out[$key] = $schema[$key];
             }
+        }
+
+        if (is_string($out['description'] ?? null)) {
+            $out['description'] = self::plain($out['description']);
         }
 
         if ($out['type'] === 'object' && is_array($schema['properties'] ?? null)) {

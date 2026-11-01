@@ -22,7 +22,7 @@
     </div>
 
     @if (is_string($description ?? null) && $description !== '')
-        <p class="vellum-api-field-description">{{ $description }}</p>
+        <div class="vellum-api-field-description">{!! $describe($description) !!}</div>
     @endif
 
     @if ($chips !== [])
@@ -35,7 +35,7 @@
 
     @if ($enum !== [])
         <p class="vellum-api-enum">
-            <span class="vellum-api-enum-label">Value in</span>
+            <span class="vellum-api-enum-label">{{ array_key_exists('const', $schema) ? 'Always' : 'Value in' }}</span>
             @foreach ($enum as $value)
                 <code>{{ $value }}</code>
             @endforeach

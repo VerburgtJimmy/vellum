@@ -6,6 +6,7 @@ namespace Vellum\OpenApi\Samples;
 
 use Vellum\OpenApi\ExampleGenerator;
 use Vellum\OpenApi\Operation;
+use Vellum\OpenApi\Stream;
 
 /**
  * Builds the request once, then asks each configured language to write it.
@@ -89,6 +90,12 @@ final class SampleBuilder
             }
         }
 
+        $stream = Stream::answer($operation);
+
+        if ($stream !== null) {
+            $headers['Accept'] = $stream;
+        }
+
         [$body, $contentType] = $this->body($operation);
 
         if ($contentType !== null) {
@@ -102,6 +109,7 @@ final class SampleBuilder
             query: $query,
             body: $body,
             contentType: $contentType,
+            stream: $stream !== null,
         );
     }
 

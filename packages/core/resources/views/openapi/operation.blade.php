@@ -56,7 +56,7 @@
                                     <span class="vellum-api-deprecated">Deprecated</span>
                                 @endif
                             </div>
-                            <p class="vellum-api-field-description">{{ $scheme['hint'] }}</p>
+                            <div class="vellum-api-field-description">{!! $describe($scheme['hint']) !!}</div>
                         </div>
                     @endforeach
                 </div>
@@ -92,7 +92,7 @@
             @endif
 
             @if (is_string($operation->requestBody['description'] ?? null))
-                <p class="vellum-api-lede">{{ $operation->requestBody['description'] }}</p>
+                <p class="vellum-api-lede">{!! $inline($operation->requestBody['description']) !!}</p>
             @endif
 
             @foreach (array_keys($requestBody) as $bodyIndex => $type)
@@ -106,7 +106,8 @@
                             <span class="vellum-api-panel-note">Required</span>
                         @endif
                     </div>
-                    @include('vellum::openapi.schema', ['schema' => is_array($media) ? ($media['schema'] ?? []) : [], 'depth' => 0, 'anchor' => $bodyIndex === 0 ? 'body' : 'body-'.($bodyIndex + 1)])
+                    @include('vellum::openapi.stream', ['type' => (string) $type])
+                    @include('vellum::openapi.schema', ['schema' => is_array($media) ? \Vellum\OpenApi\Stream::schema($media) : [], 'depth' => 0, 'anchor' => $bodyIndex === 0 ? 'body' : 'body-'.($bodyIndex + 1)])
                 </div>
             @endforeach
         @endif
@@ -124,14 +125,15 @@
                     <div class="vellum-api-panel-head">
                         <span class="vellum-api-status" data-status="{{ $statusClass((string) $status) }}">{{ $status }}</span>
                         @if (is_string($response['description'] ?? null) && $response['description'] !== '')
-                            <span class="vellum-api-panel-title">{{ $response['description'] }}</span>
+                            <span class="vellum-api-panel-title">{!! $inline($response['description']) !!}</span>
                         @endif
                         @if ($content !== [])
                             <code class="vellum-api-media">{{ array_key_first($content) }}</code>
                         @endif
                     </div>
                     @if (is_array($media))
-                        @include('vellum::openapi.schema', ['schema' => $media['schema'] ?? [], 'depth' => 0, 'anchor' => 'response-'.\Vellum\Support\Slug::from((string) $status)])
+                        @include('vellum::openapi.stream', ['type' => (string) array_key_first($content)])
+                        @include('vellum::openapi.schema', ['schema' => \Vellum\OpenApi\Stream::schema($media), 'depth' => 0, 'anchor' => 'response-'.\Vellum\Support\Slug::from((string) $status)])
                     @endif
                 </div>
             @endforeach

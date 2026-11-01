@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { bodyToForm, coerce, control, display, failure, fields, formToBody, hasForm, initial, leaves, pretty, size, rows, addItem, removeItem } from '../../resources/js/playground/form.js'
+import { bodyToForm, coerce, control, display, failure, fields, formToBody, hasForm, initial, leaves, pretty, reason, size, rows, addItem, removeItem, tokens } from '../../resources/js/playground/form.js'
 
 describe('control', () => {
   it('picks a control by what the schema allows', () => {
@@ -258,5 +258,25 @@ describe('a list of objects in the body', () => {
     expect(fewer['crew.#']).toBe('2')
     expect(formToBody(ship, fewer)).toEqual({ crew: [{ name: 'Ada' }, { name: 'Cy' }] })
     expect(Object.getPrototypeOf(fewer)).toBeNull()
+  })
+})
+
+describe('showing a response', () => {
+  it('says what a status means when the server sent only the number', () => {
+    expect(reason(200, '')).toBe('200 OK')
+    expect(reason(201)).toBe('201 Created')
+    expect(reason(200, 'Fine')).toBe('200 Fine')
+    expect(reason(299)).toBe('299')
+  })
+
+  it('tells a key from a string, and keeps every character', () => {
+    const json = '{ "a": "b:c", "n": -1.5e3, "ok": true, "none": null, "q": "say \\"hi\\"" }'
+    const pieces = tokens(json)
+
+    expect(pieces.map(([, text]) => text).join('')).toBe(json)
+    expect(pieces.filter(([name]) => name === 'hl-property').map(([, text]) => text)).toEqual(['"a"', '"n"', '"ok"', '"none"', '"q"'])
+    expect(pieces.filter(([name]) => name === 'hl-value').map(([, text]) => text)).toEqual(['"b:c"', '"say \\"hi\\""'])
+    expect(pieces.filter(([name]) => name === 'hl-number').map(([, text]) => text)).toEqual(['-1.5e3'])
+    expect(pieces.filter(([name]) => name === 'hl-literal').map(([, text]) => text)).toEqual(['true', 'null'])
   })
 })

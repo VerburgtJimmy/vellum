@@ -44,8 +44,10 @@ final class SchemaDirection
     public static function content(array $content, string $side): array
     {
         foreach ($content as $type => $media) {
-            if (is_array($media) && is_array($media['schema'] ?? null)) {
-                $content[$type]['schema'] = $side === 'request' ? self::request($media['schema']) : self::response($media['schema']);
+            foreach (['schema', 'itemSchema'] as $key) {
+                if (is_array($media) && is_array($media[$key] ?? null)) {
+                    $content[$type][$key] = $side === 'request' ? self::request($media[$key]) : self::response($media[$key]);
+                }
             }
         }
 
@@ -79,7 +81,7 @@ final class SchemaDirection
             }
         }
 
-        foreach (['items', 'additionalProperties', 'not'] as $key) {
+        foreach (['items', 'additionalProperties', 'not', 'contentSchema'] as $key) {
             if (is_array($schema[$key] ?? null)) {
                 $schema[$key] = self::without($schema[$key], $flag, $depth + 1);
             }

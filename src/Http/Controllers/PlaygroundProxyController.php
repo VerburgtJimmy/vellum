@@ -12,6 +12,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Http;
+use Psr\Http\Message\ResponseInterface;
 use Vellum\Content\ContentRepository;
 use Vellum\Http\PlaygroundProxy;
 use Vellum\OpenApi\Mount;
@@ -27,7 +28,11 @@ use Vellum\OpenApi\Playground;
  */
 final class PlaygroundProxyController extends Controller
 {
-    private const TIMEOUT = 30;
+    /**
+     * Short of the 30 seconds many hosts give a request, so a stream that
+     * never ends is answered with what came, not cut off with nothing.
+     */
+    private const TIMEOUT = 25;
 
     public function __invoke(Request $request): JsonResponse
     {
@@ -103,6 +108,7 @@ final class PlaygroundProxyController extends Controller
 
         $forward = PlaygroundProxy::headers($headers, $declared);
         $started = microtime(true);
+        $head = null;
 
         try {
             $pending = Http::withHeaders(['User-Agent' => 'Vellum-Playground', ...$forward])
@@ -114,6 +120,9 @@ final class PlaygroundProxyController extends Controller
                     'allow_redirects' => false,
                     'http_errors' => false,
                     'sink' => $sink,
+                    'on_headers' => static function (ResponseInterface $response) use (&$head): void {
+                        $head = $response;
+                    },
                     // To the address that was checked, whatever the name means by now.
                     'curl' => [CURLOPT_RESOLVE => [trim($host, '[]').':'.$port.':'.implode(',', $addresses)]],
                 ]);
@@ -125,17 +134,30 @@ final class PlaygroundProxyController extends Controller
             // The address as it was checked, not as it was sent in.
             $response = $pending->send($method, $target);
         } catch (ConnectionException) {
-            return $this->refuse('No response. The server may be down, or the address wrong.', 502);
+            // A stream can outlast the time it is given. What came is the
+            // answer so far, and there is no reason to throw that away.
+            return $head instanceof ResponseInterface
+                ? $this->answer($head, (string) $kept, true, $started)
+                : $this->refuse('No response. The server may be down, or the address wrong.', 502);
         }
 
         $content = $response->body();
         $truncated = $truncated || strlen($content) > PlaygroundProxy::MAX_RESPONSE;
+
+        return $this->answer($response->toPsrResponse(), $content, $truncated, $started);
+    }
+
+    /**
+     * What the API said, as data for the playground to show.
+     */
+    private function answer(ResponseInterface $response, string $content, bool $truncated, float $started): JsonResponse
+    {
         $content = substr($content, 0, PlaygroundProxy::MAX_RESPONSE);
-        $type = $response->header('Content-Type');
+        $type = $response->getHeaderLine('Content-Type');
         $textual = PlaygroundProxy::textual($type);
         $answered = [];
 
-        foreach ($response->headers() as $name => $values) {
+        foreach ($response->getHeaders() as $name => $values) {
             // A cookie the API sets is for a browser talking to the API.
             if (strtolower((string) $name) !== 'set-cookie') {
                 $answered[] = [(string) $name, implode(', ', $values)];
@@ -143,8 +165,8 @@ final class PlaygroundProxyController extends Controller
         }
 
         return new JsonResponse([
-            'status' => $response->status(),
-            'statusText' => $response->reason(),
+            'status' => $response->getStatusCode(),
+            'statusText' => $response->getReasonPhrase(),
             'headers' => $answered,
             'type' => $type,
             'body' => $textual ? mb_convert_encoding($content, 'UTF-8', 'UTF-8') : null,

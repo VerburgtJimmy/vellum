@@ -115,6 +115,10 @@ final class SchemaView
             $chips['Pattern'] = $schema['pattern'];
         }
 
+        if (is_string($schema['contentMediaType'] ?? null) && $schema['contentMediaType'] !== '') {
+            $chips['Holds'] = $schema['contentMediaType'];
+        }
+
         if (array_key_exists('default', $schema)) {
             $chips['Default'] = self::literal($schema['default']);
         }
@@ -164,7 +168,7 @@ final class SchemaView
      */
     public static function enumValues(array $schema): array
     {
-        $enum = $schema['enum'] ?? null;
+        $enum = array_key_exists('const', $schema) ? [$schema['const']] : ($schema['enum'] ?? null);
 
         if (! is_array($enum)) {
             return [];
@@ -283,21 +287,22 @@ final class SchemaView
             return true;
         }
 
-        $items = is_array($schema['items'] ?? null) ? $schema['items'] : null;
+        $items = is_array($schema['items'] ?? null) ? $schema['items'] : (is_array($schema['contentSchema'] ?? null) ? $schema['contentSchema'] : null);
 
         return $items !== null && (self::properties($items) !== [] || self::variants($items) !== []);
     }
 
     /**
-     * The node whose properties should be listed: an array shows its items.
+     * The node whose properties should be listed: an array shows its items,
+     * and a string that holds a document shows that document.
      *
      * @param  array<string, mixed>  $schema
      * @return array<string, mixed>
      */
     public static function body(array $schema): array
     {
-        if (self::properties($schema) === [] && is_array($schema['items'] ?? null)) {
-            return $schema['items'];
+        if (self::properties($schema) === []) {
+            return $schema['items'] ?? $schema['contentSchema'] ?? $schema;
         }
 
         return $schema;
@@ -358,6 +363,16 @@ final class SchemaView
     {
         if (is_array($schema['properties'] ?? null)) {
             return 'object';
+        }
+
+        if (array_key_exists('const', $schema)) {
+            return match (true) {
+                is_string($schema['const']) => 'string',
+                is_bool($schema['const']) => 'boolean',
+                is_int($schema['const']) => 'integer',
+                is_float($schema['const']) => 'number',
+                default => 'any',
+            };
         }
 
         return is_array($schema['items'] ?? null) ? 'array' : 'any';

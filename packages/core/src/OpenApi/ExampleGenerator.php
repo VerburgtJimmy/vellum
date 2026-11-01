@@ -18,7 +18,7 @@ final class ExampleGenerator
      */
     public static function forMedia(array $media): mixed
     {
-        return self::declared($media) ?? self::fromSchema(is_array($media['schema'] ?? null) ? $media['schema'] : []);
+        return self::declared($media) ?? self::fromSchema(Stream::schema($media));
     }
 
     /**
@@ -63,6 +63,17 @@ final class ExampleGenerator
 
         if (array_key_exists('default', $schema)) {
             return $schema['default'];
+        }
+
+        if (array_key_exists('const', $schema)) {
+            return $schema['const'];
+        }
+
+        // A string that holds a document: what it holds, as the string it is.
+        if (is_array($schema['contentSchema'] ?? null)) {
+            $held = self::fromSchema($schema['contentSchema'], $depth + 1);
+
+            return is_string($held) ? $held : json_encode($held, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
         }
 
         $enum = SchemaView::enumValues($schema);

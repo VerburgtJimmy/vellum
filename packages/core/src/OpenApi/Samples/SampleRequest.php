@@ -21,6 +21,7 @@ final readonly class SampleRequest
         public array $query = [],
         public mixed $body = null,
         public ?string $contentType = null,
+        public bool $stream = false,
     ) {}
 
     public function fullUrl(): string

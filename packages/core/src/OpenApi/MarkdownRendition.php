@@ -125,7 +125,7 @@ final class MarkdownRendition
 
             foreach ($content as $type => $media) {
                 $out[] = self::code((string) $type);
-                $out[] = $this->schema(is_array($media) && is_array($media['schema'] ?? null) ? $media['schema'] : []);
+                $out[] = $this->schema(is_array($media) ? Stream::schema($media) : []);
             }
         }
 
@@ -141,9 +141,14 @@ final class MarkdownRendition
                 }
 
                 $media = is_array($response['content'] ?? null) ? reset($response['content']) : null;
+                $item = is_array($media) ? Stream::item((string) array_key_first($response['content']), $media) : null;
 
-                if (is_array($media) && is_array($media['schema'] ?? null)) {
-                    $out[] = $this->schema($media['schema']);
+                if ($item !== null) {
+                    $out[] = 'Sent as a stream of '.$item.'s, as '.self::code((string) array_key_first($response['content'])).'.';
+                }
+
+                if (is_array($media) && Stream::schema($media) !== []) {
+                    $out[] = $this->schema(Stream::schema($media));
                 }
             }
         }

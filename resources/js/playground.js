@@ -8,11 +8,16 @@
  */
 import { bag, buildRequest, reach, toCurl, xsrfToken } from './playground/request.js'
 import { authorizeUrl, fromDiscovery, pkce, random, readToken, tokenRequest } from './playground/oauth.js'
-import { addItem, bodyToForm, coerce, control, display, failure, formToBody, hasForm, initial, pretty, removeItem, rows, size } from './playground/form.js'
+import { addItem, bodyToForm, coerce, control, display, failure, formToBody, hasForm, initial, pretty, reason, removeItem, rows, size, tokens } from './playground/form.js'
+import { reader, streamItem } from './playground/stream.js'
 
 const STORE = 'vellum-playground'
 const TIMEOUT = 30000
 const SHOWN = 400000
+// Set out piece by piece up to here, and as plain text past it.
+const HIGHLIGHTED = 100000
+// The latest items of a stream stay on the page. The reader is watching the end of it.
+const KEPT = 200
 
 /** An element. Text goes in as text, never as markup: much of it is from a spec or a response. */
 function h(tag, props = {}, ...children) {
@@ -99,8 +104,11 @@ function input(schema, text, { id, onInput, required = false, label }) {
   })
 }
 
-/** Sends the request from this browser, and reads back what it may. */
-async function direct(built, where, token, signal) {
+/**
+ * Sends the request from this browser, and reads back what it may. A stream
+ * is handed to `follow` as soon as it begins, which reads it to the end.
+ */
+async function direct(built, where, token, signal, follow) {
   const headers = { ...built.headers }
 
   // Laravel refuses a state-changing request from a signed-in browser
@@ -132,14 +140,23 @@ async function direct(built, where, token, signal) {
   })
 
   const type = response.headers.get('content-type') ?? ''
+
+  if (follow && response.ok && response.body && streamItem(type)) {
+    await follow({ status: response.status, statusText: response.statusText, headers: [...response.headers], type }, response.body)
+
+    return null
+  }
+
   const blob = await response.blob()
+  const textual = type === '' || /^text\/|json|xml|javascript|x-www-form-urlencoded|csv|yaml/i.test(type)
 
   return {
     status: response.status,
     statusText: response.statusText,
     headers: [...response.headers],
     type,
-    text: type === '' || /^text\/|json|xml|javascript|x-www-form-urlencoded|csv|yaml/i.test(type) ? await blob.text() : null,
+    text: textual ? await blob.text() : null,
+    blob: textual ? null : blob,
     size: blob.size,
     elapsed: Math.round(performance.now() - started),
     truncated: false,
@@ -234,6 +251,133 @@ async function forwarded(proxy, built, token, signal) {
     elapsed: Number(data.elapsed) || 0,
     truncated: data.truncated === true,
   }
+}
+
+/** JSON coloured in, or plain text past the size where that stops being worth it. */
+function coloured(text) {
+  return text.length > HIGHLIGHTED ? [text] : tokens(text).map(([name, piece]) => (name ? h('span', { class: name, text: piece }) : piece))
+}
+
+/** The line above a response: how it went, how long it took, how much came. */
+function statusLine(answer, ...facts) {
+  const kind = answer.status >= 500 ? '5xx' : answer.status >= 400 ? '4xx' : answer.status >= 300 ? '3xx' : '2xx'
+
+  return h(
+    'p',
+    { class: 'vellum-playground-status' },
+    h('span', { class: 'vellum-api-status', 'data-status': kind, text: reason(answer.status, answer.statusText) }),
+    ...facts,
+  )
+}
+
+function responseHeaders(answer) {
+  return h(
+    'details',
+    { class: 'vellum-playground-headers' },
+    h('summary', { text: answer.headers.length > 0 ? `Response headers (${answer.headers.length})` : 'Response headers' }),
+    h('pre', {}, h('code', { text: answer.headers.map(([name, value]) => `${name}: ${value}`).join('\n') || 'None the browser may show.' })),
+  )
+}
+
+/**
+ * A stream as a list that grows. `scroller` is what the reader scrolls: one
+ * who is at the bottom stays at the bottom, and one who scrolled up to read
+ * is left there.
+ */
+function streamView(answer, item, scroller, { via = null, live = true } = {}) {
+  const list = h('ol', { class: 'vellum-playground-stream' })
+  const count = h('span', {})
+  const amount = h('span', {})
+  const state = live ? h('span', { class: 'vellum-playground-live', text: 'Live' }) : null
+  const started = performance.now()
+  const raw = { text: '' }
+  let items = 0
+  let bytes = 0
+
+  const say = () => {
+    count.textContent = `${items} ${item}${items === 1 ? '' : 's'}`
+    amount.textContent = size(bytes)
+  }
+
+  const row = (entry) =>
+    h(
+      'li',
+      { class: 'vellum-playground-entry' },
+      live ? h('span', { class: 'vellum-playground-entry-at', text: `${((performance.now() - started) / 1000).toFixed(1)} s` }) : null,
+      entry.event ? h('span', { class: 'vellum-playground-entry-name', text: entry.event }) : null,
+      h('code', {}, ...coloured(entry.data)),
+    )
+
+  const empty = h('li', { class: 'vellum-playground-entry-waiting', text: `Waiting for the first ${item}.` })
+
+  list.append(empty)
+  say()
+
+  return {
+    raw,
+    nodes: [statusLine(answer, state, count, amount, via), list, responseHeaders(answer)],
+    /** Text as it came, the items it finished, and how many bytes it was. */
+    add(text, finished, length = text.length) {
+      const following = scroller.scrollHeight - scroller.scrollTop - scroller.clientHeight < 48
+
+      bytes += length
+      raw.text = (raw.text + text).slice(0, SHOWN)
+      items += finished.length
+      empty.remove()
+      list.append(...finished.map(row))
+
+      while (list.children.length > KEPT) {
+        list.firstChild.remove()
+      }
+
+      say()
+
+      if (following) {
+        scroller.scrollTop = scroller.scrollHeight
+      }
+    },
+    end(words) {
+      empty.remove()
+
+      if (state) {
+        state.textContent = words
+        state.dataset.state = 'ended'
+      }
+
+      if (items === 0) {
+        list.append(h('li', { class: 'vellum-playground-entry-waiting', text: `No ${item}s came.` }))
+      }
+    },
+  }
+}
+
+/**
+ * A response that is not text. A picture is shown, and anything can be saved.
+ * Only a raster image goes on the page, and a link only ever saves: the bytes
+ * are the API's, and a blob address opened as a page would run as this site.
+ */
+function binaryView(answer, urls) {
+  if (!answer.blob) {
+    return h('p', { class: 'vellum-playground-empty', text: `${answer.type || 'A response'} that is not text, so it is not shown.` })
+  }
+
+  const address = (blob) => {
+    const url = URL.createObjectURL(blob)
+
+    urls.push(url)
+
+    return url
+  }
+
+  const disposition = answer.headers.find(([name]) => name.toLowerCase() === 'content-disposition')?.[1] ?? ''
+  const name = /filename="?([^";]+)/i.exec(disposition)?.[1] ?? 'response'
+
+  return h(
+    'div',
+    { class: 'vellum-playground-file' },
+    /^image\/(png|jpeg|gif|webp|avif)\b/i.test(answer.type) ? h('img', { src: address(answer.blob), alt: 'The image in the response' }) : null,
+    h('a', { href: address(new Blob([answer.blob], { type: 'application/octet-stream' })), download: name, text: `Download ${size(answer.size)}` }),
+  )
 }
 
 let fieldCount = 0
@@ -527,7 +671,7 @@ export function open(button) {
       ...(state.auth[scheme.name] ?? {}),
     }))
 
-    return buildRequest({ method: operation.method, path: operation.path, body: body ?? null }, state.server, values, auth)
+    return buildRequest({ method: operation.method, path: operation.path, body: body ?? null, accept: operation.accept }, state.server, values, auth)
   }
 
   const curl = h('code', {})
@@ -785,16 +929,19 @@ export function open(button) {
   // Response tab until there is something to put under it.
   let tab = 'curl'
   let answered = false
+  // A stream's text as it came, which is what copying it should give.
+  let raw = null
+  const urls = []
   const command = h('pre', {}, curl)
   const tabs = h('div', { class: 'vellum-playground-modes' })
-  const shown = () => (tab === 'curl' ? curl : result.querySelector('.vellum-playground-output'))
+  const shown = () => (tab === 'curl' ? curl : result.querySelector('.vellum-playground-output, .vellum-playground-stream'))
 
   const copy = h('button', {
     type: 'button',
     class: 'vellum-playground-copy',
     text: 'Copy',
     onclick: () => {
-      navigator.clipboard?.writeText(shown()?.textContent ?? '').then(() => {
+      navigator.clipboard?.writeText(tab === 'response' && raw ? raw.text : (shown()?.textContent ?? '')).then(() => {
         copy.textContent = 'Copied'
         setTimeout(() => (copy.textContent = 'Copy'), 1500)
       })
@@ -842,6 +989,7 @@ export function open(button) {
   // An answer takes the tab and is brought into view, rather than left for
   // the reader to find under a long form.
   const show = (...nodes) => {
+    raw = null
     result.replaceChildren(...nodes.filter(Boolean))
     answered = true
     tab = 'response'
@@ -892,6 +1040,45 @@ export function open(button) {
       return
     }
 
+    urls.splice(0).forEach((url) => URL.revokeObjectURL(url))
+
+    // Reads a stream from this browser as it comes, until it ends or the
+    // reader stops it. What has arrived by then stays on the page.
+    const follow = async (head, body) => {
+      const item = streamItem(head.type)
+      const view = streamView(head, item, scroller)
+      const parse = reader(item)
+      const text = new TextDecoder()
+      const chunks = body.getReader()
+
+      clearTimeout(timer)
+      show(...view.nodes)
+      raw = view.raw
+      // Announced once it ends, not an item at a time.
+      result.setAttribute('aria-live', 'off')
+
+      try {
+        for (;;) {
+          const { done, value } = await chunks.read()
+
+          if (done) {
+            break
+          }
+
+          const piece = text.decode(value, { stream: true })
+
+          view.add(piece, parse.push(piece), value.length)
+        }
+
+        view.add('', parse.end())
+        view.end('Ended')
+      } catch (error) {
+        view.end(error?.name === 'AbortError' ? 'Stopped' : 'Cut off')
+      } finally {
+        result.setAttribute('aria-live', 'polite')
+      }
+    }
+
     controller = new AbortController()
     const timer = setTimeout(() => controller?.abort(), TIMEOUT)
 
@@ -900,7 +1087,12 @@ export function open(button) {
     show(h('p', { class: 'vellum-playground-empty', text: 'Sending.' }))
 
     try {
-      const answer = proxy ? await forwarded(proxy, built, token, controller.signal) : await direct(built, where, token, controller.signal)
+      const answer = proxy ? await forwarded(proxy, built, token, controller.signal) : await direct(built, where, token, controller.signal, follow)
+
+      // A stream read to its end has already been shown.
+      if (!answer) {
+        return
+      }
 
       if (answer.error) {
         show(h('p', { class: 'vellum-playground-error', text: answer.error }))
@@ -908,31 +1100,39 @@ export function open(button) {
         return
       }
 
-      const kind = answer.status >= 500 ? '5xx' : answer.status >= 400 ? '4xx' : answer.status >= 300 ? '3xx' : '2xx'
+      const via = proxy ? h('span', { class: 'vellum-playground-via', text: 'Sent through this site' }) : null
+      const item = answer.status < 300 && answer.text !== null ? streamItem(answer.type) : null
+
+      // This site's server hands over a stream in one piece, when it is done.
+      if (item) {
+        const view = streamView(answer, item, scroller, { via, live: false })
+        const parse = reader(item)
+
+        show(...view.nodes)
+        raw = view.raw
+        view.add(answer.text, [...parse.push(answer.text), ...parse.end()], answer.size)
+        view.end()
+        result.insertBefore(
+          h('p', { class: 'vellum-playground-empty', text: answer.truncated ? 'Sent through this site, so only what arrived in time is shown, all at once.' : 'Sent through this site, so it arrived all at once.' }),
+          result.lastChild,
+        )
+
+        return
+      }
 
       show(
-        h(
-          'p',
-          { class: 'vellum-playground-status' },
-          h('span', { class: 'vellum-api-status', 'data-status': kind, text: `${answer.status} ${answer.statusText}`.trim() }),
-          h('span', { text: `${answer.elapsed} ms` }),
-          h('span', { text: size(answer.size) }),
-          proxy ? h('span', { class: 'vellum-playground-via', text: 'Sent through this site' }) : null,
-        ),
+        statusLine(answer, h('span', { text: `${answer.elapsed} ms` }), h('span', { text: size(answer.size) }), via),
         // As text, always. A response is someone else's content, and this
         // page is not the place it gets to run.
-        answer.text !== null
-          ? h('pre', { class: 'vellum-playground-output' }, h('code', { text: pretty(answer.text, answer.type).slice(0, SHOWN) }))
-          : h('p', { class: 'vellum-playground-empty', text: `${answer.type || 'A response'} that is not text, so it is not shown.` }),
+        answer.text === null
+          ? binaryView(answer, urls)
+          : answer.text === ''
+            ? h('p', { class: 'vellum-playground-empty', text: 'No body.' })
+            : h('pre', { class: 'vellum-playground-output' }, h('code', {}, ...coloured(pretty(answer.text, answer.type).slice(0, SHOWN)))),
         answer.truncated || (answer.text ?? '').length > SHOWN
           ? h('p', { class: 'vellum-playground-empty', text: 'Only the start of the response is shown.' })
           : null,
-        h(
-          'details',
-          { class: 'vellum-playground-headers' },
-          h('summary', { text: 'Response headers' }),
-          h('pre', {}, h('code', { text: answer.headers.map(([name, value]) => `${name}: ${value}`).join('\n') || 'None the browser may show.' })),
-        ),
+        responseHeaders(answer),
       )
     } catch (error) {
       show(h('p', { class: 'vellum-playground-error', text: failure(error, proxy ? 'direct' : where) }))
@@ -944,17 +1144,8 @@ export function open(button) {
     }
   }
 
-  const form = h(
-    'form',
-    { class: 'vellum-playground-form', onsubmit: submit, novalidate: true },
-    bar,
-    h(
-      'div',
-      { class: 'vellum-playground-columns' },
-      h('div', { class: 'vellum-playground-request' }, ...sections),
-      output,
-    ),
-  )
+  const scroller = h('div', { class: 'vellum-playground-columns' }, h('div', { class: 'vellum-playground-request' }, ...sections), output)
+  const form = h('form', { class: 'vellum-playground-form', onsubmit: submit, novalidate: true }, bar, scroller)
 
   const dialog = h(
     'dialog',
@@ -963,6 +1154,7 @@ export function open(button) {
       'aria-label': `Try ${operation.title}`,
       onclose: () => {
         controller?.abort()
+        urls.splice(0).forEach((url) => URL.revokeObjectURL(url))
         // Gone once it has slid out of view, not before.
         Promise.allSettled(dialog.getAnimations().map((animation) => animation.finished)).then(() => dialog.remove())
       },

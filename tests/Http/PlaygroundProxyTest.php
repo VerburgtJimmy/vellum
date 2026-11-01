@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use GuzzleHttp\Psr7\Response;
 use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\Request;
@@ -338,4 +339,33 @@ it('lets one reader send only so many a minute', function (): void {
     }
 
     ($this->forward)(['method' => 'GET', 'url' => 'https://api.example.com/pets'])->assertStatus(429);
+});
+
+it('answers with what a stream sent before it ran out of time', function (): void {
+    proxyReady($this->cachePath());
+
+    Http::fake(function (Request $request, array $options) {
+        $options['on_headers'](new Response(200, ['Content-Type' => 'text/event-stream', 'Set-Cookie' => 'a=b']));
+        $options['sink']->write("data: one\n\n");
+
+        throw new ConnectionException('cURL error 28: Operation timed out');
+    });
+
+    ($this->forward)(['method' => 'GET', 'url' => 'https://api.example.com/pets'])
+        ->assertOk()
+        ->assertJsonPath('status', 200)
+        ->assertJsonPath('type', 'text/event-stream')
+        ->assertJsonPath('body', "data: one\n\n")
+        ->assertJsonPath('truncated', true)
+        ->assertJsonMissing(['Set-Cookie']);
+});
+
+it('still says there was no response when none began', function (): void {
+    proxyReady($this->cachePath());
+
+    Http::fake(fn () => throw new ConnectionException('cURL error 7'));
+
+    ($this->forward)(['method' => 'GET', 'url' => 'https://api.example.com/pets'])
+        ->assertStatus(502)
+        ->assertJsonPath('error', 'No response. The server may be down, or the address wrong.');
 });

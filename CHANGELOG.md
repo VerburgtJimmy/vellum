@@ -5,6 +5,20 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- Streaming responses: `text/event-stream`, JSON Lines, NDJSON, JSON text sequences and any media type with OpenAPI 3.2's `itemSchema` are marked as streams and show what one item holds, with `contentSchema` opened up. The example is written the way the stream sends it, and the samples ask for the stream, with `-N` for curl
+- The playground lists a stream's items as they arrive, with the time each came. **Stop** ends it and leaves what came on the page. Through the forwarding route a stream is shown when it ends, or as far as it got when time ran out
+- The playground's response viewer colours JSON in, says what a status means when HTTP/2 sends only the number, says when there is no body, shows a picture and offers any other file to save
+- Descriptions on fields, parameters, responses, servers and security schemes are rendered as Markdown. The playground's tooltips leave the marks out
+- A schema's `const` is shown as the one value it can be, with its type, and used in examples
+
+### Changed
+
+- The forwarding route gives a response 25 seconds, not 30, so a host's own limit does not end a slow one with nothing to show
+
 ## [0.9.4] - 2026-11-01
 
 ### Added

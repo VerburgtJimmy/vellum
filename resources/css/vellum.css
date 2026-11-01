@@ -2481,6 +2481,25 @@ html[data-vellum-nav-marker] [data-vellum-sidebar-wrap] [data-vellum-nav-link]:h
   font-size: 0.875rem;
 }
 
+/* A description is rendered Markdown, and sits as tightly as the plain line it usually is. */
+.vellum-prose .vellum-api-field-description p {
+  margin: 0;
+  font-size: inherit;
+  line-height: inherit;
+}
+
+.vellum-prose .vellum-api-field-description p + p {
+  margin-top: 0.375rem;
+}
+
+.vellum-prose .vellum-api-stream {
+  margin: 0;
+  padding: 0.625rem 1rem;
+  border-bottom: 1px solid var(--border);
+  color: var(--muted-foreground);
+  font-size: 0.8125rem;
+}
+
 .vellum-prose .vellum-api-panel > .vellum-api-field-meta {
   margin: 0;
   padding: 0.75rem 1rem;
@@ -3429,6 +3448,121 @@ textarea.vellum-playground-control {
 .vellum-playground-headers pre {
   padding-top: 0;
   color: var(--muted-foreground);
+}
+
+/* A stream: one row an item, the newest last. */
+.vellum-playground-stream {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.vellum-playground-entry {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: 0.625rem;
+  padding: 0.375rem 0.75rem;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.75rem;
+  line-height: 1.6;
+}
+
+.vellum-playground-entry:last-child {
+  border-bottom: 0;
+}
+
+.vellum-playground-entry code {
+  flex: 1 1 12rem;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  white-space: pre-wrap;
+}
+
+.vellum-playground-entry-at {
+  color: var(--muted-foreground);
+  font-variant-numeric: tabular-nums;
+}
+
+.vellum-playground-entry-name {
+  color: var(--foreground);
+  font-weight: 500;
+}
+
+.vellum-playground-entry-waiting {
+  padding: 0.75rem;
+  color: var(--muted-foreground);
+  font-size: 0.8125rem;
+}
+
+.vellum-playground-live {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  color: var(--foreground);
+}
+
+.vellum-playground-live::before {
+  content: "";
+  width: 0.4375rem;
+  height: 0.4375rem;
+  border-radius: 50%;
+  background: var(--vellum-method-get);
+}
+
+.vellum-playground-live[data-state="ended"] {
+  color: var(--muted-foreground);
+}
+
+.vellum-playground-live[data-state="ended"]::before {
+  background: var(--muted-foreground);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .vellum-playground-entry {
+    animation: vellum-playground-entry-in 180ms ease-out;
+  }
+
+  .vellum-playground-live:not([data-state])::before {
+    animation: vellum-playground-live-pulse 1.4s ease-in-out infinite;
+  }
+}
+
+@keyframes vellum-playground-entry-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.25rem);
+  }
+}
+
+@keyframes vellum-playground-live-pulse {
+  50% {
+    opacity: 0.35;
+  }
+}
+
+/* A response that is not text: the picture if it is one, and a way to save it. */
+.vellum-playground-file {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.625rem;
+  padding: 0.75rem;
+  font-size: 0.8125rem;
+}
+
+.vellum-playground-file img {
+  max-width: 100%;
+  max-height: 20rem;
+  border: 1px solid var(--border);
+  border-radius: 0.375rem;
+}
+
+.vellum-playground-file a {
+  color: var(--foreground);
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
 @media (max-width: 760px) {
