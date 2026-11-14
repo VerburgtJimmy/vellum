@@ -1,11 +1,30 @@
 ---
 title: Upgrade
-description: Upgrading from 0.8 to 0.9, from 0.7 to 0.8, from 0.6 to 0.7, within 0.6, from 0.5 to 0.6, and from 0.2 to the 0.5 freeze.
+description: Upgrading from 0.9 to 0.10, from 0.8 to 0.9, from 0.7 to 0.8, from 0.6 to 0.7, within 0.6, from 0.5 to 0.6, and from 0.2 to the 0.5 freeze.
 ---
 
 0.5 froze the keys in `config/vellum.php` and the page frontmatter names. Later releases add keys without renaming any, and no key will be removed before 1.0.
 
 The requirements have been PHP 8.4+ and Laravel 11, 12, or 13 since 0.2.
+
+## 0.9 to 0.10
+
+With `jimmyverburgt/vellum`, no changes to your content or config are required. Update the package and rebuild:
+
+```bash
+composer update jimmyverburgt/vellum
+php artisan vellum:build
+```
+
+### If you use core on its own
+
+The API reference moved out of core into `jimmyverburgt/vellum-openapi`. An app that requires `jimmyverburgt/vellum-core` without the full package, and has `openapi.enabled` on, requires it too:
+
+```bash
+composer require jimmyverburgt/vellum-openapi
+```
+
+Without it, the reference is not built, and `vellum:build` says which package to install. The config keys are unchanged.
 
 ## 0.8 to 0.9
 

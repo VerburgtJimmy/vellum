@@ -14,24 +14,29 @@ You need PHP 8.4. CI runs the test suite on Laravel 11, 12 and 13.
 
 ## Layout
 
-This repository holds two Composer packages, released together under one version.
+This repository holds three Composer packages, released together under one version.
 
 - `packages/core` is `jimmyverburgt/vellum-core`: content, frontmatter, navigation,
   versions, gating, the Markdown pipeline and its component views, the compiled cache,
   search and the changelog, with the `vellum:build`, `vellum:index` and `vellum:clear`
   commands. It has no routes, layout, styles or scripts.
+- `packages/openapi` is `jimmyverburgt/vellum-openapi`: the API reference, which turns an
+  OpenAPI spec into pages through core's page source contract, with the views those pages
+  use. It requires core and nothing of the site. The playground script, the forwarding
+  route and the OAuth return page are the site's and stay in the root package.
 - The root is `jimmyverburgt/vellum`, the docs site built on core: routes, controllers,
-  layout, theme, assets, and the install and export commands. It includes core through
-  `replace`, so installing it never pulls in a second copy.
+  layout, theme, assets, and the install and export commands. It includes both packages
+  through `replace`, so installing it never pulls in a second copy.
 
-Both share the `Vellum\` namespace, and the tests for both live in `tests/`. Core must
-not use anything from the root package; `tests/Core/BoundaryTest.php` fails if it does.
-A view both packages ship, such as `components/tabs.blade.php`, renders in the root
-package's version.
+All three share the `Vellum\` namespace, the API reference under `Vellum\OpenApi\`, and
+the tests for all of them live in `tests/`. Neither package may use anything from the root
+package, and core may not use the API reference; `tests/Core/BoundaryTest.php` fails if
+either does. A view that core and the site both ship, such as `components/tabs.blade.php`,
+renders in the site's version.
 
-`.github/workflows/split.yml` copies `packages/core` to the read-only
-`VerburgtJimmy/vellum-core` repository on every push to `master` and every tag. Changes to
-core are made here.
+`.github/workflows/split.yml` copies `packages/core` and `packages/openapi` to the
+read-only `VerburgtJimmy/vellum-core` and `VerburgtJimmy/vellum-openapi` repositories on
+every push to `master` and every tag. Changes to either are made here.
 
 ## Checks
 

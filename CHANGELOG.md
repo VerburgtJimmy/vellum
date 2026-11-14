@@ -14,6 +14,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `Vellum\Content\PageSource`, for pages that come from something other than a Markdown file. The API reference is one. A `PageSourceFactory` tagged `vellum.page-sources` in the container adds a source to every site. See Core on its own in the docs
 
+- `jimmyverburgt/vellum-openapi`, the API reference as a package of its own. `jimmyverburgt/vellum` includes it, so nothing changes for apps that install Vellum. Classes keep their names under `Vellum\OpenApi\`
+
+### Changed
+
+- An app that requires `jimmyverburgt/vellum-core` on its own and has `openapi.enabled` on now requires `jimmyverburgt/vellum-openapi` too. Without it, `vellum:build` says which package to install. See the upgrade guide
+
 ### Deprecated
 
 - `Vellum\Support\VersionLabel` and `SearchDriver::name()` and `isScout()`. Use `$site->versions` and `$site->search`. They keep working for views published before 0.10 and are removed in 1.0

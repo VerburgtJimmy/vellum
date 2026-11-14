@@ -9,8 +9,8 @@ use Illuminate\Support\ServiceProvider;
 use Vellum\Site;
 
 /**
- * Adds the API reference to the docs: its settings, and the source that
- * turns a spec into pages.
+ * Adds the API reference to the docs: its settings, the source that turns a
+ * spec into pages, and the views those pages are written with.
  */
 final class OpenApiServiceProvider extends ServiceProvider
 {
@@ -18,5 +18,13 @@ final class OpenApiServiceProvider extends ServiceProvider
     {
         $this->app->scoped(Settings::class, static fn (Application $app): Settings => Settings::fromSite($app->make(Site::class)));
         $this->app->tag([ReferenceSource::class], 'vellum.page-sources');
+    }
+
+    public function boot(): void
+    {
+        // Under core's view namespace, so a page's views stay vellum::openapi.*
+        // and a copy published to resources/views/vendor/vellum/openapi/ still
+        // takes their place.
+        $this->loadViewsFrom(__DIR__.'/../resources/views', 'vellum');
     }
 }

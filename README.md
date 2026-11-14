@@ -36,17 +36,20 @@ php artisan vellum:build
 
 ## Packages
 
-Vellum is two Composer packages, released together under one version:
+Vellum is three Composer packages, released together under one version:
 
-- `jimmyverburgt/vellum` is the docs site: routes, layout, theme, search dialog and static
-  export. This is the one to install.
+- `jimmyverburgt/vellum` is the docs site: routes, layout, theme, search dialog, the API
+  playground and static export. This is the one to install, and it includes the other two.
 - [`jimmyverburgt/vellum-core`](packages/core) is the engine under it: pages, navigation,
-  versions, access rules, Markdown, the compiled cache, search and the changelog. It comes
-  with the full package, and can be installed on its own when you render the docs yourself.
+  versions, access rules, Markdown, the compiled cache, search and the changelog. It can be
+  installed on its own when you render the docs yourself.
   See [Core on its own](https://vellum.jimmyverburgt.com/docs/core).
+- [`jimmyverburgt/vellum-openapi`](packages/openapi) is the API reference: pages written
+  from an OpenAPI spec or from Scramble. With core on its own, require it beside core to
+  have the reference.
 
-Both are developed in this repository. Core is copied to a read-only repository on each
-release, which is what Packagist installs it from.
+All three are developed in this repository. Core and the API reference are each copied to
+a read-only repository on every release, which is what Packagist installs them from.
 
 ## What it includes
 

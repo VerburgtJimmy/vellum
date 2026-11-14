@@ -12,6 +12,8 @@ Vellum can turn an OpenAPI 3.0, 3.1 or 3.2 spec into reference pages. Each opera
 ],
 ```
 
+The reference is the `jimmyverburgt/vellum-openapi` package, which `jimmyverburgt/vellum` includes. An app that uses [core on its own](/docs/core) requires it beside core.
+
 The pages live under `/docs/api`. They are ordinary pages to the rest of Vellum: search finds them, `vellum:export` writes them, and they are listed in `llms.txt` and the sitemap. Their [raw Markdown](/docs/page-actions#raw-markdown) is written for them, with fields as tables and samples as fenced code.
 
 ## What a page looks like

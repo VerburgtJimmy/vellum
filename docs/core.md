@@ -3,20 +3,27 @@ title: Core on its own
 description: Use Vellum's content engine without its routes and layout.
 ---
 
-Vellum is two Composer packages, released together under one version:
+Vellum is three Composer packages, released together under one version:
 
-- `jimmyverburgt/vellum` is the docs site: routes, layout, theme, search dialog, and the `vellum:install` and `vellum:export` commands.
+- `jimmyverburgt/vellum` is the docs site: routes, layout, theme, search dialog, the API playground, and the `vellum:install` and `vellum:export` commands.
 - `jimmyverburgt/vellum-core` is the engine under it. It reads the docs folder and handles frontmatter, navigation, versions, gating, Markdown, the compiled cache, search and the changelog.
+- `jimmyverburgt/vellum-openapi` is the [API reference](/docs/api-reference): pages written from an OpenAPI spec, which core stores beside the docs' own.
 
-Installing `jimmyverburgt/vellum` includes core, and that is what most apps want. Require core on its own when you render the docs yourself, for example in an Inertia or Livewire front end, or when a package of yours reads the docs:
+Installing `jimmyverburgt/vellum` includes the other two, and that is what most apps want. Require core on its own when you render the docs yourself, for example in an Inertia or Livewire front end, or when a package of yours reads the docs:
 
 ```bash
 composer require jimmyverburgt/vellum-core
 ```
 
+For the API reference too, require it beside core. It works without the site, and the playground, which sends requests from the page, is the site's:
+
+```bash
+composer require jimmyverburgt/vellum-openapi
+```
+
 ## What core provides
 
-- `config/vellum.php`, published with `php artisan vendor:publish --tag=vellum-config`. Core reads `path`, `versions`, `route`, `components`, `search`, `checks`, `changelog` and `cache`, the last for where compiled pages go. `route.prefix` is the start of every link core builds. The other keys, such as `layout`, `theme` and `export`, belong to the site and do nothing without it.
+- `config/vellum.php`, published with `php artisan vendor:publish --tag=vellum-config`. Core reads `path`, `versions`, `route`, `components`, `search`, `checks`, `changelog` and `cache`, the last for where compiled pages go. `route.prefix` is the start of every link core builds. The other keys, such as `layout`, `theme` and `export`, belong to the site and do nothing without it. The `openapi` block does nothing without `jimmyverburgt/vellum-openapi`, and `vellum:build` says so when it is switched on without that package.
 - `vellum:build`, `vellum:index` and `vellum:clear`, which work as described in [Commands](/docs/commands).
 - No routes, controllers, layout, styles or scripts.
 

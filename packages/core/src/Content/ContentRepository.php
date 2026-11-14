@@ -99,6 +99,16 @@ final class ContentRepository
         return $this->site;
     }
 
+    /**
+     * The names of the sources of generated pages this repository has.
+     *
+     * @return list<string>
+     */
+    public function sourceNames(): array
+    {
+        return array_map(static fn (PageSource $source): string => $source->name(), $this->sources);
+    }
+
     public function store(): CompiledStore
     {
         return $this->store;

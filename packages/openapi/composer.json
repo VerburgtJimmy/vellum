@@ -1,0 +1,54 @@
+{
+    "name": "jimmyverburgt/vellum-openapi",
+    "description": "API reference pages for Vellum, written from an OpenAPI spec or from Scramble",
+    "keywords": [
+        "laravel",
+        "documentation",
+        "openapi",
+        "api reference",
+        "vellum"
+    ],
+    "homepage": "https://github.com/VerburgtJimmy/vellum",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Jimmy Verburgt",
+            "email": "hey@jimmyverburgt.com",
+            "role": "Developer"
+        }
+    ],
+    "support": {
+        "email": "hey@jimmyverburgt.com",
+        "issues": "https://github.com/VerburgtJimmy/vellum/issues",
+        "source": "https://github.com/VerburgtJimmy/vellum",
+        "security": "https://github.com/VerburgtJimmy/vellum/security/policy"
+    },
+    "require": {
+        "php": "^8.4",
+        "ext-mbstring": "*",
+        "illuminate/contracts": "^11.0|^12.0|^13.0",
+        "illuminate/support": "^11.0|^12.0|^13.0",
+        "jimmyverburgt/vellum-core": "self.version",
+        "symfony/yaml": "^7.0|^8.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Vellum\\OpenApi\\": "src/"
+        }
+    },
+    "suggest": {
+        "dedoc/scramble": "Writes the spec from the app's routes, so it need not be committed."
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Vellum\\OpenApi\\OpenApiServiceProvider"
+            ]
+        }
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}

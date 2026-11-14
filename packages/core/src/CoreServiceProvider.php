@@ -33,8 +33,6 @@ final class CoreServiceProvider extends ServiceProvider
 
         $this->app->scoped(Site::class, self::site(...));
         $this->app->scoped(ContentRepository::class, static fn (Application $app): ContentRepository => self::repository($app, $app->make(Site::class)));
-
-        $this->app->register(OpenApi\OpenApiServiceProvider::class);
     }
 
     /**

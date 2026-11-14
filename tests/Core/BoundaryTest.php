@@ -3,9 +3,10 @@
 declare(strict_types=1);
 
 /*
- * jimmyverburgt/vellum-core ships on its own, so nothing under packages/core
- * may lean on the site around it: no class from src/, and none of the site's
- * routes, views or scripts.
+ * jimmyverburgt/vellum-core and jimmyverburgt/vellum-openapi ship on their
+ * own, so nothing under packages/ may lean on the site around it: no class
+ * from src/, and none of the site's routes, views or scripts. Core comes
+ * before the API reference, so it uses nothing of that either.
  */
 
 $files = static function (string $directory, string $suffix): array {
@@ -26,7 +27,14 @@ $files = static function (string $directory, string $suffix): array {
 
 $root = dirname(__DIR__, 2);
 
-it('uses no class of the full package', function () use ($files, $root): void {
+$packaged = static fn (): array => [
+    ...$files($root.'/packages/core/src', '.php'),
+    ...$files($root.'/packages/core/resources', '.php'),
+    ...$files($root.'/packages/openapi/src', '.php'),
+    ...$files($root.'/packages/openapi/resources', '.php'),
+];
+
+it('uses no class of the full package', function () use ($files, $root, $packaged): void {
     $site = array_map(
         static fn (string $path): string => 'Vellum\\'.str_replace('/', '\\', substr($path, strlen($root.'/src/'), -4)),
         $files($root.'/src', '.php'),
@@ -34,7 +42,7 @@ it('uses no class of the full package', function () use ($files, $root): void {
 
     $leaks = [];
 
-    foreach ([...$files($root.'/packages/core/src', '.php'), ...$files($root.'/packages/core/resources', '.php')] as $path) {
+    foreach ($packaged() as $path) {
         $source = (string) file_get_contents($path);
 
         foreach ($site as $class) {
@@ -47,7 +55,7 @@ it('uses no class of the full package', function () use ($files, $root): void {
     expect($leaks)->toBe([]);
 });
 
-it('names none of the full package\'s routes, views or scripts', function () use ($files, $root): void {
+it('names none of the full package\'s routes, views or scripts', function () use ($root, $packaged): void {
     $patterns = [
         'a vellum route' => "/route\\(\\s*'vellum\\./",
         'a layout, page or chrome view' => '/vellum::(layouts|pages|components\.(docs|ui))\b/',
@@ -56,7 +64,7 @@ it('names none of the full package\'s routes, views or scripts', function () use
 
     $leaks = [];
 
-    foreach ([...$files($root.'/packages/core/src', '.php'), ...$files($root.'/packages/core/resources', '.php')] as $path) {
+    foreach ($packaged() as $path) {
         $source = (string) file_get_contents($path);
 
         foreach ($patterns as $what => $pattern) {
@@ -69,11 +77,27 @@ it('names none of the full package\'s routes, views or scripts', function () use
     expect($leaks)->toBe([]);
 });
 
+it('keeps core free of the API reference', function () use ($files, $root): void {
+    $leaks = [];
+
+    foreach ([...$files($root.'/packages/core/src', '.php'), ...$files($root.'/packages/core/resources', '.php')] as $path) {
+        if (preg_match('/Vellum\\\\OpenApi\\\\|vellum::openapi\./', (string) file_get_contents($path)) === 1) {
+            $leaks[] = substr($path, strlen($root) + 1);
+        }
+    }
+
+    expect($leaks)->toBe([]);
+});
+
 it('requires everything it imports', function () use ($root): void {
     $core = json_decode((string) file_get_contents($root.'/packages/core/composer.json'), true);
+    $openApi = json_decode((string) file_get_contents($root.'/packages/openapi/composer.json'), true);
     $full = json_decode((string) file_get_contents($root.'/composer.json'), true);
 
     expect(array_diff_key($core['require'], $full['require']))->toBe([], 'The full package must require whatever core does.')
-        ->and($full['replace'])->toBe(['jimmyverburgt/vellum-core' => 'self.version'])
-        ->and($full['autoload']['psr-4']['Vellum\\'])->toContain('packages/core/src/');
+        ->and(array_diff_key($openApi['require'], $full['require'], ['jimmyverburgt/vellum-core' => true]))->toBe([], 'The full package must require whatever the API reference does.')
+        ->and($openApi['require']['jimmyverburgt/vellum-core'])->toBe('self.version')
+        ->and($full['replace'])->toBe(['jimmyverburgt/vellum-core' => 'self.version', 'jimmyverburgt/vellum-openapi' => 'self.version'])
+        ->and($full['autoload']['psr-4']['Vellum\\'])->toContain('packages/core/src/')
+        ->and($full['autoload']['psr-4']['Vellum\\OpenApi\\'])->toBe('packages/openapi/src/');
 });

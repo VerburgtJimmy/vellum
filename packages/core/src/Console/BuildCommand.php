@@ -39,6 +39,13 @@ final class BuildCommand extends Command
             $this->warn('OpenAPI: '.$warning);
         }
 
+        // Core alone does not have the reference, and an app that turns it on
+        // should hear what to install rather than find no reference.
+        if ((bool) ($repository->site()->get('openapi')['enabled'] ?? false) && ! in_array('api', $repository->sourceNames(), true)) {
+            $this->warn('vellum.openapi.enabled is on, but the API reference is not installed.');
+            $this->line('  Run composer require jimmyverburgt/vellum-openapi to add it.');
+        }
+
         $this->warnAboutShadowedSlugs($documents, $repository);
         $this->warnAboutInvalidDates($documents);
 

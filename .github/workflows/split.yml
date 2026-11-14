@@ -25,6 +25,8 @@ jobs:
         package:
           - directory: packages/core
             repository: vellum-core
+          - directory: packages/openapi
+            repository: vellum-openapi
 
     steps:
       - uses: actions/checkout@v4

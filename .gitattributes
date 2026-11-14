@@ -6,6 +6,9 @@
 # renders those from the repository rather than from a release. docs/.vellum
 # ships too: it is 32 KB of cached search questions, and the site that renders
 # these docs from the installed package would otherwise lose them.
+#
+# packages/core and packages/openapi ship as well: the full package replaces
+# both and loads their classes from there.
 
 /.github                export-ignore
 /.gitattributes         export-ignore

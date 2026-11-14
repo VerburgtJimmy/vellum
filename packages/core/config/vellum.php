@@ -254,6 +254,10 @@ return [
     | Reference pages generated from an OpenAPI 3.0, 3.1 or 3.2 spec: one page per
     | operation, in a sidebar folder per tag, under {route.prefix}/{prefix}.
     |
+    | The reference is jimmyverburgt/vellum-openapi, which jimmyverburgt/vellum
+    | includes. With jimmyverburgt/vellum-core alone, this block does nothing
+    | until that package is required too.
+    |
     | spec: path to a JSON or YAML file. Leave it null to have Scramble write
     | one, when dedoc/scramble is installed.
     |

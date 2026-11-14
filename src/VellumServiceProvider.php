@@ -19,6 +19,7 @@ use Vellum\Exceptions\ContentError;
 use Vellum\Http\Controllers\AssetController;
 use Vellum\Http\Middleware\CompressHtmlResponse;
 use Vellum\Http\RootLlmsTxtRoutes;
+use Vellum\OpenApi\OpenApiServiceProvider;
 
 /**
  * The docs site on top of core: routes, layout, theme, assets, and the
@@ -29,6 +30,7 @@ final class VellumServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->register(CoreServiceProvider::class);
+        $this->app->register(OpenApiServiceProvider::class);
     }
 
     public function boot(): void
