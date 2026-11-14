@@ -58,19 +58,21 @@ The public site is a separate Laravel app (`vellum-site`) that installs this pac
 Maintainers only.
 
 ```bash
-git tag v0.8.0
-git push origin v0.8.0
+git tag v0.10.0
+git push origin v0.10.0
 ```
 
 Packagist reads the version from the Git tag, so do not add a `version` field to
-either `composer.json`. Each repository only needs to be submitted to
+any `composer.json`. Each repository only needs to be submitted to
 [packagist.org/packages/submit](https://packagist.org/packages/submit) once: this one for
-`jimmyverburgt/vellum`, and `VerburgtJimmy/vellum-core` for `jimmyverburgt/vellum-core`.
-The same tag is split to `vellum-core`, so both packages release as one version.
+`jimmyverburgt/vellum`, `VerburgtJimmy/vellum-core` for `jimmyverburgt/vellum-core`, and
+`VerburgtJimmy/vellum-openapi` for `jimmyverburgt/vellum-openapi`. The same tag is split
+to both, so all three packages release as one version.
 
 Pushing the tag triggers `.github/workflows/release.yml`, which publishes a GitHub release
-using the matching `## [x.y.z]` section of `CHANGELOG.md` as the notes. Write that section
-before tagging. If it is missing, the release is still created with generated notes.
+using the matching `## [x.y.z]` section of `CHANGELOG.md` as the notes. Write that section,
+dated, in the commit you tag. If it is missing, the workflow fails and nothing is
+published: add the section, commit it, and tag that commit.
 
 `.gitattributes` keeps tests, CI config and build tooling out of the released archive.
 Before tagging, check any new files at the repo root against it.
