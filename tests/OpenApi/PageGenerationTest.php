@@ -18,7 +18,7 @@ beforeEach(function (): void {
     $this->localRepository = fn (): ContentRepository => new ContentRepository(
         site: $this->site(isLocal: true),
         store: new CompiledStore($this->cachePath()),
-        openApi: new OpenApiPages(Settings::fromSite($this->site())),
+        sources: [new OpenApiPages(Settings::fromSite($this->site()))],
     );
 });
 

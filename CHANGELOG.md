@@ -12,6 +12,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Vellum\Site`, everything core reads from `config/vellum.php` in one object. Core's service provider builds it from config, and every class in core takes it, or the part it needs, instead of reading config itself. `new ContentRepository(Site::fromArray([...]))` builds a repository for docs that config does not describe, without changing config. See Core on its own in the docs
 - `ContentRepository`, `Vellum\Site` and the API reference's settings are bound in the container, one per request, so a controller can type-hint them. `ContentRepository::fromConfig()` still builds a new repository from config
 
+- `Vellum\Content\PageSource`, for pages that come from something other than a Markdown file. The API reference is one. A `PageSourceFactory` tagged `vellum.page-sources` in the container adds a source to every site. See Core on its own in the docs
+
 ### Deprecated
 
 - `Vellum\Support\VersionLabel` and `SearchDriver::name()` and `isScout()`. Use `$site->versions` and `$site->search`. They keep working for views published before 0.10 and are removed in 1.0

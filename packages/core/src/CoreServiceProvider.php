@@ -10,10 +10,8 @@ use Vellum\Console\BuildCommand;
 use Vellum\Console\ClearCommand;
 use Vellum\Console\IndexCommand;
 use Vellum\Content\ContentRepository;
-use Vellum\Markdown\Islands\MarkdownPipeline;
-use Vellum\OpenApi\OpenApiPages;
-use Vellum\OpenApi\PageBuilder;
-use Vellum\OpenApi\Settings;
+use Vellum\Content\PageSource;
+use Vellum\Content\PageSourceFactory;
 use Vellum\Support\Paths;
 
 /**
@@ -34,8 +32,9 @@ final class CoreServiceProvider extends ServiceProvider
         $this->mergeConfigFrom(__DIR__.'/../config/vellum.php', 'vellum');
 
         $this->app->scoped(Site::class, self::site(...));
-        $this->app->scoped(Settings::class, static fn (Application $app): Settings => Settings::fromSite($app->make(Site::class)));
         $this->app->scoped(ContentRepository::class, static fn (Application $app): ContentRepository => self::repository($app, $app->make(Site::class)));
+
+        $this->app->register(OpenApi\OpenApiServiceProvider::class);
     }
 
     /**
@@ -55,19 +54,22 @@ final class CoreServiceProvider extends ServiceProvider
     }
 
     /**
-     * A repository for a site, with the API reference when the site has one.
+     * A repository for a site, with the generated pages the site has, such as
+     * an API reference, from every source tagged `vellum.page-sources`.
      */
     public static function repository(Application $app, Site $site): ContentRepository
     {
-        $settings = Settings::fromSite($site);
+        $sources = [];
 
-        return new ContentRepository(
-            site: $site,
-            openApi: $settings->enabled ? new OpenApiPages(
-                $settings,
-                builder: new PageBuilder($app->make('view'), $settings, new MarkdownPipeline(components: $site->components)),
-            ) : null,
-        );
+        foreach ($app->tagged('vellum.page-sources') as $factory) {
+            $source = $factory instanceof PageSourceFactory ? $factory->forSite($site) : null;
+
+            if ($source instanceof PageSource) {
+                $sources[] = $source;
+            }
+        }
+
+        return new ContentRepository(site: $site, sources: $sources);
     }
 
     public function boot(): void

@@ -90,3 +90,28 @@ $results = (new Ranker($visible))->search('deploy', 10);
 ```
 
 Each result's `record` has the page, heading, URL and a passage of text. This is the same ranking the site's search endpoint uses. See [Search](/docs/search).
+
+## Generated pages
+
+Pages nobody wrote as Markdown, such as the API reference built from a spec, come from a page source. A source implements `Vellum\Content\PageSource`: it names itself, returns its pages as `Document`s with slugs only it writes, says which slugs are its own, gives a signature that changes when its pages must be rebuilt, and returns its pages as one sidebar folder. The repository stores those pages beside the written ones, so search, links, access and the build treat them the same way.
+
+To add one, register a `Vellum\Content\PageSourceFactory` in the container with the `vellum.page-sources` tag. The factory is given each site and returns that site's source, or null when the site has none:
+
+```php
+use Vellum\Content\PageSource;
+use Vellum\Content\PageSourceFactory;
+use Vellum\Site;
+
+final class ChangelogArchive implements PageSourceFactory
+{
+    public function forSite(Site $site): ?PageSource
+    {
+        return new ArchivePages($site);
+    }
+}
+
+// In a service provider's register():
+$this->app->tag([ChangelogArchive::class], 'vellum.page-sources');
+```
+
+A source's pages belong to the latest version. A source whose `separate()` returns true gets a sidebar of its own, with a switch to it at the top of the docs' sidebar.

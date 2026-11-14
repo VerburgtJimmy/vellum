@@ -16,7 +16,7 @@ use Vellum\Support\Slug;
  *     directory_hash: string,
  *     version: string|null,
  *     complete?: bool,
- *     openapi?: string|null
+ *     sources?: array<string, string|null>
  * }
  */
 final class CompiledStore
@@ -247,8 +247,27 @@ final class CompiledStore
             'directory_hash' => $data['directory_hash'],
             'version' => isset($data['version']) && is_string($data['version']) ? $data['version'] : null,
             'complete' => ($data['complete'] ?? false) === true,
-            'openapi' => isset($data['openapi']) && is_string($data['openapi']) ? $data['openapi'] : null,
+            // Each source of generated pages, by name, with the signature of
+            // what its pages were built from. A manifest from before sources
+            // had names has none, which only means a rebuild.
+            'sources' => self::signatures($data['sources'] ?? []),
         ];
+    }
+
+    /**
+     * @return array<string, string|null>
+     */
+    private static function signatures(mixed $value): array
+    {
+        $signatures = [];
+
+        foreach (is_array($value) ? $value : [] as $name => $signature) {
+            if (is_string($name)) {
+                $signatures[$name] = is_string($signature) ? $signature : null;
+            }
+        }
+
+        return $signatures;
     }
 
     public function manifestPath(?string $version = null): string

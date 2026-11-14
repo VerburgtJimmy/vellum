@@ -6,6 +6,7 @@ namespace Vellum\OpenApi;
 
 use Closure;
 use Vellum\Content\Document;
+use Vellum\Content\PageSource;
 
 /**
  * The OpenAPI half of the content set: resolve a spec, build its pages, and
@@ -14,7 +15,7 @@ use Vellum\Content\Document;
  * Work is done once per instance. A build, a sidebar and a page all ask for
  * the same pages, and parsing a large spec three times in one request shows.
  */
-final class OpenApiPages
+final class OpenApiPages implements PageSource
 {
     /** @var list<Document>|null */
     private ?array $documents = null;
@@ -40,6 +41,31 @@ final class OpenApiPages
     public function settings(): Settings
     {
         return $this->settings;
+    }
+
+    public function name(): string
+    {
+        return 'api';
+    }
+
+    public function owns(string $slug): bool
+    {
+        return $this->settings->owns($slug);
+    }
+
+    public function separate(): bool
+    {
+        return $this->settings->separate;
+    }
+
+    /**
+     * A page carries the signature of the spec it was built from.
+     */
+    public function isCurrent(Document $document): bool
+    {
+        $signature = $this->signature();
+
+        return $signature !== null && ($document->frontmatter['openapi_signature'] ?? null) === $signature;
     }
 
     /**
@@ -79,7 +105,7 @@ final class OpenApiPages
      * @param  Closure(string): string  $href
      * @return array<string, mixed>|null
      */
-    public function navGroup(?string $version, Closure $href): ?array
+    public function navigation(?string $version, Closure $href): ?array
     {
         $documents = $this->documents($version, $href);
         $spec = $this->spec();
@@ -138,8 +164,6 @@ final class OpenApiPages
 
         return [
             'type' => 'folder',
-            // Marks the folder, so the reference can be given a sidebar of its own.
-            'section' => 'api',
             'title' => $this->settings->title ?? 'API reference',
             'icon' => null,
             'defaultOpen' => false,
