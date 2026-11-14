@@ -337,8 +337,8 @@ it('gives the reference a sidebar of its own, and a way between the two', functi
     expect(array_column($repository->sidebar('guide'), 'title'))->toBe(['Guide', 'Home'])
         ->and(array_column($repository->sidebar('api/pets/list-pets'), 'title'))->toBe(['Overview', 'Pets', 'Orders', 'Other'])
         ->and($repository->sections('api/pets/list-pets'))->toBe([
-            ['key' => 'docs', 'title' => 'Docs', 'href' => '/docs', 'current' => false],
-            ['key' => 'api', 'title' => 'API reference', 'href' => '/docs/api', 'current' => true],
+            ['key' => '', 'title' => 'Docs', 'description' => null, 'href' => '/docs', 'current' => false],
+            ['key' => 'api', 'title' => 'API reference', 'description' => null, 'href' => '/docs/api', 'current' => true],
         ])
         // The last page of the docs does not lead into the reference.
         ->and($repository->adjacent('')['next'])->toBeNull()

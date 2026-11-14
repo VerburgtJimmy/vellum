@@ -53,6 +53,8 @@ Add a `meta.json` to a folder to configure its group:
 | `defaultOpen` | Open the group on first load. A group containing the current page always opens. |
 | `pages` | Explicit order. Entries are file names without `.md`, relative to this folder. |
 | `access` | Gate the whole folder. See [Gating](/docs/gating). |
+| `root` | Give a top-level folder a sidebar of its own. See [Sidebars of their own](#sidebars-of-their-own). |
+| `description` | A line under a root's name in the switcher. |
 
 Names in `pages` are relative to the folder that holds `meta.json`. In `billing/`, write
 `"invoices"` and not `"billing/invoices"`.
@@ -115,6 +117,44 @@ An object entry adds a link to something other than a file in this folder:
 A link inherits its folder's `access` in the same way a page does, and an `access` key on
 the link overrides it. A link to a gated page is only shown to readers who can open that
 page.
+
+## Sidebars of their own
+
+A large set of docs reads better as a few sidebars than as one long one: guides in one,
+the reference in another, a product's internals in a third. Mark a top-level folder as a
+root in its `meta.json` and it gets a sidebar of its own:
+
+```json
+{
+    "title": "Guides",
+    "root": true,
+    "description": "Task-focused walkthroughs"
+}
+```
+
+A reader on a page inside the folder sees only that folder's pages in the sidebar. The
+pages outside every root form the docs' own sidebar. A switcher at the top of the sidebar
+lists that one first, under the `title` of the top-level `meta.json` or "Docs" when there
+is none, and then each root in the order the sidebar lists them, with its `description`
+when it has one.
+
+The rest of Vellum treats a root's pages like any other:
+
+- Previous and next stay inside the sidebar the reader is in.
+- The breadcrumbs start at the root's title.
+- Search, `llms.txt`, the sitemap and [`vellum:export`](/docs/export) cover every page,
+  whichever sidebar it is in.
+- A root the reader may open no page of is left out of their switcher. See
+  [Gating](/docs/gating).
+- With [versions](/docs/versions), each version has its own roots. Switching to a version
+  that lacks the page goes to that version's start page.
+
+Only a folder at the top of the docs, or at the top of a version, can be a root.
+`vellum:build` warns about `root` on a folder further down, which then stays an ordinary
+folder, and fails under `--strict`.
+
+The [API reference](/docs/api-reference#the-sidebar) has a sidebar of its own in the
+same way, and appears in the same switcher.
 
 ## _meta.md
 

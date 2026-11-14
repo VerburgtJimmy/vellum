@@ -210,9 +210,10 @@ final class ContentRepository
 
     /**
      * The tree for the sidebar of one page. That is navigation(), unless a
-     * source of generated pages has a sidebar to itself, as the API reference
-     * can: then a page of that source gets its folder alone, and every other
-     * page gets the docs without it.
+     * folder has a sidebar to itself: a top-level folder whose meta.json says
+     * `root`, or the folder of a source of generated pages that asks for one,
+     * as the API reference can. Then a page in that folder gets the folder
+     * alone, and every other page gets the docs without any of them.
      *
      * @return list<array<string, mixed>>
      */
@@ -239,9 +240,11 @@ final class ContentRepository
 
     /**
      * The sidebars a reader can switch between, with the one this page is in
-     * marked. Empty when there is only one.
+     * marked: the docs' own first, then each folder with a sidebar of its own
+     * in the order the sidebar lists them. A folder this reader may open no
+     * page of is left out. Empty when there is only one.
      *
-     * @return list<array{key: string, title: string, href: string, current: bool}>
+     * @return list<array{key: string, title: string, description: string|null, href: string, current: bool}>
      */
     public function sections(?string $slug, ?string $version = null): array
     {
@@ -257,9 +260,11 @@ final class ContentRepository
             }
 
             $title = $folder['title'] ?? null;
+            $description = $folder['description'] ?? null;
             $others[] = [
                 'key' => $key,
-                'title' => is_string($title) && $title !== '' ? $title : 'API reference',
+                'title' => is_string($title) && $title !== '' ? $title : $key,
+                'description' => is_string($description) ? $description : null,
                 'href' => $first['href'],
                 'current' => $this->holdsPage($folder, $slug),
             ];
@@ -272,14 +277,20 @@ final class ContentRepository
         $inOther = in_array(true, array_column($others, 'current'), true);
 
         return [
-            ['key' => 'docs', 'title' => 'Docs', 'href' => $this->hrefFor('', $version), 'current' => ! $inOther],
+            [
+                'key' => '',
+                'title' => $this->navigationBuilder()->title($this->resolveVersion($version)),
+                'description' => null,
+                'href' => $this->hrefFor('', $version),
+                'current' => ! $inOther,
+            ],
             ...$others,
         ];
     }
 
     /**
-     * Where the folders of sources with a sidebar of their own sit in a tree,
-     * by source name, for those this reader may see.
+     * Where the folders with a sidebar of their own sit in a tree, by their
+     * key: the folder name for a root, the source's name for generated pages.
      *
      * @param  list<array<string, mixed>>  $tree
      * @return array<string, int>
@@ -287,20 +298,44 @@ final class ContentRepository
     private function separateFolders(array $tree): array
     {
         $separate = [];
+        $sources = [];
 
         foreach ($this->sources as $source) {
-            if (! $source->separate()) {
+            $sources[$source->name()] = $source->separate();
+        }
+
+        foreach ($tree as $index => $node) {
+            $key = $node['section'] ?? null;
+
+            if (! is_string($key) || ! is_array($node['children'] ?? null)) {
                 continue;
             }
 
-            foreach ($tree as $index => $node) {
-                if (($node['section'] ?? null) === $source->name() && is_array($node['children'] ?? null)) {
-                    $separate[$source->name()] = $index;
-                }
+            if (($node['root'] ?? false) === true || ($sources[$key] ?? false)) {
+                $separate[$key] = $index;
             }
         }
 
         return $separate;
+    }
+
+    /**
+     * Folders below the top level that ask to be a root, by version, for the
+     * build to report.
+     *
+     * @return list<string>
+     */
+    public function misplacedRoots(): array
+    {
+        $found = [];
+
+        foreach ($this->versionsEnabled ? $this->versions : [null] as $version) {
+            foreach ($this->navigationBuilder()->misplacedRoots($version) as $path) {
+                $found[] = $version === null ? $path : $version.'/'.$path;
+            }
+        }
+
+        return $found;
     }
 
     /**
@@ -373,11 +408,29 @@ final class ContentRepository
      */
     public function breadcrumbs(Document $document): array
     {
-        return $this->navigationBuilder()->breadcrumbs(
-            $this->navigation($document->version),
-            $document->slug,
-            $document->title,
-        );
+        $tree = $this->navigation($document->version);
+
+        // A page in a folder with a sidebar of its own starts at that folder.
+        foreach ($this->separateFolders($tree) as $index) {
+            $folder = $tree[$index];
+
+            if (! $this->holdsPage($folder, $document->slug)) {
+                continue;
+            }
+
+            /** @var list<array<string, mixed>> $children */
+            $children = $folder['children'];
+            $first = $this->navigationBuilder()->flattenPages($children)[0] ?? null;
+            $title = $folder['title'] ?? null;
+
+            return $this->navigationBuilder()->breadcrumbs($children, $document->slug, $document->title, [
+                'title' => is_string($title) ? $title : '',
+                'href' => $first['href'] ?? null,
+                'slug' => $first['slug'] ?? null,
+            ]);
+        }
+
+        return $this->navigationBuilder()->breadcrumbs($tree, $document->slug, $document->title);
     }
 
     /**

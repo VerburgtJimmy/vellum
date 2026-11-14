@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Sidebars of their own: a top-level folder whose `meta.json` sets `"root": true` gets a sidebar to itself, and a switcher at the top of the sidebar moves between it, the other roots and the docs' own sidebar. An optional `description` is shown in the switcher. Previous and next stay inside the current sidebar, breadcrumbs start at the root's title, and search, `llms.txt`, the sitemap and the export cover every page. `vellum:build` reports `root` on a folder below the top level, and fails on it under `--strict`. See Navigation in the docs
+
 - `Vellum\Site`, everything core reads from `config/vellum.php` in one object. Core's service provider builds it from config, and every class in core takes it, or the part it needs, instead of reading config itself. `new ContentRepository(Site::fromArray([...]))` builds a repository for docs that config does not describe, without changing config. See Core on its own in the docs
 - `ContentRepository`, `Vellum\Site` and the API reference's settings are bound in the container, one per request, so a controller can type-hint them. `ContentRepository::fromConfig()` still builds a new repository from config
 
@@ -19,6 +21,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - An app that requires `jimmyverburgt/vellum-core` on its own and has `openapi.enabled` on now requires `jimmyverburgt/vellum-openapi` too. Without it, `vellum:build` says which package to install. See the upgrade guide
+
+- The switcher between the docs and the API reference names the docs' own sidebar after the `title` in the top-level `meta.json`, or "Docs" when there is none, where it always said "Docs". The breadcrumbs of a reference page start at the reference's title
 
 ### Deprecated
 

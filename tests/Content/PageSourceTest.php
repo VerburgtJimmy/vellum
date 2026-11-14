@@ -141,7 +141,7 @@ it('gives a source that asks for it a sidebar of its own', function (): void {
 
     expect(array_column($repository->sidebar('guides/first'), 'slug'))->toBe(['guides/first', 'guides/second'])
         ->and(array_column($repository->sidebar(''), 'title'))->toBe(['Home'])
-        ->and(array_column($repository->sections('guides/first'), 'current', 'key'))->toBe(['docs' => false, 'guides' => true]);
+        ->and(array_column($repository->sections('guides/first'), 'current', 'key'))->toBe(['' => false, 'guides' => true]);
 });
 
 it('reads a manifest written before sources had names, and rebuilds', function (): void {

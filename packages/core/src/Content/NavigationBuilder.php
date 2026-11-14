@@ -42,7 +42,88 @@ final class NavigationBuilder
             $bySlug[$document->slug] = $document;
         }
 
-        return $this->buildFolder($root, '', $bySlug, $version);
+        $tree = $this->buildFolder($root, '', $bySlug, $version);
+
+        // Only a top-level folder can be a sidebar of its own. A nested one
+        // that says so is reported by the build and stays an ordinary folder.
+        foreach ($tree as $index => $node) {
+            if (($node['type'] ?? null) === 'folder' && ($node['root'] ?? false) !== true) {
+                unset($tree[$index]['root'], $tree[$index]['section'], $tree[$index]['description']);
+            }
+
+            if (is_array($node['children'] ?? null)) {
+                $tree[$index]['children'] = self::withoutRoots($node['children']);
+            }
+        }
+
+        return $tree;
+    }
+
+    /**
+     * @param  array<mixed>  $tree
+     * @return array<mixed>
+     */
+    private static function withoutRoots(array $tree): array
+    {
+        foreach ($tree as $index => $node) {
+            if (! is_array($node) || ($node['type'] ?? null) !== 'folder') {
+                continue;
+            }
+
+            unset($node['root'], $node['section'], $node['description']);
+
+            if (is_array($node['children'] ?? null)) {
+                $node['children'] = self::withoutRoots($node['children']);
+            }
+
+            $tree[$index] = $node;
+        }
+
+        return $tree;
+    }
+
+    /**
+     * The title of the docs' own sidebar, from the top-level meta.json, when
+     * one or more folders have a sidebar of their own beside it.
+     */
+    public function title(?string $version = null): string
+    {
+        $title = $this->readMeta($this->rootPath($version))['title'] ?? null;
+
+        return is_string($title) && trim($title) !== '' ? trim($title) : 'Docs';
+    }
+
+    /**
+     * Folders below the top level whose meta.json asks to be a root, which
+     * only a top-level folder can be. Paths are relative to the docs folder.
+     *
+     * @return list<string>
+     */
+    public function misplacedRoots(?string $version = null): array
+    {
+        $root = $this->rootPath($version);
+
+        if (! is_dir($root)) {
+            return [];
+        }
+
+        $found = [];
+        $iterator = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($root, \FilesystemIterator::SKIP_DOTS), \RecursiveIteratorIterator::SELF_FIRST);
+
+        foreach ($iterator as $file) {
+            /** @var \SplFileInfo $file */
+            if (! $file->isDir() || $iterator->getDepth() < 1) {
+                continue;
+            }
+
+            if (($this->readMeta($file->getPathname())['root'] ?? false) === true) {
+                $found[] = $this->relativePath($root, $file->getPathname());
+            }
+        }
+
+        sort($found);
+
+        return $found;
     }
 
     /**
@@ -147,15 +228,17 @@ final class NavigationBuilder
     }
 
     /**
-     * Build breadcrumb crumbs for a document slug.
+     * Build breadcrumb crumbs for a document slug. They start at $home, or at
+     * the docs' start page.
      *
      * @param  NavTree  $tree
+     * @param  Breadcrumb|null  $home
      * @return list<Breadcrumb>
      */
-    public function breadcrumbs(array $tree, string $slug, string $title): array
+    public function breadcrumbs(array $tree, string $slug, string $title, ?array $home = null): array
     {
         $crumbs = [
-            [
+            $home ?? [
                 'title' => 'Docs',
                 'href' => $this->hrefForSlug('', null),
                 'slug' => '',
@@ -362,14 +445,27 @@ final class NavigationBuilder
 
             $icon = is_string($folderMeta['icon'] ?? null) ? $folderMeta['icon'] : null;
             $defaultOpen = isset($folderMeta['defaultOpen']) && filter_var($folderMeta['defaultOpen'], FILTER_VALIDATE_BOOLEAN);
-
-            return [
+            $folder = [
                 'type' => 'folder',
                 'title' => $title,
                 'icon' => $icon,
                 'defaultOpen' => $defaultOpen,
                 'children' => $this->buildFolder($folderPath, $folderSlugPrefix, $bySlug, $version),
             ];
+
+            // A sidebar of its own, with an entry in the switcher. build()
+            // keeps this only on a top-level folder.
+            if (($folderMeta['root'] ?? false) === true) {
+                $description = $folderMeta['description'] ?? null;
+                $folder = [
+                    'type' => 'folder',
+                    'section' => $folderSlugPrefix,
+                    'root' => true,
+                    'description' => is_string($description) && trim($description) !== '' ? trim($description) : null,
+                ] + $folder;
+            }
+
+            return $folder;
         }
 
         return $child['node'];

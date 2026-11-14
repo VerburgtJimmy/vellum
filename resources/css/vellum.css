@@ -2789,6 +2789,100 @@ html[data-vellum-nav-marker] [data-vellum-sidebar-wrap] [data-vellum-nav-link]:h
   outline-offset: 1px;
 }
 
+/* The switcher as a list, one sidebar per row with its description, and as
+   a menu that opens from the current one. Design round: one of the three
+   stays. */
+.vellum-sections-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.vellum-sections-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.0625rem;
+  padding: 0.375rem 0.625rem;
+  border-radius: var(--vellum-inset-radius);
+  color: var(--muted-foreground);
+}
+
+.vellum-sections-item:hover {
+  background: var(--accent);
+  color: var(--foreground);
+}
+
+.vellum-sections-item[aria-current] {
+  background: var(--muted);
+  color: var(--foreground);
+}
+
+.vellum-sections-item:focus-visible,
+.vellum-sections-trigger:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 1px;
+}
+
+.vellum-sections-title {
+  overflow: hidden;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1.25rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.vellum-sections-description {
+  overflow: hidden;
+  color: var(--muted-foreground);
+  font-size: 0.75rem;
+  line-height: 1rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.vellum-sections-trigger {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.375rem 0.625rem;
+  border: 1px solid var(--input);
+  border-radius: var(--vellum-surface-radius);
+  background: var(--background);
+  color: var(--foreground);
+  text-align: left;
+}
+
+.vellum-sections-trigger:hover {
+  background: var(--accent);
+}
+
+.vellum-sections-text {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+}
+
+.vellum-sections-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 50;
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  gap: 0.125rem;
+  margin-top: 0.25rem;
+  padding: 0.25rem;
+  border: 1px solid var(--border);
+  border-radius: var(--vellum-surface-radius);
+  background: var(--popover);
+  color: var(--popover-foreground);
+  box-shadow: 0 4px 12px oklch(0 0 0 / 0.08);
+}
+
 /* The button that opens the playground, at the end of the request line. */
 .vellum-api-try {
   display: inline-flex;

@@ -91,7 +91,7 @@ The same works for a spec from any other tool.
 
 ## The sidebar
 
-By default the reference has a sidebar to itself. A switch at the top of the sidebar leads from the docs to the reference and back, and the previous and next links stay inside the one the reader is in.
+By default the reference has a sidebar to itself, as a root folder does: it is listed in the switcher at the top of the sidebar beside the docs' own sidebar and any [roots](/docs/writing/navigation#sidebars-of-their-own), the previous and next links stay inside the one the reader is in, and its breadcrumbs start at its title.
 
 To list the reference as one more folder at the end of the docs' sidebar instead:
 

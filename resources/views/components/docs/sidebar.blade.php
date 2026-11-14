@@ -92,18 +92,11 @@
         </div>
     @endif
 
-    {{-- The docs and the API reference each have this sidebar to themselves,
-         so the way from one to the other is the first thing in both. --}}
+    {{-- The docs, each root folder and the API reference each have this
+         sidebar to themselves, so the way between them is the first thing in
+         every one. --}}
     @if (count($sections) > 1)
-        <nav aria-label="Sections" data-vellum-sections class="vellum-sections mx-3 mb-3 {{ $chrome && ! $searchInSidebar ? 'mt-3' : '' }}">
-            @foreach ($sections as $section)
-                <a
-                    href="{{ $section['href'] }}"
-                    class="vellum-section"
-                    @if ($section['current']) aria-current="true" @endif
-                >{{ $section['title'] }}</a>
-            @endforeach
-        </nav>
+        <x-vellum::docs.sections :sections="$sections" class="mx-3 mb-3 {{ $chrome && ! $searchInSidebar ? 'mt-3' : '' }}" />
     @endif
 
     <x-vellum::ui.scroll-area class="min-h-0 flex-1 px-4 pb-4 {{ $chrome && ! $searchInSidebar && count($sections) < 2 ? 'pt-4' : 'pt-1' }}">

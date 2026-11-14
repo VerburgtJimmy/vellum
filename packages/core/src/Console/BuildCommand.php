@@ -50,6 +50,7 @@ final class BuildCommand extends Command
         $this->warnAboutInvalidDates($documents);
 
         $broken = $this->reportBrokenReferences($documents, $repository);
+        $misplaced = $this->reportMisplacedRoots($repository);
 
         if ($repository->site()->search->isScout()) {
             SearchDriver::assertScoutInstalled();
@@ -102,12 +103,13 @@ final class BuildCommand extends Command
             return self::FAILURE;
         }
 
-        if ($broken > 0 && $this->strict($repository)) {
-            $this->error(sprintf(
-                '%d broken reference%s. Fix them, or drop --strict to let the build pass.',
-                $broken,
-                $broken === 1 ? '' : 's',
-            ));
+        if (($broken > 0 || $misplaced > 0) && $this->strict($repository)) {
+            $problems = array_filter([
+                $broken > 0 ? sprintf('%d broken reference%s', $broken, $broken === 1 ? '' : 's') : null,
+                $misplaced > 0 ? sprintf('%d misplaced root%s', $misplaced, $misplaced === 1 ? '' : 's') : null,
+            ]);
+
+            $this->error(implode(' and ', $problems).'. Fix them, or drop --strict to let the build pass.');
 
             return self::FAILURE;
         }
@@ -187,6 +189,22 @@ final class BuildCommand extends Command
             ));
             $this->line('  Use YYYY-MM-DD or an ISO 8601 date and time. Ignored for now.');
         }
+    }
+
+    /**
+     * A sidebar of its own can only be a top-level folder's. Counted with the
+     * broken references, so --strict fails on it the same way.
+     */
+    private function reportMisplacedRoots(ContentRepository $repository): int
+    {
+        $misplaced = $repository->misplacedRoots();
+
+        foreach ($misplaced as $folder) {
+            $this->warn('Folder "'.$folder.'" sets root in its meta.json, but only a top-level folder can have a sidebar of its own.');
+            $this->line('  It is shown as an ordinary folder. Move it to the top level, or remove root.');
+        }
+
+        return count($misplaced);
     }
 
     /**
