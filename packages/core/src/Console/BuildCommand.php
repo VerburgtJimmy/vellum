@@ -26,11 +26,10 @@ final class BuildCommand extends Command
 
     protected $description = 'Compile Markdown docs into the Vellum cache';
 
-    public function handle(): int
+    public function handle(ContentRepository $repository): int
     {
         $started = microtime(true);
 
-        $repository = ContentRepository::fromConfig();
         $version = $this->option('docs-version');
         $version = is_string($version) && $version !== '' ? $version : null;
 
@@ -40,12 +39,12 @@ final class BuildCommand extends Command
             $this->warn('OpenAPI: '.$warning);
         }
 
-        $this->warnAboutShadowedSlugs($documents);
+        $this->warnAboutShadowedSlugs($documents, $repository);
         $this->warnAboutInvalidDates($documents);
 
         $broken = $this->reportBrokenReferences($documents, $repository);
 
-        if (SearchDriver::isScout()) {
+        if ($repository->site()->search->isScout()) {
             SearchDriver::assertScoutInstalled();
             // Scout is replaced whole, so it gets every version even when
             // only one was asked for.
@@ -56,7 +55,7 @@ final class BuildCommand extends Command
             $this->line(...),
             $this->warn(...),
             forceCheck: (bool) $this->option('check-search'),
-            strict: $this->strict(),
+            strict: $this->strict($repository),
         ))->run($repository, $documents);
 
         $elapsed = round((microtime(true) - $started) * 1000);
@@ -96,7 +95,7 @@ final class BuildCommand extends Command
             return self::FAILURE;
         }
 
-        if ($broken > 0 && $this->strict()) {
+        if ($broken > 0 && $this->strict($repository)) {
             $this->error(sprintf(
                 '%d broken reference%s. Fix them, or drop --strict to let the build pass.',
                 $broken,
@@ -113,9 +112,9 @@ final class BuildCommand extends Command
      * Strict is a flag for a one-off run and a config key for CI, which does
      * not get to pass flags to whatever the deploy script calls.
      */
-    private function strict(): bool
+    private function strict(ContentRepository $repository): bool
     {
-        return (bool) $this->option('strict') || (bool) config('vellum.checks.strict', false);
+        return (bool) $this->option('strict') || $repository->site()->checks->strict;
     }
 
     /**
@@ -133,7 +132,7 @@ final class BuildCommand extends Command
      */
     private function reportBrokenReferences(array $documents, ContentRepository $repository): int
     {
-        if (! (bool) config('vellum.checks.references', true)) {
+        if (! $repository->site()->checks->references) {
             return 0;
         }
 
@@ -186,9 +185,9 @@ final class BuildCommand extends Command
     /**
      * @param  list<Document>  $documents
      */
-    private function warnAboutShadowedSlugs(array $documents): void
+    private function warnAboutShadowedSlugs(array $documents, ContentRepository $repository): void
     {
-        if (config('vellum.changelog.path') === null) {
+        if ($repository->site()->changelogPath === null) {
             return;
         }
 
@@ -198,7 +197,7 @@ final class BuildCommand extends Command
             }
 
             $this->warn('Page "'.$document->path.'" is shadowed by the changelog route.');
-            $this->line('  /'.trim((string) config('vellum.route.prefix', 'docs'), '/').'/changelog renders vellum.changelog.path instead.');
+            $this->line('  /'.$repository->site()->routePrefix.'/changelog renders vellum.changelog.path instead.');
             $this->line('  Rename the page, or set vellum.changelog.path to null.');
         }
     }

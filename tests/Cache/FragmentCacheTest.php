@@ -46,12 +46,11 @@ it('busts the fragment when component config changes', function (): void {
         mtime: 1,
     );
 
-    $cache = new FragmentCache;
-    $cache->remember($document, static fn (): string => 'first');
+    (new FragmentCache($this->site()->components))->remember($document, static fn (): string => 'first');
 
     config()->set('vellum.components.namespaces', ['vellum', '']);
 
-    expect($cache->remember($document, static fn (): string => 'second'))->toBe('second');
+    expect((new FragmentCache($this->site()->components))->remember($document, static fn (): string => 'second'))->toBe('second');
 });
 
 it('caches vellum components but renders a host component every time', function (): void {

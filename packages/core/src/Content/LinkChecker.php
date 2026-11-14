@@ -35,7 +35,7 @@ final class LinkChecker
     public function check(array $documents, ContentRepository $repository): array
     {
         $known = $this->knownPages($documents, $repository);
-        $prefix = trim((string) config('vellum.route.prefix', 'docs'), '/');
+        $prefix = $repository->site()->routePrefix;
         $findings = [];
 
         foreach ($documents as $document) {
@@ -140,11 +140,10 @@ final class LinkChecker
         }
 
         // The changelog is a route rather than a file, so nothing above lists it.
-        $changelog = Changelog::load();
+        $changelog = Changelog::load($repository->site());
 
         if ($changelog !== null) {
-            $prefix = trim((string) config('vellum.route.prefix', 'docs'), '/');
-            $known['/'.$prefix.'/changelog'] = array_values(array_filter(
+            $known['/'.$repository->site()->routePrefix.'/changelog'] = array_values(array_filter(
                 array_column($changelog->visibleHeadings(), 'id'),
                 is_string(...),
             ));

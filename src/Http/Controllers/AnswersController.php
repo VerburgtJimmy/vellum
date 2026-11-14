@@ -27,13 +27,13 @@ final class AnswersController extends Controller
 
     public function __construct(private readonly AnswersQuery $query = new AnswersQuery) {}
 
-    public function index(Request $request): Response
+    public function index(Request $request, ContentRepository $repository): Response
     {
         if (! (bool) config('vellum.search.enabled', true)) {
             abort(404);
         }
 
-        $payload = $this->query->json(ContentRepository::fromConfig(), self::version($request));
+        $payload = $this->query->json($repository, self::version($request));
 
         if ($payload === null) {
             abort(404);
@@ -47,7 +47,7 @@ final class AnswersController extends Controller
      * ranking the browser runs and the same access rules, so an agent is never
      * told about a page it cannot open.
      */
-    public function search(Request $request): Response
+    public function search(Request $request, ContentRepository $repository): Response
     {
         if (! (bool) config('vellum.agents.search', true)) {
             abort(404);
@@ -55,7 +55,7 @@ final class AnswersController extends Controller
 
         $query = $request->query('q');
         $query = is_string($query) ? trim($query) : '';
-        $index = $this->query->index(ContentRepository::fromConfig(), self::version($request));
+        $index = $this->query->index($repository, self::version($request));
 
         if ($index === null) {
             abort(404);

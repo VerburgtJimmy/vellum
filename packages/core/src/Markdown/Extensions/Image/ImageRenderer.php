@@ -34,6 +34,7 @@ final class ImageRenderer implements ConfigurationAwareInterface, NodeRendererIn
         private readonly ?string $contentPath = null,
         private readonly ?string $assetPrefix = null,
         private readonly ?ImageReport $report = null,
+        private readonly string $routePrefix = 'docs',
     ) {}
 
     public function setConfiguration(ConfigurationInterface $configuration): void
@@ -107,7 +108,7 @@ final class ImageRenderer implements ConfigurationAwareInterface, NodeRendererIn
             return $url;
         }
 
-        $prefix = trim((string) config('vellum.route.prefix', 'docs'), '/');
+        $prefix = trim($this->routePrefix, '/');
         $asset = $this->assetPrefix === null || $this->assetPrefix === ''
             ? $relative
             : trim($this->assetPrefix, '/').'/'.$relative;

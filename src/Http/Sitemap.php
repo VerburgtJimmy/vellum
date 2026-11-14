@@ -69,7 +69,7 @@ final class Sitemap
                 $lastmod = null;
 
                 if ($page['slug'] !== null && $page['href'] === $repository->hrefFor($page['slug'], $version)) {
-                    $changelog = $page['slug'] === 'changelog' ? Changelog::load() : null;
+                    $changelog = $page['slug'] === 'changelog' ? Changelog::load($repository->site()) : null;
                     $lastmod = $changelog !== null
                         ? $changelog->updated()
                         : $repository->find($page['slug'], $version)?->updated;

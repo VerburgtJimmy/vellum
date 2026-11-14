@@ -67,7 +67,7 @@ final class AnswersBuild
      */
     private function check(ContentRepository $repository, AnswerIndex $index, string $version, string $suffix): int
     {
-        if (! $this->forceCheck && ! (bool) config('vellum.checks.search', true)) {
+        if (! $this->forceCheck && ! $repository->site()->checks->search) {
             return 0;
         }
 
@@ -109,7 +109,7 @@ final class AnswersBuild
             return 1;
         }
 
-        $minimum = (float) config('vellum.checks.search_min', 0.0);
+        $minimum = $repository->site()->checks->searchMin;
 
         if ($result['asked'] > 0 && $minimum > 0.0 && $rate < $minimum) {
             ($this->warn)(sprintf(

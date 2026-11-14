@@ -12,7 +12,7 @@ beforeEach(function (): void {
 });
 
 it('renders nested components and their markdown slots', function (): void {
-    $html = (new MarkdownPipeline)->render(<<<'MD'
+    $html = (new MarkdownPipeline(components: $this->site()->components))->render(<<<'MD'
 <x-card>
 Hello **world**
 
@@ -29,7 +29,7 @@ MD);
 });
 
 it('leaves component tags and blade echoes inside fenced and inline code', function (): void {
-    $html = (new MarkdownPipeline)->render(<<<'MD'
+    $html = (new MarkdownPipeline(components: $this->site()->components))->render(<<<'MD'
 ```html
 <x-alert type="ok">{{ config('app.name') }}</x-alert>
 ```
@@ -43,20 +43,20 @@ MD);
 });
 
 it('does not evaluate blade echoes in prose', function (): void {
-    $html = (new MarkdownPipeline)->render("The name is {{ config('app.name') }}.\n");
+    $html = (new MarkdownPipeline(components: $this->site()->components))->render("The name is {{ config('app.name') }}.\n");
 
     expect($html)->toContain("{{ config('app.name') }}")
         ->and($html)->not->toContain(config('app.name'));
 });
 
 it('throws when a component is missing', function (): void {
-    (new MarkdownPipeline)->render('<x-vellum::definitely-missing />');
+    (new MarkdownPipeline(components: $this->site()->components))->render('<x-vellum::definitely-missing />');
 })->throws(UnknownComponentException::class);
 
 it('treats app as the unprefixed host namespace', function (): void {
     config()->set('vellum.components.namespaces', ['app']);
 
-    $html = (new MarkdownPipeline)->render('<x-alert>Host</x-alert>');
+    $html = (new MarkdownPipeline(components: $this->site()->components))->render('<x-alert>Host</x-alert>');
 
     expect($html)->toContain('data-test-alert')
         ->and($html)->toContain('Host');
@@ -65,20 +65,20 @@ it('treats app as the unprefixed host namespace', function (): void {
 it('throws when the namespace is not allowed', function (): void {
     config()->set('vellum.components.namespaces', ['vellum']);
 
-    (new MarkdownPipeline)->render('<x-alert>Nope</x-alert>');
+    (new MarkdownPipeline(components: $this->site()->components))->render('<x-alert>Nope</x-alert>');
 })->throws(UnknownComponentException::class);
 
 it('throws when a value tag is not allowlisted', function (): void {
-    (new MarkdownPipeline)->render('<x-vellum::env key="APP_NAME" />');
+    (new MarkdownPipeline(components: $this->site()->components))->render('<x-vellum::env key="APP_NAME" />');
 })->throws(UnknownComponentException::class);
 
 it('throws on bound attributes', function (): void {
-    (new MarkdownPipeline)->render('<x-alert :type="$foo">x</x-alert>');
+    (new MarkdownPipeline(components: $this->site()->components))->render('<x-alert :type="$foo">x</x-alert>');
 })->throws(UnknownComponentException::class);
 
 it('renders x-vellum::callout the same way as a note directive', function (): void {
-    $directive = (new MarkdownPipeline)->render(":::note\nHello body.\n:::");
-    $island = (new MarkdownPipeline)->render('<x-vellum::callout type="note">Hello body.</x-vellum::callout>');
+    $directive = (new MarkdownPipeline(components: $this->site()->components))->render(":::note\nHello body.\n:::");
+    $island = (new MarkdownPipeline(components: $this->site()->components))->render('<x-vellum::callout type="note">Hello body.</x-vellum::callout>');
 
     expect($island)->toContain('data-vellum-callout="note"')
         ->and($island)->toContain('Hello body.')
@@ -97,9 +97,9 @@ it('renders allowlisted env, config, and route value tags', function (): void {
     putenv('VELLUM_TEST_ENV=EnvDocs');
     $_ENV['VELLUM_TEST_ENV'] = 'EnvDocs';
 
-    $env = (new MarkdownPipeline)->render('<x-vellum::env key="VELLUM_TEST_ENV" />');
-    $config = (new MarkdownPipeline)->render('<x-vellum::config key="vellum.name" />');
-    $route = (new MarkdownPipeline)->render('<x-vellum::route key="vellum.docs.index" />');
+    $env = (new MarkdownPipeline(components: $this->site()->components))->render('<x-vellum::env key="VELLUM_TEST_ENV" />');
+    $config = (new MarkdownPipeline(components: $this->site()->components))->render('<x-vellum::config key="vellum.name" />');
+    $route = (new MarkdownPipeline(components: $this->site()->components))->render('<x-vellum::route key="vellum.docs.index" />');
 
     expect($env)->toContain('EnvDocs')
         ->and($config)->toContain('ConfigDocs')
@@ -110,7 +110,7 @@ it('keeps value tags as islands when they sit inside :::tabs', function (): void
     config()->set('vellum.components.allowlist.config', ['vellum.name']);
     config()->set('vellum.name', 'CompileTimeName');
 
-    $converted = (new MarkdownPipeline)->convert(<<<'MD'
+    $converted = (new MarkdownPipeline(components: $this->site()->components))->convert(<<<'MD'
 Top <x-vellum::config key="vellum.name" />
 
 :::tabs
@@ -127,7 +127,7 @@ MD);
 
     config()->set('vellum.name', 'RequestTimeName');
 
-    $html = (new IslandRenderer)->render($converted['html'], $converted['islands']);
+    $html = (new IslandRenderer($this->site()->components))->render($converted['html'], $converted['islands']);
 
     expect($html)->toContain('RequestTimeName')
         ->and($html)->not->toContain('CompileTimeName')
@@ -139,7 +139,7 @@ it('keeps value tags as children of x-vellum::tab islands', function (): void {
     config()->set('vellum.components.allowlist.config', ['vellum.name']);
     config()->set('vellum.name', 'CompileTimeName');
 
-    $converted = (new MarkdownPipeline)->convert(<<<'MD'
+    $converted = (new MarkdownPipeline(components: $this->site()->components))->convert(<<<'MD'
 <x-vellum::tabs>
 <x-vellum::tab label="Live">
 <x-vellum::config key="vellum.name" />
@@ -155,14 +155,14 @@ MD);
 
     config()->set('vellum.name', 'RequestTimeName');
 
-    $html = (new IslandRenderer)->render($converted['html'], $converted['islands']);
+    $html = (new IslandRenderer($this->site()->components))->render($converted['html'], $converted['islands']);
 
     expect($html)->toContain('RequestTimeName')
         ->and($html)->not->toContain('CompileTimeName');
 });
 
 it('assembles x-vellum::tabs from nested tab islands', function (): void {
-    $html = (new MarkdownPipeline)->render(<<<'MD'
+    $html = (new MarkdownPipeline(components: $this->site()->components))->render(<<<'MD'
 <x-vellum::tabs persist="pkg">
 <x-vellum::tab label="npm">
 npm body
@@ -185,7 +185,7 @@ MD);
 });
 
 it('keeps a code fence\'s copy button when a component sits next to it', function (): void {
-    $html = (new MarkdownPipeline)->render(<<<'MD'
+    $html = (new MarkdownPipeline(components: $this->site()->components))->render(<<<'MD'
 <x-alert>Hi</x-alert>
 
 ```php
@@ -198,7 +198,7 @@ MD);
 });
 
 it('never compiles blade inside a component attribute value', function (string $value): void {
-    $html = (new MarkdownPipeline)->render('<x-alert type="'.$value.'">Body</x-alert>');
+    $html = (new MarkdownPipeline(components: $this->site()->components))->render('<x-alert type="'.$value.'">Body</x-alert>');
 
     expect($html)->toContain('data-test-alert')
         ->and($html)->toContain('Body')
@@ -213,14 +213,14 @@ it('never compiles blade inside a component attribute value', function (string $
 ]);
 
 it('passes an attribute value through as data, escaped exactly once', function (): void {
-    $html = (new MarkdownPipeline)->render('<x-alert type="Tom & Jerry">Body</x-alert>');
+    $html = (new MarkdownPipeline(components: $this->site()->components))->render('<x-alert type="Tom & Jerry">Body</x-alert>');
 
     expect($html)->toContain('data-type="Tom &amp; Jerry"')
         ->and($html)->not->toContain('&amp;amp;');
 });
 
 it('keeps blade literal in a self-closing component attribute', function (): void {
-    $html = (new MarkdownPipeline)->render('<x-alert type="{{ php_uname() }}" />');
+    $html = (new MarkdownPipeline(components: $this->site()->components))->render('<x-alert type="{{ php_uname() }}" />');
 
     expect($html)->toContain('data-test-alert')
         ->and($html)->not->toContain(gethostname() ?: 'unreachable-hostname');

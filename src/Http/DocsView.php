@@ -9,7 +9,6 @@ use Vellum\Changelog\Changelog;
 use Vellum\Content\ContentRepository;
 use Vellum\Content\Document;
 use Vellum\Content\HeadingExtractor;
-use Vellum\Search\SearchDriver;
 
 /**
  * Shared view data for live docs pages and static export.
@@ -44,7 +43,7 @@ final class DocsView
             'next' => $adjacent['next'],
             'breadcrumbs' => $repository->breadcrumbs($document),
             'toc' => $headingExtractor->nest($document->headings),
-            'searchDriver' => SearchDriver::name(),
+            'searchDriver' => $repository->site()->search->driver,
             'staticExport' => $staticExport,
             'versions' => $switcher['versions'],
             'currentVersion' => $switcher['currentVersion'],
@@ -96,7 +95,7 @@ final class DocsView
                 ['title' => $changelog->title, 'href' => null, 'slug' => 'changelog'],
             ],
             'toc' => (new HeadingExtractor)->nest($headings),
-            'searchDriver' => SearchDriver::name(),
+            'searchDriver' => $repository->site()->search->driver,
             'staticExport' => $staticExport,
             'versions' => $switcher['versions'],
             'currentVersion' => $switcher['currentVersion'],

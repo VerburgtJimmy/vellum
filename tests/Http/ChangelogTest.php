@@ -137,14 +137,14 @@ it('serves the changelog from the cache until the file changes', function (): vo
     file_put_contents($path, "# Changelog\n\n## [1.0.0] - 2026-01-01\n\n- First\n");
     config()->set('vellum.changelog.path', $path);
 
-    expect(Changelog::load()?->releases[0]->version)->toBe('1.0.0')
-        ->and(Changelog::load()?->releases[0]->html)->toContain('First');
+    expect(Changelog::load($this->site())?->releases[0]->version)->toBe('1.0.0')
+        ->and(Changelog::load($this->site())?->releases[0]->html)->toContain('First');
 
     file_put_contents($path, "# Changelog\n\n## [1.1.0] - 2026-02-01\n\n- Second\n\n## [1.0.0] - 2026-01-01\n\n- First\n");
     touch($path, time() + 10);
     clearstatcache();
 
-    expect(Changelog::load()?->releases[0]->version)->toBe('1.1.0');
+    expect(Changelog::load($this->site())?->releases[0]->version)->toBe('1.1.0');
 
     unlink($path);
 });

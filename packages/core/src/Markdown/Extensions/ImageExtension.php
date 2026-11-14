@@ -19,10 +19,11 @@ final class ImageExtension implements ExtensionInterface
         private readonly ?string $contentPath = null,
         private readonly ?string $assetPrefix = null,
         private readonly ?ImageReport $report = null,
+        private readonly string $routePrefix = 'docs',
     ) {}
 
     public function register(EnvironmentBuilderInterface $environment): void
     {
-        $environment->addRenderer(Image::class, new ImageRenderer($this->contentPath, $this->assetPrefix, $this->report), 10);
+        $environment->addRenderer(Image::class, new ImageRenderer($this->contentPath, $this->assetPrefix, $this->report, $this->routePrefix), 10);
     }
 }

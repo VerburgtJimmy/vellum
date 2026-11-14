@@ -55,7 +55,7 @@ it('renders documented value tags when allowlisted', function (): void {
         'route' => ['vellum.docs.index'],
     ]);
 
-    $html = (new MarkdownPipeline)->render(<<<'MD'
+    $html = (new MarkdownPipeline(components: $this->site()->components))->render(<<<'MD'
 <x-vellum::config key="vellum.name" />
 <x-vellum::route key="vellum.docs.index" />
 MD);
@@ -70,7 +70,7 @@ it('renders a host component sample the same way Extending documents it', functi
     $this->registerFixtureComponents();
     config()->set('vellum.components.namespaces', ['vellum', 'app']);
 
-    $html = (new MarkdownPipeline)->render(<<<'MD'
+    $html = (new MarkdownPipeline(components: $this->site()->components))->render(<<<'MD'
 <x-alert type="ok">
 Hello **docs**
 </x-alert>

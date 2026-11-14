@@ -6,7 +6,7 @@
 @php
 
     $hotkey = (string) config('vellum.search.hotkey', 'k');
-    $driver = $staticExport ? 'answers' : (\Vellum\Search\SearchDriver::isScout() ? 'scout' : 'answers');
+    $driver = $staticExport ? 'answers' : (app(\Vellum\Site::class)->search->isScout() ? 'scout' : 'answers');
     $prefix = trim((string) config('vellum.route.prefix', 'docs'), '/');
     $versioned = is_string($currentVersion) && $currentVersion !== '' && (bool) config('vellum.versions.enabled')
         ? ['version' => $currentVersion]

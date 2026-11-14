@@ -17,15 +17,14 @@ use Vellum\Search\SearchDriver;
  */
 final class SearchIndexController extends Controller
 {
-    public function __invoke(Request $request): Response
+    public function __invoke(Request $request, ContentRepository $repository): Response
     {
-        if (! SearchDriver::isScout()) {
+        if (! $repository->site()->search->isScout()) {
             abort(404);
         }
 
         SearchDriver::assertScoutInstalled();
 
-        $repository = ContentRepository::fromConfig();
         $version = $request->query('version');
         $query = $request->query('q');
         $query = is_string($query) ? trim($query) : '';

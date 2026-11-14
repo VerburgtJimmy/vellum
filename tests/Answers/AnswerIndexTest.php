@@ -11,7 +11,7 @@ beforeEach(function (): void {
     $this->writeDoc('billing.md', "---\ntitle: Billing\naccess: auth\naliases:\n  - Supercalifragilistic invoices\n---\nRefunds take five days.\n");
 
     $this->index = function (): AnswerIndex {
-        $repository = new ContentRepository(contentPath: $this->docsPath(), store: new CompiledStore($this->cachePath()));
+        $repository = new ContentRepository(site: $this->site(), store: new CompiledStore($this->cachePath()));
 
         return AnswerIndex::build($repository->buildAll(), $repository);
     };

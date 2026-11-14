@@ -6,6 +6,7 @@ namespace Vellum\Search;
 
 use Illuminate\Database\Eloquent\Model;
 use Laravel\Scout\Searchable;
+use Vellum\Site;
 
 /**
  * Scout record for a page or heading. Not stored in a SQL table.
@@ -40,9 +41,8 @@ final class SearchableDocument extends Model
 
     public function searchableAs(): string
     {
-        $index = config('vellum.search.scout.index', 'vellum');
-
-        return is_string($index) && $index !== '' ? $index : 'vellum';
+        // Scout makes this model itself, so the site cannot be handed in.
+        return app(Site::class)->search->scoutIndex;
     }
 
     /**

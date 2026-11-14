@@ -8,6 +8,7 @@ use Vellum\Cache\CompiledStore;
 use Vellum\Content\ContentRepository;
 use Vellum\Exceptions\DuplicateSlugException;
 use Vellum\OpenApi\OpenApiPages;
+use Vellum\OpenApi\Settings;
 
 require_once __DIR__.'/helpers.php';
 
@@ -15,10 +16,9 @@ beforeEach(function (): void {
     $this->writeDoc('index.md', "---\ntitle: Home\n---\nHi");
 
     $this->localRepository = fn (): ContentRepository => new ContentRepository(
-        contentPath: $this->docsPath(),
+        site: $this->site(isLocal: true),
         store: new CompiledStore($this->cachePath()),
-        isLocal: true,
-        openApi: new OpenApiPages,
+        openApi: new OpenApiPages(Settings::fromSite($this->site())),
     );
 });
 

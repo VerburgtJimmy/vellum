@@ -14,6 +14,7 @@ use Vellum\Http\ChangelogFeed;
 use Vellum\Http\DocsView;
 use Vellum\Http\LinkHeader;
 use Vellum\Http\RawMarkdown;
+use Vellum\Site;
 
 /**
  * Serves the changelog HTML page and Atom feed.
@@ -25,15 +26,14 @@ final class ChangelogController extends Controller
         private readonly ChangelogFeed $feed = new ChangelogFeed,
     ) {}
 
-    public function page(): Response|RedirectResponse
+    public function page(ContentRepository $repository): Response|RedirectResponse
     {
-        $changelog = Changelog::load();
+        $changelog = Changelog::load($repository->site());
 
         if ($changelog === null) {
-            return app(DocsController::class)->show('changelog');
+            return app(DocsController::class)->show($repository, 'changelog');
         }
 
-        $repository = ContentRepository::fromConfig();
         $negotiates = (bool) config('vellum.agents.content_negotiation', true);
 
         if ($negotiates && RawMarkdown::preferredBy(request())) {
@@ -54,9 +54,9 @@ final class ChangelogController extends Controller
         return $response;
     }
 
-    public function feed(): Response
+    public function feed(Site $site): Response
     {
-        $changelog = Changelog::load();
+        $changelog = Changelog::load($site);
 
         if ($changelog === null) {
             abort(404);

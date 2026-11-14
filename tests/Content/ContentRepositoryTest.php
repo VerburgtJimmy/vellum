@@ -16,7 +16,7 @@ title: Authentication
 MD);
 
     $repository = new ContentRepository(
-        contentPath: $this->docsPath(),
+        site: $this->site(),
         store: new CompiledStore($this->cachePath()),
     );
 
@@ -37,7 +37,7 @@ Body
 MD);
 
     $repository = new ContentRepository(
-        contentPath: $this->docsPath(),
+        site: $this->site(),
         store: new CompiledStore($this->cachePath()),
     );
 
@@ -50,7 +50,7 @@ it('falls back to the first heading then title case filename', function (): void
     $this->writeDoc('plain-page.md', "# From Heading\n\nHi");
 
     $repository = new ContentRepository(
-        contentPath: $this->docsPath(),
+        site: $this->site(),
         store: new CompiledStore($this->cachePath()),
     );
 
@@ -71,7 +71,7 @@ MD);
 
     $store = new CompiledStore($this->cachePath());
     $repository = new ContentRepository(
-        contentPath: $this->docsPath(),
+        site: $this->site(),
         store: $store,
     );
 
@@ -97,7 +97,7 @@ Guides home
 MD);
 
     $repository = new ContentRepository(
-        contentPath: $this->docsPath(),
+        site: $this->site(),
         store: new CompiledStore($this->cachePath()),
     );
 
@@ -112,9 +112,8 @@ it('does not re-read sources in production when compiled', function (): void {
 
     $store = new CompiledStore($this->cachePath());
     $repository = new ContentRepository(
-        contentPath: $this->docsPath(),
+        site: $this->site(),
         store: $store,
-        isLocal: false,
     );
 
     $first = $repository->find('cached');
@@ -133,9 +132,8 @@ it('recompiles a document in local when mtime changes', function (): void {
     $path = $this->writeDoc('local.md', "---\ntitle: Original\n---\nOne");
 
     $repository = new ContentRepository(
-        contentPath: $this->docsPath(),
+        site: $this->site(isLocal: true),
         store: new CompiledStore($this->cachePath()),
-        isLocal: true,
     );
 
     expect($repository->find('local')?->title)->toBe('Original');
@@ -155,11 +153,8 @@ it('resolves versioned documents and omits the latest version from URLs', functi
     config()->set('vellum.versions.list', ['v2', 'v1']);
 
     $repository = new ContentRepository(
-        contentPath: $this->docsPath(),
+        site: $this->site(['versions' => ['enabled' => true, 'latest' => 'v2', 'list' => ['v2', 'v1']]]),
         store: new CompiledStore($this->cachePath()),
-        versionsEnabled: true,
-        latestVersion: 'v2',
-        versions: ['v2', 'v1'],
     );
 
     expect($repository->shouldRedirectToUnprefixed('guides/auth'))->toBeFalse()
@@ -182,9 +177,8 @@ it('rebuilds the local sidebar when an edit keeps the file the same size', funct
     $meta = $this->writeDoc('meta.json', '{"pages": ["alpha", "beta"]}');
 
     $repository = fn (): ContentRepository => new ContentRepository(
-        contentPath: $this->docsPath(),
+        site: $this->site(isLocal: true),
         store: new CompiledStore($this->cachePath()),
-        isLocal: true,
     );
 
     expect(array_column($repository()->navigation(), 'title'))->toBe(['Alpha', 'Beta']);
@@ -199,9 +193,8 @@ it('forgets a page in local as soon as its file is deleted', function (): void {
     $path = $this->writeDoc('gone.md', "---\ntitle: Gone\n---\nBody");
 
     $repository = new ContentRepository(
-        contentPath: $this->docsPath(),
+        site: $this->site(isLocal: true),
         store: new CompiledStore($this->cachePath()),
-        isLocal: true,
     );
 
     expect($repository->find('gone'))->not->toBeNull();

@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Vellum\Search\SearchDriver;
+use Vellum\Site\Search;
 
 it('has no index route of its own: the built-in driver searches in the browser', function (): void {
     $this->writeDoc('index.md', "---\ntitle: Home\n---\nHello");
@@ -62,13 +63,8 @@ it('writes nav.php during build', function (): void {
 });
 
 it('takes builtin and its old name minisearch as the same driver', function (): void {
-    config()->set('vellum.search.driver', 'minisearch');
-    expect(SearchDriver::name())->toBe('builtin')
-        ->and(SearchDriver::isScout())->toBeFalse();
-
-    config()->set('vellum.search.driver', 'builtin');
-    expect(SearchDriver::name())->toBe('builtin');
-
-    config()->set('vellum.search.driver', 'scout');
-    expect(SearchDriver::isScout())->toBeTrue();
+    expect(Search::fromArray(['driver' => 'minisearch'])->driver)->toBe('builtin')
+        ->and(Search::fromArray(['driver' => 'minisearch'])->isScout())->toBeFalse()
+        ->and(Search::fromArray(['driver' => 'builtin'])->driver)->toBe('builtin')
+        ->and(Search::fromArray(['driver' => 'scout'])->isScout())->toBeTrue();
 });

@@ -22,12 +22,12 @@ composer require jimmyverburgt/vellum-core
 
 ## Pages
 
-`ContentRepository` is the entry point. It finds pages by slug, compiles them when they changed, and checks them against the reader's access:
+`ContentRepository` is the entry point. It finds pages by slug, compiles them when they changed, and checks them against the reader's access. Resolve it from the container, or type-hint it in a controller method:
 
 ```php
 use Vellum\Content\ContentRepository;
 
-$docs = ContentRepository::fromConfig();
+$docs = app(ContentRepository::class);
 $page = $docs->find('getting-started/installation');
 
 if ($page === null || ! $docs->allows($page)) {
@@ -41,6 +41,23 @@ $docs->render($page);       // the page's HTML, components included
 $docs->navigation();        // the sidebar tree this reader may see
 $docs->adjacent($page->slug); // previous and next pages, each with its section when that differs
 ```
+
+The container builds one repository per request and shares it, so the sidebar it loads for one call serves the next. `ContentRepository::fromConfig()` still works, and builds a new repository from the config as it is at that moment.
+
+Everything core reads from `config/vellum.php` arrives through a `Vellum\Site`, built from config by core's service provider. To build a repository for docs that config does not describe, pass it a site of its own:
+
+```php
+use Vellum\Content\ContentRepository;
+use Vellum\Site;
+
+$handbook = new ContentRepository(Site::fromArray([
+    'path' => resource_path('handbook'),
+    'route' => ['prefix' => 'handbook'],
+    'cache' => ['path' => storage_path('framework/handbook')],
+]));
+```
+
+`Site::fromArray()` takes the same keys as `config/vellum.php`, with the same defaults for any you leave out.
 
 Use `render()` rather than `$page->html`. The stored HTML holds a placeholder for each Blade component in the page, and `render()` puts the rendered components in their place.
 

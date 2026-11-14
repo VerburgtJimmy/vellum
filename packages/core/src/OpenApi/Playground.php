@@ -18,11 +18,6 @@ final class Playground
     /** A schema nests this far in the data. Deeper, a field is edited as JSON. */
     private const MAX_DEPTH = 6;
 
-    public static function enabled(): bool
-    {
-        return (bool) config('vellum.openapi.playground', true);
-    }
-
     /**
      * @return array<string, mixed>
      */

@@ -36,15 +36,21 @@ final class PageBuilder
     /** What the spec was when these pages were built. Stamped on each one. */
     private ?string $signature = null;
 
+    private readonly Grouper $grouper;
+
+    private readonly SampleBuilder $samples;
+
     public function __construct(
         private readonly ViewFactory $view,
-        private readonly Grouper $grouper = new Grouper,
+        private readonly Settings $settings = new Settings,
         private readonly MarkdownPipeline $pipeline = new MarkdownPipeline,
         private readonly MarkdownRenderer $prose = new MarkdownRenderer,
-        private readonly SampleBuilder $samples = new SampleBuilder,
         private readonly MarkdownRendition $rendition = new MarkdownRendition,
         private readonly Playground $playground = new Playground,
-    ) {}
+    ) {
+        $this->grouper = new Grouper($settings->untaggedLabel);
+        $this->samples = new SampleBuilder($settings->samples);
+    }
 
     /**
      * @param  Closure(string): string  $href  The URL of a slug.
@@ -54,8 +60,8 @@ final class PageBuilder
     public function build(Spec $spec, ?string $version, Closure $href, ?string $signature = null): array
     {
         $this->signature = $signature;
-        $groups = $this->grouper->group($spec, self::groupBy());
-        $prefix = Mount::prefix();
+        $groups = $this->grouper->group($spec, $this->settings->groupBy);
+        $prefix = $this->settings->prefix;
         $documents = [$this->overview($spec, $groups, $prefix, $version, $href)];
 
         foreach ($groups as $group) {
@@ -65,11 +71,6 @@ final class PageBuilder
         }
 
         return $documents;
-    }
-
-    public static function groupBy(): string
-    {
-        return config('vellum.openapi.group_by') === 'path' ? 'path' : 'tag';
     }
 
     /**
@@ -150,7 +151,7 @@ final class PageBuilder
             'inline' => $this->inline(...),
             'body' => $this->afterOpening($operation->description),
             'payloadTabs' => $payload === null ? '' : $this->codeTabs([['label' => 'JSON', 'language' => 'json', 'code' => $payload]], null),
-            'playground' => Playground::enabled() && ! $webhook
+            'playground' => $this->settings->playground && ! $webhook
                 ? (string) json_encode(
                     $this->playground->data($operation, $spec, $server),
                     JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE,
@@ -249,7 +250,7 @@ final class PageBuilder
                 'title' => $title,
                 'openapi' => true,
                 'openapi_signature' => $this->signature,
-                'access' => self::access(),
+                'access' => $this->settings->access,
                 ...$extra,
             ],
             path: $spec->path,
@@ -260,22 +261,9 @@ final class PageBuilder
         );
     }
 
-    /**
-     * Who may read the reference. One setting for all of it: a spec has no
-     * folders to gate one by one.
-     */
-    public static function access(): string
-    {
-        $access = config('vellum.openapi.access');
-
-        return is_string($access) && trim($access) !== '' ? trim($access) : 'guest';
-    }
-
     private function title(Spec $spec): string
     {
-        $configured = config('vellum.openapi.title');
-
-        return is_string($configured) && trim($configured) !== '' ? $configured : $spec->title();
+        return $this->settings->title ?? $spec->title();
     }
 
     /**
@@ -411,10 +399,8 @@ final class PageBuilder
 
     private function serverUrl(Spec $spec, Operation $operation): ?string
     {
-        $configured = config('vellum.openapi.base_url');
-
-        if (is_string($configured) && $configured !== '') {
-            return rtrim($configured, '/');
+        if ($this->settings->baseUrl !== null) {
+            return rtrim($this->settings->baseUrl, '/');
         }
 
         foreach ($operation->servers as $server) {
@@ -436,10 +422,9 @@ final class PageBuilder
      */
     private function servers(Spec $spec): array
     {
-        $configured = config('vellum.openapi.base_url');
         // The token addresses go with the servers: getting a token is part of
         // trying a request, and the forwarding route may have to do it.
-        $urls = [...(is_string($configured) && $configured !== '' ? [$configured] : []), ...OAuth::tokenUrls($spec)];
+        $urls = [...($this->settings->baseUrl !== null ? [$this->settings->baseUrl] : []), ...OAuth::tokenUrls($spec)];
 
         foreach ([$spec->servers(), ...array_map(static fn (Operation $operation): array => $operation->servers, $spec->operations)] as $servers) {
             foreach ($servers as $server) {

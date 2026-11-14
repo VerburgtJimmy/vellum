@@ -15,8 +15,7 @@ use Illuminate\Support\Facades\Http;
 use Psr\Http\Message\ResponseInterface;
 use Vellum\Content\ContentRepository;
 use Vellum\Http\PlaygroundProxy;
-use Vellum\OpenApi\Mount;
-use Vellum\OpenApi\Playground;
+use Vellum\OpenApi\Settings;
 
 /**
  * Sends a playground request on the reader's behalf, for an API on another
@@ -34,14 +33,13 @@ final class PlaygroundProxyController extends Controller
      */
     private const TIMEOUT = 25;
 
-    public function __invoke(Request $request): JsonResponse
+    public function __invoke(Request $request, ContentRepository $repository, Settings $openApi): JsonResponse
     {
-        if (! (bool) config('vellum.openapi.enabled') || ! Playground::enabled() || ! (bool) config('vellum.openapi.proxy', false)) {
+        if (! $openApi->playgroundOn() || ! $openApi->proxy) {
             abort(404);
         }
 
-        $repository = ContentRepository::fromConfig();
-        $overview = $repository->find(Mount::prefix());
+        $overview = $repository->find($openApi->prefix);
 
         if ($overview === null || ! $overview->generated() || ! $repository->allows($overview)) {
             abort(404);
@@ -86,7 +84,7 @@ final class PlaygroundProxyController extends Controller
 
         $host = (string) parse_url($target, PHP_URL_HOST);
         $port = parse_url($target, PHP_URL_PORT) ?? (str_starts_with($target, 'https://') ? 443 : 80);
-        $addresses = PlaygroundProxy::addresses($host, (bool) config('vellum.openapi.proxy_private', false));
+        $addresses = PlaygroundProxy::addresses($host, $openApi->proxyPrivate);
 
         if ($addresses === null) {
             return $this->refuse('That server is not one this site will send a request to: it is not at a public address.', 422);

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use Illuminate\Support\Facades\Artisan;
 use Vellum\Exceptions\InvalidSpecException;
+use Vellum\OpenApi\Settings;
 use Vellum\OpenApi\SpecSource;
 
 beforeEach(function (): void {
@@ -34,7 +35,7 @@ it('uses the configured spec when there is one', function (): void {
     file_put_contents($path, '{}');
     config()->set('vellum.openapi.spec', $path);
 
-    $source = new SpecSource;
+    $source = new SpecSource(Settings::fromSite($this->site()));
 
     expect($source->resolve())->toBe($path)
         ->and($source->warnings())->toBe([]);
@@ -43,7 +44,7 @@ it('uses the configured spec when there is one', function (): void {
 it('fails when the configured spec is not there', function (): void {
     config()->set('vellum.openapi.spec', '/no/such/spec.json');
 
-    expect(fn () => (new SpecSource)->resolve())
+    expect(fn () => (new SpecSource(Settings::fromSite($this->site())))->resolve())
         ->toThrow(InvalidSpecException::class, '/no/such/spec.json');
 });
 
@@ -53,14 +54,14 @@ it('prefers the configured spec over Scramble', function (): void {
     config()->set('vellum.openapi.spec', $path);
     fakeScramble('scramble:export {--path=}');
 
-    expect((new SpecSource)->resolve())->toBe($path);
+    expect((new SpecSource(Settings::fromSite($this->site())))->resolve())->toBe($path);
 });
 
 it('does nothing at all when openapi is off', function (): void {
     config()->set('vellum.openapi.enabled', false);
     fakeScramble('scramble:export {--path=}');
 
-    $source = new SpecSource;
+    $source = new SpecSource(Settings::fromSite($this->site()));
 
     expect($source->resolve())->toBeNull()
         ->and($source->warnings())->toBe([]);
@@ -69,7 +70,7 @@ it('does nothing at all when openapi is off', function (): void {
 it('exports from Scramble when it is installed', function (): void {
     fakeScramble('scramble:export {--path=}');
 
-    $source = new SpecSource;
+    $source = new SpecSource(Settings::fromSite($this->site()));
     $resolved = $source->resolve();
 
     expect($resolved)->toBe($this->cachePath().'/openapi.json')
@@ -81,7 +82,7 @@ it('leaves Scramble alone when the bridge is switched off', function (): void {
     config()->set('vellum.openapi.scramble', false);
     fakeScramble('scramble:export {--path=}');
 
-    $source = new SpecSource;
+    $source = new SpecSource(Settings::fromSite($this->site()));
 
     expect($source->resolve())->toBeNull()
         ->and($source->warnings()[0])->toContain('no spec was found');
@@ -90,7 +91,7 @@ it('leaves Scramble alone when the bridge is switched off', function (): void {
 it('says so rather than guessing when the export has no --path', function (): void {
     Artisan::command('scramble:export', fn (): int => 0);
 
-    $source = new SpecSource;
+    $source = new SpecSource(Settings::fromSite($this->site()));
 
     expect($source->resolve())->toBeNull()
         ->and($source->warnings()[0])->toContain('--path');
@@ -99,7 +100,7 @@ it('says so rather than guessing when the export has no --path', function (): vo
 it('reports an export that produced nothing', function (): void {
     fakeScramble('scramble:export {--path=}', fn (): int => 0);
 
-    $source = new SpecSource;
+    $source = new SpecSource(Settings::fromSite($this->site()));
 
     expect($source->resolve())->toBeNull()
         ->and($source->warnings()[0])->toContain('did not produce a spec');
@@ -112,11 +113,11 @@ it('does not hand back a spec left over from a previous run', function (): void 
     // Reports success but writes nothing, which is the case a stale file hides.
     fakeScramble('scramble:export {--path=}', fn (): int => 0);
 
-    expect((new SpecSource)->resolve())->toBeNull();
+    expect((new SpecSource(Settings::fromSite($this->site())))->resolve())->toBeNull();
 });
 
 it('warns once when there is nothing to render', function (): void {
-    $source = new SpecSource;
+    $source = new SpecSource(Settings::fromSite($this->site()));
 
     expect($source->resolve())->toBeNull()
         ->and($source->warnings())->toHaveCount(1)

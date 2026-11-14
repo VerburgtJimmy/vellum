@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace Vellum\Cache;
 
+use Illuminate\Contracts\Config\Repository;
 use Illuminate\Support\Facades\Cache;
 use Vellum\Content\Document;
 use Vellum\Markdown\Islands\Island;
+use Vellum\Site\Components;
 
 /**
  * App-cache of Blade-rendered island HTML. Busted by generation, document, config, and app version.
@@ -18,6 +20,10 @@ final class FragmentCache
     private const GENERATION = 'vellum:fragment-generation';
 
     private const PREFIX = 'vellum:fragment:';
+
+    public function __construct(
+        private readonly Components $components = new Components,
+    ) {}
 
     /**
      * @param  callable(): string  $resolver
@@ -66,8 +72,8 @@ final class FragmentCache
         $payload = json_encode([
             $document->html,
             $document->toArray()['islands'],
-            config('vellum.components'),
-            config('app.version'),
+            $this->components->config,
+            $this->appSettings()->get('app.version'),
             app()->version(),
             $this->allowlistedSnapshot(),
         ], JSON_THROW_ON_ERROR);
@@ -85,20 +91,20 @@ final class FragmentCache
      */
     private function allowlistedSnapshot(): array
     {
-        /** @var array<string, mixed> $allowlist */
-        $allowlist = config('vellum.components.allowlist', []);
+        $allowlist = $this->components->allowlist;
         $snapshot = [];
 
-        foreach ($this->stringList($allowlist['env'] ?? null) as $key) {
+        foreach ($allowlist['env'] as $key) {
             $value = getenv($key);
             $snapshot['env'][$key] = $value === false ? ($_ENV[$key] ?? null) : $value;
         }
 
-        foreach ($this->stringList($allowlist['config'] ?? null) as $key) {
-            $snapshot['config'][$key] = config($key);
+        // The app's own settings, which a value tag prints. Not Vellum's.
+        foreach ($allowlist['config'] as $key) {
+            $snapshot['config'][$key] = $this->appSettings()->get($key);
         }
 
-        foreach ($this->stringList($allowlist['route'] ?? null) as $key) {
+        foreach ($allowlist['route'] as $key) {
             try {
                 $snapshot['route'][$key] = app('url')->route($key, [], false);
             } catch (\Throwable) {
@@ -109,23 +115,8 @@ final class FragmentCache
         return $snapshot;
     }
 
-    /**
-     * @return list<string>
-     */
-    private function stringList(mixed $value): array
+    private function appSettings(): Repository
     {
-        if (! is_array($value)) {
-            return [];
-        }
-
-        $keys = [];
-
-        foreach ($value as $item) {
-            if (is_string($item) && $item !== '') {
-                $keys[] = $item;
-            }
-        }
-
-        return $keys;
+        return app('config');
     }
 }

@@ -13,7 +13,7 @@ beforeEach(function (): void {
             $this->writeDoc($path, $markdown);
         }
 
-        $repository = new ContentRepository(contentPath: $this->docsPath(), store: new CompiledStore($this->cachePath()));
+        $repository = new ContentRepository(site: $this->site(), store: new CompiledStore($this->cachePath()));
 
         return new Ranker(AnswerIndex::build($repository->buildAll(), $repository));
     };

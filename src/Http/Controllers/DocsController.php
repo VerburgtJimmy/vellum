@@ -25,14 +25,13 @@ final class DocsController extends Controller
         private readonly HeadingExtractor $headingExtractor = new HeadingExtractor,
     ) {}
 
-    public function index(): Response|RedirectResponse
+    public function index(ContentRepository $repository): Response|RedirectResponse
     {
-        return $this->show('');
+        return $this->show($repository, '');
     }
 
-    public function show(string $slug = ''): Response|RedirectResponse
+    public function show(ContentRepository $repository, string $slug = ''): Response|RedirectResponse
     {
-        $repository = ContentRepository::fromConfig();
         $slug = trim($slug, '/');
 
         if ($repository->versionsEnabled() && $repository->shouldRedirectToUnprefixed($slug)) {

@@ -18,9 +18,9 @@ use Vellum\Http\Sitemap;
  */
 final class SitemapController extends Controller
 {
-    public function __invoke(): Response
+    public function __invoke(ContentRepository $repository): Response
     {
-        $entries = Sitemap::entries(ContentRepository::fromConfig());
+        $entries = Sitemap::entries($repository);
 
         if ($entries === []) {
             abort(404);

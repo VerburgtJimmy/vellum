@@ -15,6 +15,10 @@ use Vellum\Support\Slug;
  */
 final class Grouper
 {
+    public function __construct(
+        private readonly string $untaggedLabel = 'Other',
+    ) {}
+
     /**
      * @return list<Group>
      */
@@ -178,9 +182,7 @@ final class Grouper
 
     private function ungroupedLabel(): string
     {
-        $label = config('vellum.openapi.untagged_label', 'Other');
-
-        return is_string($label) && trim($label) !== '' ? $label : 'Other';
+        return $this->untaggedLabel;
     }
 
     /**

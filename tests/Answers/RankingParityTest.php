@@ -46,7 +46,7 @@ it('agrees with the committed ranking fixture', function (): void {
     $this->writeDoc('gating.md', "---\ntitle: Gating\n---\nHide pages from guests.\n");
     $this->writeDoc('billing.md', "---\ntitle: Billing\naliases:\n  - Invoices\n---\nHow charges work. A café résumé, naïvely.\n\n## Deploy notes\n\nBilling changes ship with each deploy.\n");
 
-    $repository = new ContentRepository(contentPath: $this->docsPath(), store: new CompiledStore($this->cachePath()));
+    $repository = new ContentRepository(site: $this->site(), store: new CompiledStore($this->cachePath()));
     $index = AnswerIndex::build($repository->buildAll(), $repository);
     $ranker = new Ranker($index);
     $rankings = [];

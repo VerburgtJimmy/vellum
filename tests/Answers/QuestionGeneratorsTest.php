@@ -16,7 +16,7 @@ beforeEach(function (): void {
     // Compile one page and return its sections, so generators see real markup.
     $this->sectionsOf = function (string $markdown): array {
         $this->writeDoc('page.md', $markdown);
-        $repository = new ContentRepository(contentPath: $this->docsPath(), store: new CompiledStore($this->cachePath()));
+        $repository = new ContentRepository(site: $this->site(), store: new CompiledStore($this->cachePath()));
 
         return Sections::from($repository->buildAll());
     };

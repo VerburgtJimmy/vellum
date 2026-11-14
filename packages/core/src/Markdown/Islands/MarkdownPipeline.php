@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Vellum\Markdown\Islands;
 
 use Vellum\Markdown\MarkdownRenderer;
+use Vellum\Site\Components;
 
 /**
  * Markdown to HTML with component islands extracted and compiled recursively.
@@ -17,6 +18,7 @@ final class MarkdownPipeline
 {
     public function __construct(
         private readonly MarkdownRenderer $renderer = new MarkdownRenderer,
+        private readonly Components $components = new Components,
     ) {}
 
     /**
@@ -40,7 +42,7 @@ final class MarkdownPipeline
     {
         $converted = $this->convert($markdown);
 
-        return (new IslandRenderer)->render($converted['html'], $converted['islands']);
+        return (new IslandRenderer($this->components))->render($converted['html'], $converted['islands']);
     }
 
     /**

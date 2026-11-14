@@ -6,7 +6,7 @@ namespace Vellum\Http\Controllers;
 
 use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
-use Vellum\OpenApi\Playground;
+use Vellum\OpenApi\Settings;
 
 /**
  * The address an OAuth provider sends a reader back to, for the playground
@@ -15,9 +15,9 @@ use Vellum\OpenApi\Playground;
  */
 final class PlaygroundOAuthController extends Controller
 {
-    public function __invoke(): Response
+    public function __invoke(Settings $openApi): Response
     {
-        if (! (bool) config('vellum.openapi.enabled') || ! Playground::enabled()) {
+        if (! $openApi->playgroundOn()) {
             abort(404);
         }
 

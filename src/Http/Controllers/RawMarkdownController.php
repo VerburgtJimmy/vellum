@@ -15,14 +15,13 @@ use Vellum\Http\RawMarkdown;
  */
 final class RawMarkdownController extends Controller
 {
-    public function __invoke(string $slug): Response
+    public function __invoke(ContentRepository $repository, string $slug): Response
     {
-        $repository = ContentRepository::fromConfig();
         $slug = trim($slug, '/');
 
         // /changelog renders the changelog file, not a docs page of that
         // name, so its source is that file too.
-        if ($slug === 'changelog' && ($changelog = Changelog::load()) !== null) {
+        if ($slug === 'changelog' && ($changelog = Changelog::load($repository->site())) !== null) {
             return RawMarkdown::changelog($repository, $changelog);
         }
 

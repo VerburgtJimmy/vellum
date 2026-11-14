@@ -16,7 +16,7 @@ it('orders pages from meta.json and appends unlisted alphabetically', function (
     $this->writeDoc('zebra.md', "---\ntitle: Zebra\n---\nZ");
 
     $repository = new ContentRepository(
-        contentPath: $this->docsPath(),
+        site: $this->site(),
         store: new CompiledStore($this->cachePath()),
     );
     $documents = $repository->buildAll();
@@ -40,7 +40,7 @@ it('supports separators and rest entries in meta.json', function (): void {
     $this->writeDoc('last.md', "---\ntitle: Last\n---\nL");
 
     $repository = new ContentRepository(
-        contentPath: $this->docsPath(),
+        site: $this->site(),
         store: new CompiledStore($this->cachePath()),
     );
     $tree = (new NavigationBuilder($this->docsPath()))->build($repository->buildAll());
@@ -57,7 +57,7 @@ it('falls back to title case folders and order frontmatter without meta.json', f
     $this->writeDoc('guides/alpha.md', "---\ntitle: Alpha\norder: 1\n---\nA");
 
     $repository = new ContentRepository(
-        contentPath: $this->docsPath(),
+        site: $this->site(),
         store: new CompiledStore($this->cachePath()),
     );
     $tree = (new NavigationBuilder($this->docsPath()))->build($repository->buildAll());
@@ -82,7 +82,7 @@ it('builds nested folders from stub-like meta files', function (): void {
     $this->writeDoc('getting-started/installation.md', "---\ntitle: Installation\n---\nInstall");
 
     $repository = new ContentRepository(
-        contentPath: $this->docsPath(),
+        site: $this->site(),
         store: new CompiledStore($this->cachePath()),
     );
     $repository->buildAll();
@@ -108,7 +108,7 @@ it('resolves previous and next pages and breadcrumbs', function (): void {
     $this->writeDoc('two.md', "---\ntitle: Two\ndescription: After one.\n---\n2");
 
     $repository = new ContentRepository(
-        contentPath: $this->docsPath(),
+        site: $this->site(),
         store: new CompiledStore($this->cachePath()),
     );
     $repository->buildAll();
@@ -137,7 +137,7 @@ it('inserts custom href entries from meta.json', function (): void {
     $this->writeDoc('index.md', "---\ntitle: Home\n---\nH");
 
     $repository = new ContentRepository(
-        contentPath: $this->docsPath(),
+        site: $this->site(),
         store: new CompiledStore($this->cachePath()),
     );
     $tree = (new NavigationBuilder($this->docsPath()))->build($repository->buildAll());

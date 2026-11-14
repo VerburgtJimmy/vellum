@@ -22,15 +22,14 @@ final class IndexCommand extends Command
 
     protected $description = 'Rebuild the Vellum search index';
 
-    public function handle(): int
+    public function handle(ContentRepository $repository): int
     {
-        $repository = ContentRepository::fromConfig();
         $version = $this->option('docs-version');
         $version = is_string($version) && $version !== '' ? $version : null;
 
         $documents = $repository->buildAll($version);
 
-        if (SearchDriver::isScout()) {
+        if ($repository->site()->search->isScout()) {
             SearchDriver::assertScoutInstalled();
             // Scout is replaced whole, so it gets every version even when
             // only one was asked for.

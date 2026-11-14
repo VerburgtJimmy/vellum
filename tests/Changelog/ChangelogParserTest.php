@@ -51,8 +51,8 @@ MD;
 });
 
 it('returns null when the changelog path is missing or disabled', function (): void {
-    expect(Changelog::load(null))->toBeNull()
-        ->and(Changelog::load('/tmp/vellum-missing-changelog.md'))->toBeNull();
+    expect(Changelog::load($this->site()))->toBeNull()
+        ->and(Changelog::load($this->site(), '/tmp/vellum-missing-changelog.md'))->toBeNull();
 });
 
 it('hides unreleased from visible releases unless changelog.unreleased is true', function (): void {
@@ -70,14 +70,12 @@ MD;
 
     $changelog = (new ChangelogParser)->parse($markdown, '/tmp/CHANGELOG.md', 1_700_000_000);
 
-    config()->set('vellum.changelog', ['path' => '/tmp/CHANGELOG.md', 'unreleased' => false]);
-
     expect($changelog->visible())->toHaveCount(1)
         ->and($changelog->visible()[0]->version)->toBe('1.0.0')
         ->and($changelog->visibleHeadings())->toHaveCount(1)
         ->and($changelog->visibleHeadings()[0]['id'])->toBe('1.0.0');
 
-    config()->set('vellum.changelog.unreleased', true);
+    $changelog = $changelog->showingUnreleased(true);
 
     expect($changelog->visible())->toHaveCount(2)
         ->and($changelog->visible()[0]->unreleased)->toBeTrue()

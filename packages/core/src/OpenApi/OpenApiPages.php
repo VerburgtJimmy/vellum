@@ -26,11 +26,21 @@ final class OpenApiPages
     /** @var list<string> */
     private array $warnings = [];
 
+    private readonly SpecSource $source;
+
     public function __construct(
-        private readonly SpecSource $source = new SpecSource,
+        private readonly Settings $settings = new Settings,
+        ?SpecSource $source = null,
         private readonly SpecParser $parser = new SpecParser,
         private readonly ?PageBuilder $builder = null,
-    ) {}
+    ) {
+        $this->source = $source ?? new SpecSource($settings);
+    }
+
+    public function settings(): Settings
+    {
+        return $this->settings;
+    }
 
     /**
      * What the pages would be built from, without building them. Local
@@ -84,7 +94,7 @@ final class OpenApiPages
             $bySlug[$document->slug] = $document;
         }
 
-        $prefix = Mount::prefix();
+        $prefix = $this->settings->prefix;
         $children = [];
 
         if (isset($bySlug[$prefix])) {
@@ -96,7 +106,7 @@ final class OpenApiPages
         $folders = [];
         $inside = [];
 
-        foreach ((new Grouper)->group($spec, PageBuilder::groupBy()) as $group) {
+        foreach ((new Grouper($this->settings->untaggedLabel))->group($spec, $this->settings->groupBy) as $group) {
             $pages = [];
 
             foreach ($group->operations as $operation) {
@@ -126,13 +136,11 @@ final class OpenApiPages
 
         array_push($children, ...$nest(''));
 
-        $title = config('vellum.openapi.title');
-
         return [
             'type' => 'folder',
             // Marks the folder, so the reference can be given a sidebar of its own.
             'section' => 'api',
-            'title' => is_string($title) && trim($title) !== '' ? $title : 'API reference',
+            'title' => $this->settings->title ?? 'API reference',
             'icon' => null,
             'defaultOpen' => false,
             'children' => $children,
@@ -197,6 +205,6 @@ final class OpenApiPages
 
     private function builder(): PageBuilder
     {
-        return $this->builder ?? new PageBuilder(app('view'));
+        return $this->builder ?? new PageBuilder(app('view'), $this->settings);
     }
 }

@@ -46,6 +46,7 @@ final class MarkdownRenderer
         ?string $appUrl = null,
         ?string $assetPrefix = null,
         ?ImageReport $imageReport = null,
+        string $routePrefix = 'docs',
     ) {
         $this->environment = new Environment([
             'html_input' => 'strip',
@@ -83,7 +84,7 @@ final class MarkdownRenderer
         $this->environment->addExtension(new TabsExtension);
         $this->environment->addExtension(new StepsExtension);
         $this->environment->addExtension(new CardsExtension);
-        $this->environment->addExtension(new ImageExtension($contentPath, $assetPrefix, $imageReport));
+        $this->environment->addExtension(new ImageExtension($contentPath, $assetPrefix, $imageReport, $routePrefix));
         $this->environment->addExtension(new ExternalLinkExtension($appUrl));
 
         $this->parser = new MarkdownParser($this->environment);

@@ -14,7 +14,7 @@ it('inherits folder access from meta.json until a page overrides it', function (
     $this->writeDoc('public.md', "---\ntitle: Public\naccess: guest\n---\nOpen");
 
     $repository = new ContentRepository(
-        contentPath: $this->docsPath(),
+        site: $this->site(),
         store: new CompiledStore($this->cachePath()),
     );
     $documents = $repository->buildAll();

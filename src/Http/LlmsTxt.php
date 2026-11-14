@@ -197,7 +197,7 @@ final class LlmsTxt
         }
 
         $sections = self::close($sections, $heading, $run);
-        $changelog = Changelog::load();
+        $changelog = Changelog::load($repository->site());
 
         if ($changelog !== null && ! isset($seen['changelog'])) {
             $sections[] = [
@@ -293,7 +293,7 @@ final class LlmsTxt
             return null;
         }
 
-        if ($page['slug'] === 'changelog' && ($changelog = Changelog::load()) !== null) {
+        if ($page['slug'] === 'changelog' && ($changelog = Changelog::load($repository->site())) !== null) {
             $seen['changelog'] = true;
 
             return self::changelogEntry($repository, $changelog, $page['description']);

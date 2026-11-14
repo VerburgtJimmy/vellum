@@ -10,7 +10,7 @@ it('renders every package doc without exceptions', function (): void {
         new RecursiveDirectoryIterator($docs, FilesystemIterator::SKIP_DOTS),
     );
 
-    $pipeline = new MarkdownPipeline;
+    $pipeline = new MarkdownPipeline(components: $this->site()->components);
     $count = 0;
 
     foreach ($files as $file) {

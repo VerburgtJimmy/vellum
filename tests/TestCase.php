@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Facade;
 use Orchestra\Testbench\TestCase as Orchestra;
 use Symfony\Component\Process\ExecutableFinder;
 use Symfony\Component\Process\Process;
+use Vellum\Site;
 use Vellum\VellumServiceProvider;
 
 abstract class TestCase extends Orchestra
@@ -72,6 +73,38 @@ abstract class TestCase extends Orchestra
         return [
             VellumServiceProvider::class,
         ];
+    }
+
+    /**
+     * Each request starts with the site and repository built afresh, as it
+     * does in a worker that serves many (Octane, a queue). A test that changes
+     * config between two requests then sees the change, as an app would after
+     * a deploy.
+     *
+     * @param  array<string, mixed>  $parameters
+     * @param  array<string, mixed>  $cookies
+     * @param  array<string, mixed>  $files
+     * @param  array<string, mixed>  $server
+     */
+    public function call($method, $uri, $parameters = [], $cookies = [], $files = [], $server = [], $content = null)
+    {
+        $this->app?->forgetScopedInstances();
+
+        return parent::call($method, $uri, $parameters, $cookies, $files, $server, $content);
+    }
+
+    /**
+     * A site built from the current config, with $overrides on top. For a
+     * test that builds a class by hand rather than through the container.
+     *
+     * @param  array<string, mixed>  $overrides
+     */
+    protected function site(array $overrides = [], bool $isLocal = false): Site
+    {
+        /** @var array<string, mixed> $config */
+        $config = config('vellum');
+
+        return Site::fromArray(array_replace_recursive($config, $overrides), (string) config('app.url', ''), $isLocal);
     }
 
     protected function docsPath(): string

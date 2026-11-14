@@ -39,7 +39,7 @@ it('adds a group per page from its title and frontmatter aliases', function (): 
 
 it('separates what a section is called from what it merely mentions', function (): void {
     $this->writeDoc('page.md', "---\ntitle: Billing\naliases:\n  - Invoices\n  - 7\n---\nSet `billing.currency` here.\n\n```php\n'not.this' => 1,\n```\n\n## Refunds\n\nUse `refund()`.\n");
-    $sections = Sections::from((new ContentRepository(contentPath: $this->docsPath(), store: new CompiledStore($this->cachePath())))->buildAll());
+    $sections = Sections::from((new ContentRepository(site: $this->site(), store: new CompiledStore($this->cachePath())))->buildAll());
 
     expect($sections[0]['aliases'])->toBe(['Invoices'])
         ->and(Aliases::names($sections[0]))->toBe(['billing', 'invoices'])

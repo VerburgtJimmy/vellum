@@ -6,15 +6,15 @@ namespace Vellum\Content;
 
 use Vellum\Cache\CompiledStore;
 use Vellum\Cache\FragmentCache;
+use Vellum\CoreServiceProvider;
 use Vellum\Exceptions\DuplicateSlugException;
 use Vellum\Exceptions\UnknownDirectiveException;
 use Vellum\Markdown\Islands\IslandRenderer;
 use Vellum\Markdown\Islands\MarkdownPipeline;
 use Vellum\Markdown\MarkdownRenderer;
-use Vellum\OpenApi\Mount;
 use Vellum\OpenApi\OpenApiPages;
-use Vellum\OpenApi\SpecSource;
 use Vellum\Search\SearchVisibility;
+use Vellum\Site;
 use Vellum\Support\Slug;
 use Vellum\Support\Str;
 use Vellum\Support\VersionUrl;
@@ -24,22 +24,47 @@ use Vellum\Support\VersionUrl;
  */
 final class ContentRepository
 {
+    private readonly string $contentPath;
+
+    private readonly CompiledStore $store;
+
+    private readonly MarkdownPipeline $pipeline;
+
+    private readonly bool $versionsEnabled;
+
+    private readonly ?string $latestVersion;
+
+    /** @var list<string> */
+    private readonly array $versions;
+
+    private readonly bool $isLocal;
+
+    private readonly string $routePrefix;
+
+    /**
+     * Everything the repository needs to know comes from the site it is
+     * given. The store and the pipeline can be handed in, for a test that
+     * wants to look inside them; otherwise they are made from the site.
+     */
     public function __construct(
-        private readonly string $contentPath,
-        private readonly CompiledStore $store,
+        private readonly Site $site,
+        ?CompiledStore $store = null,
         private readonly FrontMatterParser $frontMatterParser = new FrontMatterParser,
-        private readonly MarkdownPipeline $pipeline = new MarkdownPipeline,
-        private readonly bool $versionsEnabled = false,
-        private readonly ?string $latestVersion = null,
-        /** @var list<string> */
-        private readonly array $versions = [],
-        private readonly bool $isLocal = false,
-        private readonly string $routePrefix = 'docs',
+        ?MarkdownPipeline $pipeline = null,
         private readonly Access $access = new Access,
         private readonly SearchVisibility $visibility = new SearchVisibility,
         private readonly ImageReport $imageReport = new ImageReport,
         private readonly ?OpenApiPages $openApi = null,
-    ) {}
+    ) {
+        $this->contentPath = $site->contentPath;
+        $this->store = $store ?? new CompiledStore($site->cachePath);
+        $this->versionsEnabled = $site->versions->enabled;
+        $this->latestVersion = $site->versions->latest;
+        $this->versions = $site->versions->list;
+        $this->isLocal = $site->isLocal;
+        $this->routePrefix = $site->routePrefix;
+        $this->pipeline = $pipeline ?? $this->newPipeline($this->contentPath, null);
+    }
 
     /**
      * Pipelines keyed by version folder. Images resolve against the version
@@ -60,30 +85,18 @@ final class ContentRepository
     private array $navigationTrees = [];
 
     /**
-     * Build a repository from Laravel config values.
+     * A repository built from the app's config as it is now. Inside a request,
+     * prefer resolving ContentRepository from the container, which builds one
+     * per request and shares it.
      */
     public static function fromConfig(): self
     {
-        /** @var array{enabled?: bool, latest?: string, list?: list<string>} $versions */
-        $versions = config('vellum.versions', []);
-        $imageReport = new ImageReport;
+        return CoreServiceProvider::repository(app(), CoreServiceProvider::site(app()));
+    }
 
-        return new self(
-            contentPath: (string) config('vellum.path'),
-            store: new CompiledStore((string) config('vellum.cache.path')),
-            pipeline: new MarkdownPipeline(new MarkdownRenderer(
-                contentPath: (string) config('vellum.path'),
-                appUrl: (string) config('app.url', ''),
-                imageReport: $imageReport,
-            )),
-            versionsEnabled: (bool) ($versions['enabled'] ?? false),
-            latestVersion: $versions['latest'] ?? null,
-            versions: $versions['list'] ?? [],
-            isLocal: app()->environment('local'),
-            routePrefix: (string) config('vellum.route.prefix', 'docs'),
-            imageReport: $imageReport,
-            openApi: SpecSource::enabled() ? new OpenApiPages : null,
-        );
+    public function site(): Site
+    {
+        return $this->site;
     }
 
     public function store(): CompiledStore
@@ -257,7 +270,7 @@ final class ContentRepository
      */
     private function referenceIndex(array $tree): ?int
     {
-        if ($this->openApi === null || ! Mount::separate()) {
+        if ($this->openApi === null || ! $this->openApi->settings()->separate) {
             return null;
         }
 
@@ -486,8 +499,9 @@ final class ContentRepository
      */
     public function render(Document $document, bool $cache = true): string
     {
-        $render = static fn (): string => (new IslandRenderer)->render($document->html, $document->islands);
-        $html = $cache ? (new FragmentCache)->remember($document, $render) : $render();
+        $components = $this->site->components;
+        $render = static fn (): string => (new IslandRenderer($components))->render($document->html, $document->islands);
+        $html = $cache ? (new FragmentCache($components))->remember($document, $render) : $render();
 
         return $this->describeCards($html, $document->version);
     }
@@ -550,7 +564,7 @@ final class ContentRepository
         // and look again.
         if (
             $this->openApi !== null
-            && Mount::owns($slug)
+            && $this->openApi->settings()->owns($slug)
             && ($this->isLocal || ($compiled === null && ! $this->servesBuildOnly($version)))
         ) {
             $this->navigation($version);
@@ -861,12 +875,18 @@ final class ContentRepository
             return $this->pipeline;
         }
 
-        return $this->versionPipelines[$version] ??= new MarkdownPipeline(new MarkdownRenderer(
-            contentPath: $this->contentPath.DIRECTORY_SEPARATOR.$version,
-            appUrl: (string) config('app.url', ''),
-            assetPrefix: $version,
+        return $this->versionPipelines[$version] ??= $this->newPipeline($this->contentPath.DIRECTORY_SEPARATOR.$version, $version);
+    }
+
+    private function newPipeline(string $contentPath, ?string $assetPrefix): MarkdownPipeline
+    {
+        return new MarkdownPipeline(new MarkdownRenderer(
+            contentPath: $contentPath,
+            appUrl: $this->site->appUrl,
+            assetPrefix: $assetPrefix,
             imageReport: $this->imageReport,
-        ));
+            routePrefix: $this->routePrefix,
+        ), $this->site->components);
     }
 
     /**

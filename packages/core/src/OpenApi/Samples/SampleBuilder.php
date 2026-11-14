@@ -24,6 +24,13 @@ final class SampleBuilder
     ];
 
     /**
+     * @param  array<array-key, mixed>  $configured  Built-in keys, or keys mapped to a SampleGenerator class.
+     */
+    public function __construct(
+        private readonly array $configured = ['curl'],
+    ) {}
+
+    /**
      * @param  list<array{name: string, hint: string, detail: string}>  $security
      * @return list<Sample>
      */
@@ -182,11 +189,9 @@ final class SampleBuilder
      */
     private function generators(): array
     {
-        $configured = config('vellum.openapi.samples', ['curl']);
-        $configured = is_array($configured) ? $configured : ['curl'];
         $out = [];
 
-        foreach ($configured as $key => $value) {
+        foreach ($this->configured as $key => $value) {
             // Either a built-in key, or a key mapped to a class of your own.
             $name = is_string($key) ? $key : (string) $value;
             $class = is_string($key) ? $value : (self::BUILT_IN[$value] ?? null);

@@ -8,7 +8,8 @@
 
 @php
     use Vellum\Support\Icons;
-    use Vellum\Support\VersionLabel;
+
+    $siteVersions = app(\Vellum\Site::class)->versions;
 
     $enabled = (bool) config('vellum.versions.enabled');
     $versions = is_array($versions) ? array_values(array_filter($versions, 'is_string')) : [];
@@ -16,7 +17,7 @@
     $currentVersion = is_string($currentVersion) && $currentVersion !== ''
         ? $currentVersion
         : ($versions[0] ?? null);
-    $labels = VersionLabel::map($versions);
+    $labels = $siteVersions->labelsFor($versions);
     // Null when the caller does not know which versions have this page: none is marked.
     $has = static fn (string $version): bool => ! is_array($versionPages) || in_array($version, $versionPages, true);
     $tags = ['latest' => 'Latest', 'unreleased' => 'Unreleased'];
@@ -94,8 +95,8 @@
     >
         <span class="inline-flex min-w-0 items-center gap-2">
             <span class="truncate">{{ $labels[$currentVersion] ?? $currentVersion }}</span>
-            @if ($wide && isset($tags[VersionLabel::kind($currentVersion)]))
-                <span class="vellum-version-tag" data-kind="{{ VersionLabel::kind($currentVersion) }}">{{ $tags[VersionLabel::kind($currentVersion)] }}</span>
+            @if ($wide && isset($tags[$siteVersions->kind($currentVersion)]))
+                <span class="vellum-version-tag" data-kind="{{ $siteVersions->kind($currentVersion) }}">{{ $tags[$siteVersions->kind($currentVersion)] }}</span>
             @endif
         </span>
         {!! Icons::caretDown(['class' => 'h-3.5 w-3.5 shrink-0 opacity-70']) !!}
@@ -119,7 +120,7 @@
         @foreach ($versions as $index => $version)
             @php
                 $href = is_string($versionHrefs[$version] ?? null) ? $versionHrefs[$version] : '#';
-                $kind = VersionLabel::kind($version);
+                $kind = $siteVersions->kind($version);
             @endphp
             <a
                 href="{{ $href }}"

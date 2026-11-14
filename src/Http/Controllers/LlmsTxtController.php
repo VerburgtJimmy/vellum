@@ -15,28 +15,28 @@ use Vellum\Http\LlmsTxt;
  */
 final class LlmsTxtController extends Controller
 {
-    public function index(): Response
+    public function index(ContentRepository $repository): Response
     {
-        return $this->respond(static fn (ContentRepository $repository): string => LlmsTxt::index($repository));
+        return $this->respond(LlmsTxt::index(...), $repository);
     }
 
-    public function full(): Response
+    public function full(ContentRepository $repository): Response
     {
-        return $this->respond(static fn (ContentRepository $repository): string => LlmsTxt::full($repository));
+        return $this->respond(LlmsTxt::full(...), $repository);
     }
 
-    public function rootIndex(): Response
+    public function rootIndex(ContentRepository $repository): Response
     {
         $this->abortUnlessRoot();
 
-        return $this->index();
+        return $this->index($repository);
     }
 
-    public function rootFull(): Response
+    public function rootFull(ContentRepository $repository): Response
     {
         $this->abortUnlessRoot();
 
-        return $this->full();
+        return $this->full($repository);
     }
 
     /**
@@ -53,13 +53,13 @@ final class LlmsTxtController extends Controller
     /**
      * @param  callable(ContentRepository): string  $build
      */
-    private function respond(callable $build): Response
+    private function respond(callable $build, ContentRepository $repository): Response
     {
         if (! LlmsTxt::enabled()) {
             abort(404);
         }
 
-        return response($build(ContentRepository::fromConfig()), 200, [
+        return response($build($repository), 200, [
             'Content-Type' => 'text/plain; charset=UTF-8',
         ]);
     }

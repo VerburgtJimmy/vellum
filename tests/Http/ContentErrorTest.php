@@ -6,7 +6,7 @@ use Vellum\Exceptions\UnknownDirectiveException;
 use Vellum\Markdown\Islands\MarkdownPipeline;
 
 it('names the directive when one has no renderer', function (): void {
-    expect(fn () => (new MarkdownPipeline)->render(":::ntoe\nOops\n:::"))
+    expect(fn () => (new MarkdownPipeline(components: $this->site()->components))->render(":::ntoe\nOops\n:::"))
         ->toThrow(UnknownDirectiveException::class, 'Unknown docs directive [:::ntoe]');
 });
 
@@ -28,7 +28,7 @@ it('names the file the unknown directive was found in', function (): void {
 });
 
 it('still renders every directive that does have a renderer', function (string $markdown, string $expected): void {
-    expect((new MarkdownPipeline)->render($markdown))->toContain($expected);
+    expect((new MarkdownPipeline(components: $this->site()->components))->render($markdown))->toContain($expected);
 })->with([
     'callout' => [":::note\nHi\n:::", 'vellum-callout'],
     'callout alias' => [":::success\nHi\n:::", 'vellum-callout'],

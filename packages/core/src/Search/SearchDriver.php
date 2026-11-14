@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace Vellum\Search;
 
 use RuntimeException;
+use Vellum\Site;
 
 /**
- * Resolves the configured search driver.
+ * The search drivers' names, and the check that Scout is there when it is
+ * the one configured. Which driver a site uses is on Vellum\Site\Search.
  */
 final class SearchDriver
 {
@@ -19,12 +21,22 @@ final class SearchDriver
 
     public const BUILTIN_ALIAS = 'minisearch';
 
+    /**
+     * @deprecated Use `$site->search->driver`. Kept for views published
+     *             before 0.10, and removed in 1.0.
+     */
     public static function name(): string
     {
-        $driver = config('vellum.search.driver', self::BUILTIN);
-        $driver = is_string($driver) && $driver !== '' ? $driver : self::BUILTIN;
+        return app(Site::class)->search->driver;
+    }
 
-        return $driver === self::BUILTIN_ALIAS ? self::BUILTIN : $driver;
+    /**
+     * @deprecated Use `$site->search->isScout()`. Kept for views published
+     *             before 0.10, and removed in 1.0.
+     */
+    public static function isScout(): bool
+    {
+        return app(Site::class)->search->isScout();
     }
 
     /**
@@ -33,11 +45,6 @@ final class SearchDriver
      * @internal Tests point it at a missing trait to see the error.
      */
     public static string $scoutTrait = 'Laravel\\Scout\\Searchable';
-
-    public static function isScout(): bool
-    {
-        return self::name() === 'scout';
-    }
 
     public static function assertScoutInstalled(): void
     {

@@ -7,6 +7,8 @@ namespace Vellum\Changelog;
 use Illuminate\Support\Facades\Cache;
 use Vellum\Cache\FragmentCache;
 use Vellum\Content\LastUpdated;
+use Vellum\Markdown\Islands\MarkdownPipeline;
+use Vellum\Site;
 
 /**
  * A parsed Keep a Changelog file ready for the docs page and Atom feed.
@@ -27,11 +29,16 @@ final readonly class Changelog
         public array $headings,
         public string $path,
         public int $mtime,
+        public bool $includeUnreleased = false,
     ) {}
 
-    public static function load(?string $path = null): ?self
+    /**
+     * The site's changelog, or the file at $path read with the site's
+     * settings. Null when there is no such file.
+     */
+    public static function load(Site $site, ?string $path = null): ?self
     {
-        $configured = self::configuredPath($path);
+        $configured = is_string($path) && $path !== '' ? $path : $site->changelogPath;
 
         if ($configured === null) {
             return null;
@@ -50,9 +57,9 @@ final readonly class Changelog
             $configured,
             $mtime,
             filesize($configured),
-            config('vellum.components'),
-            config('vellum.route'),
-            config('app.url'),
+            $site->components->config,
+            $site->get('route'),
+            $site->appUrl,
             (new FragmentCache)->generation(),
         ]));
 
@@ -61,7 +68,7 @@ final readonly class Changelog
         $cached = Cache::get($key);
 
         if (is_array($cached)) {
-            return self::fromArray($cached);
+            return self::fromArray($cached)->showingUnreleased($site->changelogUnreleased);
         }
 
         $markdown = file_get_contents($configured);
@@ -70,10 +77,28 @@ final readonly class Changelog
             return null;
         }
 
-        $changelog = (new ChangelogParser)->parse($markdown, $configured, $mtime);
+        $changelog = (new ChangelogParser(new MarkdownPipeline(components: $site->components)))->parse($markdown, $configured, $mtime);
         Cache::put($key, $changelog->toArray(), now()->addDay());
 
-        return $changelog;
+        return $changelog->showingUnreleased($site->changelogUnreleased);
+    }
+
+    /**
+     * Keep a Changelog [Unreleased] stays in the source file. The Atom feed
+     * never includes it. The HTML page does only when changelog.unreleased is true.
+     */
+    public function showingUnreleased(bool $include): self
+    {
+        return new self(
+            $this->title,
+            $this->introHtml,
+            $this->markdown,
+            $this->releases,
+            $this->headings,
+            $this->path,
+            $this->mtime,
+            $include,
+        );
     }
 
     /**
@@ -114,21 +139,6 @@ final readonly class Changelog
     }
 
     /**
-     * Keep a Changelog [Unreleased] stays in the source file. The Atom feed
-     * never includes it. The HTML page does only when changelog.unreleased is true.
-     */
-    public static function includeUnreleased(): bool
-    {
-        $configured = config('vellum.changelog');
-
-        if (is_array($configured)) {
-            return (bool) ($configured['unreleased'] ?? false);
-        }
-
-        return false;
-    }
-
-    /**
      * The Markdown served for the changelog: the source file, minus the
      * [Unreleased] section when the HTML page hides it.
      *
@@ -142,7 +152,7 @@ final readonly class Changelog
         $source = is_file($this->path) ? file_get_contents($this->path) : false;
         $source = $source === false ? $this->markdown : $source;
 
-        if (self::includeUnreleased()) {
+        if ($this->includeUnreleased) {
             return $source;
         }
 
@@ -201,7 +211,7 @@ final readonly class Changelog
      */
     public function visible(): array
     {
-        return self::includeUnreleased() ? $this->releases : $this->published();
+        return $this->includeUnreleased ? $this->releases : $this->published();
     }
 
     /**
@@ -209,7 +219,7 @@ final readonly class Changelog
      */
     public function visibleHeadings(): array
     {
-        if (self::includeUnreleased()) {
+        if ($this->includeUnreleased) {
             return $this->headings;
         }
 
@@ -217,28 +227,5 @@ final readonly class Changelog
             $this->headings,
             static fn (array $heading): bool => $heading['id'] !== 'unreleased',
         ));
-    }
-
-    public static function configuredPath(?string $path = null): ?string
-    {
-        if (is_string($path) && $path !== '') {
-            return $path;
-        }
-
-        $configured = config('vellum.changelog');
-
-        if (is_string($configured) && $configured !== '') {
-            return $configured;
-        }
-
-        if (is_array($configured)) {
-            $file = $configured['path'] ?? null;
-
-            if (is_string($file) && $file !== '') {
-                return $file;
-            }
-        }
-
-        return null;
     }
 }

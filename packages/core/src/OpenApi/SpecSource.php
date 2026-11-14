@@ -24,6 +24,10 @@ final class SpecSource
     /** @var list<string> */
     private array $warnings = [];
 
+    public function __construct(
+        private readonly Settings $settings = new Settings,
+    ) {}
+
     /**
      * Absolute path to a spec file, or null when there is nothing to render.
      */
@@ -31,13 +35,13 @@ final class SpecSource
     {
         $this->warnings = [];
 
-        if (! self::enabled()) {
+        if (! $this->settings->enabled) {
             return null;
         }
 
-        $configured = config('vellum.openapi.spec');
+        $configured = $this->settings->spec;
 
-        if (is_string($configured) && $configured !== '') {
+        if ($configured !== null) {
             if (! is_file($configured)) {
                 // Named a file and it is not there: a typo, not an absence.
                 throw InvalidSpecException::unreadable($configured);
@@ -46,7 +50,7 @@ final class SpecSource
             return $configured;
         }
 
-        if ((bool) config('vellum.openapi.scramble', true)) {
+        if ($this->settings->scramble) {
             $exported = $this->exportFromScramble();
 
             if ($exported !== null) {
@@ -70,19 +74,19 @@ final class SpecSource
      */
     public function signature(): ?string
     {
-        if (! self::enabled()) {
+        if (! $this->settings->enabled) {
             return null;
         }
 
-        $configured = config('vellum.openapi.spec');
+        $configured = $this->settings->spec;
 
-        if (is_string($configured) && $configured !== '') {
+        if ($configured !== null) {
             return is_file($configured)
                 ? 'file:'.$configured.':'.filemtime($configured).':'.filesize($configured)
                 : 'file:'.$configured.':missing';
         }
 
-        if ((bool) config('vellum.openapi.scramble', true) && self::scrambleAvailable()) {
+        if ($this->settings->scramble && self::scrambleAvailable()) {
             return 'scramble:'.$this->watchedState();
         }
 
@@ -98,7 +102,7 @@ final class SpecSource
         $newest = 0;
         $count = 0;
 
-        foreach (self::watched() as $directory) {
+        foreach ($this->watched() as $directory) {
             $files = new \RecursiveIteratorIterator(
                 new \RecursiveDirectoryIterator($directory, \FilesystemIterator::SKIP_DOTS),
             );
@@ -117,12 +121,11 @@ final class SpecSource
     /**
      * @return list<string>
      */
-    private static function watched(): array
+    private function watched(): array
     {
-        $configured = config('vellum.openapi.watch');
-        $paths = is_array($configured) ? $configured : [base_path('app'), base_path('routes')];
+        $paths = $this->settings->watch ?? [base_path('app'), base_path('routes')];
 
-        return array_values(array_filter($paths, static fn (mixed $path): bool => is_string($path) && is_dir($path)));
+        return array_values(array_filter($paths, is_dir(...)));
     }
 
     /**
@@ -131,11 +134,6 @@ final class SpecSource
     public function warnings(): array
     {
         return $this->warnings;
-    }
-
-    public static function enabled(): bool
-    {
-        return (bool) config('vellum.openapi.enabled', false);
     }
 
     public static function scrambleAvailable(): bool
@@ -190,8 +188,8 @@ final class SpecSource
 
     private function targetPath(): string
     {
-        $cache = config('vellum.cache.path');
-        $directory = is_string($cache) && $cache !== '' ? $cache : app()->storagePath('framework/vellum');
+        $cache = $this->settings->cachePath;
+        $directory = $cache !== '' ? $cache : app()->storagePath('framework/vellum');
 
         return rtrim($directory, DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR.'openapi.json';
     }
