@@ -26,8 +26,8 @@ final class NavTree
         // One entry is enough: both copies are rendered in the same request,
         // one after the other. The key covers the tree itself, which differs
         // per reader, so a long-running worker never serves one reader's tree
-        // to another.
-        $key = hash('xxh128', (string) json_encode([$navigation, $activeSlug]));
+        // to another, nor one locale's words in another.
+        $key = hash('xxh128', (string) json_encode([$navigation, $activeSlug, app()->getLocale()]));
 
         if ($key !== self::$key) {
             self::$html = view('vellum::components.docs.partials.nav-tree', [

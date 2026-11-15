@@ -100,7 +100,7 @@
     @endif
 
     <x-vellum::ui.scroll-area class="min-h-0 flex-1 px-4 pb-4 {{ $chrome && ! $searchInSidebar && count($sections) < 2 ? 'pt-4' : 'pt-1' }}">
-        <nav aria-label="{{ collect($sections)->firstWhere('current', true)['title'] ?? 'Documentation' }}" data-vellum-nav class="flex flex-col gap-1 text-sm">
+        <nav aria-label="{{ collect($sections)->firstWhere('current', true)['title'] ?? __('vellum::sidebar.documentation') }}" data-vellum-nav class="flex flex-col gap-1 text-sm">
             {!! \Vellum\View\NavTree::render($navigation, $activeSlug, $containsActive) !!}
         </nav>
     </x-vellum::ui.scroll-area>

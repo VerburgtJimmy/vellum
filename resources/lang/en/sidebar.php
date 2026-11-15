@@ -11,6 +11,11 @@ return [
     'navigation' => 'Documentation navigation',
     'sections' => 'Sections',
 
+    // The sidebar's list, and an entry with no title.
+    'documentation' => 'Documentation',
+    'untitled' => 'Untitled',
+    'folder' => 'Folder',
+
     // Read by the script, after a page the reader has seen before.
     'changed' => 'changed since you last read it',
 ];

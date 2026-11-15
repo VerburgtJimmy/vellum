@@ -30,7 +30,7 @@
             x-on:pointerenter="onEnter()"
             class="{{ $itemClass }} {{ $isActive ? 'bg-accent font-medium text-accent-foreground' : 'text-muted-foreground hover:bg-accent/60 hover:text-accent-foreground' }}"
             @if ($isActive) aria-current="page" @endif
-        >{{ $node['title'] ?? 'Untitled' }}@if (is_string($node['method'] ?? null))<span class="vellum-nav-method" data-method="{{ strtolower($node['method']) }}" @if (! empty($node['deprecated'])) data-deprecated @endif>{{ $node['method'] }}</span>@endif</a>
+        >{{ $node['title'] ?? __('vellum::sidebar.untitled') }}@if (is_string($node['method'] ?? null))<span class="vellum-nav-method" data-method="{{ strtolower($node['method']) }}" @if (! empty($node['deprecated'])) data-deprecated @endif>{{ $node['method'] }}</span>@endif</a>
     @elseif ($type === 'folder')
         @php
             $open = (bool) ($node['defaultOpen'] ?? false) || $containsActive($node);
@@ -40,7 +40,7 @@
             <x-slot:trigger>
                 <div class="{{ $itemClass }} flex cursor-pointer items-center gap-1 font-medium text-foreground hover:bg-accent/60">
                     {!! \Vellum\Support\Icons::caretRight(['class' => 'h-3.5 w-3.5 shrink-0 text-muted-foreground transition-transform', ':class' => "open && 'rotate-90'"]) !!}
-                    <span class="truncate">{{ $node['title'] ?? 'Folder' }}</span>
+                    <span class="truncate">{{ $node['title'] ?? __('vellum::sidebar.folder') }}</span>
                 </div>
             </x-slot:trigger>
             <x-slot:content>

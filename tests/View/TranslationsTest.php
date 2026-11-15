@@ -214,6 +214,18 @@ it('leaves no English on a page, the changelog, a missing page or an operation',
     }
 });
 
+it('leaves no English on the docs of a site without a reference', function (): void {
+    config()->set('vellum.name', 'Zorp');
+    useMarkerLocale();
+
+    foreach (['/docs', '/docs/frob'] as $page) {
+        $html = (string) $this->get($page)->assertOk()->getContent();
+
+        expect(array_values(array_diff(readableWords($html), NOT_UI)))->toBe([], $page)
+            ->and($html)->not->toContain('data-vellum-sections');
+    }
+});
+
 it('writes the date a page changed in the app language', function (): void {
     $this->writeDoc('frob.md', "---\ntitle: Frob\nupdated: 2026-11-14\n---\nQuux.");
     app()->setLocale('nl');
