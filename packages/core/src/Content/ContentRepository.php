@@ -9,6 +9,7 @@ use Vellum\Cache\FragmentCache;
 use Vellum\CoreServiceProvider;
 use Vellum\Exceptions\DuplicateSlugException;
 use Vellum\Exceptions\UnknownDirectiveException;
+use Vellum\Markdown\CompiledLabels;
 use Vellum\Markdown\Islands\IslandRenderer;
 use Vellum\Markdown\Islands\MarkdownPipeline;
 use Vellum\Markdown\MarkdownRenderer;
@@ -616,7 +617,7 @@ final class ContentRepository
         $render = static fn (): string => (new IslandRenderer($components))->render($document->html, $document->islands);
         $html = $cache ? (new FragmentCache($components))->remember($document, $render) : $render();
 
-        return $this->describeCards($html, $document->version);
+        return CompiledLabels::translate($this->describeCards($html, $document->version));
     }
 
     /**

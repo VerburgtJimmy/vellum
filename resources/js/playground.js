@@ -10,6 +10,7 @@ import { bag, buildRequest, reach, toCurl, xsrfToken } from './playground/reques
 import { authorizeUrl, fromDiscovery, pkce, random, readToken, tokenRequest } from './playground/oauth.js'
 import { addItem, bodyToForm, coerce, control, display, failure, formToBody, hasForm, initial, pretty, reason, removeItem, rows, size, tokens } from './playground/form.js'
 import { reader, streamItem } from './playground/stream.js'
+import { t, tc } from './strings.js'
 
 const STORE = 'vellum-playground'
 const TIMEOUT = 30000
@@ -72,7 +73,7 @@ function input(schema, text, { id, onInput, required = false, label }) {
     return h(
       'select',
       { ...common, onchange: (event) => onInput(event.target.value) },
-      h('option', { value: '', text: required ? 'Choose' : 'Not set' }),
+      h('option', { value: '', text: t(required ? 'playground.choose' : 'playground.not_set') }),
       options.map((option) => h('option', { value: option, text: option, selected: option === text })),
     )
   }
@@ -98,7 +99,7 @@ function input(schema, text, { id, onInput, required = false, label }) {
     inputmode: kind === 'number' ? 'decimal' : null,
     autocomplete: 'off',
     spellcheck: 'false',
-    placeholder: kind === 'list' ? 'one, two' : (schema.format ?? ''),
+    placeholder: kind === 'list' ? t('playground.list_example') : (schema.format ?? ''),
     value: text,
     oninput: (event) => onInput(event.target.value),
   })
@@ -185,7 +186,7 @@ function signIn(url, state) {
     const popup = window.open(url, 'vellum-oauth', 'popup,width=520,height=720')
 
     if (!popup) {
-      reject(new Error('The browser blocked the sign-in window. Allow pop-ups for this site and try again.'))
+      reject(new Error(t('playground.oauth.blocked')))
 
       return
     }
@@ -211,7 +212,7 @@ function signIn(url, state) {
 
     const watch = setInterval(() => {
       if (popup.closed) {
-        done(() => reject(new Error('The sign-in window was closed before it finished.')))
+        done(() => reject(new Error(t('playground.oauth.closed'))))
       }
     }, 500)
 
@@ -234,11 +235,11 @@ async function forwarded(proxy, built, token, signal) {
 
   if (!response.ok || !data || typeof data.status !== 'number') {
     const reasons = {
-      419: 'This page has been open too long to send from. Reload it and try again.',
-      429: 'Too many requests from here for now. Wait a minute and try again.',
+      419: t('playground.errors.expired'),
+      429: t('playground.errors.throttled'),
     }
 
-    return { error: data?.error ?? reasons[response.status] ?? 'This site could not send the request.' }
+    return { error: data?.error ?? reasons[response.status] ?? t('playground.errors.not_sent') }
   }
 
   return {
@@ -274,8 +275,8 @@ function responseHeaders(answer) {
   return h(
     'details',
     { class: 'vellum-playground-headers' },
-    h('summary', { text: answer.headers.length > 0 ? `Response headers (${answer.headers.length})` : 'Response headers' }),
-    h('pre', {}, h('code', { text: answer.headers.map(([name, value]) => `${name}: ${value}`).join('\n') || 'None the browser may show.' })),
+    h('summary', { text: answer.headers.length > 0 ? t('playground.response.headers_count', { count: answer.headers.length }) : t('playground.response.headers') }),
+    h('pre', {}, h('code', { text: answer.headers.map(([name, value]) => `${name}: ${value}`).join('\n') || t('playground.response.no_headers') })),
   )
 }
 
@@ -288,14 +289,15 @@ function streamView(answer, item, scroller, { via = null, live = true } = {}) {
   const list = h('ol', { class: 'vellum-playground-stream' })
   const count = h('span', {})
   const amount = h('span', {})
-  const state = live ? h('span', { class: 'vellum-playground-live', text: 'Live' }) : null
+  const state = live ? h('span', { class: 'vellum-playground-live', text: t('playground.stream.live') }) : null
   const started = performance.now()
   const raw = { text: '' }
   let items = 0
   let bytes = 0
+  const noun = (count) => tc(`playground.stream.items.${item}`, count)
 
   const say = () => {
-    count.textContent = `${items} ${item}${items === 1 ? '' : 's'}`
+    count.textContent = t('playground.stream.count', { count: items, item: noun(items) })
     amount.textContent = size(bytes)
   }
 
@@ -308,7 +310,7 @@ function streamView(answer, item, scroller, { via = null, live = true } = {}) {
       h('code', {}, ...coloured(entry.data)),
     )
 
-  const empty = h('li', { class: 'vellum-playground-entry-waiting', text: `Waiting for the first ${item}.` })
+  const empty = h('li', { class: 'vellum-playground-entry-waiting', text: t('playground.stream.waiting', { item: noun(1) }) })
 
   list.append(empty)
   say()
@@ -345,7 +347,7 @@ function streamView(answer, item, scroller, { via = null, live = true } = {}) {
       }
 
       if (items === 0) {
-        list.append(h('li', { class: 'vellum-playground-entry-waiting', text: `No ${item}s came.` }))
+        list.append(h('li', { class: 'vellum-playground-entry-waiting', text: t('playground.stream.none', { items: noun(2) }) }))
       }
     },
   }
@@ -358,7 +360,7 @@ function streamView(answer, item, scroller, { via = null, live = true } = {}) {
  */
 function binaryView(answer, urls) {
   if (!answer.blob) {
-    return h('p', { class: 'vellum-playground-empty', text: `${answer.type || 'A response'} that is not text, so it is not shown.` })
+    return h('p', { class: 'vellum-playground-empty', text: t('playground.response.not_text', { type: answer.type || t('playground.response.a_response') }) })
   }
 
   const address = (blob) => {
@@ -375,8 +377,8 @@ function binaryView(answer, urls) {
   return h(
     'div',
     { class: 'vellum-playground-file' },
-    /^image\/(png|jpeg|gif|webp|avif)\b/i.test(answer.type) ? h('img', { src: address(answer.blob), alt: 'The image in the response' }) : null,
-    h('a', { href: address(new Blob([answer.blob], { type: 'application/octet-stream' })), download: name, text: `Download ${size(answer.size)}` }),
+    /^image\/(png|jpeg|gif|webp|avif)\b/i.test(answer.type) ? h('img', { src: address(answer.blob), alt: t('playground.response.image') }) : null,
+    h('a', { href: address(new Blob([answer.blob], { type: 'application/octet-stream' })), download: name, text: t('playground.response.download', { size: size(answer.size) }) }),
   )
 }
 
@@ -413,7 +415,7 @@ function typeName(schema = {}) {
   return schema.type === 'json' ? 'JSON' : (schema.type ?? 'value')
 }
 
-const FLOWS = { authorizationCode: 'Sign in', clientCredentials: 'Client credentials' }
+const FLOWS = { authorizationCode: 'playground.oauth.sign_in', clientCredentials: 'playground.oauth.client_credentials' }
 
 /**
  * Getting a token for an OAuth scheme: the flow, the client, the scopes,
@@ -460,25 +462,25 @@ function oauth(scheme, stored, use) {
       kinds.length > 1
         ? h(
             'div',
-            { class: 'vellum-playground-modes', role: 'group', 'aria-label': 'How to get a token' },
+            { class: 'vellum-playground-modes', role: 'group', 'aria-label': t('playground.oauth.modes') },
             kinds.map((name) =>
               h('button', {
                 type: 'button',
                 class: 'vellum-playground-mode',
                 'aria-pressed': String(name === kind),
-                text: FLOWS[name] ?? name,
+                text: FLOWS[name] ? t(FLOWS[name]) : name,
                 onclick: () => ((kept.flow = name), say(''), draw()),
               }),
             ),
           )
         : null,
-      text('clientId', 'Client ID'),
-      text('clientSecret', kind === 'clientCredentials' ? 'Client secret' : 'Client secret, if the app has one', true),
+      text('clientId', t('playground.oauth.client_id')),
+      text('clientSecret', t(kind === 'clientCredentials' ? 'playground.oauth.client_secret' : 'playground.oauth.client_secret_optional'), true),
       offered.length > 0
         ? h(
             'fieldset',
             { class: 'vellum-playground-oauth-scopes' },
-            h('legend', { text: 'Scopes' }),
+            h('legend', { text: t('playground.oauth.scopes') }),
             offered.map((scope) =>
               h(
                 'label',
@@ -495,7 +497,7 @@ function oauth(scheme, stored, use) {
         : h(
             'label',
             { class: 'vellum-playground-oauth-field' },
-            h('span', { text: 'Scopes' }),
+            h('span', { text: t('playground.oauth.scopes') }),
             h('input', {
               class: 'vellum-playground-control',
               autocomplete: 'off',
@@ -508,12 +510,12 @@ function oauth(scheme, stored, use) {
       h(
         'div',
         { class: 'vellum-playground-oauth-actions' },
-        h('button', { type: 'button', class: 'vellum-playground-oauth-go', text: kind === 'clientCredentials' ? 'Get token' : 'Sign in', onclick: () => run(kind) }),
+        h('button', { type: 'button', class: 'vellum-playground-oauth-go', text: t(kind === 'clientCredentials' ? 'playground.oauth.get_token' : 'playground.oauth.sign_in'), onclick: () => run(kind) }),
         status,
       ),
       kind === 'clientCredentials'
         ? null
-        : h('p', { class: 'vellum-playground-oauth-note' }, 'Register this address with the provider as a redirect URI: ', h('code', { text: redirect })),
+        : h('p', { class: 'vellum-playground-oauth-note' }, `${t('playground.oauth.redirect')} `, h('code', { text: redirect })),
     )
   }
 
@@ -521,19 +523,19 @@ function oauth(scheme, stored, use) {
     const clientId = (kept.clientId ?? '').trim()
 
     if (clientId === '') {
-      say('Fill in the client ID first.', true)
+      say(t('playground.oauth.need_client'), true)
 
       return
     }
 
     try {
       if (!flows && scheme.oauth.discovery) {
-        say('Reading the provider\'s settings…')
+        say(t('playground.oauth.reading'))
         const answer = await dispatch({ method: 'GET', url: scheme.oauth.discovery, headers: { Accept: 'application/json' } }, undefined, false)
         flows = answer.error ? null : fromDiscovery(JSON.parse(answer.text ?? 'null'))
 
         if (!flows) {
-          throw new Error(answer.error ?? 'The provider\'s settings could not be read.')
+          throw new Error(answer.error ?? t('playground.oauth.unreadable'))
         }
       }
 
@@ -548,17 +550,17 @@ function oauth(scheme, stored, use) {
         request = tokenRequest(flow.tokenUrl, 'client_credentials', { clientId, clientSecret: kept.clientSecret ?? '', scopes })
       } else {
         if (!window.isSecureContext || !crypto.subtle) {
-          throw new Error('Signing in needs the page to be served over HTTPS.')
+          throw new Error(t('playground.oauth.https'))
         }
 
         const { verifier, challenge } = await pkce()
         const state = random()
-        say('Waiting for you to sign in…')
+        say(t('playground.oauth.waiting'))
         const code = await signIn(authorizeUrl(flow, { clientId, redirectUri: redirect, scopes, state, challenge, base: window.location.href }), state)
         request = tokenRequest(flow.tokenUrl, 'authorization_code', { clientId, clientSecret: kept.clientSecret ?? '', code, verifier, redirectUri: redirect })
       }
 
-      say('Getting the token…')
+      say(t('playground.oauth.getting'))
       // A provider found through discovery names its own token address,
       // which the forwarding route does not know, so that one stays here.
       const answer = await dispatch(request, undefined, !scheme.oauth.discovery)
@@ -577,12 +579,12 @@ function oauth(scheme, stored, use) {
       const minutes = result.expiresIn ? Math.round(result.expiresIn / 60) : null
 
       if (kind === 'clientCredentials') {
-        say(minutes ? `Got a token, good for ${minutes} minutes.` : 'Got a token.')
+        say(minutes ? t('playground.oauth.got_for', { minutes }) : t('playground.oauth.got'))
       } else {
-        say(minutes ? `Signed in. The token is good for ${minutes} minutes.` : 'Signed in.')
+        say(minutes ? t('playground.oauth.signed_in_for', { minutes }) : t('playground.oauth.signed_in'))
       }
     } catch (error) {
-      say(error instanceof TypeError ? 'The provider could not be reached from this page. It may not allow it (CORS).' : error.message, true)
+      say(error instanceof TypeError ? t('playground.oauth.unreachable') : error.message, true)
     }
   }
 
@@ -676,7 +678,7 @@ export function open(button) {
 
   const curl = h('code', {})
   const result = h('div', { class: 'vellum-playground-response', 'aria-live': 'polite' })
-  const send = h('button', { type: 'submit', class: 'vellum-playground-send' }, h('span', { text: 'Send' }), h('kbd', { text: '⌘↵', 'aria-hidden': 'true' }))
+  const send = h('button', { type: 'submit', class: 'vellum-playground-send' }, h('span', { text: t('playground.send') }), h('kbd', { text: '⌘↵', 'aria-hidden': 'true' }))
 
   const refresh = () => {
     curl.textContent = toCurl(request())
@@ -694,7 +696,7 @@ export function open(button) {
     h('span', { class: 'vellum-api-method', 'data-method': operation.method.toLowerCase(), text: operation.method }),
     h('input', {
       class: 'vellum-playground-server',
-      'aria-label': 'Server',
+      'aria-label': t('playground.server'),
       list: 'vellum-playground-servers',
       spellcheck: 'false',
       autocomplete: 'off',
@@ -718,7 +720,7 @@ export function open(button) {
   if (operation.security.length > 0) {
     sections.push(
       section(
-        'Authorization',
+        t('playground.sections.authorization'),
         operation.security.flatMap((scheme) => {
           const stored = (state.auth[scheme.name] ??= bag())
           const inputs = bag()
@@ -734,7 +736,7 @@ export function open(button) {
                   type: secret ? 'password' : 'text',
                   autocomplete: 'off',
                   spellcheck: 'false',
-                  placeholder: scheme.type === 'bearer' ? (scheme.oauth ? 'Paste one, or get one below' : 'Token') : '',
+                  placeholder: scheme.type === 'bearer' ? t(scheme.oauth ? 'playground.auth.token_or_sign_in' : 'playground.auth.token') : '',
                   value: stored[key] ?? '',
                   oninput: (event) => {
                     stored[key] = event.target.value
@@ -745,7 +747,7 @@ export function open(button) {
             })
 
           if (scheme.type === 'basic') {
-            return [field('username', 'Username', false), field('password', 'Password', true)]
+            return [field('username', t('playground.auth.username'), false), field('password', t('playground.auth.password'), true)]
           }
 
           const token = field('value', scheme.type === 'apiKey' ? scheme.key : scheme.name, true)
@@ -756,7 +758,8 @@ export function open(button) {
     )
   }
 
-  for (const [location, title] of [['path', 'Path'], ['query', 'Query'], ['header', 'Headers']]) {
+  for (const location of ['path', 'query', 'header']) {
+    const title = t(`playground.sections.${location}`)
     const parameters = operation.parameters.filter((parameter) => parameter.in === location)
 
     if (parameters.length > 0) {
@@ -794,7 +797,7 @@ export function open(button) {
       const whole = () =>
         h('textarea', {
           class: 'vellum-playground-control vellum-playground-json',
-          'aria-label': 'Request body',
+          'aria-label': t('playground.body.label'),
           rows: Math.min(18, Math.max(4, state.json[index].split('\n').length)),
           spellcheck: 'false',
           value: state.json[index],
@@ -824,7 +827,7 @@ export function open(button) {
                 leaf.required ? h('span', { class: 'vellum-playground-required', 'aria-hidden': 'true', text: '*' }) : null,
                 h('span', { class: 'vellum-playground-type', text: typeName(leaf.schema) }),
               ),
-              h('button', { type: 'button', class: 'vellum-playground-item-action', text: 'Add item', onclick: () => relist(addItem(state.form[index], leaf.key)) }),
+              h('button', { type: 'button', class: 'vellum-playground-item-action', text: t('playground.body.add_item'), onclick: () => relist(addItem(state.form[index], leaf.key)) }),
             )
           }
 
@@ -832,12 +835,12 @@ export function open(button) {
             return h(
               'div',
               { class: 'vellum-playground-item' },
-              h('span', { text: `Item ${leaf.index + 1}` }),
+              h('span', { text: t('playground.body.item', { number: leaf.index + 1 }) }),
               h('button', {
                 type: 'button',
                 class: 'vellum-playground-item-action',
-                text: 'Remove',
-                'aria-label': `Remove item ${leaf.index + 1}`,
+                text: t('playground.body.remove'),
+                'aria-label': t('playground.body.remove_item', { number: leaf.index + 1 }),
                 onclick: () => relist(removeItem(state.form[index], leaf.list, leaf.index)),
               }),
             )
@@ -874,7 +877,7 @@ export function open(button) {
                 type: 'button',
                 class: 'vellum-playground-mode',
                 'aria-pressed': String(mode === name),
-                text: name === 'form' ? 'Form' : 'JSON',
+                text: name === 'form' ? t('playground.body.form') : 'JSON',
                 onclick: () => {
                   if (mode === name) {
                     return
@@ -898,14 +901,14 @@ export function open(button) {
       )
     }
 
-    const modes = h('div', { class: 'vellum-playground-modes', role: 'group', 'aria-label': 'How to write the body' })
+    const modes = h('div', { class: 'vellum-playground-modes', role: 'group', 'aria-label': t('playground.body.modes') })
     const types =
       bodies.length > 1
         ? h(
             'select',
             {
               class: 'vellum-playground-control vellum-playground-types',
-              'aria-label': 'Content type',
+              'aria-label': t('playground.body.content_type'),
               onchange: (event) => {
                 state.body = Number(event.target.value)
                 drawBody()
@@ -916,13 +919,13 @@ export function open(button) {
           )
         : h('span', { class: 'vellum-playground-type', text: bodies[0].contentType })
 
-    const heading = h('h3', { class: 'vellum-playground-heading' }, h('span', { text: 'Body' }), types, modes)
+    const heading = h('h3', { class: 'vellum-playground-heading' }, h('span', { text: t('playground.sections.body') }), types, modes)
     sections.push(h('section', { class: 'vellum-playground-section' }, heading, holder))
     drawBody()
   }
 
   if (sections.length === 0) {
-    sections.push(h('p', { class: 'vellum-playground-empty', text: 'This request takes nothing. Send it as it is.' }))
+    sections.push(h('p', { class: 'vellum-playground-empty', text: t('playground.body.nothing') }))
   }
 
   // The command and the response share one place, a tab each. There is no
@@ -939,11 +942,11 @@ export function open(button) {
   const copy = h('button', {
     type: 'button',
     class: 'vellum-playground-copy',
-    text: 'Copy',
+    text: t('playground.tabs.copy'),
     onclick: () => {
       navigator.clipboard?.writeText(tab === 'response' && raw ? raw.text : (shown()?.textContent ?? '')).then(() => {
-        copy.textContent = 'Copied'
-        setTimeout(() => (copy.textContent = 'Copy'), 1500)
+        copy.textContent = t('playground.tabs.copied')
+        setTimeout(() => (copy.textContent = t('playground.tabs.copy')), 1500)
       })
     },
   })
@@ -956,7 +959,7 @@ export function open(button) {
       type: 'button',
       class: 'vellum-playground-mode',
       'data-tab': name,
-      text: name === 'curl' ? 'cURL' : 'Response',
+      text: name === 'curl' ? 'cURL' : t('playground.tabs.response'),
       onclick: () => {
         tab = name
         drawTabs()
@@ -1015,7 +1018,7 @@ export function open(button) {
     // refuse for itself, and its refusal is worth seeing.
     if (/\{[^}]+\}/.test(built.url.split('?')[0]) && missing) {
       missing.focus()
-      show(h('p', { class: 'vellum-playground-error', text: 'Fill in the path first.' }))
+      show(h('p', { class: 'vellum-playground-error', text: t('playground.errors.path') }))
 
       return
     }
@@ -1023,7 +1026,7 @@ export function open(button) {
     const where = reach(built.url, window.location.origin)
 
     if (where === 'invalid') {
-      show(h('p', { class: 'vellum-playground-error', text: 'That server is not an address the browser can reach.' }))
+      show(h('p', { class: 'vellum-playground-error', text: t('playground.errors.server') }))
 
       return
     }
@@ -1035,7 +1038,7 @@ export function open(button) {
     const token = xsrfToken(document.cookie)
 
     if (proxy && built.files) {
-      show(h('p', { class: 'vellum-playground-error', text: 'A file cannot be sent to another origin through this site. Use the command above.' }))
+      show(h('p', { class: 'vellum-playground-error', text: t('playground.errors.file') }))
 
       return
     }
@@ -1071,9 +1074,9 @@ export function open(button) {
         }
 
         view.add('', parse.end())
-        view.end('Ended')
+        view.end(t('playground.stream.ended'))
       } catch (error) {
-        view.end(error?.name === 'AbortError' ? 'Stopped' : 'Cut off')
+        view.end(t(error?.name === 'AbortError' ? 'playground.stream.stopped' : 'playground.stream.cut_off'))
       } finally {
         result.setAttribute('aria-live', 'polite')
       }
@@ -1082,9 +1085,9 @@ export function open(button) {
     controller = new AbortController()
     const timer = setTimeout(() => controller?.abort(), TIMEOUT)
 
-    send.firstChild.textContent = 'Stop'
+    send.firstChild.textContent = t('playground.stop')
     form.setAttribute('aria-busy', 'true')
-    show(h('p', { class: 'vellum-playground-empty', text: 'Sending.' }))
+    show(h('p', { class: 'vellum-playground-empty', text: t('playground.sending') }))
 
     try {
       const answer = proxy ? await forwarded(proxy, built, token, controller.signal) : await direct(built, where, token, controller.signal, follow)
@@ -1100,7 +1103,7 @@ export function open(button) {
         return
       }
 
-      const via = proxy ? h('span', { class: 'vellum-playground-via', text: 'Sent through this site' }) : null
+      const via = proxy ? h('span', { class: 'vellum-playground-via', text: t('playground.response.via') }) : null
       const item = answer.status < 300 && answer.text !== null ? streamItem(answer.type) : null
 
       // This site's server hands over a stream in one piece, when it is done.
@@ -1113,7 +1116,7 @@ export function open(button) {
         view.add(answer.text, [...parse.push(answer.text), ...parse.end()], answer.size)
         view.end()
         result.insertBefore(
-          h('p', { class: 'vellum-playground-empty', text: answer.truncated ? 'Sent through this site, so only what arrived in time is shown, all at once.' : 'Sent through this site, so it arrived all at once.' }),
+          h('p', { class: 'vellum-playground-empty', text: t(answer.truncated ? 'playground.response.via_truncated' : 'playground.response.via_whole') }),
           result.lastChild,
         )
 
@@ -1127,10 +1130,10 @@ export function open(button) {
         answer.text === null
           ? binaryView(answer, urls)
           : answer.text === ''
-            ? h('p', { class: 'vellum-playground-empty', text: 'No body.' })
+            ? h('p', { class: 'vellum-playground-empty', text: t('playground.response.no_body') })
             : h('pre', { class: 'vellum-playground-output' }, h('code', {}, ...coloured(pretty(answer.text, answer.type).slice(0, SHOWN)))),
         answer.truncated || (answer.text ?? '').length > SHOWN
-          ? h('p', { class: 'vellum-playground-empty', text: 'Only the start of the response is shown.' })
+          ? h('p', { class: 'vellum-playground-empty', text: t('playground.response.start_only') })
           : null,
         responseHeaders(answer),
       )
@@ -1139,7 +1142,7 @@ export function open(button) {
     } finally {
       clearTimeout(timer)
       controller = null
-      send.firstChild.textContent = 'Send'
+      send.firstChild.textContent = t('playground.send')
       form.removeAttribute('aria-busy')
     }
   }
@@ -1151,7 +1154,7 @@ export function open(button) {
     'dialog',
     {
       class: 'vellum-playground',
-      'aria-label': `Try ${operation.title}`,
+      'aria-label': t('playground.open', { operation: operation.title }),
       onclose: () => {
         controller?.abort()
         urls.splice(0).forEach((url) => URL.revokeObjectURL(url))
@@ -1174,7 +1177,7 @@ export function open(button) {
         'header',
         { class: 'vellum-playground-header' },
         h('h2', { class: 'vellum-playground-title', text: operation.title }),
-        h('button', { type: 'button', class: 'vellum-playground-close', 'aria-label': 'Close', text: '×', onclick: () => dialog.close() }),
+        h('button', { type: 'button', class: 'vellum-playground-close', 'aria-label': t('playground.close'), text: '×', onclick: () => dialog.close() }),
       ),
       form,
     ),

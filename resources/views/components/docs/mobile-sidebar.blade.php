@@ -17,7 +17,7 @@
                 <button
                     type="button"
                     data-vellum-button
-                    aria-label="Open navigation"
+                    aria-label="{{ __('vellum::sidebar.open') }}"
                     class="inline-flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 >
                     {!! \Vellum\Support\Icons::list(['class' => 'h-5 w-5']) !!}
@@ -33,7 +33,7 @@
                         data-vellum-dialog-close
                         data-vellum-button
                         x-on:click="close()"
-                        aria-label="Close"
+                        aria-label="{{ __('vellum::layout.close') }}"
                         class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-border text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                     >
                         {!! \Vellum\Support\Icons::x(['class' => 'h-4 w-4']) !!}

@@ -75,6 +75,7 @@ final class FragmentCache
             $this->components->config,
             $this->appSettings()->get('app.version'),
             app()->version(),
+            app()->getLocale(),
             $this->allowlistedSnapshot(),
         ], JSON_THROW_ON_ERROR);
 

@@ -1,3 +1,5 @@
+import { t } from './strings.js'
+
 /**
  * The line under a page's title says when the page last changed. The server
  * writes the date; for a recent change this says how long ago instead, which
@@ -11,9 +13,10 @@ const DAY = 86_400_000
  *
  * @param {Date} then
  * @param {Date} now
+ * @param {string} [locale]  the page's language
  * @returns {string|null}  null when the date is in the future or a month or more ago
  */
-export function relativeDay(then, now) {
+export function relativeDay(then, now, locale = 'en') {
   const midnight = (date) => new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime()
   const days = Math.round((midnight(now) - midnight(then)) / DAY)
 
@@ -21,7 +24,7 @@ export function relativeDay(then, now) {
     return null
   }
 
-  return days === 0 ? 'today' : days === 1 ? 'yesterday' : `${days} days ago`
+  return new Intl.RelativeTimeFormat(locale, { numeric: 'auto' }).format(-days, 'day')
 }
 
 export function initPageMeta() {
@@ -32,9 +35,9 @@ export function initPageMeta() {
     return
   }
 
-  const ago = relativeDay(then, new Date())
+  const ago = relativeDay(then, new Date(), document.documentElement.lang || 'en')
 
   if (ago !== null) {
-    time.textContent = `Updated ${ago}`
+    time.textContent = t('page.updated', { date: ago })
   }
 }

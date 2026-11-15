@@ -40,11 +40,11 @@
                         <a
                             href="{{ $feedUrl }}"
                             class="text-sm text-muted-foreground hover:text-foreground"
-                        >Atom feed</a>
+                        >{{ __('vellum::changelog.feed') }}</a>
                     </div>
                     <x-vellum::docs.page-meta :updated="$updated ?? null" />
                     <div class="vellum-prose">
-                        {!! $changelog->introHtml !!}
+                        {!! \Vellum\Markdown\CompiledLabels::translate($changelog->introHtml) !!}
                         @foreach ($changelog->visible() as $release)
                             <section @class(['vellum-changelog-release', 'mt-10' => ! $loop->first])>
                                 <h2 id="{{ $release->id }}" class="vellum-heading">
@@ -57,7 +57,7 @@
                                         <time datetime="{{ $release->date }}" class="ml-2 text-base font-normal text-muted-foreground">{{ $release->date }}</time>
                                     @endif
                                 </h2>
-                                {!! $release->html !!}
+                                {!! \Vellum\Markdown\CompiledLabels::translate($release->html) !!}
                             </section>
                         @endforeach
                     </div>

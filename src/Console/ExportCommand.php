@@ -18,6 +18,7 @@ use Vellum\Http\DocsView;
 use Vellum\Http\LlmsTxt;
 use Vellum\Http\Sitemap;
 use Vellum\OpenApi\Settings;
+use Vellum\Support\Translate;
 
 /**
  * Renders the docs site to a static HTML folder for any static host.
@@ -205,8 +206,8 @@ final class ExportCommand extends Command
             dirname(__DIR__, 2).'/resources/views/pages/404.blade.php',
             [
                 'name' => config('vellum.name'),
-                'description' => 'Page not found',
-                'pageTitle' => DocsView::pageTitle('Page not found'),
+                'description' => Translate::line('vellum::errors.not_found.title'),
+                'pageTitle' => DocsView::pageTitle(Translate::line('vellum::errors.not_found.title')),
                 'noindex' => true,
                 'navigation' => $repository->sidebar(null, $version),
                 'sections' => $repository->sections(null, $version),
@@ -286,16 +287,20 @@ final class ExportCommand extends Command
             ? ''
             : "\n    <link rel=\"canonical\" href=\"".htmlspecialchars($canonical, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8').'">';
 
+        $lang = str_replace('_', '-', app()->getLocale());
+        $title = e(Translate::line('vellum::errors.redirect.title'));
+        $link = e(Translate::line('vellum::errors.redirect.link'));
+
         return <<<HTML
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{$lang}">
 <head>
     <meta charset="utf-8">
     <meta http-equiv="refresh" content="0;url={$escaped}">{$canonicalLink}
-    <title>Redirecting</title>
+    <title>{$title}</title>
 </head>
 <body>
-    <p><a href="{$escaped}">Continue to the latest version</a></p>
+    <p><a href="{$escaped}">{$link}</a></p>
 </body>
 </html>
 HTML;

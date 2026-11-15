@@ -3,17 +3,17 @@
      only, and closes. The code is worth nothing without the verifier the
      playground kept. --}}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="robots" content="noindex">
     <meta name="referrer" content="no-referrer">
-    <title>Signing in</title>
+    <title>{{ __('vellum-openapi::playground.callback.title') }}</title>
     <style>body { margin: 3rem auto; max-width: 28rem; padding: 0 1rem; font: 15px/1.5 system-ui, sans-serif; color: #555 }</style>
 </head>
 <body>
-    <p id="status">Signing in. This window closes by itself.</p>
+    <p id="status">{{ __('vellum-openapi::playground.callback.status') }}</p>
     <script>
         (function () {
             var query = new URLSearchParams(window.location.search);
@@ -29,7 +29,7 @@
                 window.opener.postMessage(message, window.location.origin);
                 window.close();
             } else {
-                document.getElementById('status').textContent = 'Signing in only works from the playground that opened this window. Close it and try again from there.';
+                document.getElementById('status').textContent = @js(__('vellum-openapi::playground.callback.orphan'));
             }
         })();
     </script>

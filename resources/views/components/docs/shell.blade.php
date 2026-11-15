@@ -36,7 +36,7 @@
             data-vellum-sidebar-expand
             data-vellum-button
             class="inline-flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            aria-label="Expand sidebar"
+            aria-label="{{ __('vellum::sidebar.expand') }}"
             x-on:click="toggleSidebar()"
         >
             {!! \Vellum\Support\Icons::sidebar(['class' => 'h-4 w-4']) !!}

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Vellum\OpenApi;
 
 use Vellum\Support\Slug;
+use Vellum\Support\Translate;
 
 /**
  * Sorts a spec's operations into the pages they will be written to.
@@ -59,7 +60,7 @@ final class Grouper
         // Webhooks are requests the API sends, so they are read apart from
         // the ones it answers, after them.
         if ($spec->webhooks !== []) {
-            $groups[] = new Group(name: 'Webhooks', slug: $this->uniqueSlug('webhooks', $slugs), operations: $spec->webhooks);
+            $groups[] = new Group(name: Translate::line('vellum-openapi::reference.webhooks'), slug: $this->uniqueSlug('webhooks', $slugs), operations: $spec->webhooks);
         }
 
         return $groups;

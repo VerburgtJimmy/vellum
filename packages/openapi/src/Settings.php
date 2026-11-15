@@ -31,7 +31,7 @@ final readonly class Settings
         public bool $separate = true,
         public ?string $title = null,
         public string $groupBy = 'tag',
-        public string $untaggedLabel = 'Other',
+        public ?string $untaggedLabel = null,
         public array $samples = ['curl'],
         public ?string $baseUrl = null,
         public bool $playground = true,
@@ -56,7 +56,7 @@ final readonly class Settings
         $prefix = $config['prefix'] ?? 'api';
         $prefix = is_string($prefix) ? Slug::from(trim($prefix, '/')) : '';
         $title = $config['title'] ?? null;
-        $label = $config['untagged_label'] ?? 'Other';
+        $label = $config['untagged_label'] ?? null;
         $samples = $config['samples'] ?? ['curl'];
         $baseUrl = $config['base_url'] ?? null;
         $access = $config['access'] ?? null;
@@ -70,7 +70,7 @@ final readonly class Settings
             separate: ($config['sidebar'] ?? 'separate') !== 'docs',
             title: is_string($title) && trim($title) !== '' ? $title : null,
             groupBy: ($config['group_by'] ?? null) === 'path' ? 'path' : 'tag',
-            untaggedLabel: is_string($label) && trim($label) !== '' ? $label : 'Other',
+            untaggedLabel: is_string($label) && trim($label) !== '' ? $label : null,
             samples: is_array($samples) ? $samples : ['curl'],
             baseUrl: is_string($baseUrl) && $baseUrl !== '' ? $baseUrl : null,
             playground: (bool) ($config['playground'] ?? true),

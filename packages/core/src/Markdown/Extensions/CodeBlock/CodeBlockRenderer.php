@@ -12,6 +12,7 @@ use League\CommonMark\Renderer\NodeRendererInterface;
 use League\CommonMark\Util\HtmlElement;
 use League\CommonMark\Util\Xml;
 use Tempest\Highlight\Highlighter;
+use Vellum\Markdown\CompiledLabels;
 use Vellum\Support\Icons;
 
 /**
@@ -81,7 +82,7 @@ final class CodeBlockRenderer implements NodeRendererInterface
             new HtmlElement('div', ['class' => 'vellum-code-header'], [
                 new HtmlElement('span', ['class' => 'vellum-code-header-meta'], [
                     LanguageIcon::svg($info->language),
-                    new HtmlElement('span', ['class' => 'vellum-code-title'], Xml::escape($titled ? (string) $info->title : 'Terminal')),
+                    new HtmlElement('span', ['class' => 'vellum-code-title'], Xml::escape($titled ? (string) $info->title : CompiledLabels::english('code.terminal'))),
                 ]),
                 $this->copyButton(),
             ]),
@@ -176,7 +177,7 @@ final class CodeBlockRenderer implements NodeRendererInterface
             'type' => 'button',
             'class' => 'vellum-code-copy',
             'data-vellum-copy-code' => '',
-            'aria-label' => 'Copy code',
+            'aria-label' => CompiledLabels::english('code.copy'),
         ], [
             new HtmlElement('span', [
                 'class' => 'vellum-code-copy-icon',

@@ -15,4 +15,9 @@ describe('when a page last changed', () => {
     expect(relativeDay(new Date(2026, 7, 29), now)).toBeNull()
     expect(relativeDay(new Date(2026, 8, 29), now)).toBeNull()
   })
+
+  it('says it in the page language', () => {
+    expect(relativeDay(new Date(2026, 8, 27, 23, 0), now, 'nl')).toBe('gisteren')
+    expect(relativeDay(new Date(2026, 8, 25, 12, 0), now, 'de')).toBe('vor 3 Tagen')
+  })
 })

@@ -10,6 +10,7 @@ use Vellum\Content\Document;
 use Vellum\Markdown\Islands\MarkdownPipeline;
 use Vellum\Markdown\MarkdownRenderer;
 use Vellum\OpenApi\Samples\SampleBuilder;
+use Vellum\Support\Translate;
 
 /**
  * Turns a spec into the same Document objects Markdown compiles to.
@@ -48,7 +49,7 @@ final class PageBuilder
         private readonly MarkdownRendition $rendition = new MarkdownRendition,
         private readonly Playground $playground = new Playground,
     ) {
-        $this->grouper = new Grouper($settings->untaggedLabel);
+        $this->grouper = new Grouper($settings->untaggedLabel ?? Translate::line('vellum-openapi::reference.untagged'));
         $this->samples = new SampleBuilder($settings->samples);
     }
 
@@ -96,11 +97,11 @@ final class PageBuilder
         $headings = [];
 
         if ($spec->servers() !== []) {
-            $headings[] = ['id' => 'servers', 'text' => 'Servers', 'level' => 2];
+            $headings[] = ['id' => 'servers', 'text' => Translate::line('vellum-openapi::reference.sections.servers'), 'level' => 2];
         }
 
         if ($spec->securitySchemes() !== []) {
-            $headings[] = ['id' => 'authentication', 'text' => 'Authentication', 'level' => 2];
+            $headings[] = ['id' => 'authentication', 'text' => Translate::line('vellum-openapi::reference.sections.authentication'), 'level' => 2];
         }
 
         foreach ($groups as $group) {
@@ -179,29 +180,29 @@ final class PageBuilder
         $headings = [];
 
         if ($security !== []) {
-            $headings[] = ['id' => 'authorization', 'text' => 'Authorization', 'level' => 2];
+            $headings[] = ['id' => 'authorization', 'text' => Translate::line('vellum-openapi::reference.sections.authorization'), 'level' => 2];
         }
 
         foreach (array_keys($operation->parametersByLocation()) as $location) {
             $headings[] = [
                 'id' => $location.'-parameters',
-                'text' => ucfirst($location).' parameters',
+                'text' => Translate::line('vellum-openapi::reference.sections.parameters.'.$location),
                 'level' => 2,
             ];
         }
 
         if (is_array($operation->requestBody['content'] ?? null)) {
             $headings[] = $webhook
-                ? ['id' => 'payload', 'text' => 'Payload', 'level' => 2]
-                : ['id' => 'request-body', 'text' => 'Request body', 'level' => 2];
+                ? ['id' => 'payload', 'text' => Translate::line('vellum-openapi::reference.sections.payload'), 'level' => 2]
+                : ['id' => 'request-body', 'text' => Translate::line('vellum-openapi::reference.sections.request_body'), 'level' => 2];
         }
 
         if ($operation->responses !== []) {
-            $headings[] = ['id' => 'responses', 'text' => 'Responses', 'level' => 2];
+            $headings[] = ['id' => 'responses', 'text' => Translate::line('vellum-openapi::reference.sections.responses'), 'level' => 2];
         }
 
         if ($operation->callbacks !== []) {
-            $headings[] = ['id' => 'callbacks', 'text' => 'Callbacks', 'level' => 2];
+            $headings[] = ['id' => 'callbacks', 'text' => Translate::line('vellum-openapi::reference.sections.callbacks'), 'level' => 2];
         }
 
         return $this->document(
@@ -315,7 +316,7 @@ final class PageBuilder
             $fence = str_repeat('`', max(3, self::longestFence($block['code']) + 1));
             // A label is a status or a language. A spec is free to make a
             // status of anything, and this goes on to be read as Markdown.
-            $label = trim((string) preg_replace('/[^\w .+-]+/u', '', $block['label'])) ?: 'Example';
+            $label = trim((string) preg_replace('/[^\w .+-]+/u', '', $block['label'])) ?: Translate::line('vellum-openapi::reference.examples.example');
             $markdown .= '::tab['.$label."]\n".$fence.$block['language']."\n".$block['code']."\n".$fence."\n";
         }
 
@@ -532,12 +533,12 @@ final class PageBuilder
 
         return match ($type) {
             'http' => strtolower($http) === 'bearer'
-                ? 'Send a bearer token in the Authorization header.'
-                : 'HTTP '.$http.' in the Authorization header.',
-            'apiKey' => trim('Send an API key in the '.$in.' '.$name).'.',
-            'oauth2' => 'OAuth 2 access token.',
-            'openIdConnect' => 'OpenID Connect token.',
-            default => 'This endpoint requires authentication.',
+                ? Translate::line('vellum-openapi::reference.security.bearer')
+                : Translate::line('vellum-openapi::reference.security.http', ['scheme' => $http]),
+            'apiKey' => str_replace(' .', '.', Translate::line('vellum-openapi::reference.security.api_key', ['in' => $in, 'name' => $name])),
+            'oauth2' => Translate::line('vellum-openapi::reference.security.oauth2'),
+            'openIdConnect' => Translate::line('vellum-openapi::reference.security.open_id_connect'),
+            default => Translate::line('vellum-openapi::reference.security.other'),
         };
     }
 

@@ -275,7 +275,8 @@ return [
     |
     | group_by: tag, or path to group by the first segment of the path.
     |
-    | untagged_label: the folder for operations without a tag.
+    | untagged_label: the folder for operations without a tag. Unset, it is
+    | "Other" in the app's language.
     |
     | samples: languages of the request samples, in tab order. curl, php,
     | javascript and python are built in.
@@ -302,7 +303,7 @@ return [
         'sidebar' => 'separate',
         'title' => 'API reference',
         'group_by' => 'tag',
-        'untagged_label' => 'Other',
+        'untagged_label' => null,
         'samples' => ['curl', 'php', 'javascript', 'python'],
         'base_url' => null,
         'playground' => true,

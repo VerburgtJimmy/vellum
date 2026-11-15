@@ -1,3 +1,5 @@
+import { t } from '../strings.js'
+
 /**
  * What the playground needs to get an OAuth 2 token for a reader: the
  * sign-in address for the authorization code flow with PKCE, and the token
@@ -43,7 +45,7 @@ export function authorizeUrl(flow, { clientId, redirectUri, scopes, state, chall
   // The address is the spec's, often someone else's file. A window opened
   // on javascript: would run it as this page.
   if (url.protocol !== 'https:' && url.protocol !== 'http:') {
-    throw new Error('The sign-in address in the spec is not a web address.')
+    throw new Error(t('playground.oauth.bad_address'))
   }
 
   url.searchParams.set('response_type', 'code')

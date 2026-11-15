@@ -1,10 +1,12 @@
+import { t } from './strings.js'
+
 /**
  * Lightweight heading scroll-spy for the docs TOC.
  *
  * @param {Array<string|{id: string, text?: string}>} items
  * @param {string} pageTitle
  */
-export function vellumScrollSpy(items = [], pageTitle = 'On this page') {
+export function vellumScrollSpy(items = [], pageTitle = t('toc.title')) {
   const normalized = items.map((item) => (
     typeof item === 'string' ? { id: item, text: item } : item
   ))
@@ -142,7 +144,7 @@ export function vellumScrollSpy(items = [], pageTitle = 'On this page') {
       this.$nextTick(() => this.updateRail())
     },
     updateActiveTitle() {
-      this.activeTitle = this.titles[this.activeId] || 'On this page'
+      this.activeTitle = this.titles[this.activeId] || t('toc.title')
     },
     updateProgress() {
       const article = document.querySelector('[data-vellum-article]')

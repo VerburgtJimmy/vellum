@@ -10,6 +10,7 @@ use League\CommonMark\Node\Node;
 use League\CommonMark\Renderer\ChildNodeRendererInterface;
 use League\CommonMark\Renderer\NodeRendererInterface;
 use League\CommonMark\Util\HtmlElement;
+use Vellum\Markdown\CompiledLabels;
 use Vellum\Support\Icons;
 
 /**
@@ -27,7 +28,7 @@ final class HeadingPermalinkRenderer implements NodeRendererInterface
             'type' => 'button',
             'class' => 'vellum-heading-anchor',
             'data-vellum-heading-copy' => '',
-            'aria-label' => 'Copy link to heading',
+            'aria-label' => CompiledLabels::english('code.copy_heading_link'),
         ], [
             new HtmlElement('span', [
                 'class' => 'vellum-heading-anchor-icon',
@@ -35,7 +36,7 @@ final class HeadingPermalinkRenderer implements NodeRendererInterface
             ], Icons::link()),
             new HtmlElement('span', [
                 'class' => 'vellum-heading-anchor-copied',
-            ], 'Copied'),
+            ], CompiledLabels::english('code.copied')),
         ]);
     }
 }

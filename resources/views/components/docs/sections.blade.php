@@ -16,7 +16,7 @@
 @endphp
 
 <nav
-    aria-label="Sections"
+    aria-label="{{ __('vellum::sidebar.sections') }}"
     data-vellum-sections
     class="vellum-sections-dropdown relative {{ $class }}"
     x-data="{

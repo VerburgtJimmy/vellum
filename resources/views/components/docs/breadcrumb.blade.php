@@ -3,7 +3,7 @@
 ])
 
 @if ($breadcrumbs !== [])
-    <nav data-vellum-breadcrumb aria-label="Breadcrumb" class="mb-4 min-w-0">
+    <nav data-vellum-breadcrumb aria-label="{{ __('vellum::page.breadcrumb') }}" class="mb-4 min-w-0">
         <ol class="flex flex-wrap items-center gap-1.5 text-sm text-muted-foreground">
             @foreach ($breadcrumbs as $index => $crumb)
                 <li class="inline-flex items-center gap-1.5">

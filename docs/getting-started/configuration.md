@@ -32,6 +32,10 @@ description: Every config key and frontmatter field, all frozen since 0.5.
 | `export.out` | `public_path('docs-static')` | Output directory for `vellum:export` |
 | `export.base_url` | `/` | URL prefix used inside the export |
 
+## Language
+
+The site follows the app's locale, `app.locale`. See [Translations](/docs/translations) to publish its strings and add a language.
+
 ## Theme
 
 See [Theming](/docs/theming) for the presets, the accent colour and the contrast target.

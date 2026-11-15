@@ -26,8 +26,8 @@
             data-vellum-sidebar-toggle
             data-vellum-button
             class="-ml-1.5 hidden h-8 w-8 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:inline-flex"
-            aria-label="Collapse sidebar"
-            :aria-label="collapsed ? 'Expand sidebar' : 'Collapse sidebar'"
+            aria-label="{{ __('vellum::sidebar.collapse') }}"
+            :aria-label="collapsed ? @js(__('vellum::sidebar.expand')) : @js(__('vellum::sidebar.collapse'))"
             :aria-expanded="(! collapsed).toString()"
             x-on:click="toggleSidebar()"
         >
@@ -65,7 +65,7 @@
         @endif
 
         @if (is_array($links) && $links !== [])
-            <nav class="hidden items-center gap-1 lg:flex" aria-label="Header links">
+            <nav class="hidden items-center gap-1 lg:flex" aria-label="{{ __('vellum::layout.header_links') }}">
                 @foreach ($links as $link)
                     @php
                         $label = is_array($link) ? ($link['label'] ?? '') : '';
@@ -89,7 +89,7 @@
                 href="{{ preg_replace('#/edit/.*$#', '', rtrim($repo, '/')) }}"
                 target="_blank"
                 rel="noopener noreferrer"
-                aria-label="GitHub repository"
+                aria-label="{{ __('vellum::layout.repository') }}"
                 class="inline-flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-accent-foreground"
             >
                 {!! \Vellum\Support\Icons::github(['class' => 'h-4 w-4']) !!}

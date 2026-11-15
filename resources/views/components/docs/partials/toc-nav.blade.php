@@ -2,7 +2,7 @@
     $tocStyle = config('vellum.layout.toc') === 'line' ? 'line' : 'window';
 @endphp
 <nav
-    aria-label="Table of contents"
+    aria-label="{{ __('vellum::toc.label') }}"
     class="vellum-toc-nav relative text-sm {{ $class ?? '' }}"
     data-vellum-toc-nav
     data-vellum-toc-style="{{ $tocStyle }}"

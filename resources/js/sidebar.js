@@ -1,3 +1,5 @@
+import { t } from './strings.js'
+
 /**
  * The desktop sidebar's details: a marker under the current page's entry that
  * slides over from the previous page's entry, a hover highlight that glides
@@ -72,7 +74,7 @@ function markChangedPages(active) {
       link.setAttribute('data-vellum-nav-changed', '')
       const note = document.createElement('span')
       note.className = 'sr-only'
-      note.textContent = ' (changed since you last read it)'
+      note.textContent = ` (${t('sidebar.changed')})`
       link.append(note)
     }
   })

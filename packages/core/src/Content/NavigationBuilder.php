@@ -7,6 +7,7 @@ namespace Vellum\Content;
 use Vellum\Support\SafeHref;
 use Vellum\Support\Slug;
 use Vellum\Support\Str;
+use Vellum\Support\Translate;
 use Vellum\Support\VersionUrl;
 
 /**
@@ -90,7 +91,7 @@ final class NavigationBuilder
     {
         $title = $this->readMeta($this->rootPath($version))['title'] ?? null;
 
-        return is_string($title) && trim($title) !== '' ? trim($title) : 'Docs';
+        return is_string($title) && trim($title) !== '' ? trim($title) : Translate::line('vellum-core::navigation.docs');
     }
 
     /**
@@ -239,7 +240,7 @@ final class NavigationBuilder
     {
         $crumbs = [
             $home ?? [
-                'title' => 'Docs',
+                'title' => Translate::line('vellum-core::navigation.docs'),
                 'href' => $this->hrefForSlug('', null),
                 'slug' => '',
             ],

@@ -21,22 +21,22 @@
             <span class="vellum-api-method" data-method="{{ $method }}">{{ $operation->method }}</span>
             @if ($webhook)
                 <code class="vellum-api-path">{{ $operation->webhook }}</code>
-                <span class="vellum-api-kind">Webhook</span>
+                <span class="vellum-api-kind">{{ __('vellum-openapi::reference.webhook') }}</span>
             @else
                 <code class="vellum-api-path">{!! $path($operation->path) !!}</code>
             @endif
             @if ($operation->deprecated)
-                <span class="vellum-api-deprecated">Deprecated</span>
+                <span class="vellum-api-deprecated">{{ __('vellum-openapi::reference.deprecated') }}</span>
             @endif
             {{-- Hidden until a script says it can open something. The data
                  is everything a playground needs to build the request. --}}
             @if ($playground !== null)
-                <button type="button" class="vellum-api-try" data-vellum-playground="{{ $playground }}" hidden>Try it</button>
+                <button type="button" class="vellum-api-try" data-vellum-playground="{{ $playground }}" hidden>{{ __('vellum-openapi::reference.try_it') }}</button>
             @endif
         </div>
 
         @if ($webhook)
-            <p class="vellum-api-lede vellum-api-webhook-note">The API sends this request to an address you give it. Your app receives it and answers.</p>
+            <p class="vellum-api-lede vellum-api-webhook-note">{{ __('vellum-openapi::reference.webhook_note') }}</p>
         @endif
 
         @if ($body !== '')
@@ -44,7 +44,7 @@
         @endif
 
         @if ($security !== [])
-            <h2 id="authorization" class="vellum-heading vellum-api-section">Authorization</h2>
+            <h2 id="authorization" class="vellum-heading vellum-api-section">{{ __('vellum-openapi::reference.sections.authorization') }}</h2>
             <div class="vellum-api-panel">
                 <div class="vellum-api-fields">
                     @foreach ($security as $scheme)
@@ -53,7 +53,7 @@
                                 <code class="vellum-api-field-name">{{ $scheme['name'] }}</code>
                                 <span class="vellum-api-field-type">{{ $scheme['detail'] }}</span>
                                 @if ($scheme['deprecated'] ?? false)
-                                    <span class="vellum-api-deprecated">Deprecated</span>
+                                    <span class="vellum-api-deprecated">{{ __('vellum-openapi::reference.deprecated') }}</span>
                                 @endif
                             </div>
                             <div class="vellum-api-field-description">{!! $describe($scheme['hint']) !!}</div>
@@ -64,7 +64,7 @@
         @endif
 
         @foreach ($parameters as $location => $group)
-            <h2 id="{{ $location }}-parameters" class="vellum-heading vellum-api-section">{{ ucfirst($location) }} parameters</h2>
+            <h2 id="{{ $location }}-parameters" class="vellum-heading vellum-api-section">{{ __('vellum-openapi::reference.sections.parameters.'.$location) }}</h2>
             <div class="vellum-api-panel">
                 <div class="vellum-api-fields" data-depth="0">
                     @foreach ($group as $parameter)
@@ -76,7 +76,7 @@
                             'depth' => 0,
                             'anchor' => $location,
                             'extraChips' => array_key_exists('example', $parameter)
-                                ? ['Example' => SchemaView::literal($parameter['example'])]
+                                ? [__('vellum-openapi::reference.examples.example') => SchemaView::literal($parameter['example'])]
                                 : [],
                         ])
                     @endforeach
@@ -86,9 +86,9 @@
 
         @if ($requestBody !== [])
             @if ($webhook)
-                <h2 id="payload" class="vellum-heading vellum-api-section">Payload</h2>
+                <h2 id="payload" class="vellum-heading vellum-api-section">{{ __('vellum-openapi::reference.sections.payload') }}</h2>
             @else
-                <h2 id="request-body" class="vellum-heading vellum-api-section">Request body</h2>
+                <h2 id="request-body" class="vellum-heading vellum-api-section">{{ __('vellum-openapi::reference.sections.request_body') }}</h2>
             @endif
 
             @if (is_string($operation->requestBody['description'] ?? null))
@@ -103,7 +103,7 @@
                     <div class="vellum-api-panel-head">
                         <code class="vellum-api-media">{{ $type }}</code>
                         @if (! empty($operation->requestBody['required']))
-                            <span class="vellum-api-panel-note">Required</span>
+                            <span class="vellum-api-panel-note">{{ __('vellum-openapi::reference.required') }}</span>
                         @endif
                     </div>
                     @include('vellum::openapi.stream', ['type' => (string) $type])
@@ -113,7 +113,7 @@
         @endif
 
         @if ($operation->responses !== [])
-            <h2 id="responses" class="vellum-heading vellum-api-section">Responses</h2>
+            <h2 id="responses" class="vellum-heading vellum-api-section">{{ __('vellum-openapi::reference.sections.responses') }}</h2>
 
             @foreach ($operation->responses as $status => $response)
                 @php
@@ -140,8 +140,8 @@
         @endif
 
         @if ($operation->callbacks !== [])
-            <h2 id="callbacks" class="vellum-heading vellum-api-section">Callbacks</h2>
-            <p class="vellum-api-lede">Requests the API sends back once this one is made, to the address shown.</p>
+            <h2 id="callbacks" class="vellum-heading vellum-api-section">{{ __('vellum-openapi::reference.sections.callbacks') }}</h2>
+            <p class="vellum-api-lede">{{ __('vellum-openapi::reference.callbacks_note') }}</p>
 
             @foreach ($operation->callbacks as $index => $callback)
                 @php
@@ -164,7 +164,7 @@
                     @endif
                     @if ($call->responses !== [])
                         <p class="vellum-api-callback-answers">
-                            <span class="vellum-api-chip-label">Answer with</span>
+                            <span class="vellum-api-chip-label">{{ __('vellum-openapi::reference.answer_with') }}</span>
                             @foreach ($call->responses as $status => $response)
                                 <span class="vellum-api-status" data-status="{{ $statusClass((string) $status) }}">{{ $status }}</span>
                             @endforeach
@@ -176,22 +176,22 @@
     </div>
 
     @if ($sampleTabs !== '' || $responseTabs !== '' || $payloadTabs !== '')
-        <aside class="vellum-api-examples" aria-label="Examples">
+        <aside class="vellum-api-examples" aria-label="{{ __('vellum-openapi::reference.examples.label') }}">
             @if ($payloadTabs !== '')
                 <div class="vellum-api-example vellum-api-samples">
-                    <p class="vellum-api-example-label">Payload</p>
+                    <p class="vellum-api-example-label">{{ __('vellum-openapi::reference.examples.payload') }}</p>
                     {!! $payloadTabs !!}
                 </div>
             @endif
             @if ($sampleTabs !== '')
                 <div class="vellum-api-example vellum-api-samples">
-                    <p class="vellum-api-example-label">Request</p>
+                    <p class="vellum-api-example-label">{{ __('vellum-openapi::reference.examples.request') }}</p>
                     {!! $sampleTabs !!}
                 </div>
             @endif
             @if ($responseTabs !== '')
                 <div class="vellum-api-example vellum-api-response-examples">
-                    <p class="vellum-api-example-label">Response</p>
+                    <p class="vellum-api-example-label">{{ __('vellum-openapi::reference.examples.response') }}</p>
                     {!! $responseTabs !!}
                 </div>
             @endif

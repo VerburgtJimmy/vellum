@@ -20,7 +20,7 @@
     $labels = $siteVersions->labelsFor($versions);
     // Null when the caller does not know which versions have this page: none is marked.
     $has = static fn (string $version): bool => ! is_array($versionPages) || in_array($version, $versionPages, true);
-    $tags = ['latest' => 'Latest', 'unreleased' => 'Unreleased'];
+    $tags = ['latest' => __('vellum::versions.latest'), 'unreleased' => __('vellum::versions.unreleased')];
     $wide = $variant === 'wide';
     static $menuSeq = 0;
     $menuId = 'vellum-version-menu-'.(++$menuSeq);
@@ -86,7 +86,7 @@
             'h-9 w-full justify-between gap-2 border-input bg-background px-2.5 text-sm' => $wide,
             'h-8 gap-1 border-border bg-background px-2 text-xs font-medium' => ! $wide,
         ])
-        aria-label="Documentation version: {{ $labels[$currentVersion] ?? $currentVersion }}"
+        aria-label="{{ __('vellum::versions.current', ['version' => $labels[$currentVersion] ?? $currentVersion]) }}"
         aria-haspopup="menu"
         aria-controls="{{ $menuId }}"
         :aria-expanded="open.toString()"
@@ -114,7 +114,7 @@
             'min-w-[13rem]' => ! $wide,
         ])
         role="menu"
-        aria-label="Documentation versions"
+        aria-label="{{ __('vellum::versions.list') }}"
         x-on:keydown="onMenuKeydown($event)"
     >
         @foreach ($versions as $index => $version)
@@ -137,7 +137,7 @@
                     @endisset
                 </span>
                 @if (! $has($version))
-                    <span class="mt-0.5 block text-xs text-muted-foreground">This page is not in {{ $labels[$version] ?? $version }}. Opens its start page.</span>
+                    <span class="mt-0.5 block text-xs text-muted-foreground">{{ __('vellum::versions.missing', ['version' => $labels[$version] ?? $version]) }}</span>
                 @endif
             </a>
         @endforeach

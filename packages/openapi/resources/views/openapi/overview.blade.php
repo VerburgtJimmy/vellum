@@ -3,11 +3,11 @@
 @endif
 
 @if ($spec->apiVersion() !== null)
-    <p class="vellum-api-version">Version <code>{{ $spec->apiVersion() }}</code></p>
+    <p class="vellum-api-version">{!! __('vellum-openapi::reference.version', ['version' => '<code>'.e($spec->apiVersion()).'</code>']) !!}</p>
 @endif
 
 @if ($spec->servers() !== [])
-    <h2 id="servers" class="vellum-heading vellum-api-section">Servers</h2>
+    <h2 id="servers" class="vellum-heading vellum-api-section">{{ __('vellum-openapi::reference.sections.servers') }}</h2>
     <div class="vellum-api-panel">
         <div class="vellum-api-fields">
             @foreach ($spec->servers() as $server)
@@ -23,10 +23,10 @@
                     @endif
                     @foreach (\Vellum\OpenApi\Servers::variables($server) as $variable)
                         <p class="vellum-api-enum">
-                            <span class="vellum-api-enum-label">&#123;{{ $variable['name'] }}&#125; is</span>
+                            <span class="vellum-api-enum-label">{!! __('vellum-openapi::reference.server_variable', ['name' => '&#123;'.e($variable['name']).'&#125;']) !!}</span>
                             <code>{{ $variable['default'] }}</code>
                             @foreach (array_diff($variable['values'], [$variable['default']]) as $value)
-                                {!! $loop->first ? '<span class="vellum-api-enum-label">or</span>' : '' !!}
+                                {!! $loop->first ? '<span class="vellum-api-enum-label">'.e(__('vellum-openapi::reference.or')).'</span>' : '' !!}
                                 <code>{{ $value }}</code>
                             @endforeach
                             @if ($variable['description'] !== null)
@@ -41,7 +41,7 @@
 @endif
 
 @if ($spec->securitySchemes() !== [])
-    <h2 id="authentication" class="vellum-heading vellum-api-section">Authentication</h2>
+    <h2 id="authentication" class="vellum-heading vellum-api-section">{{ __('vellum-openapi::reference.sections.authentication') }}</h2>
     <div class="vellum-api-panel">
         <div class="vellum-api-fields">
             @foreach ($spec->securitySchemes() as $name => $scheme)
@@ -50,7 +50,7 @@
                         <code class="vellum-api-field-name">{{ $name }}</code>
                         <span class="vellum-api-field-type">{{ is_string($scheme['type'] ?? null) ? $scheme['type'] : 'unknown' }}@if (is_string($scheme['scheme'] ?? null)) ({{ $scheme['scheme'] }})@endif</span>
                         @if ((bool) ($scheme['deprecated'] ?? false))
-                            <span class="vellum-api-deprecated">Deprecated</span>
+                            <span class="vellum-api-deprecated">{{ __('vellum-openapi::reference.deprecated') }}</span>
                         @endif
                     </div>
                     @if (is_string($scheme['description'] ?? null) && $scheme['description'] !== '')

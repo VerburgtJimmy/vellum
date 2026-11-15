@@ -66,7 +66,7 @@
             data-vellum-sidebar-collapse
             data-vellum-button
             class="hidden h-8 w-8 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:inline-flex"
-            aria-label="Collapse sidebar"
+            aria-label="{{ __('vellum::sidebar.collapse') }}"
             x-on:click="toggleSidebar()"
         >
             {!! \Vellum\Support\Icons::sidebar(['class' => 'h-4 w-4']) !!}

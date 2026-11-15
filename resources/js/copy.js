@@ -1,3 +1,5 @@
+import { t } from './strings.js'
+
 /**
  * The copy buttons in rendered Markdown: a code block copies its code, a
  * heading copies a link to itself. The Markdown marks them with data
@@ -37,7 +39,7 @@ export function initCopyButtons() {
     }
 
     button.setAttribute('data-copied', '')
-    button.setAttribute('aria-label', 'Copied')
+    button.setAttribute('aria-label', t('code.copied'))
     window.clearTimeout(timers.get(button))
     timers.set(button, window.setTimeout(() => {
       button.removeAttribute('data-copied')

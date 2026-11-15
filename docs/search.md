@@ -32,6 +32,8 @@ Search works on sections: each heading and the text under it is one result, show
 
 Sections are ranked with BM25 over their title, heading and text, with the title weighted highest. Words are also matched by their stem, so "gate", "gated" and "gating" find each other, and a word matches the start of longer words at a lower weight, so results appear while the reader is still typing. A section whose heading, page title or alias the query names in full is ranked above one that only mentions those words.
 
+The stems and the synonyms below are made for English. Docs in another language are still searched word by word; see [Translations](/docs/translations#what-is-not-translated).
+
 Each section is also indexed with questions derived from its content when the docs are built:
 
 | From | Example |

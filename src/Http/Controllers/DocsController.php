@@ -14,6 +14,7 @@ use Vellum\Content\HeadingExtractor;
 use Vellum\Http\DocsView;
 use Vellum\Http\LinkHeader;
 use Vellum\Http\RawMarkdown;
+use Vellum\Support\Translate;
 
 /**
  * Serves compiled documentation pages.
@@ -78,8 +79,8 @@ final class DocsController extends Controller
             dirname(__DIR__, 3).'/resources/views/pages/404.blade.php',
             [
                 'name' => config('vellum.name'),
-                'description' => 'Page not found',
-                'pageTitle' => DocsView::pageTitle('Page not found'),
+                'description' => Translate::line('vellum::errors.not_found.title'),
+                'pageTitle' => DocsView::pageTitle(Translate::line('vellum::errors.not_found.title')),
                 'noindex' => true,
                 'navigation' => $repository->sidebar(null, $version),
                 'sections' => $repository->sections(null, $version),

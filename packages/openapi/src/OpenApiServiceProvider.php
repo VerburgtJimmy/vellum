@@ -26,5 +26,12 @@ final class OpenApiServiceProvider extends ServiceProvider
         // and a copy published to resources/views/vendor/vellum/openapi/ still
         // takes their place.
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'vellum');
+        $this->loadTranslationsFrom(__DIR__.'/../resources/lang', 'vellum-openapi');
+
+        if ($this->app->runningInConsole()) {
+            $this->publishes([
+                __DIR__.'/../resources/lang' => $this->app->langPath('vendor/vellum-openapi'),
+            ], 'vellum-lang');
+        }
     }
 }

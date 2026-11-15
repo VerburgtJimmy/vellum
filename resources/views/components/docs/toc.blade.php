@@ -30,7 +30,7 @@
     $showMobile = in_array($placement, ['both', 'mobile'], true);
     $pageTitle = is_string($document?->title ?? null) && $document->title !== ''
         ? $document->title
-        : 'On this page';
+        : __('vellum::toc.title');
 @endphp
 
 @if (! $full)
@@ -43,7 +43,7 @@
             <div class="sticky {{ $stickyClass }} overflow-y-auto py-6 pl-2">
                 <p class="mb-3 flex items-center gap-2 text-[13px] font-medium text-muted-foreground">
                     {!! \Vellum\Support\Icons::listBullets(['class' => 'h-3.5 w-3.5']) !!}
-                    <span>On this page</span>
+                    <span>{{ __('vellum::toc.title') }}</span>
                 </p>
                 @include('vellum::components.docs.partials.toc-nav', ['nodes' => $toc])
             </div>
@@ -81,7 +81,7 @@
                     :aria-valuenow="progress.toFixed(2)"
                     aria-valuemin="0"
                     aria-valuemax="1"
-                    aria-label="Reading progress"
+                    aria-label="{{ __('vellum::toc.progress') }}"
                 >
                     <circle cx="9" cy="9" r="7.5" fill="none" stroke-width="1.5" class="vellum-toc-progress-track"></circle>
                     <circle

@@ -10,6 +10,7 @@ import { initSidebar } from './sidebar.js'
 import { initSteps } from './steps.js'
 import { initTables } from './tables.js'
 import { initImageZoom } from './zoom.js'
+import { t, tc } from './strings.js'
 import { applyTheme, getStoredTheme, initTheme, resolveTheme } from './theme.js'
 
 window.VellumTheme = { applyTheme, getStoredTheme, initTheme, resolveTheme }
@@ -257,7 +258,7 @@ function vellumSearchDialog(given) {
     results: [],
     showingRecent: false,
     active: 0,
-    status: 'Type to search',
+    status: t('search.status.type'),
     loading: false,
     ready: false,
 
@@ -276,7 +277,7 @@ function vellumSearchDialog(given) {
         if (last && last.key === key) {
           last.hits.push({ ...hit, index })
         } else {
-          groups.push({ key, title: this.showingRecent ? 'Recent' : hit.title, hits: [{ ...hit, index }] })
+          groups.push({ key, title: this.showingRecent ? t('search.recent') : hit.title, hits: [{ ...hit, index }] })
         }
       })
 
@@ -291,7 +292,7 @@ function vellumSearchDialog(given) {
         label: [hit.title, hit.heading].filter(Boolean).join(' › '),
         passage: '',
       }))
-      this.status = this.results.length === 0 ? 'Type to search' : 'Recent results'
+      this.status = t(this.results.length === 0 ? 'search.status.type' : 'search.status.recent')
     },
 
     remember(hit) {
@@ -315,7 +316,7 @@ function vellumSearchDialog(given) {
       }
 
       this.loading = true
-      this.status = 'Loading search index'
+      this.status = t('search.status.loading')
 
       try {
         const search = await window.VellumSearch.load()
@@ -325,9 +326,9 @@ function vellumSearchDialog(given) {
         }
 
         this.ready = true
-        this.status = 'Search ready'
+        this.status = t('search.status.ready')
       } catch {
-        this.status = 'Search unavailable'
+        this.status = t('search.status.unavailable')
       } finally {
         this.loading = false
       }
@@ -367,7 +368,7 @@ function vellumSearchDialog(given) {
       })))
 
       const count = this.results.length
-      this.status = count === 0 ? 'No results' : count === 1 ? '1 result' : `${count} results`
+      this.status = count === 0 ? t('search.status.none') : tc('search.status.count', count)
     },
 
     move(delta) {

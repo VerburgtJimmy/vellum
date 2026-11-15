@@ -64,9 +64,9 @@
                     role="dialog"
                     aria-modal="true"
                     @if ($isSearch)
-                        aria-label="Search documentation"
+                        aria-label="{{ __('vellum::search.dialog') }}"
                     @elseif ($isSheet)
-                        aria-label="Documentation navigation"
+                        aria-label="{{ __('vellum::sidebar.navigation') }}"
                     @endif
                     x-trap.noscroll="true"
                     x-on:click.stop
@@ -82,7 +82,7 @@
                             data-vellum-dialog-close
                             data-vellum-button
                             x-on:click="close()"
-                            aria-label="Close"
+                            aria-label="{{ __('vellum::layout.close') }}"
                             class="absolute right-3 top-3 inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                         >
                             {!! \Vellum\Support\Icons::x(['class' => 'h-4 w-4']) !!}
@@ -120,7 +120,7 @@
                                     x-on:click="close()"
                                     class="inline-flex h-9 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                                 >
-                                    Close
+                                    {{ __('vellum::layout.close') }}
                                 </button>
                             @endisset
                         </div>

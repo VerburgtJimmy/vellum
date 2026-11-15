@@ -11,13 +11,13 @@
     <div data-vellum-page-meta class="mt-4 mb-9 flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
         <p class="vellum-page-facts">
             @if ($updated)
-                <time data-vellum-updated datetime="{{ $updated['iso'] }}" title="{{ $updated['long'] }}">Updated {{ $updated['label'] }}</time>
+                <time data-vellum-updated datetime="{{ $updated['iso'] }}" title="{{ $updated['long'] }}">{{ __('vellum::page.updated', ['date' => $updated['label']]) }}</time>
             @endif
             @if ($showReading)
-                <span>{{ $readingMinutes }} min read</span>
+                <span>{{ __('vellum::page.reading_time', ['minutes' => $readingMinutes]) }}</span>
             @endif
             @if ($updated)
-                <span data-vellum-page-changed class="vellum-page-changed" hidden>Changed since your last visit</span>
+                <span data-vellum-page-changed class="vellum-page-changed" hidden>{{ __('vellum::page.changed') }}</span>
             @endif
         </p>
         {{ $slot }}

@@ -37,7 +37,7 @@ describe('getting an OAuth token', () => {
 
   it('never opens a sign-in address that is not a web address', () => {
     for (const address of ['javascript:alert(1)', 'data:text/html,<script>alert(1)</script>', 'vbscript:x']) {
-      expect(() => authorizeUrl({ ...flow, authorizationUrl: address }, { clientId: 'a', redirectUri: 'https://d.test/cb', scopes: [], state: 's', challenge: 'c' })).toThrow('not a web address')
+      expect(() => authorizeUrl({ ...flow, authorizationUrl: address }, { clientId: 'a', redirectUri: 'https://d.test/cb', scopes: [], state: 's', challenge: 'c' })).toThrow('playground.oauth.bad_address')
     }
   })
 

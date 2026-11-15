@@ -132,9 +132,10 @@ describe('what a response shows', () => {
   })
 
   it('explains a request that got no response by where it went', () => {
-    expect(failure(new TypeError('Failed to fetch'), 'cross')).toContain('CORS')
-    expect(failure(new TypeError('Failed to fetch'), 'direct')).not.toContain('CORS')
-    expect(failure({ name: 'AbortError' }, 'direct')).toContain('too long')
+    // Without a page there are no lines, so each message comes back as its key.
+    expect(failure(new TypeError('Failed to fetch'), 'cross')).toBe('playground.errors.cors')
+    expect(failure(new TypeError('Failed to fetch'), 'direct')).toBe('playground.errors.no_response')
+    expect(failure({ name: 'AbortError' }, 'direct')).toBe('playground.errors.timeout')
   })
 })
 

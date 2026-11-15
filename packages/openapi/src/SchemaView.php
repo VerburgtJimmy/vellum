@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Vellum\OpenApi;
 
+use Vellum\Support\Translate;
+
 /**
  * Display facts about a schema node, worked out once at build time.
  *
@@ -70,13 +72,13 @@ final class SchemaView
         $variants = self::variants($schema);
 
         if ($variants !== [] && self::types($schema) === []) {
-            return implode(' or ', array_column($variants, 'label'));
+            return implode(self::or(), array_column($variants, 'label'));
         }
 
         $types = self::types($schema);
         $nullable = in_array('null', $types, true) || ($schema['nullable'] ?? false) === true;
         $types = array_values(array_diff($types, ['null']));
-        $base = $types === [] ? self::implied($schema) : implode(' or ', $types);
+        $base = $types === [] ? self::implied($schema) : implode(self::or(), $types);
 
         if ($base === 'array') {
             $items = is_array($schema['items'] ?? null) ? $schema['items'] : [];
@@ -102,25 +104,25 @@ final class SchemaView
         $chips = [];
 
         if (is_string($schema['format'] ?? null) && $schema['format'] !== '') {
-            $chips['Format'] = $schema['format'];
+            $chips[Translate::line('vellum-openapi::reference.fields.format')] = $schema['format'];
         }
 
         $range = self::range($schema);
 
         if ($range !== null) {
-            $chips['Range'] = $range;
+            $chips[Translate::line('vellum-openapi::reference.fields.range')] = $range;
         }
 
         if (is_string($schema['pattern'] ?? null) && $schema['pattern'] !== '') {
-            $chips['Pattern'] = $schema['pattern'];
+            $chips[Translate::line('vellum-openapi::reference.fields.pattern')] = $schema['pattern'];
         }
 
         if (is_string($schema['contentMediaType'] ?? null) && $schema['contentMediaType'] !== '') {
-            $chips['Holds'] = $schema['contentMediaType'];
+            $chips[Translate::line('vellum-openapi::reference.fields.holds')] = $schema['contentMediaType'];
         }
 
         if (array_key_exists('default', $schema)) {
-            $chips['Default'] = self::literal($schema['default']);
+            $chips[Translate::line('vellum-openapi::reference.fields.default_value')] = self::literal($schema['default']);
         }
 
         return $chips;
@@ -153,6 +155,14 @@ final class SchemaView
      * Booleans and null have to go through json_encode: casting false to a
      * string gives "", which renders as "Default" followed by nothing.
      */
+    /**
+     * The word between two types a value can have, with its spaces.
+     */
+    private static function or(): string
+    {
+        return ' '.Translate::line('vellum-openapi::reference.or').' ';
+    }
+
     public static function literal(mixed $value): string
     {
         if (is_string($value)) {
@@ -204,7 +214,7 @@ final class SchemaView
 
                 $variants[] = [
                     // What the author called it, then the schema's name, then its type.
-                    'label' => $title ?? self::name($member) ?? (self::type($member) ?: 'Option '.($index + 1)),
+                    'label' => $title ?? self::name($member) ?? (self::type($member) ?: Translate::line('vellum-openapi::reference.fields.option', ['number' => $index + 1])),
                     'schema' => $member,
                 ];
             }

@@ -74,6 +74,7 @@ final class CoreServiceProvider extends ServiceProvider
     {
         Paths::resolveConfig();
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'vellum');
+        $this->loadTranslationsFrom(__DIR__.'/../resources/lang', 'vellum-core');
 
         if ($this->app->runningInConsole()) {
             $this->commands([
@@ -85,6 +86,12 @@ final class CoreServiceProvider extends ServiceProvider
             $this->publishes([
                 __DIR__.'/../config/vellum.php' => config_path('vellum.php'),
             ], 'vellum-config');
+
+            // Each package's strings, under one tag so one command copies
+            // them all to lang/vendor/, where they take the shipped ones' place.
+            $this->publishes([
+                __DIR__.'/../resources/lang' => $this->app->langPath('vendor/vellum-core'),
+            ], 'vellum-lang');
 
             $this->optimizes(clear: 'vellum:clear');
         }

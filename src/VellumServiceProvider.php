@@ -36,12 +36,17 @@ final class VellumServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->registerViews();
+        $this->loadTranslationsFrom(__DIR__.'/../resources/lang', 'vellum');
 
         if ($this->app->runningInConsole()) {
             $this->commands([
                 InstallCommand::class,
                 ExportCommand::class,
             ]);
+
+            $this->publishes([
+                __DIR__.'/../resources/lang' => $this->app->langPath('vendor/vellum'),
+            ], 'vellum-lang');
         }
 
         $this->renderContentErrors();

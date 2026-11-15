@@ -284,7 +284,7 @@ A reader who may not open the reference is not shown the way to it.
 | `openapi.sidebar` | `separate` | `separate` for a sidebar of its own, `docs` for a folder in the docs' sidebar. |
 | `openapi.title` | `API reference` | The reference's name in the sidebar and on its overview. |
 | `openapi.group_by` | `tag` | `tag` or `path`. |
-| `openapi.untagged_label` | `Other` | The folder for operations without a tag. |
+| `openapi.untagged_label` | `null` | The folder for operations without a tag. Unset, it is "Other" in the app's language. |
 | `openapi.samples` | `curl`, `php`, `javascript`, `python` | Languages of the request samples, in tab order. |
 | `openapi.base_url` | `null` | Used in the samples in place of the spec's first server. |
 | `openapi.playground` | `true` | Whether a reader can send a request from an operation's page. |

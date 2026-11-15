@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Vellum\Changelog;
 
 use Vellum\Markdown\Islands\MarkdownPipeline;
+use Vellum\Support\Translate;
 
 /**
  * Splits a Keep a Changelog file into version headings and Markdown bodies.
@@ -21,7 +22,7 @@ final class ChangelogParser
         $refs = $this->referenceUrls($markdown);
         $refBlock = $this->referenceBlock($markdown);
 
-        $title = 'Changelog';
+        $title = Translate::line('vellum-core::changelog.title');
 
         if (preg_match('/^#\s+(.+)$/m', $markdown, $titleMatch) === 1) {
             $title = trim($titleMatch[1]);

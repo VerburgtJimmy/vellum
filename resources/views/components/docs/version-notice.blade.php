@@ -25,11 +25,11 @@
     <div data-vellum-version-notice="{{ $kind }}" role="note" class="vellum-version-notice">
         <span>
             @if ($kind === 'unreleased')
-                These are the docs for <strong>{{ $siteVersions->label($currentVersion) }}</strong>, which is not released yet.
+                {!! __('vellum::versions.notice_unreleased', ['version' => '<strong>'.e($siteVersions->label($currentVersion)).'</strong>']) !!}
             @else
-                You are reading the docs for <strong>{{ $siteVersions->label($currentVersion) }}</strong>, an older version.
+                {!! __('vellum::versions.notice_older', ['version' => '<strong>'.e($siteVersions->label($currentVersion)).'</strong>']) !!}
             @endif
         </span>
-        <a href="{{ $versionHrefs[$latest] ?? '#' }}">{{ $samePage ? 'Read this page in '.$latestName : 'Go to '.$latestName }}</a>
+        <a href="{{ $versionHrefs[$latest] ?? '#' }}">{{ $samePage ? __('vellum::versions.read_this_page_in', ['version' => $latestName]) : __('vellum::versions.go_to', ['version' => $latestName]) }}</a>
     </div>
 @endif

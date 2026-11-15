@@ -7,6 +7,7 @@ namespace Vellum\OpenApi;
 use Symfony\Component\Yaml\Exception\ParseException;
 use Symfony\Component\Yaml\Yaml;
 use Vellum\Exceptions\InvalidSpecException;
+use Vellum\Support\Translate;
 
 /**
  * Reads an OpenAPI 3.0, 3.1 or 3.2 document from disk into a resolved Spec.
@@ -419,7 +420,7 @@ final class SpecParser
             $lang = is_string($sample['lang'] ?? null) ? trim($sample['lang']) : '';
             $label = is_string($sample['label'] ?? null) && trim($sample['label']) !== '' ? trim($sample['label']) : $lang;
 
-            $out[] = ['lang' => $lang, 'label' => $label === '' ? 'Example' : $label, 'source' => rtrim($sample['source'])];
+            $out[] = ['lang' => $lang, 'label' => $label === '' ? Translate::line('vellum-openapi::reference.examples.example') : $label, 'source' => rtrim($sample['source'])];
         }
 
         return $out;

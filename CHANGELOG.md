@@ -18,9 +18,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `jimmyverburgt/vellum-openapi`, the API reference as a package of its own. `jimmyverburgt/vellum` includes it, so nothing changes for apps that install Vellum. Classes keep their names under `Vellum\OpenApi\`
 
+- Translations. Every word Vellum writes around your pages comes from a language file and follows `app.locale`: the sidebar, search, page actions, the table of contents, callout labels, code block buttons, the 404 and error pages, the API reference and its playground. `php artisan vendor:publish --tag=vellum-lang` copies the English files to `lang/vendor/vellum`, `lang/vendor/vellum-core` and `lang/vendor/vellum-openapi`, one folder per package. The scripts read their lines from a JSON block the layout writes into each page, so a static export keeps the language it was exported in. See Translations in the docs
+
 ### Changed
 
 - An app that requires `jimmyverburgt/vellum-core` on its own and has `openapi.enabled` on now requires `jimmyverburgt/vellum-openapi` too. Without it, `vellum:build` says which package to install. See the upgrade guide
+
+- The "Updated" date under a page's title is written in the app's locale, and a recent one ("3 days ago") in the page's language. In English it reads as before
+- `openapi.untagged_label` defaults to `null`, which means "Other" in the app's language. A published config that sets it keeps its value
+- The window that finishes signing in from the playground, and the redirect pages of a static export, take their `lang` from the app's locale instead of always saying `en`
 
 - The switcher between the docs and the API reference names the docs' own sidebar after the `title` in the top-level `meta.json`, or "Docs" when there is none, where it always said "Docs". The breadcrumbs of a reference page start at the reference's title
 

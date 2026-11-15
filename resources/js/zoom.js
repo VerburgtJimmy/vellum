@@ -1,3 +1,5 @@
+import { t } from './strings.js'
+
 /**
  * An image shown smaller than it is can be opened at full size: it grows from
  * where it sits to the middle of the window, and a click, Escape or the
@@ -17,7 +19,7 @@ function mark(image) {
   image.setAttribute('data-vellum-zoomable', '')
   image.setAttribute('tabindex', '0')
   image.setAttribute('role', 'button')
-  image.setAttribute('aria-label', `View larger: ${image.alt || 'image'}`)
+  image.setAttribute('aria-label', t('page.zoom.open', { name: image.alt || t('page.zoom.image') }))
 }
 
 function open(image) {
@@ -26,7 +28,7 @@ function open(image) {
   const layer = document.createElement('button')
   layer.type = 'button'
   layer.className = 'vellum-zoom'
-  layer.setAttribute('aria-label', 'Close the larger image')
+  layer.setAttribute('aria-label', t('page.zoom.close'))
 
   const large = new Image()
   large.src = image.currentSrc || image.src

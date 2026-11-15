@@ -9,6 +9,7 @@ use Vellum\Changelog\Changelog;
 use Vellum\Content\ContentRepository;
 use Vellum\Content\Document;
 use Vellum\Content\HeadingExtractor;
+use Vellum\Support\Translate;
 
 /**
  * Shared view data for live docs pages and static export.
@@ -79,14 +80,14 @@ final class DocsView
             frontmatter: [],
             path: $changelog->path,
             mtime: $changelog->mtime,
-            description: 'Release notes',
+            description: Translate::line('vellum::changelog.description'),
         );
 
         return [
             'document' => $document,
             'changelog' => $changelog,
             'name' => config('vellum.name'),
-            'description' => 'Release notes',
+            'description' => Translate::line('vellum::changelog.description'),
             'navigation' => $repository->sidebar(null, $version),
             'sections' => $repository->sections(null, $version),
             'previous' => null,
@@ -254,10 +255,15 @@ final class DocsView
             return null;
         }
 
+        // Written in the app's language, "Nov 14, 2026" and "November 14,
+        // 2026" in English.
+        $local = $date->copy();
+        $local->locale(app()->getLocale());
+
         return [
             'iso' => $date->toIso8601String(),
-            'label' => $date->toFormattedDateString(),
-            'long' => $date->format('F j, Y'),
+            'label' => $local->isoFormat('ll'),
+            'long' => $local->isoFormat('LL'),
         ];
     }
 

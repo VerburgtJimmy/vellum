@@ -218,7 +218,9 @@ title: Plain
 Just a paragraph.
 MD);
 
-    $html = $this->get('/docs/plain')->assertOk()->getContent();
+    // The scripts' lines carry the heading's words too, for the script that
+    // names the section a reader is in.
+    $html = (string) preg_replace('#<script type="application/json" id="vellum-strings">.*?</script>#s', '', (string) $this->get('/docs/plain')->assertOk()->getContent());
 
     expect($html)
         ->toContain('data-vellum-toc-placeholder')

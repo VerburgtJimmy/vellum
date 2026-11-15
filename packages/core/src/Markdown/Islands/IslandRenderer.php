@@ -9,6 +9,7 @@ use Illuminate\Support\HtmlString;
 use Vellum\Exceptions\UnknownComponentException;
 use Vellum\Site\Components;
 use Vellum\Support\MarkdownView;
+use Vellum\Support\Translate;
 
 /**
  * Bottom-up Blade render of an island tree. Slot HTML is passed as data, never compiled.
@@ -96,7 +97,7 @@ final class IslandRenderer
 
             $this->assertAllowed($child);
 
-            $label = $child->attributes['label'] ?? $child->attributes['title'] ?? 'Tab';
+            $label = $child->attributes['label'] ?? $child->attributes['title'] ?? Translate::line('vellum-core::components.tab');
 
             $items[] = [
                 'id' => $child->attributes['id'] ?? $this->tabId($label),

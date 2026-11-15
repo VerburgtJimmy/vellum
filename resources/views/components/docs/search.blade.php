@@ -51,7 +51,7 @@
                 x-on:keydown.arrow-up.prevent="move(-1)"
                 x-on:keydown.enter.prevent="go()"
             >
-                <label class="sr-only" for="vellum-search-query">Search</label>
+                <label class="sr-only" for="vellum-search-query">{{ __('vellum::search.search') }}</label>
                 <div class="flex flex-row items-center gap-2 p-3">
                     {!! \Vellum\Support\Icons::magnifyingGlass(['class' => 'h-5 w-5 shrink-0 text-muted-foreground']) !!}
                     <input
@@ -66,7 +66,7 @@
                         autocomplete="off"
                         autocorrect="off"
                         spellcheck="false"
-                        placeholder="Search"
+                        placeholder="{{ __('vellum::search.search') }}"
                         class="w-0 flex-1 bg-transparent text-lg placeholder:text-muted-foreground focus-visible:outline-none"
                         x-model="query"
                         x-on:input.debounce.150ms="runSearch()"
@@ -74,7 +74,7 @@
                     <button
                         type="button"
                         class="inline-flex items-center rounded-md border border-border px-2 py-1 font-mono text-xs text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-                        aria-label="Close search"
+                        aria-label="{{ __('vellum::search.close') }}"
                         x-on:click="closeSearch()"
                     >ESC</button>
                 </div>
@@ -86,13 +86,13 @@
                     class="vellum-scroll-area max-h-[min(60vh,28rem)] p-1"
                     :class="{ 'border-t border-border': results.length > 0 || query.trim() !== '' }"
                     role="listbox"
-                    aria-label="Search results"
+                    aria-label="{{ __('vellum::search.results') }}"
                 >
                     <template x-if="query.trim() && loading && ! ready">
-                        <p class="px-3 py-6 text-center text-sm text-muted-foreground">Loading…</p>
+                        <p class="px-3 py-6 text-center text-sm text-muted-foreground">{{ __('vellum::search.loading') }}</p>
                     </template>
                     <template x-if="ready && query.trim() && results.length === 0">
-                        <p class="px-3 py-6 text-center text-sm text-muted-foreground">No results for “<span x-text="query.trim()"></span>”</p>
+                        <p class="px-3 py-6 text-center text-sm text-muted-foreground">{!! __('vellum::search.no_results_for', ['query' => '<span x-text="query.trim()"></span>']) !!}</p>
                     </template>
 
                     <template x-for="group in groups" :key="group.key">
@@ -127,9 +127,9 @@
                 </div>
 
                 <div class="hidden items-center gap-4 border-t border-border px-3.5 py-2 text-xs text-muted-foreground md:flex" aria-hidden="true">
-                    <span><kbd class="vellum-search-key">↑</kbd><kbd class="vellum-search-key">↓</kbd> to move</span>
-                    <span><kbd class="vellum-search-key">↵</kbd> to open</span>
-                    <span><kbd class="vellum-search-key">esc</kbd> to close</span>
+                    <span>{!! __('vellum::search.hint_move', ['keys' => '<kbd class="vellum-search-key">↑</kbd><kbd class="vellum-search-key">↓</kbd>']) !!}</span>
+                    <span>{!! __('vellum::search.hint_open', ['keys' => '<kbd class="vellum-search-key">↵</kbd>']) !!}</span>
+                    <span>{!! __('vellum::search.hint_close', ['keys' => '<kbd class="vellum-search-key">esc</kbd>']) !!}</span>
                 </div>
             </div>
         </x-slot:content>

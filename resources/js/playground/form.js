@@ -6,6 +6,7 @@
  */
 
 import { bag } from './request.js'
+import { t } from '../strings.js'
 
 const blank = (value) => value === undefined || value === null || value === ''
 
@@ -360,12 +361,12 @@ export function pretty(text, contentType = '') {
  */
 export function failure(error, where) {
   if (error?.name === 'AbortError') {
-    return 'The request took too long and was stopped.'
+    return t('playground.errors.timeout')
   }
 
   if (where === 'cross') {
-    return 'No response the browser could show. The request went to another origin, which has to allow this page to read its answer (CORS). If it does, the server may be down or the address wrong.'
+    return t('playground.errors.cors')
   }
 
-  return 'No response. The server may be down, or the address wrong.'
+  return t('playground.errors.no_response')
 }

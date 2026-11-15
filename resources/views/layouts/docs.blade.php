@@ -1,5 +1,6 @@
 @php
     use Vellum\View\Assets;
+    use Vellum\View\ScriptStrings;
     use Vellum\View\Theme;
 
     $themeDefault = config('vellum.theme.default', 'system');
@@ -8,6 +9,7 @@
     $themePreset = Theme::preset();
     $themeAccent = Theme::accent();
     $rootStyles = ['--radius: '.$themeRadius];
+    $playground = config('vellum.openapi.enabled') && config('vellum.openapi.playground', true);
 
     if ($themePrimary !== null && $themePrimary !== '') {
         $rootStyles[] = '--vellum-primary-hue: '.$themePrimary;
@@ -20,7 +22,7 @@
     data-vellum-search="{{ Assets::searchJsUrl() }}"
     data-vellum-anchor="{{ Assets::anchorJsUrl() }}"
     data-vellum-focus="{{ Assets::focusJsUrl() }}"
-    @if (config('vellum.openapi.enabled') && config('vellum.openapi.playground', true))
+    @if ($playground)
         data-vellum-playground-src="{{ Assets::playgroundJsUrl() }}"
         {{-- A static export writes the page as a folder of its own. --}}
         data-vellum-oauth-callback="{{ ($staticExport ?? false) ? '/'.trim((string) config('vellum.route.prefix', 'docs'), '/').'/_vellum/oauth/' : route('vellum.playground.oauth', [], false) }}"
@@ -100,11 +102,12 @@ html[data-vellum-preset]{{ $mode === 'dark' ? '.dark' : '' }} { --primary: {{ $a
             @endforeach
         </style>
     @endif
+    <script type="application/json" id="vellum-strings">{!! ScriptStrings::json($playground) !!}</script>
     <script type="module" src="{{ Assets::jsUrl() }}"></script>
     @yield('head')
 </head>
 <body class="min-h-screen bg-background text-foreground antialiased">
-    <a href="#vellum-content" class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-background focus:px-3 focus:py-2 focus:text-sm focus:shadow">Skip to content</a>
+    <a href="#vellum-content" class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-background focus:px-3 focus:py-2 focus:text-sm focus:shadow">{{ __('vellum::layout.skip_to_content') }}</a>
     @yield('content')
 </body>
 </html>

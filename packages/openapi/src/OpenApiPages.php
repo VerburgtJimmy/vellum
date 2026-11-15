@@ -7,6 +7,7 @@ namespace Vellum\OpenApi;
 use Closure;
 use Vellum\Content\Document;
 use Vellum\Content\PageSource;
+use Vellum\Support\Translate;
 
 /**
  * The OpenAPI half of the content set: resolve a spec, build its pages, and
@@ -74,7 +75,11 @@ final class OpenApiPages implements PageSource
      */
     public function signature(): ?string
     {
-        return $this->source->signature();
+        $signature = $this->source->signature();
+
+        // The pages are written in the app's language, so another one is
+        // another build.
+        return $signature === null ? null : $signature.':'.app()->getLocale();
     }
 
     /**
@@ -124,7 +129,7 @@ final class OpenApiPages implements PageSource
         $children = [];
 
         if (isset($bySlug[$prefix])) {
-            $children[] = $this->pageNode($bySlug[$prefix], 'Overview', $href, null);
+            $children[] = $this->pageNode($bySlug[$prefix], Translate::line('vellum-openapi::reference.overview'), $href, null);
         }
 
         // A folder per group, each inside its parent's, so a tag hierarchy
@@ -132,7 +137,7 @@ final class OpenApiPages implements PageSource
         $folders = [];
         $inside = [];
 
-        foreach ((new Grouper($this->settings->untaggedLabel))->group($spec, $this->settings->groupBy) as $group) {
+        foreach ((new Grouper($this->settings->untaggedLabel ?? Translate::line('vellum-openapi::reference.untagged')))->group($spec, $this->settings->groupBy) as $group) {
             $pages = [];
 
             foreach ($group->operations as $operation) {
@@ -164,7 +169,7 @@ final class OpenApiPages implements PageSource
 
         return [
             'type' => 'folder',
-            'title' => $this->settings->title ?? 'API reference',
+            'title' => $this->settings->title ?? Translate::line('vellum-openapi::reference.title'),
             'icon' => null,
             'defaultOpen' => false,
             'children' => $children,

@@ -17,7 +17,7 @@
     x-data="{
         open: false,
         preference: window.VellumTheme?.getStoredTheme(@js($default)) ?? @js($default),
-        labels: { light: 'Light', dark: 'Dark', system: 'System' },
+        labels: { light: @js(__('vellum::layout.theme.light')), dark: @js(__('vellum::layout.theme.dark')), system: @js(__('vellum::layout.theme.system')) },
         options: ['light', 'dark', 'system'],
         active: 0,
         set(value) {
@@ -88,7 +88,7 @@
                 data-vellum-button
                 class="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 :class="preference === 'light' && 'bg-accent text-accent-foreground'"
-                aria-label="Light"
+                aria-label="{{ __('vellum::layout.theme.light') }}"
                 x-on:click="set('light')"
             >
                 {!! \Vellum\Support\Icons::sun(['class' => 'h-4 w-4']) !!}
@@ -98,7 +98,7 @@
                 data-vellum-button
                 class="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 :class="preference === 'dark' && 'bg-accent text-accent-foreground'"
-                aria-label="Dark"
+                aria-label="{{ __('vellum::layout.theme.dark') }}"
                 x-on:click="set('dark')"
             >
                 {!! \Vellum\Support\Icons::moon(['class' => 'h-4 w-4']) !!}
@@ -110,7 +110,7 @@
         x-ref="trigger"
         data-vellum-button
         class="inline-flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-        aria-label="Toggle theme"
+        aria-label="{{ __('vellum::layout.theme.toggle') }}"
         aria-haspopup="menu"
         :aria-expanded="open.toString()"
         x-on:click="toggle()"
@@ -127,7 +127,7 @@
         x-transition.opacity
         class="absolute z-50 min-w-[8rem] rounded-md border border-border bg-popover p-1 text-popover-foreground shadow-md {{ $menuPlacement }}"
         role="menu"
-        aria-label="Color theme"
+        aria-label="{{ __('vellum::layout.theme.menu') }}"
         x-on:keydown="onMenuKeydown($event)"
     >
         <template x-for="(value, index) in options" :key="value">

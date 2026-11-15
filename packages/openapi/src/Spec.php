@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Vellum\OpenApi;
 
+use Vellum\Support\Translate;
+
 /**
  * A parsed, fully resolved OpenAPI document.
  *
@@ -33,7 +35,7 @@ final readonly class Spec
     {
         $title = $this->document['info']['title'] ?? null;
 
-        return is_string($title) && trim($title) !== '' ? $title : 'API reference';
+        return is_string($title) && trim($title) !== '' ? $title : Translate::line('vellum-openapi::reference.title');
     }
 
     public function description(): ?string

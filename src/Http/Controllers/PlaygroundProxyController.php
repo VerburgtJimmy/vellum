@@ -16,6 +16,7 @@ use Psr\Http\Message\ResponseInterface;
 use Vellum\Content\ContentRepository;
 use Vellum\Http\PlaygroundProxy;
 use Vellum\OpenApi\Settings;
+use Vellum\Support\Translate;
 
 /**
  * Sends a playground request on the reader's behalf, for an API on another
@@ -50,7 +51,7 @@ final class PlaygroundProxyController extends Controller
         // without this app's leave, so this holds even where the docs'
         // middleware has been set without CSRF protection.
         if (! str_starts_with(strtolower(trim((string) $request->header('Content-Type'))), 'application/json')) {
-            return $this->refuse('The request is not one the playground sends.', 415);
+            return $this->refuse('not_playground', 415);
         }
 
         $method = strtoupper((string) $request->input('method'));
@@ -59,11 +60,11 @@ final class PlaygroundProxyController extends Controller
         $headers = $request->input('headers', []);
 
         if (! in_array($method, PlaygroundProxy::METHODS, true) || ! is_string($url) || ! is_array($headers) || ($body !== null && ! is_string($body))) {
-            return $this->refuse('The request is not one the playground sends.', 422);
+            return $this->refuse('not_playground', 422);
         }
 
         if ($body !== null && strlen($body) > PlaygroundProxy::MAX_REQUEST) {
-            return $this->refuse('The body is too large to send through this site.', 413);
+            return $this->refuse('too_large', 413);
         }
 
         /** @var list<string> $servers */
@@ -72,14 +73,14 @@ final class PlaygroundProxyController extends Controller
         $target = PlaygroundProxy::target($url, $servers);
 
         if ($target === null) {
-            return $this->refuse('That address is not one of the servers this API reference names.', 422);
+            return $this->refuse('unknown_server', 422);
         }
 
         /** @var list<string> $declared */
         $declared = array_values(array_filter((array) ($overview->frontmatter['openapi_headers'] ?? []), is_string(...)));
 
         if (! class_exists(Client::class) || ! extension_loaded('curl')) {
-            return $this->refuse('This site cannot send requests: its HTTP client is not installed.', 501);
+            return $this->refuse('no_client', 501);
         }
 
         $host = (string) parse_url($target, PHP_URL_HOST);
@@ -87,7 +88,7 @@ final class PlaygroundProxyController extends Controller
         $addresses = PlaygroundProxy::addresses($host, $openApi->proxyPrivate);
 
         if ($addresses === null) {
-            return $this->refuse('That server is not one this site will send a request to: it is not at a public address.', 422);
+            return $this->refuse('private', 422);
         }
 
         // Kept to what will be shown. The rest of a longer answer is read and dropped.
@@ -136,7 +137,7 @@ final class PlaygroundProxyController extends Controller
             // answer so far, and there is no reason to throw that away.
             return $head instanceof ResponseInterface
                 ? $this->answer($head, (string) $kept, true, $started)
-                : $this->refuse('No response. The server may be down, or the address wrong.', 502);
+                : $this->refuse('no_response', 502);
         }
 
         $content = $response->body();
@@ -188,8 +189,13 @@ final class PlaygroundProxyController extends Controller
         return 'application/octet-stream';
     }
 
-    private function refuse(string $message, int $status): JsonResponse
+    /**
+     * @param  string  $reason  A key under the playground's proxy lines.
+     */
+    private function refuse(string $reason, int $status): JsonResponse
     {
+        $message = Translate::line('vellum-openapi::playground.proxy.'.$reason);
+
         return new JsonResponse(['error' => $message], $status, ['Cache-Control' => 'no-store']);
     }
 }
