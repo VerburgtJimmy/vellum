@@ -349,9 +349,11 @@ it('gives the reference a sidebar of its own, and a way between the two', functi
     $apiPage = (string) $this->get('/docs/api/pets/list-pets')->assertOk()->getContent();
 
     expect($docsPage)->toContain('data-vellum-sections')
-        ->toMatch('/<a\s+href="\/docs"\s+class="vellum-section"\s+aria-current="true"\s*>Docs<\/a>/')
+        ->toMatch('/class="vellum-sections-trigger".*?<span class="vellum-sections-title">Docs<\/span>/s')
+        ->toMatch('/<a\s+href="\/docs"\s+class="vellum-sections-item"[^>]*aria-current="true"/')
         ->not->toContain('vellum-nav-method')
-        ->and($apiPage)->toMatch('/<a\s+href="\/docs\/api"\s+class="vellum-section"\s+aria-current="true"\s*>API reference<\/a>/')
+        ->and($apiPage)->toMatch('/class="vellum-sections-trigger".*?<span class="vellum-sections-title">API reference<\/span>/s')
+        ->toMatch('/<a\s+href="\/docs\/api"\s+class="vellum-sections-item"[^>]*aria-current="true"/')
         ->toContain('vellum-nav-method')
         ->not->toContain('href="/docs/guide"');
 });
