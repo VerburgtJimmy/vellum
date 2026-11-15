@@ -103,6 +103,11 @@ it('treats a shallow clone as no git', function (): void {
     $this->skipWithoutGit();
 
     $origin = $this->docsPath().'-origin';
+    $clone = $this->docsPath().'-shallow';
+
+    // A run that failed half way leaves both behind.
+    $this->deleteDirectory($origin);
+    $this->deleteDirectory($clone);
     mkdir($origin, 0755, true);
     file_put_contents($origin.'/page.md', "---\ntitle: Page\n---\nBody");
     $this->git($origin, ['init', '-q']);
@@ -110,7 +115,6 @@ it('treats a shallow clone as no git', function (): void {
     file_put_contents($origin.'/other.md', "---\ntitle: Other\n---\nBody");
     $this->commitAll($origin, 'Second.', '2021-01-02T03:04:05+00:00');
 
-    $clone = $this->docsPath().'-shallow';
     $this->git(dirname($clone), ['clone', '-q', '--depth', '1', 'file://'.$origin, $clone]);
     config()->set('vellum.path', $clone);
 
