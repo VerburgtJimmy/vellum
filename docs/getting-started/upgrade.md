@@ -26,6 +26,28 @@ composer require jimmyverburgt/vellum-openapi
 
 Without it, the reference is not built, and `vellum:build` says which package to install. The config keys are unchanged.
 
+### What readers will notice
+
+- The switch between the docs and the API reference names the docs' sidebar after the `title` in your docs folder's `meta.json`. Without a title it still says "Docs".
+- A reference page's breadcrumbs start at the reference's title.
+
+### Views you overrode
+
+Every word in Vellum's views now comes from a language file. A view you published before 0.10 keeps its English words and keeps working, but it does not follow the app's locale. Copy it again from 0.10 if you want it translated.
+
+The switcher at the top of the sidebar moved into its own component, `docs.sections`, and became a menu that shows each sidebar's description. A `sidebar` published from 0.9 keeps the row of tabs it was copied with, which still works and is still styled.
+
+### PHP that uses Vellum's classes
+
+- `Vellum\Support\VersionLabel`, `SearchDriver::name()` and `SearchDriver::isScout()` are deprecated. Read `$site->versions` and `$site->search` from `Vellum\Site`, which the container resolves. The old ones keep working until 1.0.
+- `ContentRepository`, `Vellum\Site` and the API reference's `Vellum\OpenApi\Settings` are bound in the container, one per request.
+
+### New and optional
+
+- **Sidebars of their own.** A top-level folder whose `meta.json` has `"root": true` gets a sidebar to itself, with a switcher between it and the others. See [Navigation](/docs/writing/navigation#sidebars-of-their-own).
+- **Translations.** Set `app.locale` and add the lines for your language. See [Translations](/docs/translations).
+- **`openapi.untagged_label`** defaults to `null` in a newly published config, which means "Other" in the app's language. A config that sets it keeps its value.
+
 ## 0.8 to 0.9
 
 No changes to your content or config are required. Update the package and rebuild:
