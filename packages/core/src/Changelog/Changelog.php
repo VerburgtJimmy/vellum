@@ -35,9 +35,18 @@ final readonly class Changelog
     /**
      * The site's changelog, or the file at $path read with the site's
      * settings. Null when there is no such file.
+     *
+     * Without a site, the one the app's config describes is used, as
+     * ContentRepository::fromConfig() does. That keeps the calls of 0.9
+     * working: load() and load($path).
      */
-    public static function load(Site $site, ?string $path = null): ?self
+    public static function load(Site|string|null $site = null, ?string $path = null): ?self
     {
+        if (! $site instanceof Site) {
+            $path ??= $site;
+            $site = app(Site::class);
+        }
+
         $configured = is_string($path) && $path !== '' ? $path : $site->changelogPath;
 
         if ($configured === null) {

@@ -1,0 +1,849 @@
+# 0.10
+class Vellum\Answers\Aliases
+class Vellum\Answers\AnswerIndex
+class Vellum\Answers\AnswersBuild
+class Vellum\Answers\AnswersQuery
+class Vellum\Answers\Bm25
+class Vellum\Answers\Passage
+class Vellum\Answers\Questions\CalloutQuestions
+class Vellum\Answers\Questions\CommandQuestions
+class Vellum\Answers\Questions\ConfigKeyQuestions
+class Vellum\Answers\Questions\FrontmatterQuestions
+class Vellum\Answers\Questions\HeadingQuestions
+class Vellum\Answers\Questions\QuestionGenerator
+class Vellum\Answers\Questions\QuestionGenerators
+class Vellum\Answers\Ranker
+class Vellum\Answers\SearchCheck
+class Vellum\Answers\Sections
+class Vellum\Answers\Stemmer
+class Vellum\Answers\Synonyms
+class Vellum\Cache\CompiledStore
+class Vellum\Cache\FragmentCache
+class Vellum\Changelog\Changelog
+class Vellum\Changelog\ChangelogParser
+class Vellum\Changelog\ChangelogRelease
+class Vellum\Content\Access
+class Vellum\Content\ContentFiles
+class Vellum\Content\ContentRepository
+class Vellum\Content\Document
+class Vellum\Content\DocumentCollection
+class Vellum\Content\FrontMatterParser
+class Vellum\Content\HeadingExtractor
+class Vellum\Content\ImageReport
+class Vellum\Content\LastUpdated
+class Vellum\Content\LinkChecker
+class Vellum\Content\NavigationBuilder
+class Vellum\Content\PageSource
+class Vellum\Content\PageSourceFactory
+class Vellum\CoreServiceProvider
+class Vellum\Exceptions\ContentError
+class Vellum\Exceptions\DuplicateSlugException
+class Vellum\Exceptions\InvalidFrontMatterException
+class Vellum\Exceptions\InvalidSpecException
+class Vellum\Exceptions\UnknownComponentException
+class Vellum\Exceptions\UnknownDirectiveException
+class Vellum\Http\ChangelogFeed
+class Vellum\Http\DocsView
+class Vellum\Http\LinkHeader
+class Vellum\Http\LlmsTxt
+class Vellum\Http\PlaygroundProxy
+class Vellum\Http\RawMarkdown
+class Vellum\Http\RootLlmsTxtRoutes
+class Vellum\Http\Sitemap
+class Vellum\Markdown\CompiledLabels
+class Vellum\Markdown\Extensions\CalloutExtension
+class Vellum\Markdown\Extensions\Callout\CalloutRenderer
+class Vellum\Markdown\Extensions\CardsExtension
+class Vellum\Markdown\Extensions\Cards\CardBlock
+class Vellum\Markdown\Extensions\Cards\CardContinueParser
+class Vellum\Markdown\Extensions\Cards\CardStartParser
+class Vellum\Markdown\Extensions\Cards\CardsRenderer
+class Vellum\Markdown\Extensions\CodeBlockExtension
+class Vellum\Markdown\Extensions\CodeBlock\BashCommandPattern
+class Vellum\Markdown\Extensions\CodeBlock\BashVerbPattern
+class Vellum\Markdown\Extensions\CodeBlock\CodeBlockInfo
+class Vellum\Markdown\Extensions\CodeBlock\CodeBlockRenderer
+class Vellum\Markdown\Extensions\CodeBlock\InlineCodeHighlightListener
+class Vellum\Markdown\Extensions\CodeBlock\InlineCodeRenderer
+class Vellum\Markdown\Extensions\CodeBlock\LanguageIcon
+class Vellum\Markdown\Extensions\CodeBlock\VellumBashLanguage
+class Vellum\Markdown\Extensions\DirectiveExtension
+class Vellum\Markdown\Extensions\Directive\AttributeParser
+class Vellum\Markdown\Extensions\Directive\DirectiveBlock
+class Vellum\Markdown\Extensions\Directive\DirectiveContinueParser
+class Vellum\Markdown\Extensions\Directive\DirectiveInfo
+class Vellum\Markdown\Extensions\Directive\DirectiveStartParser
+class Vellum\Markdown\Extensions\Directive\ParagraphText
+class Vellum\Markdown\Extensions\Directive\UnknownDirectiveRenderer
+class Vellum\Markdown\Extensions\ExternalLinkExtension
+class Vellum\Markdown\Extensions\ExternalLink\ExternalLinkRenderer
+class Vellum\Markdown\Extensions\HeadingAnchorExtension
+class Vellum\Markdown\Extensions\HeadingPermalink\HeadingPermalinkRenderer
+class Vellum\Markdown\Extensions\ImageExtension
+class Vellum\Markdown\Extensions\Image\ImageRenderer
+class Vellum\Markdown\Extensions\StepsExtension
+class Vellum\Markdown\Extensions\Steps\StepBlock
+class Vellum\Markdown\Extensions\Steps\StepsProcessor
+class Vellum\Markdown\Extensions\Steps\StepsRenderer
+class Vellum\Markdown\Extensions\TableExtension
+class Vellum\Markdown\Extensions\Table\TableWrapRenderer
+class Vellum\Markdown\Extensions\TabsExtension
+class Vellum\Markdown\Extensions\Tabs\TabBlock
+class Vellum\Markdown\Extensions\Tabs\TabsProcessor
+class Vellum\Markdown\Extensions\Tabs\TabsRenderer
+class Vellum\Markdown\Islands\CodeGuard
+class Vellum\Markdown\Islands\Island
+class Vellum\Markdown\Islands\IslandExtractor
+class Vellum\Markdown\Islands\IslandRenderer
+class Vellum\Markdown\Islands\MarkdownPipeline
+class Vellum\Markdown\Islands\RawIsland
+class Vellum\Markdown\MarkdownRenderer
+class Vellum\OpenApi\ExampleGenerator
+class Vellum\OpenApi\Group
+class Vellum\OpenApi\Grouper
+class Vellum\OpenApi\MarkdownRendition
+class Vellum\OpenApi\OAuth
+class Vellum\OpenApi\OpenApiPages
+class Vellum\OpenApi\OpenApiServiceProvider
+class Vellum\OpenApi\Operation
+class Vellum\OpenApi\PageBuilder
+class Vellum\OpenApi\Playground
+class Vellum\OpenApi\RefResolver
+class Vellum\OpenApi\ReferenceSource
+class Vellum\OpenApi\Samples\CurlGenerator
+class Vellum\OpenApi\Samples\JavaScriptGenerator
+class Vellum\OpenApi\Samples\PhpGenerator
+class Vellum\OpenApi\Samples\PythonGenerator
+class Vellum\OpenApi\Samples\SampleBuilder
+class Vellum\OpenApi\Samples\SampleGenerator
+class Vellum\OpenApi\Samples\SampleRequest
+class Vellum\OpenApi\SchemaDirection
+class Vellum\OpenApi\SchemaView
+class Vellum\OpenApi\Servers
+class Vellum\OpenApi\Settings
+class Vellum\OpenApi\Spec
+class Vellum\OpenApi\SpecParser
+class Vellum\OpenApi\SpecSource
+class Vellum\OpenApi\Stream
+class Vellum\Search\ScoutIndexer
+class Vellum\Search\SearchDriver
+class Vellum\Search\SearchVisibility
+class Vellum\Search\SearchableDocument
+class Vellum\Site
+class Vellum\Site\Checks
+class Vellum\Site\Components
+class Vellum\Site\Search
+class Vellum\Site\Versions
+class Vellum\Support\Icons
+class Vellum\Support\MarkdownView
+class Vellum\Support\Paths
+class Vellum\Support\SafeHref
+class Vellum\Support\Slug
+class Vellum\Support\Str
+class Vellum\Support\Translate
+class Vellum\Support\VersionLabel
+class Vellum\Support\VersionUrl
+class Vellum\VellumServiceProvider
+class Vellum\View\Assets
+class Vellum\View\Cn
+class Vellum\View\Color
+class Vellum\View\NavTree
+class Vellum\View\ScriptStrings
+class Vellum\View\Theme
+constant Vellum\Answers\AnswerIndex::FILE
+constant Vellum\Answers\Ranker::EXACT_BOOST
+constant Vellum\Answers\Ranker::PER_PAGE
+constant Vellum\Answers\Ranker::STEM_WEIGHT
+constant Vellum\Answers\Ranker::SYNONYM_WEIGHT
+constant Vellum\Answers\SearchCheck::DEPTH
+constant Vellum\Answers\SearchCheck::FILE
+constant Vellum\Content\ContentFiles::ALLOWED_EXTENSIONS
+constant Vellum\Content\HeadingExtractor::MAX_LEVEL
+constant Vellum\Content\HeadingExtractor::MIN_LEVEL
+constant Vellum\Http\LlmsTxt::DEFAULT_SECTION
+constant Vellum\Http\LlmsTxt::OPTIONAL_SECTION
+constant Vellum\Http\LlmsTxt::SEPARATOR
+constant Vellum\Http\PlaygroundProxy::MAX_REQUEST
+constant Vellum\Http\PlaygroundProxy::MAX_RESPONSE
+constant Vellum\Http\PlaygroundProxy::METHODS
+constant Vellum\OpenApi\RefResolver::NAME
+constant Vellum\OpenApi\RefResolver::RECURSIVE
+constant Vellum\Search\SearchDriver::BUILTIN
+constant Vellum\Search\SearchDriver::BUILTIN_ALIAS
+constant Vellum\View\ScriptStrings::FILES
+constant Vellum\View\ScriptStrings::KEYS
+constant Vellum\View\ScriptStrings::PLAYGROUND
+constant Vellum\View\Theme::PRESETS
+method Vellum\Answers\Aliases::names(array $section) static
+method Vellum\Answers\Aliases::terms(array $section) static
+method Vellum\Answers\AnswerIndex::__construct(array $sections, array $synonyms)
+method Vellum\Answers\AnswerIndex::build(array $documents, Vellum\Content\ContentRepository $repository) static
+method Vellum\Answers\AnswerIndex::forAccess(array $access)
+method Vellum\Answers\AnswerIndex::load(string $directory) static
+method Vellum\Answers\AnswerIndex::save(string $directory)
+method Vellum\Answers\AnswerIndex::synonymGroups()
+method Vellum\Answers\AnswerIndex::synonyms()
+method Vellum\Answers\AnswerIndex::text(array $record) static
+method Vellum\Answers\AnswersBuild::__construct(Closure $line, Closure $warn, bool $forceCheck = …, bool $strict = …)
+method Vellum\Answers\AnswersBuild::run(Vellum\Content\ContentRepository $repository, array $documents)
+method Vellum\Answers\AnswersQuery::__construct(Vellum\Search\SearchVisibility $visibility = …)
+method Vellum\Answers\AnswersQuery::allowed(Vellum\Answers\AnswerIndex $index)
+method Vellum\Answers\AnswersQuery::directory(Vellum\Content\ContentRepository $repository, ?string $version)
+method Vellum\Answers\AnswersQuery::index(Vellum\Content\ContentRepository $repository, ?string $version)
+method Vellum\Answers\AnswersQuery::json(Vellum\Content\ContentRepository $repository, ?string $version)
+method Vellum\Answers\Bm25::__construct(array $documents, array $boosts)
+method Vellum\Answers\Bm25::search(string $query)
+method Vellum\Answers\Bm25::searchTerms(array $weights)
+method Vellum\Answers\Bm25::terms(string $text) static
+method Vellum\Answers\Passage::of(array $section, int $sentences = …) static
+method Vellum\Answers\Passage::sentences(string $text) static
+method Vellum\Answers\Questions\CalloutQuestions::generate(array $section)
+method Vellum\Answers\Questions\CommandQuestions::generate(array $section)
+method Vellum\Answers\Questions\ConfigKeyQuestions::generate(array $section)
+method Vellum\Answers\Questions\ConfigKeyQuestions::keys(string $html) static
+method Vellum\Answers\Questions\FrontmatterQuestions::generate(array $section)
+method Vellum\Answers\Questions\HeadingQuestions::generate(array $section)
+method Vellum\Answers\Questions\QuestionGenerator::generate(array $section)
+method Vellum\Answers\Questions\QuestionGenerators::__construct(array $generators)
+method Vellum\Answers\Questions\QuestionGenerators::default() static
+method Vellum\Answers\Questions\QuestionGenerators::for(array $section)
+method Vellum\Answers\Ranker::__construct(Vellum\Answers\AnswerIndex $index)
+method Vellum\Answers\Ranker::index()
+method Vellum\Answers\Ranker::search(string $query, int $limit = …)
+method Vellum\Answers\Ranker::spread(array $scored, int $limit) static
+method Vellum\Answers\SearchCheck::read(string $file) static
+method Vellum\Answers\SearchCheck::run(Vellum\Answers\AnswerIndex $index)
+method Vellum\Answers\Sections::from(array $documents) static
+method Vellum\Answers\Sections::text(string $html) static
+method Vellum\Answers\Stemmer::stem(string $word) static
+method Vellum\Answers\Synonyms::__construct(array $groups)
+method Vellum\Answers\Synonyms::expand(string $query)
+method Vellum\Answers\Synonyms::normalize(string $text) static
+method Vellum\Answers\Synonyms::withPages(array $pages) static
+method Vellum\Cache\CompiledStore::__construct(string $basePath)
+method Vellum\Cache\CompiledStore::basePath()
+method Vellum\Cache\CompiledStore::clear()
+method Vellum\Cache\CompiledStore::exists(string $slug, ?string $version = …)
+method Vellum\Cache\CompiledStore::get(string $slug, ?string $version = …)
+method Vellum\Cache\CompiledStore::getManifest(?string $version = …)
+method Vellum\Cache\CompiledStore::getNav(?string $version = …)
+method Vellum\Cache\CompiledStore::manifestPath(?string $version = …)
+method Vellum\Cache\CompiledStore::navPath(?string $version = …)
+method Vellum\Cache\CompiledStore::pagesPath(?string $version = …)
+method Vellum\Cache\CompiledStore::pathFor(string $slug, ?string $version = …)
+method Vellum\Cache\CompiledStore::prunePages(array $slugs, ?string $version = …)
+method Vellum\Cache\CompiledStore::put(Vellum\Content\Document $document)
+method Vellum\Cache\CompiledStore::putManifest(array $manifest, ?string $version = …)
+method Vellum\Cache\CompiledStore::putNav(array $tree, ?string $version = …)
+method Vellum\Cache\CompiledStore::versionPath(?string $version = …)
+method Vellum\Cache\FragmentCache::__construct(Vellum\Site\Components $components = …)
+method Vellum\Cache\FragmentCache::clear()
+method Vellum\Cache\FragmentCache::generation()
+method Vellum\Cache\FragmentCache::remember(Vellum\Content\Document $document, callable $resolver)
+method Vellum\Changelog\Changelog::__construct(string $title, string $introHtml, string $markdown, array $releases, array $headings, string $path, int $mtime, bool $includeUnreleased = …)
+method Vellum\Changelog\Changelog::fromArray(array $data) static
+method Vellum\Changelog\Changelog::load(Vellum\Site|string|null $site = …, ?string $path = …) static
+method Vellum\Changelog\Changelog::published()
+method Vellum\Changelog\Changelog::rawMarkdown()
+method Vellum\Changelog\Changelog::showingUnreleased(bool $include)
+method Vellum\Changelog\Changelog::toArray()
+method Vellum\Changelog\Changelog::updated()
+method Vellum\Changelog\Changelog::visible()
+method Vellum\Changelog\Changelog::visibleHeadings()
+method Vellum\Changelog\ChangelogParser::__construct(Vellum\Markdown\Islands\MarkdownPipeline $pipeline = …)
+method Vellum\Changelog\ChangelogParser::parse(string $markdown, string $path, int $mtime)
+method Vellum\Changelog\ChangelogRelease::__construct(string $version, bool $unreleased, ?string $date, string $id, string $html, ?string $url = …)
+method Vellum\Content\Access::__construct(Vellum\Content\FrontMatterParser $frontMatterParser = …)
+method Vellum\Content\Access::folderMtime(string $absolutePath, string $contentRoot)
+method Vellum\Content\Access::forPage(array $matter, string $absolutePath, string $contentRoot)
+method Vellum\Content\Access::inherited(string $absolutePath, string $contentRoot)
+method Vellum\Content\Access::normalize(mixed $value) static
+method Vellum\Content\ContentFiles::isPublic(string $relative) static
+method Vellum\Content\ContentRepository::__construct(Vellum\Site $site, ?Vellum\Cache\CompiledStore $store = …, Vellum\Content\FrontMatterParser $frontMatterParser = …, ?Vellum\Markdown\Islands\MarkdownPipeline $pipeline = …, Vellum\Content\Access $access = …, Vellum\Search\SearchVisibility $visibility = …, Vellum\Content\ImageReport $imageReport = …, array $sources = …)
+method Vellum\Content\ContentRepository::adjacent(string $slug, ?string $version = …)
+method Vellum\Content\ContentRepository::allows(Vellum\Content\Document $document)
+method Vellum\Content\ContentRepository::breadcrumbs(Vellum\Content\Document $document)
+method Vellum\Content\ContentRepository::buildAll(?string $version = …)
+method Vellum\Content\ContentRepository::compileFile(string $absolutePath, ?string $slug = …, ?string $version = …)
+method Vellum\Content\ContentRepository::contentPath(?string $version = …)
+method Vellum\Content\ContentRepository::discoverSourceFiles(?string $version = …)
+method Vellum\Content\ContentRepository::find(string $slug, ?string $version = …)
+method Vellum\Content\ContentRepository::fromConfig() static
+method Vellum\Content\ContentRepository::generatedWarnings()
+method Vellum\Content\ContentRepository::hrefFor(string $slug, ?string $version = …)
+method Vellum\Content\ContentRepository::imageReport()
+method Vellum\Content\ContentRepository::isDefaultVersion(?string $version)
+method Vellum\Content\ContentRepository::latestVersion()
+method Vellum\Content\ContentRepository::misplacedRoots()
+method Vellum\Content\ContentRepository::navigation(?string $version = …)
+method Vellum\Content\ContentRepository::navigationBuilder()
+method Vellum\Content\ContentRepository::parseRequestSlug(string $slug)
+method Vellum\Content\ContentRepository::render(Vellum\Content\Document $document, bool $cache = …)
+method Vellum\Content\ContentRepository::sections(?string $slug, ?string $version = …)
+method Vellum\Content\ContentRepository::shouldRedirectToUnprefixed(string $slug)
+method Vellum\Content\ContentRepository::sidebar(?string $slug, ?string $version = …)
+method Vellum\Content\ContentRepository::site()
+method Vellum\Content\ContentRepository::sourceNames()
+method Vellum\Content\ContentRepository::store()
+method Vellum\Content\ContentRepository::unprefixedPath(string $slug)
+method Vellum\Content\ContentRepository::versionSwitcherData(?string $documentSlug, ?string $currentVersion)
+method Vellum\Content\ContentRepository::versions()
+method Vellum\Content\ContentRepository::versionsEnabled()
+method Vellum\Content\Document::__construct(string $slug, string $title, string $html, array $headings, array $frontmatter, string $path, int $mtime, ?string $description = …, ?string $version = …, bool $full = …, ?string $icon = …, array $islands = …, ?string $updated = …, ?string $markdown = …)
+method Vellum\Content\Document::access()
+method Vellum\Content\Document::fromArray(array $data) static
+method Vellum\Content\Document::generated()
+method Vellum\Content\Document::source()
+method Vellum\Content\Document::toArray()
+method Vellum\Content\DocumentCollection::__construct(iterable $documents = …)
+method Vellum\Content\DocumentCollection::add(Vellum\Content\Document $document)
+method Vellum\Content\DocumentCollection::all()
+method Vellum\Content\DocumentCollection::count()
+method Vellum\Content\DocumentCollection::get(string $slug)
+method Vellum\Content\DocumentCollection::getIterator()
+method Vellum\Content\DocumentCollection::has(string $slug)
+method Vellum\Content\DocumentCollection::slugs()
+method Vellum\Content\FrontMatterParser::parse(string $contents, ?string $path = …)
+method Vellum\Content\FrontMatterParser::parseFile(string $path)
+method Vellum\Content\HeadingExtractor::extractFromDocument(League\CommonMark\Node\Block\Document $document)
+method Vellum\Content\HeadingExtractor::nest(array $headings)
+method Vellum\Content\ImageReport::all()
+method Vellum\Content\ImageReport::forPage(string $slug, ?string $version = …)
+method Vellum\Content\ImageReport::missing(string $url, string $path)
+method Vellum\Content\ImageReport::reset()
+method Vellum\Content\LastUpdated::__construct(string $contentPath)
+method Vellum\Content\LastUpdated::fromMatter(mixed $value) static
+method Vellum\Content\LastUpdated::prime()
+method Vellum\Content\LastUpdated::resolve(string $path, array $matter)
+method Vellum\Content\LinkChecker::check(array $documents, Vellum\Content\ContentRepository $repository)
+method Vellum\Content\NavigationBuilder::__construct(string $contentPath, string $routePrefix = …, ?string $defaultVersion = …)
+method Vellum\Content\NavigationBuilder::adjacent(array $tree, string $slug)
+method Vellum\Content\NavigationBuilder::breadcrumbs(array $tree, string $slug, string $title, ?array $home = …)
+method Vellum\Content\NavigationBuilder::build(array $documents, ?string $version = …)
+method Vellum\Content\NavigationBuilder::directoryHash(?string $version = …)
+method Vellum\Content\NavigationBuilder::flattenPages(array $tree)
+method Vellum\Content\NavigationBuilder::misplacedRoots(?string $version = …)
+method Vellum\Content\NavigationBuilder::title(?string $version = …)
+method Vellum\Content\PageSource::documents(?string $version, Closure $href)
+method Vellum\Content\PageSource::isCurrent(Vellum\Content\Document $document)
+method Vellum\Content\PageSource::name()
+method Vellum\Content\PageSource::navigation(?string $version, Closure $href)
+method Vellum\Content\PageSource::owns(string $slug)
+method Vellum\Content\PageSource::separate()
+method Vellum\Content\PageSource::signature()
+method Vellum\Content\PageSource::warnings()
+method Vellum\Content\PageSourceFactory::forSite(Vellum\Site $site)
+method Vellum\CoreServiceProvider::boot()
+method Vellum\CoreServiceProvider::register()
+method Vellum\CoreServiceProvider::repository(Illuminate\Contracts\Foundation\Application $app, Vellum\Site $site) static
+method Vellum\CoreServiceProvider::site(Illuminate\Contracts\Foundation\Application $app) static
+method Vellum\Exceptions\ContentError::contentFile()
+method Vellum\Exceptions\DuplicateSlugException::forPaths(string $slug, string $first, string $second) static
+method Vellum\Exceptions\InvalidFrontMatterException::contentFile()
+method Vellum\Exceptions\InvalidFrontMatterException::forFile(string $path, string $reason, ?Throwable $previous = …) static
+method Vellum\Exceptions\InvalidSpecException::contentFile()
+method Vellum\Exceptions\InvalidSpecException::missing(string $path, string $what) static
+method Vellum\Exceptions\InvalidSpecException::unparsable(string $path, string $reason, ?Throwable $previous = …) static
+method Vellum\Exceptions\InvalidSpecException::unreadable(string $path, ?Throwable $previous = …) static
+method Vellum\Exceptions\InvalidSpecException::unresolvableRef(string $path, string $ref) static
+method Vellum\Exceptions\InvalidSpecException::unsupportedVersion(string $path, string $version) static
+method Vellum\Exceptions\UnknownComponentException::contentFile()
+method Vellum\Exceptions\UnknownComponentException::invalidAttributes(string $name) static
+method Vellum\Exceptions\UnknownComponentException::missing(string $name, ?Throwable $previous = …) static
+method Vellum\Exceptions\UnknownComponentException::notAllowed(string $name) static
+method Vellum\Exceptions\UnknownComponentException::unclosed(string $name) static
+method Vellum\Exceptions\UnknownComponentException::valueTagRefused(string $name, string $key) static
+method Vellum\Exceptions\UnknownDirectiveException::__construct(string $message, string $directive, ?string $docsFile = …)
+method Vellum\Exceptions\UnknownDirectiveException::contentFile()
+method Vellum\Exceptions\UnknownDirectiveException::missing(string $name) static
+method Vellum\Exceptions\UnknownDirectiveException::withFile(string $file)
+method Vellum\Http\ChangelogFeed::render(Vellum\Changelog\Changelog $changelog)
+method Vellum\Http\DocsView::canonical(string $path, bool $staticExport = …) static
+method Vellum\Http\DocsView::changelog(Vellum\Content\ContentRepository $repository, Vellum\Changelog\Changelog $changelog, bool $staticExport = …) static
+method Vellum\Http\DocsView::document(Vellum\Content\ContentRepository $repository, Vellum\Content\Document $document, Vellum\Content\HeadingExtractor $headingExtractor, bool $cacheFragment = …, bool $staticExport = …) static
+method Vellum\Http\DocsView::editUrl(Vellum\Content\Document $document) static
+method Vellum\Http\DocsView::pageTitle(string $title) static
+method Vellum\Http\DocsView::rawSlug(Vellum\Content\Document $document) static
+method Vellum\Http\DocsView::rawUrl(Vellum\Content\Document $document) static
+method Vellum\Http\DocsView::readingMinutes(string $html) static
+method Vellum\Http\DocsView::source(Vellum\Content\Document $document) static
+method Vellum\Http\DocsView::updated(?string $updated) static
+method Vellum\Http\LinkHeader::add(Symfony\Component\HttpFoundation\Response $response, string $url, string $rel, ?string $type = …) static
+method Vellum\Http\LlmsTxt::enabled() static
+method Vellum\Http\LlmsTxt::full(Vellum\Content\ContentRepository $repository, bool $staticExport = …) static
+method Vellum\Http\LlmsTxt::index(Vellum\Content\ContentRepository $repository, bool $staticExport = …) static
+method Vellum\Http\PlaygroundProxy::addresses(string $host, bool $private = …) static
+method Vellum\Http\PlaygroundProxy::headers(array $headers, array $declared = …) static
+method Vellum\Http\PlaygroundProxy::isPublic(string $address) static
+method Vellum\Http\PlaygroundProxy::lookupUsing(?Closure $lookup) static
+method Vellum\Http\PlaygroundProxy::target(string $url, array $servers) static
+method Vellum\Http\PlaygroundProxy::textual(string $contentType) static
+method Vellum\Http\RawMarkdown::canonical(string $path) static
+method Vellum\Http\RawMarkdown::changelog(Vellum\Content\ContentRepository $repository, Vellum\Changelog\Changelog $changelog) static
+method Vellum\Http\RawMarkdown::lastModified(Illuminate\Http\Response $response, ?string $updated) static
+method Vellum\Http\RawMarkdown::preferredBy(Illuminate\Http\Request $request) static
+method Vellum\Http\RawMarkdown::response(Vellum\Content\ContentRepository $repository, Vellum\Content\Document $document) static
+method Vellum\Http\RawMarkdown::visible(Vellum\Content\ContentRepository $repository, ?Vellum\Content\Document $document) static
+method Vellum\Http\RootLlmsTxtRoutes::register(Illuminate\Routing\Router $router) static
+method Vellum\Http\Sitemap::entries(Vellum\Content\ContentRepository $repository, bool $staticExport = …) static
+method Vellum\Http\Sitemap::render(array $entries) static
+method Vellum\Http\Sitemap::urls(Vellum\Content\ContentRepository $repository, bool $staticExport = …) static
+method Vellum\Markdown\CompiledLabels::english(string $key) static
+method Vellum\Markdown\CompiledLabels::translate(string $html) static
+method Vellum\Markdown\Extensions\CalloutExtension::register(League\CommonMark\Environment\EnvironmentBuilderInterface $environment)
+method Vellum\Markdown\Extensions\Callout\CalloutRenderer::render(League\CommonMark\Node\Node $node, League\CommonMark\Renderer\ChildNodeRendererInterface $childRenderer)
+method Vellum\Markdown\Extensions\CardsExtension::register(League\CommonMark\Environment\EnvironmentBuilderInterface $environment)
+method Vellum\Markdown\Extensions\Cards\CardBlock::__construct(string $title, string $href, array $attributes = …, ?string $description = …)
+method Vellum\Markdown\Extensions\Cards\CardBlock::getAttributes()
+method Vellum\Markdown\Extensions\Cards\CardBlock::getDescription()
+method Vellum\Markdown\Extensions\Cards\CardBlock::getHref()
+method Vellum\Markdown\Extensions\Cards\CardBlock::getIcon()
+method Vellum\Markdown\Extensions\Cards\CardBlock::getTitle()
+method Vellum\Markdown\Extensions\Cards\CardContinueParser::__construct(Vellum\Markdown\Extensions\Cards\CardBlock $block)
+method Vellum\Markdown\Extensions\Cards\CardContinueParser::getBlock()
+method Vellum\Markdown\Extensions\Cards\CardContinueParser::tryContinue(League\CommonMark\Parser\Cursor $cursor, League\CommonMark\Parser\Block\BlockContinueParserInterface $activeBlockParser)
+method Vellum\Markdown\Extensions\Cards\CardStartParser::tryStart(League\CommonMark\Parser\Cursor $cursor, League\CommonMark\Parser\MarkdownParserStateInterface $parserState)
+method Vellum\Markdown\Extensions\Cards\CardsRenderer::render(League\CommonMark\Node\Node $node, League\CommonMark\Renderer\ChildNodeRendererInterface $childRenderer)
+method Vellum\Markdown\Extensions\CodeBlockExtension::__construct(Tempest\Highlight\Highlighter $highlighter = …)
+method Vellum\Markdown\Extensions\CodeBlockExtension::register(League\CommonMark\Environment\EnvironmentBuilderInterface $environment)
+method Vellum\Markdown\Extensions\CodeBlock\BashCommandPattern::getPattern()
+method Vellum\Markdown\Extensions\CodeBlock\BashCommandPattern::getTokenType()
+method Vellum\Markdown\Extensions\CodeBlock\BashCommandPattern::match(string $content)
+method Vellum\Markdown\Extensions\CodeBlock\BashVerbPattern::getPattern()
+method Vellum\Markdown\Extensions\CodeBlock\BashVerbPattern::getTokenType()
+method Vellum\Markdown\Extensions\CodeBlock\BashVerbPattern::match(string $content)
+method Vellum\Markdown\Extensions\CodeBlock\CodeBlockInfo::__construct(string $language, ?string $title, array $highlightLines, bool $showLineNumbers)
+method Vellum\Markdown\Extensions\CodeBlock\CodeBlockInfo::parse(?string $info) static
+method Vellum\Markdown\Extensions\CodeBlock\CodeBlockRenderer::__construct(Tempest\Highlight\Highlighter $highlighter = …)
+method Vellum\Markdown\Extensions\CodeBlock\CodeBlockRenderer::render(League\CommonMark\Node\Node $node, League\CommonMark\Renderer\ChildNodeRendererInterface $childRenderer)
+method Vellum\Markdown\Extensions\CodeBlock\InlineCodeHighlightListener::__invoke(League\CommonMark\Event\DocumentParsedEvent $event)
+method Vellum\Markdown\Extensions\CodeBlock\InlineCodeRenderer::__construct(Tempest\Highlight\Highlighter $highlighter = …)
+method Vellum\Markdown\Extensions\CodeBlock\InlineCodeRenderer::render(League\CommonMark\Node\Node $node, League\CommonMark\Renderer\ChildNodeRendererInterface $childRenderer)
+method Vellum\Markdown\Extensions\CodeBlock\LanguageIcon::normalize(string $language) static
+method Vellum\Markdown\Extensions\CodeBlock\LanguageIcon::svg(string $language) static
+method Vellum\Markdown\Extensions\CodeBlock\VellumBashLanguage::getPatterns()
+method Vellum\Markdown\Extensions\DirectiveExtension::register(League\CommonMark\Environment\EnvironmentBuilderInterface $environment)
+method Vellum\Markdown\Extensions\Directive\AttributeParser::parse(string $input) static
+method Vellum\Markdown\Extensions\Directive\DirectiveBlock::__construct(string $name, ?string $title = …, array $attributes = …)
+method Vellum\Markdown\Extensions\Directive\DirectiveBlock::getAttribute(string $key)
+method Vellum\Markdown\Extensions\Directive\DirectiveBlock::getAttributes()
+method Vellum\Markdown\Extensions\Directive\DirectiveBlock::getName()
+method Vellum\Markdown\Extensions\Directive\DirectiveBlock::getTitle()
+method Vellum\Markdown\Extensions\Directive\DirectiveContinueParser::__construct(Vellum\Markdown\Extensions\Directive\DirectiveInfo $info)
+method Vellum\Markdown\Extensions\Directive\DirectiveContinueParser::canContain(League\CommonMark\Node\Block\AbstractBlock $childBlock)
+method Vellum\Markdown\Extensions\Directive\DirectiveContinueParser::getBlock()
+method Vellum\Markdown\Extensions\Directive\DirectiveContinueParser::isContainer()
+method Vellum\Markdown\Extensions\Directive\DirectiveContinueParser::tryContinue(League\CommonMark\Parser\Cursor $cursor, League\CommonMark\Parser\Block\BlockContinueParserInterface $activeBlockParser)
+method Vellum\Markdown\Extensions\Directive\DirectiveInfo::__construct(string $name, ?string $title = …, array $attributes = …)
+method Vellum\Markdown\Extensions\Directive\DirectiveInfo::parse(string $info) static
+method Vellum\Markdown\Extensions\Directive\DirectiveStartParser::tryStart(League\CommonMark\Parser\Cursor $cursor, League\CommonMark\Parser\MarkdownParserStateInterface $parserState)
+method Vellum\Markdown\Extensions\Directive\ParagraphText::of(League\CommonMark\Node\Block\Paragraph $paragraph) static
+method Vellum\Markdown\Extensions\Directive\UnknownDirectiveRenderer::render(League\CommonMark\Node\Node $node, League\CommonMark\Renderer\ChildNodeRendererInterface $childRenderer)
+method Vellum\Markdown\Extensions\ExternalLinkExtension::__construct(?string $appUrl = …)
+method Vellum\Markdown\Extensions\ExternalLinkExtension::register(League\CommonMark\Environment\EnvironmentBuilderInterface $environment)
+method Vellum\Markdown\Extensions\ExternalLink\ExternalLinkRenderer::__construct(?string $appUrl = …)
+method Vellum\Markdown\Extensions\ExternalLink\ExternalLinkRenderer::render(League\CommonMark\Node\Node $node, League\CommonMark\Renderer\ChildNodeRendererInterface $childRenderer)
+method Vellum\Markdown\Extensions\ExternalLink\ExternalLinkRenderer::setConfiguration(League\Config\ConfigurationInterface $configuration)
+method Vellum\Markdown\Extensions\HeadingAnchorExtension::register(League\CommonMark\Environment\EnvironmentBuilderInterface $environment)
+method Vellum\Markdown\Extensions\HeadingPermalink\HeadingPermalinkRenderer::render(League\CommonMark\Node\Node $node, League\CommonMark\Renderer\ChildNodeRendererInterface $childRenderer)
+method Vellum\Markdown\Extensions\ImageExtension::__construct(?string $contentPath = …, ?string $assetPrefix = …, ?Vellum\Content\ImageReport $report = …, string $routePrefix = …)
+method Vellum\Markdown\Extensions\ImageExtension::register(League\CommonMark\Environment\EnvironmentBuilderInterface $environment)
+method Vellum\Markdown\Extensions\Image\ImageRenderer::__construct(?string $contentPath = …, ?string $assetPrefix = …, ?Vellum\Content\ImageReport $report = …, string $routePrefix = …)
+method Vellum\Markdown\Extensions\Image\ImageRenderer::render(League\CommonMark\Node\Node $node, League\CommonMark\Renderer\ChildNodeRendererInterface $childRenderer)
+method Vellum\Markdown\Extensions\Image\ImageRenderer::setConfiguration(League\Config\ConfigurationInterface $configuration)
+method Vellum\Markdown\Extensions\StepsExtension::register(League\CommonMark\Environment\EnvironmentBuilderInterface $environment)
+method Vellum\Markdown\Extensions\Steps\StepBlock::__construct(int $number)
+method Vellum\Markdown\Extensions\Steps\StepBlock::getNumber()
+method Vellum\Markdown\Extensions\Steps\StepsProcessor::__invoke(League\CommonMark\Event\DocumentParsedEvent $event)
+method Vellum\Markdown\Extensions\Steps\StepsRenderer::render(League\CommonMark\Node\Node $node, League\CommonMark\Renderer\ChildNodeRendererInterface $childRenderer)
+method Vellum\Markdown\Extensions\TableExtension::register(League\CommonMark\Environment\EnvironmentBuilderInterface $environment)
+method Vellum\Markdown\Extensions\Table\TableWrapRenderer::__construct(League\CommonMark\Extension\Table\TableRenderer $inner = …)
+method Vellum\Markdown\Extensions\Table\TableWrapRenderer::render(League\CommonMark\Node\Node $node, League\CommonMark\Renderer\ChildNodeRendererInterface $childRenderer)
+method Vellum\Markdown\Extensions\TabsExtension::register(League\CommonMark\Environment\EnvironmentBuilderInterface $environment)
+method Vellum\Markdown\Extensions\Tabs\TabBlock::__construct(string $label)
+method Vellum\Markdown\Extensions\Tabs\TabBlock::getId()
+method Vellum\Markdown\Extensions\Tabs\TabBlock::getLabel()
+method Vellum\Markdown\Extensions\Tabs\TabsProcessor::__invoke(League\CommonMark\Event\DocumentParsedEvent $event)
+method Vellum\Markdown\Extensions\Tabs\TabsRenderer::render(League\CommonMark\Node\Node $node, League\CommonMark\Renderer\ChildNodeRendererInterface $childRenderer)
+method Vellum\Markdown\Islands\CodeGuard::protect(string $markdown) static
+method Vellum\Markdown\Islands\CodeGuard::restore(string $markdown, array $codes) static
+method Vellum\Markdown\Islands\Island::__construct(string $id, string $name, array $attributes, string $slotHtml, array $children, bool $selfClosing)
+method Vellum\Markdown\Islands\Island::fromArray(array $data) static
+method Vellum\Markdown\Islands\Island::listFromArray(mixed $value) static
+method Vellum\Markdown\Islands\Island::placeholder()
+method Vellum\Markdown\Islands\Island::toArray()
+method Vellum\Markdown\Islands\Island::token(string $id) static
+method Vellum\Markdown\Islands\IslandExtractor::extract(string $markdown) static
+method Vellum\Markdown\Islands\IslandRenderer::__construct(Vellum\Site\Components $components = …)
+method Vellum\Markdown\Islands\IslandRenderer::inlineSlots(string $html, array $islands)
+method Vellum\Markdown\Islands\IslandRenderer::render(string $html, array $islands)
+method Vellum\Markdown\Islands\MarkdownPipeline::__construct(Vellum\Markdown\MarkdownRenderer $renderer = …, Vellum\Site\Components $components = …)
+method Vellum\Markdown\Islands\MarkdownPipeline::convert(string $markdown)
+method Vellum\Markdown\Islands\MarkdownPipeline::render(string $markdown)
+method Vellum\Markdown\Islands\RawIsland::__construct(string $id, string $name, array $attributes, string $slotMarkdown, array $children, bool $selfClosing)
+method Vellum\Markdown\MarkdownRenderer::__construct(?Vellum\Content\HeadingExtractor $headingExtractor = …, ?string $contentPath = …, ?string $appUrl = …, ?string $assetPrefix = …, ?Vellum\Content\ImageReport $imageReport = …, string $routePrefix = …)
+method Vellum\Markdown\MarkdownRenderer::convert(string $markdown)
+method Vellum\Markdown\MarkdownRenderer::parseDocument(string $markdown)
+method Vellum\Markdown\MarkdownRenderer::render(string $markdown)
+method Vellum\OpenApi\ExampleGenerator::declared(array $object) static
+method Vellum\OpenApi\ExampleGenerator::forMedia(array $media) static
+method Vellum\OpenApi\ExampleGenerator::fromSchema(array $schema, int $depth = …) static
+method Vellum\OpenApi\Group::__construct(string $name, string $slug, array $operations, ?string $description = …, ?string $title = …, ?string $parent = …, int $depth = …)
+method Vellum\OpenApi\Group::label()
+method Vellum\OpenApi\Group::methodCount()
+method Vellum\OpenApi\Group::slugFor(Vellum\OpenApi\Operation $operation)
+method Vellum\OpenApi\Grouper::__construct(string $untaggedLabel = …)
+method Vellum\OpenApi\Grouper::group(Vellum\OpenApi\Spec $spec, string $by = …)
+method Vellum\OpenApi\MarkdownRendition::operation(array $page)
+method Vellum\OpenApi\MarkdownRendition::overview(string $title, Vellum\OpenApi\Spec $spec, array $groups, Closure $href)
+method Vellum\OpenApi\OAuth::absolute(string $url, ?string $base) static
+method Vellum\OpenApi\OAuth::flows(array $scheme, ?string $base) static
+method Vellum\OpenApi\OAuth::tokenUrls(Vellum\OpenApi\Spec $spec) static
+method Vellum\OpenApi\OpenApiPages::__construct(Vellum\OpenApi\Settings $settings = …, ?Vellum\OpenApi\SpecSource $source = …, Vellum\OpenApi\SpecParser $parser = …, ?Vellum\OpenApi\PageBuilder $builder = …)
+method Vellum\OpenApi\OpenApiPages::documents(?string $version, Closure $href)
+method Vellum\OpenApi\OpenApiPages::isCurrent(Vellum\Content\Document $document)
+method Vellum\OpenApi\OpenApiPages::name()
+method Vellum\OpenApi\OpenApiPages::navigation(?string $version, Closure $href)
+method Vellum\OpenApi\OpenApiPages::owns(string $slug)
+method Vellum\OpenApi\OpenApiPages::separate()
+method Vellum\OpenApi\OpenApiPages::settings()
+method Vellum\OpenApi\OpenApiPages::signature()
+method Vellum\OpenApi\OpenApiPages::warnings()
+method Vellum\OpenApi\OpenApiServiceProvider::boot()
+method Vellum\OpenApi\OpenApiServiceProvider::register()
+method Vellum\OpenApi\Operation::__construct(string $method, string $path, ?string $operationId = …, ?string $summary = …, ?string $description = …, array $tags = …, bool $deprecated = …, array $parameters = …, ?array $requestBody = …, array $responses = …, ?array $security = …, array $servers = …, array $codeSamples = …, ?string $webhook = …, array $callbacks = …)
+method Vellum\OpenApi\Operation::headingId()
+method Vellum\OpenApi\Operation::parametersByLocation()
+method Vellum\OpenApi\Operation::title()
+method Vellum\OpenApi\PageBuilder::__construct(Illuminate\Contracts\View\Factory $view, Vellum\OpenApi\Settings $settings = …, Vellum\Markdown\Islands\MarkdownPipeline $pipeline = …, Vellum\Markdown\MarkdownRenderer $prose = …, Vellum\OpenApi\MarkdownRendition $rendition = …, Vellum\OpenApi\Playground $playground = …)
+method Vellum\OpenApi\PageBuilder::build(Vellum\OpenApi\Spec $spec, ?string $version, Closure $href, ?string $signature = …)
+method Vellum\OpenApi\PageBuilder::longestFence(string $source) static
+method Vellum\OpenApi\Playground::data(Vellum\OpenApi\Operation $operation, Vellum\OpenApi\Spec $spec, ?string $server)
+method Vellum\OpenApi\RefResolver::__construct(string $path)
+method Vellum\OpenApi\RefResolver::resolve(array $document)
+method Vellum\OpenApi\RefResolver::warnings()
+method Vellum\OpenApi\ReferenceSource::__construct(Illuminate\Contracts\View\Factory $view)
+method Vellum\OpenApi\ReferenceSource::forSite(Vellum\Site $site)
+method Vellum\OpenApi\Samples\CurlGenerator::generate(Vellum\OpenApi\Samples\SampleRequest $request)
+method Vellum\OpenApi\Samples\CurlGenerator::highlight()
+method Vellum\OpenApi\Samples\CurlGenerator::label()
+method Vellum\OpenApi\Samples\JavaScriptGenerator::generate(Vellum\OpenApi\Samples\SampleRequest $request)
+method Vellum\OpenApi\Samples\JavaScriptGenerator::highlight()
+method Vellum\OpenApi\Samples\JavaScriptGenerator::label()
+method Vellum\OpenApi\Samples\PhpGenerator::generate(Vellum\OpenApi\Samples\SampleRequest $request)
+method Vellum\OpenApi\Samples\PhpGenerator::highlight()
+method Vellum\OpenApi\Samples\PhpGenerator::label()
+method Vellum\OpenApi\Samples\PythonGenerator::generate(Vellum\OpenApi\Samples\SampleRequest $request)
+method Vellum\OpenApi\Samples\PythonGenerator::highlight()
+method Vellum\OpenApi\Samples\PythonGenerator::label()
+method Vellum\OpenApi\Samples\SampleBuilder::__construct(array $configured = …)
+method Vellum\OpenApi\Samples\SampleBuilder::build(Vellum\OpenApi\Operation $operation, ?string $serverUrl, array $security)
+method Vellum\OpenApi\Samples\SampleGenerator::generate(Vellum\OpenApi\Samples\SampleRequest $request)
+method Vellum\OpenApi\Samples\SampleGenerator::highlight()
+method Vellum\OpenApi\Samples\SampleGenerator::label()
+method Vellum\OpenApi\Samples\SampleRequest::__construct(string $method, string $url, array $headers = …, array $query = …, mixed $body = …, ?string $contentType = …, bool $stream = …)
+method Vellum\OpenApi\Samples\SampleRequest::fullUrl()
+method Vellum\OpenApi\Samples\SampleRequest::hasBody()
+method Vellum\OpenApi\Samples\SampleRequest::json(int $flags = …)
+method Vellum\OpenApi\SchemaDirection::content(array $content, string $side) static
+method Vellum\OpenApi\SchemaDirection::request(array $schema) static
+method Vellum\OpenApi\SchemaDirection::response(array $schema) static
+method Vellum\OpenApi\SchemaView::body(array $schema) static
+method Vellum\OpenApi\SchemaView::chips(array $schema) static
+method Vellum\OpenApi\SchemaView::discriminator(array $schema) static
+method Vellum\OpenApi\SchemaView::enumValues(array $schema) static
+method Vellum\OpenApi\SchemaView::expandable(array $schema) static
+method Vellum\OpenApi\SchemaView::isRecursive(array $schema) static
+method Vellum\OpenApi\SchemaView::literal(mixed $value) static
+method Vellum\OpenApi\SchemaView::name(array $schema) static
+method Vellum\OpenApi\SchemaView::properties(array $schema) static
+method Vellum\OpenApi\SchemaView::type(array $schema) static
+method Vellum\OpenApi\SchemaView::variants(array $schema) static
+method Vellum\OpenApi\Servers::default(array $server) static
+method Vellum\OpenApi\Servers::urls(array $server) static
+method Vellum\OpenApi\Servers::variables(array $server) static
+method Vellum\OpenApi\Settings::__construct(bool $enabled = …, ?string $spec = …, bool $scramble = …, ?array $watch = …, string $prefix = …, bool $separate = …, ?string $title = …, string $groupBy = …, ?string $untaggedLabel = …, array $samples = …, ?string $baseUrl = …, bool $playground = …, bool $proxy = …, bool $proxyPrivate = …, string $access = …, string $cachePath = …)
+method Vellum\OpenApi\Settings::fromArray(array $config, string $cachePath = …) static
+method Vellum\OpenApi\Settings::fromSite(Vellum\Site $site) static
+method Vellum\OpenApi\Settings::owns(string $slug)
+method Vellum\OpenApi\Settings::playgroundOn()
+method Vellum\OpenApi\Spec::__construct(string $path, string $version, array $document, array $operations, array $warnings = …, array $webhooks = …)
+method Vellum\OpenApi\Spec::apiVersion()
+method Vellum\OpenApi\Spec::defaultSecurity()
+method Vellum\OpenApi\Spec::description()
+method Vellum\OpenApi\Spec::securitySchemes()
+method Vellum\OpenApi\Spec::serverUrl()
+method Vellum\OpenApi\Spec::servers()
+method Vellum\OpenApi\Spec::tags()
+method Vellum\OpenApi\Spec::title()
+method Vellum\OpenApi\SpecParser::parse(string $contents, string $path)
+method Vellum\OpenApi\SpecParser::parseFile(string $path)
+method Vellum\OpenApi\SpecSource::__construct(Vellum\OpenApi\Settings $settings = …)
+method Vellum\OpenApi\SpecSource::resolve()
+method Vellum\OpenApi\SpecSource::scrambleAvailable() static
+method Vellum\OpenApi\SpecSource::signature()
+method Vellum\OpenApi\SpecSource::warnings()
+method Vellum\OpenApi\Stream::answer(Vellum\OpenApi\Operation $operation) static
+method Vellum\OpenApi\Stream::example(array $media, string $item) static
+method Vellum\OpenApi\Stream::item(string $type, array $media) static
+method Vellum\OpenApi\Stream::schema(array $media) static
+method Vellum\Search\ScoutIndexer::search(string $query, ?string $version)
+method Vellum\Search\ScoutIndexer::sync(Vellum\Content\ContentRepository $repository, array $documents)
+method Vellum\Search\SearchDriver::assertScoutInstalled() static
+method Vellum\Search\SearchDriver::isScout() static
+method Vellum\Search\SearchDriver::name() static
+method Vellum\Search\SearchVisibility::allows(array $document)
+method Vellum\Search\SearchVisibility::allowsAccess(string $access)
+method Vellum\Search\SearchVisibility::allowsNode(array $node)
+method Vellum\Search\SearchVisibility::filterNavigation(array $tree)
+method Vellum\Search\SearchVisibility::key(array $documents)
+method Vellum\Search\SearchableDocument::bootSearchable() static
+method Vellum\Search\SearchableDocument::disableSearchSyncing() static
+method Vellum\Search\SearchableDocument::enableSearchSyncing() static
+method Vellum\Search\SearchableDocument::getScoutKey()
+method Vellum\Search\SearchableDocument::getScoutKeyName()
+method Vellum\Search\SearchableDocument::getScoutKeyType()
+method Vellum\Search\SearchableDocument::getScoutModelsByIds(Laravel\Scout\Builder $builder, array $ids)
+method Vellum\Search\SearchableDocument::getTable()
+method Vellum\Search\SearchableDocument::indexableAs()
+method Vellum\Search\SearchableDocument::makeAllSearchable($chunk = …) static
+method Vellum\Search\SearchableDocument::makeAllSearchableQuery() static
+method Vellum\Search\SearchableDocument::makeSearchableUsing(Illuminate\Support\Collection $models)
+method Vellum\Search\SearchableDocument::pushSoftDeleteMetadata()
+method Vellum\Search\SearchableDocument::queryScoutModelsByIds(Laravel\Scout\Builder $builder, array $ids)
+method Vellum\Search\SearchableDocument::queueMakeSearchable($models)
+method Vellum\Search\SearchableDocument::queueRemoveFromSearch($models)
+method Vellum\Search\SearchableDocument::registerSearchableMacros()
+method Vellum\Search\SearchableDocument::removeAllFromSearch() static
+method Vellum\Search\SearchableDocument::scoutMetadata()
+method Vellum\Search\SearchableDocument::search($query = …, $callback = …) static
+method Vellum\Search\SearchableDocument::searchIndexShouldBeUpdated()
+method Vellum\Search\SearchableDocument::searchable()
+method Vellum\Search\SearchableDocument::searchableAs()
+method Vellum\Search\SearchableDocument::searchableEmbeddingColumn()
+method Vellum\Search\SearchableDocument::searchableSync()
+method Vellum\Search\SearchableDocument::searchableUsing()
+method Vellum\Search\SearchableDocument::shouldBeSearchable()
+method Vellum\Search\SearchableDocument::syncMakeSearchable($models)
+method Vellum\Search\SearchableDocument::syncRemoveFromSearch($models)
+method Vellum\Search\SearchableDocument::syncWithSearchUsing()
+method Vellum\Search\SearchableDocument::syncWithSearchUsingQueue()
+method Vellum\Search\SearchableDocument::toSearchableArray()
+method Vellum\Search\SearchableDocument::unsearchable()
+method Vellum\Search\SearchableDocument::unsearchableSync()
+method Vellum\Search\SearchableDocument::wasSearchableBeforeDelete()
+method Vellum\Search\SearchableDocument::wasSearchableBeforeUpdate()
+method Vellum\Search\SearchableDocument::withScoutMetadata($key, $value)
+method Vellum\Search\SearchableDocument::withoutSyncingToSearch($callback) static
+method Vellum\Site::__construct(string $contentPath, string $routePrefix, string $cachePath, string $appUrl, bool $isLocal, Vellum\Site\Versions $versions, Vellum\Site\Components $components, Vellum\Site\Checks $checks, Vellum\Site\Search $search, ?string $changelogPath, bool $changelogUnreleased, array $config = …)
+method Vellum\Site::fromArray(array $config, string $appUrl = …, bool $isLocal = …) static
+method Vellum\Site::get(string $key)
+method Vellum\Site\Checks::__construct(bool $references = …, bool $strict = …, bool $search = …, float $searchMin = …)
+method Vellum\Site\Checks::fromArray(array $config) static
+method Vellum\Site\Components::__construct(array $namespaces = …, array $allowlist = …, array $config = …)
+method Vellum\Site\Components::fromArray(array $config) static
+method Vellum\Site\Search::__construct(string $driver = …, string $scoutIndex = …)
+method Vellum\Site\Search::fromArray(array $config) static
+method Vellum\Site\Search::isScout()
+method Vellum\Site\Versions::__construct(bool $enabled = …, ?string $latest = …, array $list = …, array $labels = …)
+method Vellum\Site\Versions::current()
+method Vellum\Site\Versions::fromArray(array $config) static
+method Vellum\Site\Versions::kind(string $version)
+method Vellum\Site\Versions::label(string $version)
+method Vellum\Site\Versions::labelsFor(array $versions)
+method Vellum\Support\Icons::arrowRight(array $attributes = …) static
+method Vellum\Support\Icons::arrowSquareOut(array $attributes = …) static
+method Vellum\Support\Icons::callout(string $type) static
+method Vellum\Support\Icons::caretDown(array $attributes = …) static
+method Vellum\Support\Icons::caretLeft(array $attributes = …) static
+method Vellum\Support\Icons::caretRight(array $attributes = …) static
+method Vellum\Support\Icons::check(array $attributes = …) static
+method Vellum\Support\Icons::clock(array $attributes = …) static
+method Vellum\Support\Icons::copy(array $attributes = …) static
+method Vellum\Support\Icons::file(array $attributes = …) static
+method Vellum\Support\Icons::github(array $attributes = …) static
+method Vellum\Support\Icons::hash(array $attributes = …) static
+method Vellum\Support\Icons::link(array $attributes = …) static
+method Vellum\Support\Icons::list(array $attributes = …) static
+method Vellum\Support\Icons::listBullets(array $attributes = …) static
+method Vellum\Support\Icons::magnifyingGlass(array $attributes = …) static
+method Vellum\Support\Icons::moon(array $attributes = …) static
+method Vellum\Support\Icons::path(string $d) static
+method Vellum\Support\Icons::pencilSimple(array $attributes = …) static
+method Vellum\Support\Icons::phosphor(string $d, array $attributes = …) static
+method Vellum\Support\Icons::sidebar(array $attributes = …) static
+method Vellum\Support\Icons::sun(array $attributes = …) static
+method Vellum\Support\Icons::svg(array $children, array $attributes = …) static
+method Vellum\Support\Icons::x(array $attributes = …) static
+method Vellum\Support\MarkdownView::render(string $component, array $data) static
+method Vellum\Support\Paths::absolute(string $path) static
+method Vellum\Support\Paths::resolveConfig() static
+method Vellum\Support\SafeHref::of(string $href) static
+method Vellum\Support\Slug::from(string $value) static
+method Vellum\Support\Slug::fromRelativePath(string $relativePath) static
+method Vellum\Support\Slug::isSafe(string $slug) static
+method Vellum\Support\Slug::segment(string $part) static
+method Vellum\Support\Str::firstHeading(string $markdown) static
+method Vellum\Support\Str::titleCase(string $value) static
+method Vellum\Support\Str::withoutLeadingHeading(string $markdown) static
+method Vellum\Support\Translate::line(string $key, array $replace = …) static
+method Vellum\Support\VersionLabel::for(string $version) static
+method Vellum\Support\VersionLabel::kind(string $version) static
+method Vellum\Support\VersionLabel::map(array $versions) static
+method Vellum\Support\VersionUrl::href(string $routePrefix, string $slug, ?string $version, ?string $defaultVersion) static
+method Vellum\VellumServiceProvider::boot()
+method Vellum\VellumServiceProvider::register()
+method Vellum\View\Assets::anchorJsPath() static
+method Vellum\View\Assets::anchorJsUrl() static
+method Vellum\View\Assets::cssPath() static
+method Vellum\View\Assets::cssUrl() static
+method Vellum\View\Assets::focusJsPath() static
+method Vellum\View\Assets::focusJsUrl() static
+method Vellum\View\Assets::jsPath() static
+method Vellum\View\Assets::jsUrl() static
+method Vellum\View\Assets::playgroundJsPath() static
+method Vellum\View\Assets::playgroundJsUrl() static
+method Vellum\View\Assets::searchJsPath() static
+method Vellum\View\Assets::searchJsUrl() static
+method Vellum\View\Cn::merge(?string ...$classes) static
+method Vellum\View\Color::contrast(array $foreground, array $background) static
+method Vellum\View\Color::luminance(array $rgba) static
+method Vellum\View\Color::over(array $foreground, array $background) static
+method Vellum\View\Color::parse(string $value) static
+method Vellum\View\Color::readableOn(string $fill, string $light = …, string $dark = …) static
+method Vellum\View\NavTree::render(array $navigation, ?string $activeSlug, Closure $containsActive) static
+method Vellum\View\ScriptStrings::all(bool $playground = …) static
+method Vellum\View\ScriptStrings::json(bool $playground = …) static
+method Vellum\View\Theme::accent() static
+method Vellum\View\Theme::configuredPreset() static
+method Vellum\View\Theme::preset() static
+property Vellum\Answers\AnswerIndex::$sections
+property Vellum\Answers\AnswerIndex::$synonyms
+property Vellum\Answers\SearchCheck::$questions
+property Vellum\Changelog\Changelog::$headings
+property Vellum\Changelog\Changelog::$includeUnreleased
+property Vellum\Changelog\Changelog::$introHtml
+property Vellum\Changelog\Changelog::$markdown
+property Vellum\Changelog\Changelog::$mtime
+property Vellum\Changelog\Changelog::$path
+property Vellum\Changelog\Changelog::$releases
+property Vellum\Changelog\Changelog::$title
+property Vellum\Changelog\ChangelogRelease::$date
+property Vellum\Changelog\ChangelogRelease::$html
+property Vellum\Changelog\ChangelogRelease::$id
+property Vellum\Changelog\ChangelogRelease::$unreleased
+property Vellum\Changelog\ChangelogRelease::$url
+property Vellum\Changelog\ChangelogRelease::$version
+property Vellum\Content\Document::$description
+property Vellum\Content\Document::$frontmatter
+property Vellum\Content\Document::$full
+property Vellum\Content\Document::$headings
+property Vellum\Content\Document::$html
+property Vellum\Content\Document::$icon
+property Vellum\Content\Document::$islands
+property Vellum\Content\Document::$markdown
+property Vellum\Content\Document::$mtime
+property Vellum\Content\Document::$path
+property Vellum\Content\Document::$slug
+property Vellum\Content\Document::$title
+property Vellum\Content\Document::$updated
+property Vellum\Content\Document::$version
+property Vellum\Exceptions\UnknownDirectiveException::$directive
+property Vellum\Exceptions\UnknownDirectiveException::$docsFile
+property Vellum\Markdown\Extensions\CodeBlock\CodeBlockInfo::$highlightLines
+property Vellum\Markdown\Extensions\CodeBlock\CodeBlockInfo::$language
+property Vellum\Markdown\Extensions\CodeBlock\CodeBlockInfo::$showLineNumbers
+property Vellum\Markdown\Extensions\CodeBlock\CodeBlockInfo::$title
+property Vellum\Markdown\Extensions\Directive\DirectiveInfo::$attributes
+property Vellum\Markdown\Extensions\Directive\DirectiveInfo::$name
+property Vellum\Markdown\Extensions\Directive\DirectiveInfo::$title
+property Vellum\Markdown\Islands\Island::$attributes
+property Vellum\Markdown\Islands\Island::$children
+property Vellum\Markdown\Islands\Island::$id
+property Vellum\Markdown\Islands\Island::$name
+property Vellum\Markdown\Islands\Island::$selfClosing
+property Vellum\Markdown\Islands\Island::$slotHtml
+property Vellum\Markdown\Islands\RawIsland::$attributes
+property Vellum\Markdown\Islands\RawIsland::$children
+property Vellum\Markdown\Islands\RawIsland::$id
+property Vellum\Markdown\Islands\RawIsland::$name
+property Vellum\Markdown\Islands\RawIsland::$selfClosing
+property Vellum\Markdown\Islands\RawIsland::$slotMarkdown
+property Vellum\OpenApi\Group::$depth
+property Vellum\OpenApi\Group::$description
+property Vellum\OpenApi\Group::$name
+property Vellum\OpenApi\Group::$operations
+property Vellum\OpenApi\Group::$parent
+property Vellum\OpenApi\Group::$slug
+property Vellum\OpenApi\Group::$title
+property Vellum\OpenApi\Operation::$callbacks
+property Vellum\OpenApi\Operation::$codeSamples
+property Vellum\OpenApi\Operation::$deprecated
+property Vellum\OpenApi\Operation::$description
+property Vellum\OpenApi\Operation::$method
+property Vellum\OpenApi\Operation::$operationId
+property Vellum\OpenApi\Operation::$parameters
+property Vellum\OpenApi\Operation::$path
+property Vellum\OpenApi\Operation::$requestBody
+property Vellum\OpenApi\Operation::$responses
+property Vellum\OpenApi\Operation::$security
+property Vellum\OpenApi\Operation::$servers
+property Vellum\OpenApi\Operation::$summary
+property Vellum\OpenApi\Operation::$tags
+property Vellum\OpenApi\Operation::$webhook
+property Vellum\OpenApi\Samples\SampleRequest::$body
+property Vellum\OpenApi\Samples\SampleRequest::$contentType
+property Vellum\OpenApi\Samples\SampleRequest::$headers
+property Vellum\OpenApi\Samples\SampleRequest::$method
+property Vellum\OpenApi\Samples\SampleRequest::$query
+property Vellum\OpenApi\Samples\SampleRequest::$stream
+property Vellum\OpenApi\Samples\SampleRequest::$url
+property Vellum\OpenApi\Settings::$access
+property Vellum\OpenApi\Settings::$baseUrl
+property Vellum\OpenApi\Settings::$cachePath
+property Vellum\OpenApi\Settings::$enabled
+property Vellum\OpenApi\Settings::$groupBy
+property Vellum\OpenApi\Settings::$playground
+property Vellum\OpenApi\Settings::$prefix
+property Vellum\OpenApi\Settings::$proxy
+property Vellum\OpenApi\Settings::$proxyPrivate
+property Vellum\OpenApi\Settings::$samples
+property Vellum\OpenApi\Settings::$scramble
+property Vellum\OpenApi\Settings::$separate
+property Vellum\OpenApi\Settings::$spec
+property Vellum\OpenApi\Settings::$title
+property Vellum\OpenApi\Settings::$untaggedLabel
+property Vellum\OpenApi\Settings::$watch
+property Vellum\OpenApi\Spec::$document
+property Vellum\OpenApi\Spec::$operations
+property Vellum\OpenApi\Spec::$path
+property Vellum\OpenApi\Spec::$version
+property Vellum\OpenApi\Spec::$warnings
+property Vellum\OpenApi\Spec::$webhooks
+property Vellum\Search\SearchDriver::$scoutTrait
+property Vellum\Search\SearchableDocument::$incrementing
+property Vellum\Search\SearchableDocument::$timestamps
+property Vellum\Site::$appUrl
+property Vellum\Site::$cachePath
+property Vellum\Site::$changelogPath
+property Vellum\Site::$changelogUnreleased
+property Vellum\Site::$checks
+property Vellum\Site::$components
+property Vellum\Site::$contentPath
+property Vellum\Site::$isLocal
+property Vellum\Site::$routePrefix
+property Vellum\Site::$search
+property Vellum\Site::$versions
+property Vellum\Site\Checks::$references
+property Vellum\Site\Checks::$search
+property Vellum\Site\Checks::$searchMin
+property Vellum\Site\Checks::$strict
+property Vellum\Site\Components::$allowlist
+property Vellum\Site\Components::$config
+property Vellum\Site\Components::$namespaces
+property Vellum\Site\Search::$driver
+property Vellum\Site\Search::$scoutIndex
+property Vellum\Site\Versions::$enabled
+property Vellum\Site\Versions::$labels
+property Vellum\Site\Versions::$latest
+property Vellum\Site\Versions::$list

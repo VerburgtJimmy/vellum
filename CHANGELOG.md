@@ -5,6 +5,16 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- `Changelog::load()` works without arguments again, and with a path as its only argument, as it did in 0.9. In 0.10.0 it required a `Vellum\Site`, which broke an app that called it
+
+### Changed
+
+- The 0.9 to 0.10 section of the upgrade guide lists the classes and methods 0.10.0 changed for PHP that calls them: `Vellum\OpenApi\Mount` is gone, the static settings of the API reference moved to `Vellum\OpenApi\Settings`, and a `MarkdownPipeline` built by hand takes the components allowlist as an argument. The section now puts what needs a change first
+
 ## [0.10.0] - 2026-11-18
 
 ### Added

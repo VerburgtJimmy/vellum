@@ -55,6 +55,15 @@ it('returns null when the changelog path is missing or disabled', function (): v
         ->and(Changelog::load($this->site(), '/tmp/vellum-missing-changelog.md'))->toBeNull();
 });
 
+it('loads the changelog the app\'s config names when it is given no site, as 0.9 did', function (): void {
+    $path = $this->cachePath().'/CHANGELOG.md';
+    file_put_contents($path, "# Changelog\n\n## [1.0.0] - 2026-01-02\n\n- Frob\n");
+    config()->set('vellum.changelog', ['path' => $path]);
+
+    expect(Changelog::load()?->published()[0]->version)->toBe('1.0.0')
+        ->and(Changelog::load($path)?->published()[0]->version)->toBe('1.0.0');
+});
+
 it('hides unreleased from visible releases unless changelog.unreleased is true', function (): void {
     $markdown = <<<'MD'
 # Changelog

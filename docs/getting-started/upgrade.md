@@ -9,50 +9,58 @@ The requirements have been PHP 8.4+ and Laravel 11, 12, or 13 since 0.2.
 
 ## 0.9 to 0.10
 
-With `jimmyverburgt/vellum`, no changes to your content or config are required. Update the package and rebuild:
+Update the package and rebuild:
 
 ```bash
 composer update jimmyverburgt/vellum
 php artisan vellum:build
 ```
 
-### If you use core on its own
+Your content and config need no changes. Three kinds of app have something to do, most likely first.
 
-The API reference moved out of core into `jimmyverburgt/vellum-openapi`. An app that requires `jimmyverburgt/vellum-core` without the full package, and has `openapi.enabled` on, requires it too:
+### PHP that calls Vellum's classes
+
+Core no longer reads config on its own. It builds one `Vellum\Site` from config and passes it along, and the API reference keeps its settings in `Vellum\OpenApi\Settings`. Both come from the container, as `ContentRepository` does. Code of yours that calls one of these needs the change beside it:
+
+| 0.9 | 0.10 |
+| --- | --- |
+| `Mount::prefix()`, `Mount::owns()`, `Mount::separate()` | The class is gone. Use `prefix`, `owns()` and `separate` on `Vellum\OpenApi\Settings`. |
+| `Playground::enabled()`, `SpecSource::enabled()`, `PageBuilder::access()`, `PageBuilder::groupBy()` | `playgroundOn()`, `enabled`, `access` and `groupBy` on `Settings`. |
+| `new MarkdownPipeline` | Still builds, but no longer takes the components allowlist from config, so a value tag is refused. Pass it: `new MarkdownPipeline(components: $site->components)`. |
+| `new ContentRepository(contentPath: …, store: …)` | `new ContentRepository(Site::fromArray([...]))`, or resolve it from the container. `ContentRepository::__construct` takes a site and a list of page sources. |
+| `Changelog::includeUnreleased()`, `Changelog::configuredPath()` | `$site->changelogUnreleased` and `$site->changelogPath`. |
+| `OpenApiPages::__construct`, `OpenApiPages::navGroup()`, `PageBuilder::__construct` | Built by the container from `Settings`. `navGroup()` is `navigation()`. |
+
+`Changelog::load()` and `ContentRepository::fromConfig()` work as before. `Vellum\Support\VersionLabel`, `SearchDriver::name()` and `SearchDriver::isScout()` still work and are removed in 1.0: read `$site->versions` and `$site->search`.
+
+### Core on its own, with the API reference
+
+The reference moved out of core into `jimmyverburgt/vellum-openapi`. The full package includes it. An app that requires only `jimmyverburgt/vellum-core` and has `openapi.enabled` on requires it too:
 
 ```bash
 composer require jimmyverburgt/vellum-openapi
 ```
 
-Without it, the reference is not built, and `vellum:build` says which package to install. The config keys are unchanged.
+Until then the reference is not built, and `vellum:build` says which package to install.
 
-### What readers will notice
+### Views you published
 
-- The switch between the docs and the API reference names the docs' sidebar after the `title` in your docs folder's `meta.json`. Without a title it still says "Docs".
-- A reference page's breadcrumbs start at the reference's title.
+A published view keeps working. Two of them are worth copying again from 0.10.
 
-### Views you overrode
-
-Every word in Vellum's views now comes from a language file. A view you published before 0.10 keeps working with the English it was copied with, but its words do not follow the app's locale. Copy it again from 0.10 if you want it translated.
-
-The scripts read their words from a block of JSON that the 0.10 layout writes into each page. A `layouts/docs.blade.php` published from 0.9 has no such block, so the scripts use the English they carry: the search status, "On this page", the "Copied" label and the playground read as they did in 0.9, whatever the locale. To have them follow the locale, copy the layout again, or add this line to your copy above the `<script type="module">` tag:
+**`layouts/docs.blade.php`.** The scripts read their words from a block of JSON the 0.10 layout writes. A 0.9 copy has no block, so the search status, "On this page", "Copied" and the playground stay in English whatever the locale. Copy the layout again, or add this line above its `<script type="module">` tag:
 
 ```blade
 <script type="application/json" id="vellum-strings">{!! \Vellum\View\ScriptStrings::json(config('vellum.openapi.enabled') && config('vellum.openapi.playground', true)) !!}</script>
 ```
 
-The switcher at the top of the sidebar moved into its own component, `docs.sections`, and became a menu that shows each sidebar's description. A `sidebar` published from 0.9 keeps the row of tabs it was copied with, which still works and is still styled.
+**`components/docs/sidebar.blade.php`.** The switch between sidebars is now a menu in its own component, `docs.sections`. A 0.9 copy keeps its row of tabs, which is still styled.
 
-### PHP that uses Vellum's classes
+Any other published view keeps the English it was copied with. Copy it again only if you translate the site.
 
-- `Vellum\Support\VersionLabel`, `SearchDriver::name()` and `SearchDriver::isScout()` are deprecated. Read `$site->versions` and `$site->search` from `Vellum\Site`, which the container resolves. The old ones keep working until 1.0.
-- `ContentRepository`, `Vellum\Site` and the API reference's `Vellum\OpenApi\Settings` are bound in the container, one per request.
+### What readers will notice
 
-### New and optional
-
-- **Sidebars of their own.** A top-level folder whose `meta.json` has `"root": true` gets a sidebar to itself, with a switcher between it and the others. See [Navigation](/docs/writing/navigation#sidebars-of-their-own).
-- **Translations.** Set `app.locale` and add the lines for your language. See [Translations](/docs/translations).
-- **`openapi.untagged_label`** defaults to `null` in a newly published config, which means "Other" in the app's language. A config that sets it keeps its value.
+- The switch between the docs and the API reference is a menu. It names the docs' sidebar after the `title` in your docs folder's `meta.json`, or "Docs" without one.
+- A reference page's breadcrumbs start at the reference's title.
 
 ## 0.8 to 0.9
 

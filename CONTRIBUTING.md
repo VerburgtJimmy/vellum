@@ -77,6 +77,35 @@ published: add the section, commit it, and tag that commit.
 `.gitattributes` keeps tests, CI config and build tooling out of the released archive.
 Before tagging, check any new files at the repo root against it.
 
+### Changes that can break an app
+
+An app can call any public class or method of either package, not only what the docs
+show. `tests/ApiSurfaceTest.php` compares them with `tests/fixtures/api-surface.txt`, the
+list as it was at the last release, and fails when a class, a method or a required
+parameter is gone and the upgrade guide does not name it. When it fails, in this order:
+
+1. Keep the old call working if that is cheap.
+2. Otherwise name what changed, and what to call instead, under the section for the
+   coming release in `docs/getting-started/upgrade.md`. That section lists what an app
+   has to change, most likely first. New features belong in the changelog, not there.
+3. A class no app should call can be marked `@internal`, which also needs the note once.
+
+The test reads signatures, so it cannot see a method that keeps its shape and changes
+what it does. Before tagging, run the public site's own tests against the branch, since
+it is the one app known to call these classes:
+
+```bash
+cd ../vellum-site
+COMPOSER=composer.local.json composer update jimmyverburgt/vellum
+php artisan test
+composer install
+```
+
+The last line puts the released version back.
+
+In the commit that prepares a release, after the changelog, write the list again with
+`composer api:baseline`.
+
 The test suite does not run the site in a browser, so check these by hand before tagging:
 
 - Build and serve the docs, open search with `Ctrl+K` or `⌘K`, type a query, move through
