@@ -156,6 +156,11 @@ abstract class TestCase extends Orchestra
             file_put_contents($path, $contents);
         }
 
+        // A test may publish a view twice. Laravel 13 dates a compiled view a
+        // second after its source, so a source rewritten within that second
+        // looks older than what was compiled from the first one.
+        $this->artisan('view:clear');
+
         config()->set('view.paths', [$this->publishedViewsPath()]);
         $this->app->forgetInstance('view.finder');
         $this->app->forgetInstance('view');
