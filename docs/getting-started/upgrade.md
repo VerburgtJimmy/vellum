@@ -33,7 +33,13 @@ Without it, the reference is not built, and `vellum:build` says which package to
 
 ### Views you overrode
 
-Every word in Vellum's views now comes from a language file. A view you published before 0.10 keeps its English words and keeps working, but it does not follow the app's locale. Copy it again from 0.10 if you want it translated.
+Every word in Vellum's views now comes from a language file. A view you published before 0.10 keeps working with the English it was copied with, but its words do not follow the app's locale. Copy it again from 0.10 if you want it translated.
+
+The scripts read their words from a block of JSON that the 0.10 layout writes into each page. A `layouts/docs.blade.php` published from 0.9 has no such block, so the scripts use the English they carry: the search status, "On this page", the "Copied" label and the playground read as they did in 0.9, whatever the locale. To have them follow the locale, copy the layout again, or add this line to your copy above the `<script type="module">` tag:
+
+```blade
+<script type="application/json" id="vellum-strings">{!! \Vellum\View\ScriptStrings::json(config('vellum.openapi.enabled') && config('vellum.openapi.playground', true)) !!}</script>
+```
 
 The switcher at the top of the sidebar moved into its own component, `docs.sections`, and became a menu that shows each sidebar's description. A `sidebar` published from 0.9 keeps the row of tabs it was copied with, which still works and is still styled.
 

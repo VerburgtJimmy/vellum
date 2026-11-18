@@ -10,8 +10,11 @@ import { initSidebar } from './sidebar.js'
 import { initSteps } from './steps.js'
 import { initTables } from './tables.js'
 import { initImageZoom } from './zoom.js'
-import { t, tc } from './strings.js'
+import { english, t, tc } from './strings.js'
+import { code, page, search, sidebar, toc } from './strings.en.json'
 import { applyTheme, getStoredTheme, initTheme, resolveTheme } from './theme.js'
+
+english({ code, page, search, sidebar, toc })
 
 window.VellumTheme = { applyTheme, getStoredTheme, initTheme, resolveTheme }
 window.VellumPrefetch = { prefetch }

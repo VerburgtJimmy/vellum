@@ -82,6 +82,28 @@ function readableWords(string $html): array
 }
 
 /**
+ * The keys the scripts read, each with the name of the file it is in. A key
+ * a script completes, such as a stream's kind of item, is its start.
+ *
+ * @return list<array{string, string}>
+ */
+function scriptKeys(): array
+{
+    $scripts = '';
+
+    foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator(dirname(__DIR__, 2).'/resources/js', FilesystemIterator::SKIP_DOTS)) as $file) {
+        if (str_ends_with((string) $file, '.js')) {
+            $scripts .= file_get_contents((string) $file)."\n";
+        }
+    }
+
+    $files = implode('|', array_keys(ScriptStrings::FILES));
+    preg_match_all("/['`](($files)\\.[a-z_.]+?)(\\.\\$\\{)?['`]/", $scripts, $lines, PREG_SET_ORDER);
+
+    return array_map(static fn (array $line): array => [$line[1], $line[2]], $lines);
+}
+
+/**
  * Words that are not English to translate: the fixture's own made-up words,
  * the product, and the vocabulary of HTTP and of a schema.
  */
@@ -120,18 +142,11 @@ it('defines every line a view, a class or a script asks for', function (): void 
         }
     }
 
-    $scripts = '';
-
-    foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($root.'/resources/js', FilesystemIterator::SKIP_DOTS)) as $file) {
-        $scripts .= file_get_contents((string) $file)."\n";
-    }
-
-    $files = implode('|', array_keys(ScriptStrings::FILES));
-    preg_match_all("/['`](($files)\.[a-z_.]+?)(\.\\$\{)?['`]/", $scripts, $lines, PREG_SET_ORDER);
+    $lines = scriptKeys();
 
     expect($lines)->not->toBeEmpty();
 
-    foreach ($lines as [, $key, $file]) {
+    foreach ($lines as [$key, $file]) {
         [, $path] = explode('.', $key, 2);
 
         if (! app('translator')->has(ScriptStrings::FILES[$file].'.'.$path, 'en', false)) {
@@ -259,4 +274,64 @@ it('publishes the strings of all three packages under one tag', function (): voi
         ->toEqualCanonicalizing(['vellum', 'vellum-core', 'vellum-openapi'])
         ->and(array_map(static fn (string $from): bool => is_file($from.'/en/page.php') || is_file($from.'/en/code.php') || is_file($from.'/en/reference.php'), array_keys($paths)))
         ->each->toBeTrue();
+});
+
+it('carries in each script bundle the English its language files hold', function (): void {
+    $english = json_decode((string) file_get_contents(dirname(__DIR__, 2).'/resources/js/strings.en.json'), true, 512, JSON_THROW_ON_ERROR);
+
+    expect($english)->toBe(ScriptStrings::all(true), 'resources/js/strings.en.json is behind the language files.');
+});
+
+it('shows the scripts lines in English, not as keys, under a layout published from 0.9', function (): void {
+    enableOpenApi($this->cachePath(), [
+        'openapi' => '3.1.0',
+        'info' => ['title' => 'Zorp', 'version' => '1.0.0'],
+        'paths' => ['/zorps' => ['get' => ['tags' => ['Zorps'], 'operationId' => 'listZorps', 'summary' => 'Blib', 'responses' => ['200' => ['description' => 'Frob']]]]],
+    ]);
+    $this->publishViews(['layouts/docs.blade.php' => (string) file_get_contents(dirname(__DIR__).'/fixtures/views/0.9/layouts/docs.blade.php')]);
+
+    $root = dirname(__DIR__, 2);
+    $english = json_decode((string) file_get_contents($root.'/resources/js/strings.en.json'), true, 512, JSON_THROW_ON_ERROR);
+    $bundles = [
+        'vellum.js' => (string) file_get_contents($root.'/resources/dist/vellum.js'),
+        'vellum-playground.js' => (string) file_get_contents($root.'/resources/dist/vellum-playground.js'),
+    ];
+
+    foreach (['/docs', '/docs/api/zorps/list-zorps'] as $page) {
+        $html = (string) $this->get($page)->assertOk()->getContent();
+
+        expect($html)->toContain('data-vellum-playground-src')
+            ->not->toContain('id="vellum-strings"');
+
+        // What strings.js reads: the page's block, then the English its bundle carries.
+        preg_match('#<script type="application/json" id="vellum-strings">(.*?)</script>#s', $html, $block);
+        $lines = isset($block[1]) ? json_decode($block[1], true, 512, JSON_THROW_ON_ERROR) : [];
+
+        foreach (scriptKeys() as [$key, $file]) {
+            $line = data_get($lines, $key) ?? data_get($english, $key);
+            $bundle = $file === ScriptStrings::PLAYGROUND ? 'vellum-playground.js' : 'vellum.js';
+
+            foreach (is_array($line) ? Arr::dot($line, $key.'.') : [$key => $line] as $shown => $text) {
+                expect($text)->toBeString($page.': '.$shown.' shows as its key')
+                    ->not->toMatch('/^[a-z_]+(\.[a-z_]+)+$/', $page.': '.$shown.' shows as its key');
+
+                // esbuild writes a character past ASCII as \uXXXX.
+                $carried = str_contains($bundles[$bundle], $text)
+                    || str_contains($bundles[$bundle], substr((string) json_encode($text, JSON_UNESCAPED_SLASHES), 1, -1));
+
+                expect($carried)->toBeTrue($shown.' is not in resources/dist/'.$bundle.'. Run npm run build.');
+            }
+        }
+    }
+
+    // The line the upgrade guide gives a 0.9 layout writes the block.
+    preg_match('#```blade\n(<script type="application/json" id="vellum-strings">.*?)\n```#s', (string) file_get_contents($root.'/docs/getting-started/upgrade.md'), $line);
+    $this->publishViews(['layouts/docs.blade.php' => str_replace(
+        '<script type="module"',
+        $line[1]."\n    <script type=\"module\"",
+        (string) file_get_contents(dirname(__DIR__).'/fixtures/views/0.9/layouts/docs.blade.php'),
+    )]);
+
+    expect($this->get('/docs')->assertOk()->getContent())
+        ->toContain('<script type="application/json" id="vellum-strings">'.ScriptStrings::json(true).'</script>');
 });

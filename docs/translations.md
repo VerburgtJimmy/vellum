@@ -43,7 +43,7 @@ A file can hold only some of the lines. Laravel takes each missing line from `ap
 ## What follows the locale
 
 - The page around your docs: header, sidebar, table of contents, search, page actions, pagination, the changelog page, and the 404 and error pages.
-- The scripts. The layout writes the lines they use into the page as one block of JSON, so a [static export](/docs/export) carries the language it was exported in.
+- The scripts. The layout writes the lines they use into the page as one block of JSON, so a [static export](/docs/export) carries the language it was exported in. A layout you published before 0.10 writes no block, and its scripts stay in English. The [upgrade guide](/docs/getting-started/upgrade#views-you-overrode) has the line to add.
 - Dates. The "Updated" date under a page's title is written in the locale, and a recent one reads "3 days ago" in the page's language.
 - The `lang` attribute of every page, and of the window that finishes signing in to an API from the playground.
 - The API reference and its playground.

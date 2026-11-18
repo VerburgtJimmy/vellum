@@ -1,0 +1,110 @@
+@php
+    use Vellum\View\Assets;
+    use Vellum\View\Theme;
+
+    $themeDefault = config('vellum.theme.default', 'system');
+    $themeRadius = config('vellum.theme.radius', '0.5rem');
+    $themePrimary = config('vellum.theme.primary');
+    $themePreset = Theme::preset();
+    $themeAccent = Theme::accent();
+    $rootStyles = ['--radius: '.$themeRadius];
+
+    if ($themePrimary !== null && $themePrimary !== '') {
+        $rootStyles[] = '--vellum-primary-hue: '.$themePrimary;
+    }
+@endphp
+<!DOCTYPE html>
+<html
+    lang="{{ str_replace('_', '-', app()->getLocale()) }}"
+    data-vellum-preset="{{ $themePreset }}"
+    data-vellum-search="{{ Assets::searchJsUrl() }}"
+    data-vellum-anchor="{{ Assets::anchorJsUrl() }}"
+    data-vellum-focus="{{ Assets::focusJsUrl() }}"
+    @if (config('vellum.openapi.enabled') && config('vellum.openapi.playground', true))
+        data-vellum-playground-src="{{ Assets::playgroundJsUrl() }}"
+        {{-- A static export writes the page as a folder of its own. --}}
+        data-vellum-oauth-callback="{{ ($staticExport ?? false) ? '/'.trim((string) config('vellum.route.prefix', 'docs'), '/').'/_vellum/oauth/' : route('vellum.playground.oauth', [], false) }}"
+        @if (config('vellum.openapi.proxy') && ! ($staticExport ?? false))
+            data-vellum-playground-proxy="{{ route('vellum.playground.proxy', [], false) }}"
+        @endif
+    @endif
+>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script>
+        (function () {
+            try {
+                var key = 'vellum-theme';
+                var stored = localStorage.getItem(key);
+                var preference = stored || @json($themeDefault);
+                var dark = preference === 'dark' || (
+                    preference === 'system'
+                    && window.matchMedia('(prefers-color-scheme: dark)').matches
+                );
+                document.documentElement.classList.toggle('dark', dark);
+            } catch (e) {}
+            try {
+                // Arriving from another docs page, the sidebar marker slides
+                // over from that page's entry, so the plain highlight is hidden
+                // from the first frame rather than flashing.
+                if (sessionStorage.getItem('vellum-sidebar-marker')) {
+                    document.documentElement.setAttribute('data-vellum-nav-marker', '');
+                }
+            } catch (e) {}
+            try {
+                if (localStorage.getItem('vellum-sidebar') === 'collapsed') {
+                    document.documentElement.setAttribute('data-vellum-sidebar', 'collapsed');
+                }
+            } catch (e) {}
+        })();
+    </script>
+    <title>@yield('title', config('vellum.name'))</title>
+    <link rel="icon" href="data:,">
+    @if (! empty($description ?? null))
+        <meta name="description" content="{{ $description }}">
+    @endif
+    @if (! empty($canonical ?? null))
+        <link rel="canonical" href="{{ $canonical }}">
+    @endif
+    @if (! empty($rawUrl ?? null))
+        <link rel="alternate" type="text/markdown" href="{{ $rawUrl }}">
+    @endif
+    @if ($noindex ?? false)
+        <meta name="robots" content="noindex">
+    @endif
+    <meta property="og:site_name" content="{{ config('vellum.name') }}">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="{{ $pageTitle ?? config('vellum.name') }}">
+    @if (! empty($description ?? null))
+        <meta property="og:description" content="{{ $description }}">
+    @endif
+    @if (! empty($canonical ?? null))
+        <meta property="og:url" content="{{ $canonical }}">
+    @endif
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="{{ $pageTitle ?? config('vellum.name') }}">
+    @if (! empty($description ?? null))
+        <meta name="twitter:description" content="{{ $description }}">
+    @endif
+    @if (! empty(config('vellum.fonts')))
+        {!! config('vellum.fonts') !!}
+    @endif
+    <style>:root { {{ implode('; ', $rootStyles) }} }</style>
+    <link rel="stylesheet" href="{{ Assets::cssUrl() }}">
+    @if ($themeAccent)
+        {{-- After the stylesheet so the accent wins the tie with the preset block. --}}
+        <style>
+            @foreach ($themeAccent as $mode => $accent)
+html[data-vellum-preset]{{ $mode === 'dark' ? '.dark' : '' }} { --primary: {{ $accent['color'] }}; --primary-foreground: {{ $accent['foreground'] }}; --ring: {{ $accent['color'] }} }
+            @endforeach
+        </style>
+    @endif
+    <script type="module" src="{{ Assets::jsUrl() }}"></script>
+    @yield('head')
+</head>
+<body class="min-h-screen bg-background text-foreground antialiased">
+    <a href="#vellum-content" class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-background focus:px-3 focus:py-2 focus:text-sm focus:shadow">Skip to content</a>
+    @yield('content')
+</body>
+</html>

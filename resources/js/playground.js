@@ -10,7 +10,10 @@ import { bag, buildRequest, reach, toCurl, xsrfToken } from './playground/reques
 import { authorizeUrl, fromDiscovery, pkce, random, readToken, tokenRequest } from './playground/oauth.js'
 import { addItem, bodyToForm, coerce, control, display, failure, formToBody, hasForm, initial, pretty, reason, removeItem, rows, size, tokens } from './playground/form.js'
 import { reader, streamItem } from './playground/stream.js'
-import { t, tc } from './strings.js'
+import { english, t, tc } from './strings.js'
+import { playground } from './strings.en.json'
+
+english({ playground })
 
 const STORE = 'vellum-playground'
 const TIMEOUT = 30000
